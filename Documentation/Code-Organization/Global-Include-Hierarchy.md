@@ -62,12 +62,12 @@ Only truly platform-independent hardware abstractions:
 These stay in their modules:
 
 ```
-lib/lib_buffer/include/lib/buffer.h     # Character buffers
-lib/lib_fio/include/lib/fio.h           # Formatted I/O
-lib/lib_memory/include/lib/memory.h     # Memory operations
-arch/include/arch/cpu.h                 # CPU operations
-arch/include/arch/serial.h              # Serial port
-memman/include/memman/page.h      # Page management
+lib/buffer/include/lib/buffer.h     # Character buffers
+lib/fio/include/lib/fio.h           # Formatted I/O
+lib/memory/include/lib/memory.h     # Memory operations
+arch/include/arch/cpu.h             # CPU operations
+arch/include/arch/serial.h          # Serial port
+mm/include/mm/page.h                # Page management
 ```
 
 **Reasoning:** These are specific to one subsystem. Modules can include each other's headers when needed.
@@ -120,7 +120,7 @@ include/
 #include <arch/serial.h>
 
 // Module-specific headers - angle brackets
-#include <memman/page.h>
+#include <mm/page.h>
 
 // Local module headers - quotes (same module)
 #include "internal.h"
@@ -130,7 +130,7 @@ include/
 ### From Module Code
 
 ```c
-// In lib/lib_buffer/buffer.c
+// In lib/buffer/buffer.c
 #include <lib/buffer.h>       // Own public header
 #include <lib/memory.h>       // Other library
 #include <lib/types.h>        # Base types

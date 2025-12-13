@@ -9,9 +9,9 @@
 
 Headers must be:
 - **Self-contained** - Include all dependencies. Don't make users guess what to include.
-- **Minimal** - Only expose what's necessary. Internal shit stays internal.
+- **Minimal** - Only expose what's necessary. Internal implementation details remain private.
 - **Well-organized** - Clear public vs private separation. No dumping everything in one header.
-- **Portable** - Work across architectures when possible. Architecture-specific stuff goes in arch/.
+- **Portable** - Work across architectures when possible. Architecture-specific code goes in arch/.
 
 ## Include Directory Structure
 
@@ -39,16 +39,16 @@ TinyOS/
 │       ├── serial.h          # Serial port
 │       └── vga.h             # VGA text mode
 │
-├── lib/libkbuffer/include/   # Library headers
+├── lib/buffer/include/   # Library headers
 │   └── lib/
 │       └── buffer.h
 │
-├── lib/libkio/include/
+├── lib/fio/include/
 │   └── lib/
-│       └── io.h
+│       └── fio.h
 │
-└── memman/include/               # Memory management (future)
-    └── memman/
+└── mm/include/               # Memory management (future)
+    └── mm/
         ├── page_frame.h
         ├── vmm.h
         └── kmalloc.h

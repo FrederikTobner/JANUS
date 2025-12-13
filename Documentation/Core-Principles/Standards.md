@@ -7,15 +7,13 @@
 
 ### C17 (ISO/IEC 9899:2018)
 
-**We use C17. Not C++. Not Rust. C17.**
-
-This is specified in `.clang-format`:
+TinyOS uses C17 (ISO/IEC 9899:2018) as specified in `.clang-format`:
 ```yaml
 Language: C
 Standard: c17
 ```
 
-If you're writing C++ features, you're doing it wrong. Go read Philosophy.md.
+This project uses pure C, not C++. See [Philosophy.md](Philosophy.md) for the rationale.
 
 ## Compiler Requirements
 
@@ -44,21 +42,19 @@ If you're writing C++ features, you're doing it wrong. Go read Philosophy.md.
 > "If the code and the comments disagree, then both are probably wrong."
 > — *Norm Schryer*
 
-**Zero warnings. Period.**
+**Zero warnings. All code must compile cleanly.**
 
-All code must compile cleanly with:
+All code must compile without warnings using:
 ```bash
 -Wall -Wextra -Wpedantic
 ```
 
-**Warnings are the compiler telling you that you fucked up.** Fix it. Don't suppress it. Don't ignore it.
-
-Common warnings that mean you made an error:
-- Unused variables (delete them)
-- Implicit function declarations (missing include)
-- Type mismatches (fix your types)
-- Signed/unsigned comparisons (be explicit about what you want)
-- Missing return statements (every path must return)
+**Warnings indicate problems that must be addressed, not suppressed:**
+- Unused variables: Remove them
+- Implicit function declarations: Add the appropriate include
+- Type mismatches: Ensure type correctness
+- Signed/unsigned comparisons: Use explicit casts with clear intent
+- Missing return statements: Every code path must return a value
 
 ### Static Analysis
 Code should pass clang static analyzer:
@@ -68,31 +64,39 @@ clang --analyze -Xanalyzer -analyzer-output=text ...
 
 ### Undefined Behavior
 
-**In userspace, undefined behavior crashes your application. In kernel space, undefined behavior crashes the entire machine. Or worse - it bricks it.**
+**Kernel-space undefined behavior has catastrophic consequences.**
 
-You're running in ring 0 with unrestricted hardware access. There are no safety rails. No process isolation. No memory protection. No "your application has stopped responding" dialog. When you fuck up with UB in kernel mode, you get:
-- Instant system crash (triple fault, page fault in interrupt handler)
-- Complete hardware lockup
+In userspace applications, undefined behavior typically crashes the process. The operating system contains the damage through process isolation and memory protection. In kernel space, these protections don't exist.
+
+**Kernel code runs at ring 0 with unrestricted hardware access:**
+- No process isolation
+- No memory protection between kernel components
+- No segmentation faults or exception handlers
+- Direct, unmediated hardware access
+
+**Consequences of kernel UB:**
+- System crash (triple fault, page fault in interrupt handler, general protection fault)
+- Complete hardware lockup requiring power cycle
 - Silent memory corruption across the entire system
-- Exploitable security vulnerabilities with full hardware access
-- **Corrupted boot configuration**: Trash the boot sector, partition table, or bootloader and your system won't start
-- **Data loss**: With direct memory access, one bad pointer can destroy the filesystem or user data
-- **Hardware misconfiguration**: Write garbage to device registers and you might need to power cycle or reset CMOS
+- Security vulnerabilities with full hardware privileges
+- Corrupted boot configuration (damaged boot sector, partition table, or bootloader)
+- Data loss (bad pointers can destroy filesystem structures or user data)
+- Hardware misconfiguration (incorrect device register programming)
 
-In a game or text editor, UB means the app crashes and users restart it. Annoying but tolerable. In an OS, a single undefined behavior is a **death sentence**. The entire machine goes down. All running applications die. Unsaved work is gone. (Though if you're a Windows user, you might think weekly BSODs are normal behavior.)
+**In userspace vs kernel space:**
+- **Userspace**: Process terminates, OS recovers, system continues
+- **Kernel**: System crash, all processes terminate, unsaved work lost, potential data corruption
 
-**These are not "implementation details" - they are bugs that will take down the whole system:**
-- Uninitialized variables → Initialize your damn variables
-- Buffer overflows → Check your bounds (one byte over = kernel panic or worse)
-- Null pointer dereferences → Check for NULL (no segfault handler will save you)
-- Signed integer overflow → Use unsigned or check limits
-- Precision-losing conversions → Cast explicitly and know what you're doing
+There is no recovery mechanism. There is no debugger popup. The system freezes or reboots.
 
-**The difference between kernel and userspace UB:**
-- **Userspace**: Process terminates, OS cleans up, life goes on
-- **Kernel**: Triple fault, system reset, angry users, data loss
+**Common UB that must be prevented:**
+- Uninitialized variables → Always initialize variables
+- Buffer overflows → Check array bounds (even one byte overflow causes system crash)
+- Null pointer dereferences → Validate pointers before dereferencing
+- Signed integer overflow → Use unsigned types or validate ranges
+- Precision-losing conversions → Cast explicitly and understand truncation behavior
 
-You don't get exceptions. You don't get debugger popups. You get a frozen screen or instant reboot. Don't write undefined behavior.
+**This is not theoretical.** Every item in this list can and will crash the entire system if it occurs in kernel code.
 
 ## Type System
 

@@ -78,7 +78,7 @@ function(tinyos_add_library NAME)
 endfunction()
 
 #
-# Add a kernel module (like kernel, boot, arch, memman)
+# Add a kernel module (like kernel, boot, arch, mm)
 # 
 # Usage:
 #   tinyos_add_module(name

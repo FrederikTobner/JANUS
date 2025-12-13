@@ -13,16 +13,16 @@ CompileFlags:
     - "-fno-builtin"
     - "-std=c17"
     
-    # Include directories for all modules
-    - "-I/home/frederik/Projects/C/TinyOS/include"
-    - "-I/home/frederik/Projects/C/TinyOS/lib/types/include"
-    - "-I/home/frederik/Projects/C/TinyOS/lib/memory/include"
-    - "-I/home/frederik/Projects/C/TinyOS/lib/buffer/include"
-    - "-I/home/frederik/Projects/C/TinyOS/lib/fio/include"
-    - "-I/home/frederik/Projects/C/TinyOS/kernel/include"
-    - "-I/home/frederik/Projects/C/TinyOS/arch/include"
-    - "-I/home/frederik/Projects/C/TinyOS/boot/include"
-    - "-I/home/frederik/Projects/C/TinyOS/memman/include"
+    # Include directories for all modules (relative to project root)
+    - "-Iinclude"
+    - "-Ilib/types/include"
+    - "-Ilib/memory/include"
+    - "-Ilib/buffer/include"
+    - "-Ilib/fio/include"
+    - "-Ikernel/include"
+    - "-Iarch/include"
+    - "-Iboot/include"
+    - "-Imm/include"
     
   Remove:
     # Remove flags that confuse clangd analysis

@@ -18,7 +18,7 @@ TinyOS/
 ├── arch/             # Architecture-specific code
 ├── lib/              # Utility libraries
 ├── bmunit/           # BMUnit testing framework
-├── memman/           # Memory management
+├── mm/               # Memory management
 ├── drivers/          # Device drivers (future)
 ├── fs/               # File systems (future)
 ├── net/              # Network stack (future)
@@ -44,9 +44,9 @@ Each module is an independent unit that:
 
 ### 2. No Circular Dependencies
 
-**Circular dependencies are bugs.** If module A depends on B and B depends on A, you've fucked up your abstraction layers.
+**Circular dependencies indicate incorrect abstraction layering.** If module A depends on B and B depends on A, the module boundaries are incorrectly designed.
 
-Dependencies go **one direction**:
+Dependencies must flow in **one direction**:
 
 ```
            ┌──────────┐
@@ -56,17 +56,17 @@ Dependencies go **one direction**:
        ┌────────┴────────┐
        ▼                 ▼
   ┌─────────┐      ┌─────────┐
-  │ libkio  │      │  arch   │
+  │   fio   │      │  arch   │
   └────┬────┘      └────┬────┘
        │                │
        └────────┬───────┘
                 ▼
           ┌──────────┐
-          │ libkbuffer│
+          │  buffer  │
           └──────────┘
 ```
 
-If `libkbuffer` needs something from `kernel`, you've layered it wrong. Move the functionality or redesign the interface.
+If `buffer` needs something from `kernel`, you've layered it wrong. Move the functionality or redesign the interface.
 
 ### 3. Clear Layering
 ```
@@ -309,9 +309,10 @@ Each module builds as a static library:
 ```
 build/
 ├── lib/
-│   ├── libkbuffer.a   # Character buffer library
-│   ├── libkio.a       # I/O library
-│   └── libkstd.a      # Standard library subset
+│   ├── buffer.a       # Character buffer library
+│   ├── fio.a          # I/O library
+│   ├── memory.a       # Memory operations
+│   └── types.a        # Basic types
 ├── arch/
 │   └── libarch.a      # Architecture library
 └── boot/
@@ -321,7 +322,7 @@ build/
 ### Final Kernel Linking
 All libraries link into final kernel binary:
 ```
-libkbuffer.a + libkio.a + libarch.a + boot.a + kernel.o → kernel.bin
+buffer.a + fio.a + arch.a + boot.a + kernel.o → kernel.bin
 ```
 
 ## Module Interfaces
@@ -438,7 +439,7 @@ kernel/
 ### CMake Test Integration
 
 ```cmake
-# lib/libkbuffer/CMakeLists.txt
+# lib/buffer/CMakeLists.txt
 
 # Always build the library
 add_library(kbuffer STATIC buffer.c)

@@ -5,7 +5,7 @@
 > "The cheapest, fastest, and most reliable components are those that aren't there."
 > — *Gordon Bell*
 
-**Use the right damn words.** TinyOS uses explicit, hardware-aware terminology that reflects actual implementation, not fluffy abstractions.
+**Use precise terminology.** TinyOS uses explicit, hardware-aware terminology that reflects actual implementation rather than abstract concepts.
 
 If you call a hashtable a "map," you're hiding the implementation. If you call a character buffer a "string," you're importing assumptions from high-level languages. **Words matter. Use precise ones.**
 
@@ -13,7 +13,7 @@ If you call a hashtable a "map," you're hiding the implementation. If you call a
 
 ### Data Structures
 
-**Don't use vague high-level bullshit. Use implementation-specific terms.**
+**Use implementation-specific terms rather than vague abstractions:**
 
 | Instead of... | We use... | Why |
 |---------------|-----------|-----|
@@ -22,7 +22,7 @@ If you call a hashtable a "map," you're hiding the implementation. If you call a
 | Queue | **Ring Buffer** | It's a circular buffer with head/tail pointers |
 | List | **Linked List** | Pointer-based structure with explicit traversal cost |
 | Binary Tree | **Red-black Tree** | Be specific about the tree type |
-| Vector | **Dynamic Array** | An array that can has a dynamic capacity, changing at runtime |
+| Vector | **Dynamic Array** | An array that has a dynamic capacity, changing at runtime |
 
 ## Naming Conventions
 
@@ -132,9 +132,9 @@ Functions are prefixed with their module abbreviation:
 ```c
 // buffer library functions (prefix: buf_)
 buf_create(size_t capacity);
-void buf_append(buffer_t* buf, char const * data);
-void buf_destroy(buffer_t* buf);
-buf_view_t buf_slice(buffer_t* buf, size_t start, size_t len);
+void buf_append(char_buffer_t* buf, char const * data);
+void buf_destroy(char_buffer_t* buf);
+char_buffer_view_t buf_slice(char_buffer_t* buf, size_t start, size_t len);
 
 // fio library functions (prefix: fio_)
 void fio_printf(char const * format, ...);
@@ -152,10 +152,10 @@ void arch_disable_interrupts(void);
 phys_addr_t arch_virt_to_phys(virt_addr_t vaddr);
 void arch_flush_tlb(void);
 
-// Memory management functions (prefix: memman_)
-int memman_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags);
-void memman_unmap_page(virt_addr_t vaddr);
-page_frame_t* memman_alloc_page_frame(void);
+// Memory management functions (prefix: mm_)
+int mm_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags);
+void mm_unmap_page(virt_addr_t vaddr);
+page_frame_t* mm_alloc_page_frame(void);
 ```
 
 #### Operation Clarity
@@ -174,9 +174,9 @@ uint8_t port_read_byte(uint16_t port);                // Reads, no side effects
 void port_write_byte(uint16_t port, uint8_t value);   // Writes to hardware
 
 // Clear about data modification
-void kbuf_zero_fill(char_buffer_t* buf);              // Modifies buffer
-void kbuf_append(char_buffer_t* buf, const char* data); // Modifies buffer
-char_buffer_view_t kbuf_readonly_view(const char_buffer_t* buf); // Read-only view
+void buf_zero_fill(char_buffer_t* buf);              // Modifies buffer
+void buf_append(char_buffer_t* buf, const char* data); // Modifies buffer
+char_buffer_view_t buf_readonly_view(const char_buffer_t* buf); // Read-only view
 ```
 
 ### Variable Naming

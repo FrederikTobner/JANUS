@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(TinyOS C ASM_NASM)
+project(TinyOS VERSION 0.1.0 LANGUAGES C ASM_NASM)
 
 # Set C standard
 set(CMAKE_C_STANDARD 17)
@@ -10,6 +10,20 @@ set(CMAKE_C_EXTENSIONS ON)  # Allow GNU extensions
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(TinyOSPlatform)
 include(TinyOSHelpers)
+
+# Generate build timestamp
+string(TIMESTAMP TINYOS_BUILD_DATE "%Y-%m-%d")
+string(TIMESTAMP TINYOS_BUILD_TIME "%H:%M:%S")
+
+# Configure config.h from config.h.in
+configure_file(
+    "${CMAKE_SOURCE_DIR}/include/tinyos/config.h.in"
+    "${CMAKE_BINARY_DIR}/include/tinyos/config.h"
+    @ONLY
+)
+
+# Add generated config.h to include path
+include_directories("${CMAKE_BINARY_DIR}/include")
 
 # Options
 option(BUILD_TESTS "Build BMUnit tests" OFF)
@@ -48,7 +62,7 @@ add_subdirectory(boot)
 add_subdirectory(kernel)
 
 # Memory management
-add_subdirectory(memman)
+add_subdirectory(mm)
 
 # Device drivers (future)
 # add_subdirectory(drivers)

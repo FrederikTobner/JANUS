@@ -109,114 +109,100 @@ This approach trades convenient syntax for explicit understanding of memory beha
 > "C++ is a horrible language... And limiting your project to C means that people don't screw things up with any idiotic 'object model' crap."
 > — *Linus Torvalds*
 
-C++ is a disaster for kernel development:
+C++ introduces complexity that is incompatible with kernel development requirements:
 
-**Hidden Complexity Everywhere:**
-- Constructors/destructors run code you didn't write. In kernel space, unexpected code execution is a security vulnerability waiting to happen.
-- Operator overloading hides function calls. That innocent-looking `a = b + c` might be doing memory allocation, mutex locks, or fucking virtual dispatch.
-- Exceptions are a non-starter. Stack unwinding in kernel mode? Yeah, good luck with that when interrupts are disabled.
+**Implicit Execution:**
+- Constructors and destructors execute code implicitly during object lifetime. In kernel space, all code execution should be explicit and visible at the call site.
+- Operator overloading obscures function calls behind operator syntax. A simple `a = b + c` could perform memory allocation, acquire locks, or dispatch through vtables.
+- Exception handling requires stack unwinding machinery that cannot function correctly when interrupts are disabled or during early boot.
 
-**Performance Unpredictability:**
-- Virtual function calls through vtables add indirection in hot paths
-- RTTI adds overhead for type information nobody needs
-- Standard library assumes userspace (malloc, exceptions, RTTI)
-- "Zero-cost abstractions" that aren't actually zero-cost
+**Runtime Overhead:**
+- Virtual function calls add indirection through vtable lookups in performance-critical code paths
+- Runtime Type Information (RTTI) consumes memory and CPU cycles for type queries
+- The standard library (libstdc++) assumes userspace environment with malloc, exceptions, and threading
+- "Zero-cost abstractions" often have measurable overhead in debug builds and code size
 
-**Kernel Reality:**
-- No standard library (libstdc++ assumes malloc, exceptions, threading)
-- No exceptions (can't unwind through interrupt handlers)
-- No RTTI (costs memory and time for runtime type information)
-- No operator new/delete (we have our own allocators)
-- No constructors running before we've set up memory management
+**Freestanding Environment Constraints:**
+- Standard library unavailable (libstdc++ requires hosted environment)
+- Exception handling disabled (incompatible with interrupt handlers and early boot)
+- RTTI disabled (memory and runtime overhead)
+- Custom operator new/delete required (before memory management is initialized)
+- Constructor execution timing issues (code runs before kernel subsystems are ready)
 
 ### Why Not Rust?
 
-Rust solves problems we don't have and creates problems we don't want:
+While Rust provides memory safety guarantees valuable in userspace, kernel development presents challenges for its ownership model:
 
-**Borrow Checker Hell:**
-- The borrow checker assumes a single-threaded model with well-defined ownership. Kernels have interrupt handlers, DMA, memory-mapped hardware, and multiple CPUs all poking at the same memory. Good luck expressing "this hardware owns this memory" in Rust's type system.
-- Fighting the borrow checker wastes time. Time better spent writing correct C than arguing with a compiler about whether a hardware register can have multiple mutable references.
-- `unsafe` everywhere. Kernel code is basically always unsafe - direct hardware access, memory management, interrupt handling. At this point, what's Rust giving you except slower compile times?
+**Ownership Model Limitations:**
+- The borrow checker is designed for single-threaded, well-defined ownership patterns. Kernel code frequently deals with shared mutable state: interrupt handlers, DMA buffers, memory-mapped I/O, and multi-core synchronization.
+- Hardware ownership semantics ("this device owns this memory region") don't map cleanly to Rust's lifetime system.
+- Most kernel operations require `unsafe` blocks: hardware register access, memory management, interrupt handling, and inline assembly. This reduces the practical value of Rust's safety guarantees in kernel context.
 
-**Complexity Overhead:**
-- Lifetimes everywhere. Explaining to the compiler why a global page table can outlive the function that initializes it is not productive work.
-- Generic trait bounds create unreadable error messages spanning multiple screens.
-- Async/await and the borrow checker don't play nice. Kernels need async I/O. Rust makes it painful.
+**Type System Complexity:**
+- Lifetime annotations become pervasive in kernel code, particularly for long-lived structures like page tables and global descriptors.
+- Generic trait bounds can produce error messages that are difficult to debug, especially in low-level code.
+- Async/await integration with the borrow checker remains challenging, while kernels require extensive asynchronous I/O.
 
-**Tooling Immaturity:**
-- Locked to LLVM backend exclusively. No alternative compiler implementations. C has GCC, Clang, ICC, TCC - compiler competition drives quality and prevents vendor lock-in.
-- Cross-compilation story is still rough. We're targeting bare metal x86-64. Rust's target system is evolving and breaks.
-- Debugging support is "getting there" instead of "battle-tested for decades."
+**Toolchain Considerations:**
+- Single compiler implementation (rustc/LLVM). C benefits from multiple independent compilers (GCC, Clang, ICC, TCC) which provide implementation diversity.
+- Cross-compilation for bare-metal targets is functional but less mature than C's well-established toolchains.
+- Debugging support is improving but less comprehensive than C with GDB/LLDB.
 
-**Cultural Problems:**
-- Rust community loves abstraction. Kernels need concrete implementations.
-- "Fearless concurrency" sounds nice until you're dealing with lock-free algorithms and memory barriers that Rust's type system can't verify anyway.
-- The language is still changing. Kernel code needs to build in 10 years.
-
-**Industry Reality:**
-- Yeah sure, RedoxOS exists. It's a proof-of-concept, not production infrastructure. Linux is 30 million lines of C and runs the world.
-- Rust-in-Linux is progressing, but it's for drivers, not core kernel code.
-- When your "safe" language requires `unsafe` for everything a kernel does, you've lost the safety argument.
+**Ecosystem Maturity:**
+- Language evolution continues, with new editions potentially affecting compatibility.
+- RedoxOS demonstrates Rust kernel feasibility but remains in early development.
+- Rust-for-Linux project focuses on drivers rather than core kernel components.
+- The extensive use of `unsafe` in kernel code means safety guarantees are limited to small portions of the codebase.
 
 ### Why Not Zig?
 
-Zig markets itself as a "better C" for systems programming. It's not. It's a different C with different problems:
+Zig presents itself as a "better C" for systems programming, but introduces tradeoffs that favor application development over kernel work:
 
-**Language Instability:**
-- Zig hasn't even hit version 1.0 yet. The language is still changing. Breaking changes happen between versions.
-- Kernel code needs to compile in 10 years. Good luck with a language that's still figuring out its core semantics.
-- Standard library APIs change. Documentation goes stale. The ecosystem is immature.
+**Language Stability:**
+- Zig has not yet reached version 1.0. Breaking changes occur between releases.
+- Long-term stability is critical for kernel code that must compile and function correctly for years.
+- Standard library APIs are still evolving, requiring ongoing maintenance of kernel code.
 
-**Comptime Complexity:**
-- `comptime` seems clever until you're debugging why your kernel won't compile because some compile-time evaluation failed in a way that produces cryptic errors.
-- Comptime code execution means the compiler is running arbitrary code at build time. Great attack surface for malicious code.
-- Mixing runtime and comptime semantics creates cognitive overhead. Is this evaluated at compile time or runtime? You have to know.
+**Comptime System:**
+- The `comptime` feature enables powerful metaprogramming but adds conceptual complexity.
+- Compile-time evaluation errors can be difficult to debug, especially in low-level code.
+- Distinguishing between compile-time and runtime evaluation requires careful attention.
+- Build-time code execution expands the attack surface for supply chain vulnerabilities.
 
-**Error Handling Theater:**
-- Explicit error unions (`!Type`) sound nice until you're writing kernel code where most operations can fail and you're drowning in error handling boilerplate.
-- The `try` keyword is sugar for error propagation. It's not simpler than checking return values - it's just different syntax for the same thing.
-- Kernel code needs fine-grained error handling. Zig's error unions don't provide more value than C's errno or return codes.
+**Error Handling:**
+- Error unions (`!Type`) provide explicit error propagation but add syntactic overhead.
+- Kernel code has frequent error conditions. The error union syntax can become verbose.
+- The `try` keyword is syntactic sugar for error propagation, functionally similar to checking return codes.
+- For kernel development, traditional C error handling patterns are well-understood and adequate.
 
-**Allocation Semantics:**
-- Zig forces you to pass allocators everywhere. Good for userspace, annoying for kernel where you have multiple memory zones, DMA regions, and allocation contexts.
-- The language's insistence on explicit allocators creates API noise. Sometimes you just want to allocate from the kernel heap without threading an allocator through 15 function calls.
+**Allocator Model:**
+- Explicit allocator parameters are beneficial for applications but create friction in kernel code.
+- Kernels manage multiple allocation contexts (kernel heap, DMA regions, page allocators, NUMA zones).
+- Threading allocators through deep call stacks adds API complexity without clear benefit.
 
-**Tooling Immaturity:**
-- Self-hosted compiler is still being developed. Bootstrap process is complex.
-- IDE support is "getting better" instead of "rock solid."
-- Debugger integration isn't as battle-tested as C with GDB/LLDB.
-- The compiler itself is still evolving rapidly. API breaks between versions are common.
+**Toolchain Maturity:**
+- Self-hosted compiler is under active development. Bootstrap process is more complex than C.
+- IDE and debugger integration is improving but less mature than C tooling.
+- Compiler evolution means potential API instability.
 
-**The "Better C" Myth:**
-- Zig tries to be C without C's problems. But C's problems are well-known and avoidable with discipline.
-- Zig's solutions add complexity. Comptime adds complexity. Error unions add complexity. Allocator parameters add complexity.
-- "Better C" means "C with different tradeoffs" and those tradeoffs favor userspace, not kernel development.
-
-**No Killer Feature:**
-- What does Zig give you that disciplined C doesn't?
-- Comptime? C has macros and constexpr. Not as fancy, but they work.
-- Error handling? C has return codes. Been working fine since 1972.
-- Safety? Zig still has undefined behavior. You still need to be careful.
-- The juice isn't worth the squeeze for kernel development.
-
-**Real World:**
-- No major kernel written in Zig. There's a reason.
-- The language is still evolving. Kernels need stability.
-- Learning Zig for kernel work means learning a moving target while also learning kernel development. Learn C instead - it's not going anywhere.
+**Practical Considerations:**
+- Zig addresses C's undefined behavior and provides better compile-time guarantees, but C's issues are well-documented and manageable with discipline.
+- Zig's features (comptime, error unions, allocator parameters) add complexity that may not provide proportional value in kernel context.
+- No production kernels currently use Zig, so the ecosystem and best practices are still developing.
+- Learning Zig while learning kernel development means tackling two moving targets simultaneously.
 
 ### C: Simple, Predictable, Proven
 
 > "C is quirky, flawed, and an enormous success."
 > — *Dennis Ritchie*
 
-**C is the only sane choice for kernel development.** Not C++. Not Rust. Not Zig. C.
+TinyOS uses C for kernel development for several compelling reasons:
 
-C is boring and simple. That's exactly why it's perfect:
-
-- What you write is what executes. No surprises.
-- The compiler does what you tell it, not what it thinks you meant.
-- Has been used for writing kernels since the 1970s. It works.
-- Universal compiler support. GCC and Clang target everything from microcontrollers to supercomputers. Try cross-compiling Rust to obscure embedded targets.
+**Predictability:**
+- C code maps clearly to generated assembly. The relationship between source and machine code is straightforward.
+- The compiler follows explicit programmer intent rather than applying implicit transformations.
+- Decades of usage in kernel development have established clear patterns and best practices.
+- Universal compiler support: GCC and Clang target platforms from microcontrollers to supercomputers, with excellent cross-compilation support.
 
 **Direct Mapping to Machine Reality:**
 
@@ -281,31 +267,36 @@ We embrace C's strengths:
 - Predictable performance
 - Minimal runtime overhead
 - Explicit memory layout control
-- No hidden bullshit
+- No hidden costs
 
-We avoid C's weaknesses through discipline:
+We mitigate C's weaknesses through engineering discipline:
 - Strict naming conventions
 - Comprehensive documentation
 - Static analysis tools
 - Thorough code review
+- Zero-tolerance for warnings and undefined behavior
 
-**Bottom line:** C is the only language with a 50-year track record of building operating systems that don't collapse under their own complexity. Want to write an OS? Learn C. Everything else is a distraction marketed as "modern systems programming".
+**Summary:**
 
-Rust is perfect for web services where memory safety matters more than your ability to reason about hardware. When your "system" is a REST API that panics and restarts when something goes wrong, Rust's safety guarantees are actually useful. But kernels can't panic and restart - they ARE the system. The borrow checker can't save you when you're managing page tables and interrupt vectors.
+C has a 50-year track record in operating system development. The language's simplicity, predictability, and direct hardware mapping make it well-suited for kernel work.
 
-Zig is great for build systems and developer tools where comptime metaprogramming can eliminate boilerplate and you can afford to rewrite everything when the language breaks. But production systems need to compile in 10 years, not break when you upgrade the compiler.
+Rust's memory safety guarantees are valuable in application domains where crashes are acceptable and memory safety is the primary concern. In kernel space, where crashes are unacceptable and most operations require `unsafe` anyway, the ownership model provides limited practical benefit.
 
-C++ works for game engines and desktop applications, but if you strip away libstdc++ (which you can't use in kernel mode) C++ becomes "C with worse syntax and hidden vtable indirection."
+Zig's modern features (comptime, error unions, allocator parameters) address real limitations in C, but the language's pre-1.0 status and evolving semantics create stability concerns for long-lived kernel code.
 
-Languages that add abstraction, complexity, and runtime overhead work fine in domains where you can afford those costs. Operating systems can't.
+C++ adds features useful for large applications (RAII, templates, classes) but requires disabling most of them (exceptions, RTTI, STL) in freestanding environments, leaving primarily the downsides (hidden costs, complex name mangling).
 
-- Linux kernel is pure C.
-- FreeBSD, OpenBSD, NetBSD - all C.
-- Embedded RTOSes (FreeRTOS, Zephyr, ThreadX) - C. Bootloaders (GRUB, U-Boot) - C or assembly.
-- macOS kernel core is C (XNU's Mach and BSD layers), though IOKit uses restricted C++ for driver frameworks.
-- Windows NT uses C++ with no exceptions, no RTTI, no STL - basically "C with vtables and constructors nobody ever asked for in the kernel development space." If you're taking kernel engineering advice from the people who brought you decades of blue screens and a registry that corrupts itself, you've already lost. Windows using C++ doesn't prove C++ works for kernels, it proves the opposite.
+Each language excels in its target domain. For kernel development, C's directness and maturity remain compelling.
 
-Successful, stable production kernels are C. The one major kernel written in restricted C++ is famous for crashing, bloat, and security vulnerabilities. Languages promising to replace C for systems programming have yet to produce a single kernel that runs production workloads at scale.
+**Industry Usage:**
+
+- Linux, FreeBSD, OpenBSD, NetBSD: Pure C
+- Embedded RTOSes (FreeRTOS, Zephyr, ThreadX): C
+- Bootloaders (GRUB, U-Boot): C and assembly
+- macOS (XNU kernel): C for Mach and BSD layers, restricted C++ for IOKit driver framework
+- Windows NT: Restricted C++ (no exceptions, no RTTI, minimal STL usage)
+
+The vast majority of production operating systems are written in C. The few exceptions use heavily restricted subsets of other languages that remove most of their distinctive features. Alternative systems languages have yet to produce kernels running production workloads at scale, though projects like Rust-for-Linux and RedoxOS are exploring new approaches.
 
 ### Kernel-Space Discipline
 Kernel code requires higher standards:

@@ -1,9 +1,9 @@
 # TinyOS API Design Guidelines
 
-## Function Design Principles
-
 > "Simplicity is prerequisite for reliability."
 > — *Edsger Dijkstra*
+
+## Function Design Principles
 
 ### 1. Clear Intent
 
@@ -18,18 +18,18 @@ Your function must communicate:
 All functions use their module prefix:
 
 | Module | Prefix | Example |
-|--------|--------|---------|
-| libkbuffer | `kbuf_` | `kbuf_create()` |
-| libkio | `kio_` | `kio_printf()` |
+|--------|--------|---------|  
+| buffer | `buf_` | `buf_create()` |
+| fio | `fio_` | `fio_printf()` |
 | arch | `arch_` | `arch_enable_interrupts()` |
-| memman | `memman_` | `memman_map_page()` |
+| mm | `mm_` | `mm_map_page()` |
 | kernel | `kernel_` | `kernel_panic()` |
 
 ### 3. Verb-Noun Pattern
 Functions follow verb-noun or verb-object pattern:
 ```c
-kbuf_create()         // create a buffer
-kbuf_destroy()        // destroy a buffer
+buf_create()         // create a buffer
+buf_destroy()        // destroy a buffer
 mm_map_page()         // map a page
 arch_flush_tlb()      // flush the TLB
 port_read_byte()      // read a byte from port
@@ -37,32 +37,29 @@ port_read_byte()      // read a byte from port
 
 ## Function Naming Patterns
 
-> "The only way to learn a new programming language is by writing programs in it."
-> — *Dennis Ritchie*
-
 ### Creation and Destruction
 ```c
 // Allocation/creation functions return pointer
-char_buffer_t* kbuf_create(size_t capacity);
+char_buffer_t* buf_create(size_t capacity);
 hashtable_t* hashtable_create(size_t initial_size);
 
 // Destruction functions take pointer
-void kbuf_destroy(char_buffer_t* buffer);
+void buf_destroy(char_buffer_t* buffer);
 void hashtable_destroy(hashtable_t* table);
 
 // In-place initialization (no allocation)
-void kbuf_init(char_buffer_t* buffer, char* data, size_t size);
-void kbuf_cleanup(char_buffer_t* buffer);
+void buf_init(char_buffer_t* buffer, char* data, size_t size);
+void buf_cleanup(char_buffer_t* buffer);
 ```
 
 ### Getters and Setters
 ```c
 // Get operations - no side effects
-size_t kbuf_get_length(char_buffer_t const * buffer);
+size_t buf_get_length(char_buffer_t const * buffer);
 uint64_t arch_get_cr3(void);
 
 // Set operations - explicit modification
-void kbuf_set_length(char_buffer_t* buffer, size_t new_length);
+void buf_set_length(char_buffer_t* buffer, size_t new_length);
 void arch_set_cr3(uint64_t value);
 ```
 
@@ -70,7 +67,7 @@ void arch_set_cr3(uint64_t value);
 Use `is_`, `has_`, `can_` prefixes:
 ```c
 bool mm_is_page_present(virt_addr_t vaddr);
-bool kbuf_has_capacity(char_buffer_t const * buf, size_t required);
+bool buf_has_capacity(char_buffer_t const * buf, size_t required);
 bool arch_can_enable_feature(uint32_t feature);
 ```
 
@@ -78,13 +75,13 @@ bool arch_can_enable_feature(uint32_t feature);
 Make side effects explicit:
 ```c
 // Clearly modifies buffer
-void kbuf_append(char_buffer_t* buffer, char const * data);
-void kbuf_zero_fill(char_buffer_t* buffer);
-void kbuf_truncate(char_buffer_t* buffer, size_t new_length);
+void buf_append(char_buffer_t* buffer, char const * data);
+void buf_zero_fill(char_buffer_t* buffer);
+void buf_truncate(char_buffer_t* buffer, size_t new_length);
 
 // Read-only operations (return views/copies)
-char_buffer_view_t kbuf_slice(char_buffer_t const * buf, size_t start, size_t len);
-char_buffer_view_t kbuf_readonly_view(char_buffer_t const * buf);
+char_buffer_view_t buf_slice(char_buffer_t const * buf, size_t start, size_t len);
+char_buffer_view_t buf_readonly_view(char_buffer_t const * buf);
 ```
 
 ### Hardware Interaction
@@ -107,7 +104,7 @@ void mmio_write_32(mmio_region_t* region, size_t offset, uint32_t value);
 
 ### Parameter Order
 
-**Pick an order and stick to it. If your parameters are inconsistent across similar functions, you're making people memorize arbitrary bullshit.**
+**Consistency is critical. Maintain the same parameter order across similar functions to avoid requiring developers to memorize arbitrary differences.**
 
 1. **Input parameters** (const pointers, values to read)
 2. **Output parameters** (non-const pointers to write)
@@ -116,7 +113,7 @@ void mmio_write_32(mmio_region_t* region, size_t offset, uint32_t value);
 
 ```c
 // Good parameter ordering
-int kbuf_copy(
+int buf_copy(
     char_buffer_t const * source,      // Input (1)
     char_buffer_t       * destination, // Output (2)
     size_t                max_bytes,   // Size (3)

@@ -135,19 +135,19 @@ for (size_t i = 0; i < count; i++) {
 
 ## Structure Encapsulation Philosophy
 
-### Don't Hide Your Damn Structures
+### Public Structures
 
 > "If you can't trust your kernel developers to not mess with internal fields, you have the wrong developers."
 > — *Linus Torvalds*
 
-**All structure definitions are public. No opaque handles.**
+**TinyOS uses public structure definitions rather than opaque handles.**
 
-Hiding structures behind opaque handles (`typedef struct foo * foo_handle_t`) is userspace OOP bullshit that has no place in kernel code. Here's why opaque handles are catastrophically bad for kernel development:
+Opaque handles (`typedef struct foo * foo_handle_t`) hide structure definitions from callers. This pattern is common in userspace libraries for API stability, but creates significant problems in kernel development:
 
-**Performance disaster:**
-- Every access requires pointer indirection
-- Forces heap allocation instead of stack allocation
-- Destroys cache locality by scattering data
+**Performance Concerns:**
+- Every field access requires pointer indirection
+- Forces heap allocation instead of enabling stack allocation
+- Reduces cache locality by requiring separate allocations
 - Adds function call overhead for simple field access
 
 **Debugging nightmare:**
@@ -192,37 +192,43 @@ typedef struct parser {
 } parser_t;  // Likely worse cache behavior
 ```
 
-**It's a trust problem masquerading as an encapsulation problem.** If you don't trust your kernel developers to understand structure internals and not break invariants, fire them and hire competent developers. Don't make the code worse to protect against incompetence.
+**Encapsulation in kernel code:**
+
+Kernel developers need to understand data structure internals. Hiding implementation details creates barriers to debugging and optimization without providing meaningful benefits. Public structures enable:
+- Direct field access for performance-critical code
+- Stack allocation to avoid memory management overhead
+- Structure embedding for better cache behavior
+- Full visibility during debugging
 
 ### Default: Public Structures
 
-**All core data structures are public. Period.**
+**Core data structures use public definitions:**
 
 ```c
-// include/kbuffer/buffer.h - Structure is PUBLIC, deal with it
-typedef struct kbuffer {
+// include/buffer/buffer.h - Public structure definition
+typedef struct buffer {
     uint8_t * data;
     size_t length;
     size_t capacity;
-} kbuffer_t;
+} buffer_t;
 
-// Inline helpers for convenience (not for "encapsulation")
-static inline size_t kbuf_length(kbuffer_t const * buf) {
+// Inline helpers for convenience
+static inline size_t buf_length(buffer_t const * buf) {
     return buf->length;
 }
 
 // Complex operations as functions
-void kbuf_init(kbuffer_t * buf, size_t initial_capacity);
-int kbuf_append(kbuffer_t * buf, uint8_t const * data, size_t len);
-void kbuf_destroy(kbuffer_t * buf);
+void buf_init(buffer_t * buf, size_t initial_capacity);
+int buf_append(buffer_t * buf, uint8_t const * data, size_t len);
+void buf_destroy(buffer_t * buf);
 ```
 
 ### Why This is Better
 
 **Performance:**
 ```c
-kbuffer_t buffer;  // Stack allocation - zero malloc overhead
-kbuf_init(&buffer, 256);
+buffer_t buffer;  // Stack allocation - zero malloc overhead
+buf_init(&buffer, 256);
 
 if (buffer.length > 0) {  // Direct access - zero function call overhead
     process(buffer.data);
@@ -231,23 +237,24 @@ if (buffer.length > 0) {  // Direct access - zero function call overhead
 
 **Debugging:**
 ```bash
+# Public structure - full visibility
 (lldb) print buffer
-(kbuffer_t) $0 = {
+(buffer_t) $0 = {
   data = 0x00007ffff7fb0000 "actual data you can see"
   length = 23
   capacity = 256
 }
 
-# vs opaque handle stupidity:
+# Opaque handle - limited information
 (lldb) print handle
-(void *) $0 = 0x00007ffff7fb0000  # Great, an address. Very helpful.
+(void *) $0 = 0x00007ffff7fb0000
 ```
 
 **Memory layout:**
 ```c
 typedef struct parser {
-    kbuffer_t input;   // Embedded - one allocation for entire struct
-    kbuffer_t output;  // Not a pointer - better cache locality
+    buffer_t input;   // Embedded - one allocation for entire struct
+    buffer_t output;  // Not a pointer - better cache locality
     size_t pos;
 } parser_t;
 ```
@@ -264,10 +271,10 @@ for (size_t i = 0; i < buffer.length; i++) {
 
 // Need to check something? Just check it.
 if (buffer.capacity < required) {
-    kbuf_resize(&buffer, required);
+    buf_resize(&buffer, required);
 }
 
-// Setting up a structure? Set the damn fields.
+// Setting up a structure? Initialize the fields.
 packet.payload.length = new_size;
 ```
 
@@ -331,9 +338,9 @@ pte->value = phys_addr | PTE_PRESENT | PTE_WRITABLE;
 
 **Public structures:**
 ```c
-typedef struct kbuffer kbuffer_t;
-void kbuf_init(kbuffer_t * buf, size_t capacity);
-void kbuf_destroy(kbuffer_t * buf);
+typedef struct char_buffer char_buffer_t;
+void buf_init(char_buffer_t * buf, size_t capacity);
+void buf_destroy(char_buffer_t * buf);
 ```
 
 **Opaque handles (rare):**

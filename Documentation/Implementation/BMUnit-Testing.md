@@ -5,7 +5,7 @@
 **BMUnit** (Bare Metal Unit) is TinyOS's in-kernel testing framework, inspired by Linux kernel's KUnit but adapted for bare metal x86-64 development.
 
 **Design Philosophy:**
-- **Pure C17** - No C++ bullshit
+- **Pure C17** - No C++ dependencies
 - **Freestanding** - Runs in kernel context, no libc
 - **Embedded tests** - Tests live with the code they verify
 - **Minimal overhead** - Simple macros, no runtime bloat
@@ -509,10 +509,10 @@ test_serial_write();  // Uses mock instead of real UART
 
 | Feature | KUnit | BMUnit |
 |---------|-------|--------|
-| Output | `printk` | Serial/VGA via `kio_*` |
+| Output | `printk` | Serial/VGA via `fio_*` |
 | Initialization | Linux subsystem init | Bare metal early init |
 | Memory allocation | `kmalloc` | Static/stack (Phase 1) |
-| String operations | Linux `<string.h>` | `libkstd` |
+| String operations | Linux `<string.h>` | `lib/memory` |
 | Test discovery | Module loading | Linker section gathering |
 | Parameterized tests | Yes | Planned |
 | Hardware mocking | No | Planned |

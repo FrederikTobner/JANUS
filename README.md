@@ -26,7 +26,7 @@ TinyOS/
 ├── arch/             # Architecture-specific code (x86_64)
 ├── lib/              # Kernel libraries (types, memory, buffer, fio)
 ├── bmunit/           # BMUnit testing framework
-├── memman/           # Memory management
+├── mm/               # Memory management
 ├── drivers/          # Device drivers
 ├── include/          # Global headers
 ├── scripts/          # Build and utility scripts

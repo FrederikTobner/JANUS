@@ -7,7 +7,7 @@ tinyos_add_module(memman
 )
 
 # Add tests if enabled
-tinyos_add_tests(memman
+tinyos_add_tests(mm
     SOURCES
-        # memman_test.c (future)
+        # mm_test.c (future)
 )

@@ -5,16 +5,16 @@
 > "UNIX is basically a simple operating system, but you have to be a genius to understand the simplicity."
 > — *Dennis Ritchie*
 
-**We talk to hardware directly. No bullshit layers hiding what's actually happening.**
+**TinyOS provides direct hardware access with minimal abstraction.**
 
 TinyOS embraces low-level hardware programming:
 
 - **Explicit over implicit** - Direct register access with clear intent. No magic.
 - **Zero-cost abstractions** - If the abstraction costs performance, it's wrong.
 - **Hardware awareness** - Code reflects hardware realities, not programmer fantasies.
-- **Type safety** - Strong types prevent stupid register access mistakes.
+- **Type safety** - Strong types prevent register access errors.
 
-If you're hiding hardware behavior behind multiple abstraction layers, you're writing userspace code. Stop it.
+Kernel code should directly express hardware operations rather than hiding them behind multiple abstraction layers.
 
 ## Hardware Access Patterns
 

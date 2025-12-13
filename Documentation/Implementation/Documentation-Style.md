@@ -5,7 +5,7 @@
 **Document why, not what. If your comment just repeats what the code says, delete it.**
 
 Documentation in TinyOS has a purpose:
-- **Explain complex shit** - Algorithms and design decisions that aren't obvious
+- **Explain complex logic** - Algorithms and design decisions that aren't obvious
 - **Define APIs** - Interfaces and contracts
 - **Educational value** - Help people learn, not just copy-paste
 - **Enable debugging** - Future you needs to understand this code at 3AM
@@ -210,7 +210,7 @@ void complex_initialization(void) {
 
 #include <kernel/pmm.h>
 #include <kernel/memory.h>
-#include <lib/libkio/kprintf.h>
+#include <lib/fio/fio.h>
 ```
 
 ### Header File Documentation
