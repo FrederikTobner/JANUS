@@ -6,8 +6,16 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)  # Allow GNU extensions
 
-# Export compile commands for clangd/IDE support
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Include TinyOS platform detection and helper functions
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(TinyOSPlatform)
+include(TinyOSHelpers)
+
+# Options
+option(BUILD_TESTS "Build BMUnit tests" OFF)
+
+# Print build configuration
+tinyos_print_config()
 
 # Copy compile_commands.json to project root for clangd
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
@@ -16,19 +24,14 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_BINARY_DIR}/compile_commands.json
             ${CMAKE_SOURCE_DIR}/compile_commands.json
-        DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+        BYPRODUCTS ${CMAKE_SOURCE_DIR}/compile_commands.json
         COMMENT "Copying compile_commands.json to project root"
     )
 endif()
 
-# Include CMake modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-
-# Testing support (BMUnit)
-option(BUILD_TESTS "Build BMUnit tests" OFF)
-
+# Testing framework
 if(BUILD_TESTS)
-    message(STATUS "BMUnit: Testing enabled")
+    enable_testing()
     add_subdirectory(bmunit)
 endif()
 

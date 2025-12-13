@@ -53,7 +53,7 @@ All code must compile cleanly with:
 
 **Warnings are the compiler telling you that you fucked up.** Fix it. Don't suppress it. Don't ignore it.
 
-Common warnings that mean you fucked up:
+Common warnings that mean you made an error:
 - Unused variables (delete them)
 - Implicit function declarations (missing include)
 - Type mismatches (fix your types)
@@ -75,8 +75,9 @@ You're running in ring 0 with unrestricted hardware access. There are no safety 
 - Complete hardware lockup
 - Silent memory corruption across the entire system
 - Exploitable security vulnerabilities with full hardware access
-- **Permanent hardware damage**: Corrupt the boot sector, partition table, or UEFI firmware and your machine won't boot anymore
-- **Actual bricking**: With direct access to firmware flash memory, badly written kernel code can overwrite BIOS/UEFI, turning your motherboard into an expensive paperweight
+- **Corrupted boot configuration**: Trash the boot sector, partition table, or bootloader and your system won't start
+- **Data loss**: With direct memory access, one bad pointer can destroy the filesystem or user data
+- **Hardware misconfiguration**: Write garbage to device registers and you might need to power cycle or reset CMOS
 
 In a game or text editor, UB means the app crashes and users restart it. Annoying but tolerable. In an OS, a single undefined behavior is a **death sentence**. The entire machine goes down. All running applications die. Unsaved work is gone. (Though if you're a Windows user, you might think weekly BSODs are normal behavior.)
 

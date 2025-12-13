@@ -189,7 +189,7 @@ typedef struct parser {
     handle_t * input;   // Pointer to heap allocation
     handle_t * output;  // Another pointer to different heap allocation
     size_t pos;
-} parser_t;  // Cache misses everywhere
+} parser_t;  // Likely worse cache behavior
 ```
 
 **It's a trust problem masquerading as an encapsulation problem.** If you don't trust your kernel developers to understand structure internals and not break invariants, fire them and hire competent developers. Don't make the code worse to protect against incompetence.

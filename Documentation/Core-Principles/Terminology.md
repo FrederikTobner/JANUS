@@ -21,28 +21,8 @@ If you call a hashtable a "map," you're hiding the implementation. If you call a
 | Map | **Hashtable** | We're using a hashtable. Say so. |
 | Queue | **Ring Buffer** | It's a circular buffer with head/tail pointers |
 | List | **Linked List** | Pointer-based structure with explicit traversal cost |
-| Tree | **Binary Tree** | Be specific about the tree type |
-
-### Memory Management
-| Instead of... | We use... | Rationale |
-|---------------|-----------|-----------|
-| Memory Page | **Page Frame** | Distinguishes physical memory management |
-| Memory Space | **Address Space** | Emphasizes MMU and virtual memory |
-| Pointer | **Address** (when appropriate) | Clarifies memory addressing |
-
-### Hardware Interfaces
-| Instead of... | We use... | Rationale |
-|---------------|-----------|-----------|
-| Device Communication | **Port I/O** | Specifies hardware I/O mechanism |
-| Event Handler | **Interrupt Vector** | Describes hardware interrupt table |
-| Variable | **Register** | When referring to CPU registers |
-
-### System Concepts
-| Instead of... | We use... | Rationale |
-|---------------|-----------|-----------|
-| Process | **Task** (initially) | Simpler concept for basic scheduler |
-| Thread | **Execution Context** | Explicit about CPU state |
-| Mutex | **Spinlock** | Describes actual implementation |
+| Binary Tree | **Red-black Tree** | Be specific about the tree type |
+| Vector | **Dynamic Array** | An array that can has a dynamic capacity, changing at runtime |
 
 ## Naming Conventions
 
@@ -101,42 +81,48 @@ typedef struct cpu_regs cpu_regs_t;
 
 ### Module and Library Naming
 
-#### Library Prefix: `libk*`
-All kernel libraries use the `libk` prefix to:
-- Distinguish from user-space libraries
-- Prevent naming conflicts with standard C
-- Indicate bare-metal, kernel-space code
+#### Kernel Library Structure
+Kernel libraries are organized under `lib/` without a common prefix:
+- Simple, focused names that describe their purpose
+- No `libk` prefix (the `lib/` directory already indicates library code)
+- Each library is self-contained and focused
 
 ```
 lib/
-├── libkbuffer/    # Character buffer operations
-├── libkio/        # Input/Output operations
-├── libkstd/       # Standard library subset
-└── libkarch/      # Architecture abstraction (future)
+├── types/      # Basic types and compiler attributes (header-only)
+├── memory/     # Memory operations (memcpy, memset, etc.)
+├── buffer/     # Character buffer operations  
+└── fio/        # Formatted I/O operations
 ```
 
 #### Core Library Descriptions
 
-**`libkbuffer`** - Character Buffer Operations
+**`types`** - Basic Types and Compiler Attributes (Header-Only)
+- Fixed-width integer types (uint8_t, int32_t, etc.)
+- Boolean type and macros
+- Compiler attributes (__packed, __noreturn, likely/unlikely)
+- Essential macros (NULL, ARRAY_SIZE, container_of)
+- Platform-independent type definitions
+
+**`memory`** - Memory Operations
+- Low-level memory manipulation (memcpy, memmove, memset)
+- Memory comparison (memcmp)
+- Memory zeroing (memzero)
+- No libc dependency
+
+**`buffer`** - Character Buffer Operations
 - Character buffer manipulation and views
 - Buffer slicing and substring operations
 - Memory-safe buffer operations
 - Fixed-size and dynamic buffer management
 - Buffer comparison and searching
-- Character encoding/decoding operations
 
-**`libkio`** - Input/Output Operations
+**`fio`** - Formatted I/O Operations
 - Formatted output (printf family)
 - Character and buffer I/O
 - Debug output and logging
 - Binary data serialization
 - Stream abstractions for devices
-
-**`libkstd`** - Standard Library Subset
-- Basic type definitions (stdint.h, stddef.h)
-- Essential macros and constants
-- Compiler intrinsics wrappers
-- Platform-independent abstractions
 
 ### Function Naming
 
@@ -144,16 +130,21 @@ lib/
 Functions are prefixed with their module abbreviation:
 
 ```c
-// libkbuffer functions (prefix: kbuf_)
-char_buffer_t* kbuf_create(size_t capacity);
-void kbuf_append(char_buffer_t* buf, const char* data);
-void kbuf_destroy(char_buffer_t* buf);
-char_buffer_view_t kbuf_slice(char_buffer_t* buf, size_t start, size_t len);
+// buffer library functions (prefix: buf_)
+buf_create(size_t capacity);
+void buf_append(buffer_t* buf, char const * data);
+void buf_destroy(buffer_t* buf);
+buf_view_t buf_slice(buffer_t* buf, size_t start, size_t len);
 
-// libkio functions (prefix: kio_)
-void kio_printf(const char* format, ...);
-void kio_write_buffer(const char_buffer_t* buf);
-void kio_debug_hex_dump(const void* data, size_t len);
+// fio library functions (prefix: fio_)
+void fio_printf(char const * format, ...);
+void fio_write_buffer(buffer_t const * buf);
+void fio_debug_hex_dump(void const * data, size_t len);
+
+// memory library functions (prefix: none - standard names)
+void * memcpy(void * dest, void const * src, size_t n);
+void * memset(void * dest, int value, size_t n);
+int memcmp(void const * s1, void const * s2, size_t n);
 
 // Architecture functions (prefix: arch_)
 void arch_enable_interrupts(void);
@@ -161,10 +152,10 @@ void arch_disable_interrupts(void);
 phys_addr_t arch_virt_to_phys(virt_addr_t vaddr);
 void arch_flush_tlb(void);
 
-// Memory management functions (prefix: mm_)
-int mm_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags);
-void mm_unmap_page(virt_addr_t vaddr);
-page_frame_t* mm_alloc_page_frame(void);
+// Memory management functions (prefix: memman_)
+int memman_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags);
+void memman_unmap_page(virt_addr_t vaddr);
+page_frame_t* memman_alloc_page_frame(void);
 ```
 
 #### Operation Clarity
