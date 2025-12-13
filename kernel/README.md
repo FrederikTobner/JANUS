@@ -17,7 +17,8 @@ Headers in `include/kernel/`:
 
 ## Dependencies
 
-- libkstd (standard library subset)
-- libkio (I/O operations)
+- types (type definitions)
+- memory (memory operations)
+- fio (I/O operations)
 - arch (architecture layer)
 - boot (boot components)

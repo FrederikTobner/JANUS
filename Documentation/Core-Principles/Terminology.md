@@ -138,7 +138,7 @@ char_buffer_view_t buf_slice(char_buffer_t* buf, size_t start, size_t len);
 
 // fio library functions (prefix: fio_)
 void fio_printf(char const * format, ...);
-void fio_write_buffer(buffer_t const * buf);
+void fio_write_buffer(char_buffer_t const * buf);
 void fio_debug_hex_dump(void const * data, size_t len);
 
 // memory library functions (prefix: none - standard names)

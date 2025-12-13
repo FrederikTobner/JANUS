@@ -1,8 +1,12 @@
 # memory - Memory manipulation operations
 
+# Automatically find all source files
+file(GLOB_RECURSE MEMORY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
+file(GLOB_RECURSE MEMORY_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+
 tinyos_add_library(memory
     SOURCES
-        memory.c
+        ${MEMORY_SOURCES}
     DEPENDENCIES
         types
 )

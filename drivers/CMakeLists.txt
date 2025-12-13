@@ -1,6 +1,10 @@
 # Device drivers module
 project(tinyos-drivers)
 
+# Automatically find all source files
+file(GLOB_RECURSE DRIVERS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
+file(GLOB_RECURSE DRIVERS_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+
 add_library(drivers STATIC)
 
 target_include_directories(drivers
@@ -9,13 +13,12 @@ target_include_directories(drivers
         ${CMAKE_SOURCE_DIR}/include
 )
 
-target_sources(drivers
-    PRIVATE
-        # Source files will be added in future phases
-        # Keyboard driver
-        # Disk drivers
-        # Network drivers
-)
+if(DRIVERS_SOURCES)
+    target_sources(drivers
+        PRIVATE
+            ${DRIVERS_SOURCES}
+    )
+endif()
 
 target_compile_options(drivers
     PRIVATE
@@ -32,5 +35,5 @@ target_compile_options(drivers
 target_link_libraries(drivers
     PRIVATE
         arch
-        kio
+        fio
 )

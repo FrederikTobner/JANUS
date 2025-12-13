@@ -133,11 +133,11 @@ void mm_map_range(
 Always use const for read-only parameters:
 ```c
 // Good
-size_t kbuf_length(char_buffer_t const * buffer);
-void kbuf_print(char_buffer_t const * buffer);
+size_t buf_length(char_buffer_t const * buffer);
+void buf_print(char_buffer_t const * buffer);
 
 // Bad - missing const
-size_t kbuf_length(char_buffer_t* buffer);
+size_t buf_length(char_buffer_t* buffer);
 ```
 
 ### Pointer vs Value
@@ -147,7 +147,7 @@ size_t kbuf_length(char_buffer_t* buffer);
 
 ```c
 // Structures by pointer
-void kbuf_append_buffer(char_buffer_t* dest, char_buffer_t const * source);
+void buf_append_buffer(char_buffer_t* dest, char_buffer_t const * source);
 
 // Small types by value
 uint8_t port_read_byte(uint16_t port);
@@ -166,7 +166,7 @@ int mm_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags);
 // Returns: 0 on success, negative error code on failure
 
 // Option 2: Boolean for simple success/failure  
-bool kbuf_append(char_buffer_t* buffer, char const * data);
+bool buf_append(char_buffer_t* buffer, char const * data);
 // Returns: true on success, false on failure
 
 // Option 3: Pointer (NULL indicates failure)
@@ -316,12 +316,12 @@ bool kbuf_append_safe(char_buffer_t* buf, char const * data, size_t len);
  * 
  * Example:
  * @code
- * char_buffer_t* buf = kbuf_create(256);
- * kbuf_append(buf, "Hello");
- * kbuf_destroy(buf);
+ * char_buffer_t* buf = buf_create(256);
+ * buf_append(buf, "Hello");
+ * buf_destroy(buf);
  * @endcode
  */
-char_buffer_t* kbuf_create(size_t capacity);
+char_buffer_t* buf_create(size_t capacity);
 ```
 
 ### Hardware-Specific Functions

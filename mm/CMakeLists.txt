@@ -1,6 +1,12 @@
-# Memory manager module
+# Memory management module
 
-tinyos_add_module(memman
+# Automatically find all source files
+file(GLOB_RECURSE MM_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
+file(GLOB_RECURSE MM_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+
+tinyos_add_module(mm
+    SOURCES
+        ${MM_SOURCES}
     DEPENDENCIES
         types
         memory

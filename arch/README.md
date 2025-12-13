@@ -27,5 +27,5 @@ Headers in `include/arch/`:
 
 ## Dependencies
 
-- libkbuffer (for I/O formatting)
-- libkstd (standard types)
+- types (basic type definitions)
+- buffer (for I/O formatting - future)

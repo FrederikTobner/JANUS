@@ -108,7 +108,7 @@ Use quotes for headers within the same module:
 
 ### Example
 ```c
-// lib/libkbuffer/buffer.c
+// lib/buffer/buffer.c
 #include "lib/buffer.h"        // Corresponding header
 
 #include <tinyos/types.h>      // Global headers
@@ -125,7 +125,7 @@ Use quotes for headers within the same module:
 
 ### Public Header Template
 ```c
-// lib/libkbuffer/include/lib/buffer.h
+// lib/buffer/include/lib/buffer.h
 #ifndef TINYOS_LIB_BUFFER_H
 #define TINYOS_LIB_BUFFER_H
 
@@ -154,13 +154,13 @@ typedef struct char_buffer_view {
  * @param capacity Initial capacity in bytes
  * @return Pointer to buffer, or NULL on failure
  */
-char_buffer_t* kbuf_create(size_t capacity);
+char_buffer_t* buf_create(size_t capacity);
 
 /**
  * Destroy a character buffer
  * @param buffer Buffer to destroy
  */
-void kbuf_destroy(char_buffer_t* buffer);
+void buf_destroy(char_buffer_t* buffer);
 
 // More function declarations...
 
@@ -169,7 +169,7 @@ void kbuf_destroy(char_buffer_t* buffer);
 
 ### Private Header Template
 ```c
-// lib/libkbuffer/buffer_internal.h
+// lib/buffer/buffer_internal.h
 #ifndef BUFFER_INTERNAL_H
 #define BUFFER_INTERNAL_H
 
@@ -209,7 +209,7 @@ void buffer_internal_realloc(char_buffer_t* buf, size_t new_capacity);
 // ...
 #endif
 
-// lib/libkbuffer/include/lib/buffer.h
+// lib/buffer/include/lib/buffer.h
 #ifndef TINYOS_LIB_BUFFER_H
 #define TINYOS_LIB_BUFFER_H
 // ...
@@ -225,7 +225,7 @@ void buffer_internal_realloc(char_buffer_t* buf, size_t new_capacity);
 ### Private Headers
 ```c
 // Local headers can use simpler guards
-// lib/libkbuffer/buffer_internal.h
+// lib/buffer/buffer_internal.h
 #ifndef BUFFER_INTERNAL_H
 #define BUFFER_INTERNAL_H
 // ...
@@ -304,16 +304,12 @@ static inline void arch_enable_interrupts(void) {
 
 ### Module Include Directories
 ```cmake
-# lib/libkbuffer/CMakeLists.txt
-add_kernel_library(kbuffer
+# lib/buffer/CMakeLists.txt
+tinyos_add_library(buffer
     SOURCES buffer.c
 )
 
-# Export public include directory
-target_include_directories(kbuffer PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>  # Global headers
-)
+# The helper automatically sets up public include directories
 ```
 
 ### Global Include Setup
@@ -326,7 +322,7 @@ include_directories(
 # Each module adds its own public headers
 add_subdirectory(kernel)                 # Adds kernel/include/
 add_subdirectory(arch)                   # Adds arch/include/
-add_subdirectory(lib/libkbuffer)         # Adds lib/libkbuffer/include/
+add_subdirectory(lib/buffer)         # Adds lib/buffer/include/
 ```
 
 ## Header Documentation

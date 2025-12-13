@@ -287,20 +287,6 @@ target_link_libraries(kernel
     boot
 )
 ```
-        x86_64/serial.c
-        x86_64/cpu.c
-    DEPENDS kbuffer
-)
-
-# kernel/CMakeLists.txt
-add_executable(kernel main.c)
-target_link_libraries(kernel
-    kio
-    kbuffer
-    arch
-    boot
-)
-```
 
 ## Module Build System
 
@@ -341,7 +327,7 @@ buffer.a + fio.a + arch.a + boot.a + kernel.o → kernel.bin
 
 Example:
 ```
-lib/libkbuffer/
+lib/buffer/
 ├── buffer.c              # Implementation
 ├── buffer_internal.h     # Private header (implementation details)
 └── include/
@@ -442,20 +428,17 @@ kernel/
 # lib/buffer/CMakeLists.txt
 
 # Always build the library
-add_library(kbuffer STATIC buffer.c)
+tinyos_add_library(buffer
+    SOURCES
+        buffer.c
+)
 
 # Conditionally build tests
 if(BUILD_TESTS)
-    add_library(kbuffer_test STATIC
-        buffer_test.c
+    tinyos_add_test(buffer_test
+        SOURCES buffer_test.c
+        DEPENDS buffer
     )
-    
-    target_link_libraries(kbuffer_test
-        kbuffer
-        bmunit
-    )
-    
-    set_property(GLOBAL APPEND PROPERTY BMUNIT_TEST_MODULES kbuffer_test)
 endif()
 ```
 

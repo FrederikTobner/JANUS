@@ -6,7 +6,11 @@ This directory contains the technical documentation for TinyOS. It's not optiona
 
 ## Quick Start
 
-**New to the project? Read these in order:**
+**New to the project? Start here:**
+
+0. **[Setup.md](Setup.md)** - Install required dependencies (CMake, Clang, NASM, LLDB, QEMU)
+
+**Then read these in order:**
 
 1. [Core-Principles/Philosophy.md](Core-Principles/Philosophy.md) - Why we do things this way
 2. [Core-Principles/Terminology.md](Core-Principles/Terminology.md) - What words to use (and not use)

@@ -93,7 +93,7 @@ We don't use a separate top-level `tests/` directory. That's a userspace convent
 ### Basic Test Structure
 
 ```c
-// lib/libkbuffer/buffer_test.c
+// lib/buffer/buffer_test.c
 #include <bmunit/test.h>
 #include <lib/buffer.h>
 
@@ -259,30 +259,20 @@ static struct bmunit_suite buffer_test_suite = {
 ### Module CMakeLists.txt
 
 ```cmake
-# lib/libkbuffer/CMakeLists.txt
+# lib/buffer/CMakeLists.txt
 
 # Always build the library
-add_library(kbuffer STATIC
-    buffer.c
-)
-
-target_include_directories(kbuffer PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+tinyos_add_library(buffer
+    SOURCES
+        buffer.c
 )
 
 # Conditionally build tests
 if(BUILD_TESTS)
-    add_library(kbuffer_test STATIC
-        buffer_test.c
+    tinyos_add_test(buffer_test
+        SOURCES buffer_test.c
+        DEPENDS buffer
     )
-    
-    target_link_libraries(kbuffer_test
-        kbuffer
-        bmunit
-    )
-    
-    # Register test suite
-    set_property(GLOBAL APPEND PROPERTY BMUNIT_TEST_MODULES kbuffer_test)
 endif()
 ```
 
