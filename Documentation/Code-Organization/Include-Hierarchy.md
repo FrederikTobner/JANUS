@@ -47,8 +47,8 @@ TinyOS/
 │   └── lib/
 │       └── io.h
 │
-└── mm/include/               # Memory management (future)
-    └── mm/
+└── memman/include/               # Memory management (future)
+    └── memman/
         ├── page_frame.h
         ├── vmm.h
         └── kmalloc.h

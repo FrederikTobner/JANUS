@@ -22,7 +22,7 @@ All functions use their module prefix:
 | libkbuffer | `kbuf_` | `kbuf_create()` |
 | libkio | `kio_` | `kio_printf()` |
 | arch | `arch_` | `arch_enable_interrupts()` |
-| mm | `mm_` | `mm_map_page()` |
+| memman | `memman_` | `memman_map_page()` |
 | kernel | `kernel_` | `kernel_panic()` |
 
 ### 3. Verb-Noun Pattern

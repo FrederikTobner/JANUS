@@ -1,15 +1,15 @@
 # Memory manager module
-project(tinyos-memoryman)
+project(tinyos-memman)
 
-add_library(memoryman STATIC)
+add_library(memman STATIC)
 
-target_include_directories(memoryman
+target_include_directories(memman
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/include
 )
 
-target_sources(memoryman
+target_sources(memman
     PRIVATE
         # Source files will be added in future phases
         # Physical memory manager
@@ -17,7 +17,7 @@ target_sources(memoryman
         # Kernel heap allocator
 )
 
-target_compile_options(memoryman
+target_compile_options(memman
     PRIVATE
         -target x86_64-elf
         -nostdlib
@@ -29,7 +29,7 @@ target_compile_options(memoryman
         -mno-red-zone
 )
 
-target_link_libraries(memoryman
+target_link_libraries(memman
     PRIVATE
-        kstd
+        types
 )

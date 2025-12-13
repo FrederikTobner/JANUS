@@ -9,6 +9,18 @@ set(CMAKE_C_EXTENSIONS ON)  # Allow GNU extensions
 # Export compile commands for clangd/IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Copy compile_commands.json to project root for clangd
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+    add_custom_target(
+        copy_compile_commands ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_SOURCE_DIR}/compile_commands.json
+        DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+        COMMENT "Copying compile_commands.json to project root"
+    )
+endif()
+
 # Include CMake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -20,10 +32,8 @@ if(BUILD_TESTS)
     add_subdirectory(bmunit)
 endif()
 
-# Build all library modules first
-add_subdirectory(lib/libkstd)
-add_subdirectory(lib/libkbuffer)
-add_subdirectory(lib/libkio)
+# Library modules
+add_subdirectory(lib)
 
 # Architecture layer
 add_subdirectory(arch)
@@ -35,7 +45,7 @@ add_subdirectory(boot)
 add_subdirectory(kernel)
 
 # Memory management
-add_subdirectory(memoryman)
+add_subdirectory(memman)
 
 # Device drivers (future)
 # add_subdirectory(drivers)

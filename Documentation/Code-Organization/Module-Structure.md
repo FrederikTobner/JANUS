@@ -18,7 +18,7 @@ TinyOS/
 ├── arch/             # Architecture-specific code
 ├── lib/              # Utility libraries
 ├── bmunit/           # BMUnit testing framework
-├── memoryman/        # Memory management
+├── memman/           # Memory management
 ├── drivers/          # Device drivers (future)
 ├── fs/               # File systems (future)
 ├── net/              # Network stack (future)
@@ -161,12 +161,51 @@ arch/
 
 ## Library Modules
 
-### `lib/libkbuffer/` - Character Buffer Operations
+### `lib/types/` - Basic Types and Compiler Attributes
+Fundamental type definitions and compiler-specific macros.
+
+**Structure:**
+```
+lib/types/
+├── include/
+│   └── lib/
+│       ├── types.h      # Fixed-width types, size_t, bool
+│       └── compiler.h   # Compiler attributes, macros
+└── CMakeLists.txt
+```
+
+**Responsibilities:**
+- Fixed-width integer types (uint8_t, int32_t, etc.)
+- Size types (size_t, ssize_t, ptrdiff_t)
+- Boolean type (bool, true, false)
+- NULL definition
+- Compiler attributes (__packed, __aligned, etc.)
+- Common macros (likely, unlikely, ARRAY_SIZE)
+
+### `lib/memory/` - Memory Manipulation
+Low-level memory operations without libc.
+
+**Structure:**
+```
+lib/memory/
+├── memory.c           # Memory operations implementation
+├── include/
+│   └── lib/
+│       └── memory.h   # Public interface
+└── CMakeLists.txt
+```
+
+**Responsibilities:**
+- memcpy, memmove, memset, memcmp
+- memzero (explicit zero-fill)
+- Raw memory region operations
+
+### `lib/buffer/` - Character Buffer Operations
 Character buffer manipulation, views, and operations.
 
 **Structure:**
 ```
-lib/libkbuffer/
+lib/buffer/
 ├── buffer.c           # Buffer implementation
 ├── include/
 │   └── lib/
@@ -180,16 +219,16 @@ lib/libkbuffer/
 - Buffer views and slicing
 - Memory-safe buffer operations
 
-### `lib/libkio/` - Input/Output Operations
+### `lib/fio/` - Formatted Input/Output
 Formatted I/O, logging, and debug output.
 
 **Structure:**
 ```
-lib/libkio/
-├── io.c               # I/O implementation
+lib/fio/
+├── fio.c              # Formatted I/O implementation
 ├── include/
 │   └── lib/
-│       └── io.h       # Public interface
+│       └── fio.h      # Public interface
 └── CMakeLists.txt
 ```
 
@@ -199,55 +238,55 @@ lib/libkio/
 - Stream abstractions
 - Binary serialization
 
-### `lib/libkstd/` - Standard Library Subset
-Essential standard library functionality for kernel use.
-
-**Structure:**
-```
-lib/libkstd/
-├── stdint.c
-├── stddef.c
-├── include/
-│   └── lib/
-│       ├── stdint.h
-│       └── stddef.h
-└── CMakeLists.txt
-```
-
-**Responsibilities:**
-- Basic type definitions
-- Essential macros and constants
-- Compiler intrinsics wrappers
-
 ## Module Dependencies
 
 ### Dependency Graph (Phase 1)
 ```
 kernel
-├── depends on: libkio, libkbuffer, arch, boot
+├── depends on: fio, buffer, arch, boot
 │
-libkio
-├── depends on: libkbuffer, arch
+fio
+├── depends on: buffer, types
 │
 arch
-├── depends on: libkbuffer
+├── depends on: memory, types
 │
-libkbuffer
-└── depends on: libkstd (minimal)
+buffer
+├── depends on: memory, types
+│
+memory
+└── depends on: types (header-only)
 ```
 
 ### CMake Dependency Declaration
 ```cmake
-# lib/libkbuffer/CMakeLists.txt
-add_kernel_library(kbuffer
-    SOURCES buffer.c
-    DEPENDS kstd
+# lib/buffer/CMakeLists.txt
+add_library(buffer STATIC buffer.c)
+target_link_libraries(buffer PUBLIC
+    memory
+    types
 )
 
 # arch/CMakeLists.txt  
-add_kernel_library(arch
-    SOURCES 
-        x86_64/io.c
+add_library(arch STATIC
+    x86_64/io.c
+    x86_64/serial.c
+    x86_64/cpu.c
+)
+target_link_libraries(arch PUBLIC
+    memory
+    types
+)
+
+# kernel/CMakeLists.txt
+add_executable(kernel main.c)
+target_link_libraries(kernel
+    fio
+    buffer
+    arch
+    boot
+)
+```
         x86_64/serial.c
         x86_64/cpu.c
     DEPENDS kbuffer

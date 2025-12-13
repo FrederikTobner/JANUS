@@ -7,7 +7,9 @@
 ## clang                    ##
 ##############################
 .[Cc][Aa][Cc][Hh][Ee]/
-.[Cc][Ll][Aa][Nn][Gg][Dd]
+.[Cc][Ll][Aa][Nn][Gg][Dd]/
+# Track .clangd config, ignore generated compile_commands.json
+compile_commands.json
 
 ##############################
 ## cmake                    ##

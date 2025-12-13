@@ -24,9 +24,9 @@ TinyOS/
 ├── kernel/           # Core kernel functionality
 ├── boot/             # Multiboot2 boot loader
 ├── arch/             # Architecture-specific code (x86_64)
-├── lib/              # Kernel libraries (libkbuffer, libkio, libkstd)
+├── lib/              # Kernel libraries (types, memory, buffer, fio)
 ├── bmunit/           # BMUnit testing framework
-├── memoryman/        # Memory management
+├── memman/           # Memory management
 ├── drivers/          # Device drivers
 ├── include/          # Global headers
 ├── scripts/          # Build and utility scripts

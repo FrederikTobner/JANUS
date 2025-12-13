@@ -51,7 +51,7 @@ Documents describing the architecture and structure of the codebase.
   - Module responsibilities and boundaries
   - Dependency graph and build order
   - CMake build system organization
-  - Library structure (libkbuffer, libkio, libkstd)
+  - Library structure (types, memory, buffer, fio)
 
 - **[API-Design.md](Code-Organization/API-Design.md)**
   - Function naming patterns (module_action_object)
@@ -66,6 +66,13 @@ Documents describing the architecture and structure of the codebase.
   - Forward declarations and reducing dependencies
   - Architecture-specific headers
   - CMake include directory configuration
+
+- **[Global-Include-Hierarchy.md](Code-Organization/Global-Include-Hierarchy.md)**
+  - What goes in `include/tinyos/`
+  - Global vs module-specific headers
+  - When to promote headers to global
+  - Include patterns and examples
+  - Migration policy for cross-cutting headers
 
 ### Implementation
 
@@ -122,6 +129,7 @@ Practical guides for writing code that adheres to project standards.
 | Module-Structure.md | Describe codebase organization | Developers, new contributors |
 | API-Design.md | Guide interface design decisions | Library authors, API designers |
 | Include-Hierarchy.md | Organize header dependencies | All developers |
+| Global-Include-Hierarchy.md | Define global include directory | All developers |
 | Coding-Style.md | Enforce consistent formatting | All developers |
 | Hardware-Abstraction.md | Guide low-level hardware code | Kernel developers, driver authors |
 | Documentation-Style.md | Guide comment and documentation writing | All contributors |

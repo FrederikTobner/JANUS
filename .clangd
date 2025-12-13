@@ -1,0 +1,50 @@
+# clangd configuration for TinyOS kernel development
+# This file tells clangd (LSP) how to understand our freestanding kernel code
+
+CompileFlags:
+  Add:
+    # Force C language mode (not Objective-C)
+    - "-xc"
+    
+    # Kernel-specific compiler flags
+    - "--target=x86_64-elf"
+    - "-ffreestanding"
+    - "-nostdlib"
+    - "-fno-builtin"
+    - "-std=c17"
+    
+    # Include directories for all modules
+    - "-I/home/frederik/Projects/C/TinyOS/include"
+    - "-I/home/frederik/Projects/C/TinyOS/lib/types/include"
+    - "-I/home/frederik/Projects/C/TinyOS/lib/memory/include"
+    - "-I/home/frederik/Projects/C/TinyOS/lib/buffer/include"
+    - "-I/home/frederik/Projects/C/TinyOS/lib/fio/include"
+    - "-I/home/frederik/Projects/C/TinyOS/kernel/include"
+    - "-I/home/frederik/Projects/C/TinyOS/arch/include"
+    - "-I/home/frederik/Projects/C/TinyOS/boot/include"
+    - "-I/home/frederik/Projects/C/TinyOS/memman/include"
+    
+  Remove:
+    # Remove flags that confuse clangd analysis
+    - "-mno-red-zone"
+    - "-fno-stack-protector"
+    - "-march=*"
+    - "-mtune=*"
+
+Diagnostics:
+  # Don't complain about missing standard library
+  Suppress:
+    - "pp_file_not_found"
+  
+  UnusedIncludes: Strict
+  MissingIncludes: None
+
+Index:
+  Background: Build
+  StandardLibrary: No
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+  Designators: Yes
