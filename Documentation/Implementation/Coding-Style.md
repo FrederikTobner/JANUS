@@ -19,6 +19,9 @@ Run `clang-format -i <file>` and move on.
 
 ## Multi-Dimensional Memory Access
 
+> "The programmer has to be able to see what the machine is doing."
+> — *Ken Thompson*
+
 ### Pointer Arithmetic for Multi-Dimensional Data
 
 TinyOS prefers **explicit pointer arithmetic** over array indexing for multi-dimensional data structures to make memory layout and performance characteristics visible.
@@ -134,20 +137,62 @@ for (size_t i = 0; i < count; i++) {
 
 ### Don't Hide Your Damn Structures
 
-TinyOS follows the Linux kernel approach: **expose structure definitions**. No opaque handle bullshit.
+> "If you can't trust your kernel developers to not mess with internal fields, you have the wrong developers."
+> — *Linus Torvalds*
 
-**Why? Because Linus is right:**
+**All structure definitions are public. No opaque handles.**
 
-> "In kernel space, we don't hide data structures. If you can't trust your kernel developers to not mess with internal fields, you have the wrong developers." - Linus Torvalds
+Hiding structures behind opaque handles (`typedef struct foo * foo_handle_t`) is userspace OOP bullshit that has no place in kernel code. Here's why opaque handles are catastrophically bad for kernel development:
 
-Opaque handles are a disease imported from userspace OOP garbage. They:
-- **Kill performance** with pointless indirection
-- **Murder the cache** by forcing heap allocation and pointer chasing  
-- **Fuck debugging** - try inspecting `void *` in a debugger
-- **Waste memory** on unnecessary allocations
-- Are a **solution looking for a problem** in kernel code
+**Performance disaster:**
+- Every access requires pointer indirection
+- Forces heap allocation instead of stack allocation
+- Destroys cache locality by scattering data
+- Adds function call overhead for simple field access
 
-If you need to hide implementation details from your own kernel developers, you don't have a code problem - you have a people problem.
+**Debugging nightmare:**
+```bash
+# Public structure - see everything
+(lldb) print buffer
+(kbuffer_t) {
+  data = 0x7fff "Hello, World!"
+  length = 13
+  capacity = 256
+}
+
+# Opaque handle - see nothing
+(lldb) print handle
+(void *) 0x7fff8000  # Congratulations, you have an address
+```
+
+**Memory waste:**
+```c
+// Public structure - stack allocation, zero malloc overhead
+kbuffer_t buffer;
+kbuf_init(&buffer, 256);
+
+// Opaque handle - forces heap allocation you don't need
+handle_t * handle = handle_create(256);  // Pointless malloc
+```
+
+**Cache murder:**
+```c
+// Public structure - embedding means one allocation
+typedef struct parser {
+    kbuffer_t input;   // Embedded, contiguous memory
+    kbuffer_t output;  // Better cache locality
+    size_t pos;
+} parser_t;
+
+// Opaque handle - pointer chasing across memory
+typedef struct parser {
+    handle_t * input;   // Pointer to heap allocation
+    handle_t * output;  // Another pointer to different heap allocation
+    size_t pos;
+} parser_t;  // Cache misses everywhere
+```
+
+**It's a trust problem masquerading as an encapsulation problem.** If you don't trust your kernel developers to understand structure internals and not break invariants, fire them and hire competent developers. Don't make the code worse to protect against incompetence.
 
 ### Default: Public Structures
 

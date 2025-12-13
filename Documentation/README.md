@@ -102,6 +102,16 @@ Practical guides for writing code that adheres to project standards.
   - TODO/FIXME conventions
   - Technical writing style
 
+- **[BMUnit-Testing.md](Implementation/BMUnit-Testing.md)**
+  - BMUnit testing framework overview
+  - Test organization (embedded tests, not separate folder)
+  - Assertion macros (EXPECT vs ASSERT)
+  - Test suite structure and registration
+  - CMake test integration
+  - Running tests in QEMU
+  - Differences from KUnit
+  - Testing best practices
+
 ## Document Purpose Summary
 
 | Document | Purpose | Audience |
@@ -115,6 +125,7 @@ Practical guides for writing code that adheres to project standards.
 | Coding-Style.md | Enforce consistent formatting | All developers |
 | Hardware-Abstraction.md | Guide low-level hardware code | Kernel developers, driver authors |
 | Documentation-Style.md | Guide comment and documentation writing | All contributors |
+| BMUnit-Testing.md | Testing framework and practices | All developers |
 
 ## Contributing
 
@@ -151,6 +162,11 @@ When adding or modifying code:
 - Function headers → [Documentation-Style.md](Implementation/Documentation-Style.md)
 - Technical writing → [Documentation-Style.md](Implementation/Documentation-Style.md)
 
+**Testing:**
+- Test framework → [BMUnit-Testing.md](Implementation/BMUnit-Testing.md)
+- Test organization → [Module-Structure.md](Code-Organization/Module-Structure.md#module-testing)
+- Writing tests → [BMUnit-Testing.md](Implementation/BMUnit-Testing.md)
+
 ### Common Questions
 
 **Q: How should I name my functions?**
@@ -173,6 +189,12 @@ A: No. TinyOS is written in C17 only. See [Standards.md](Core-Principles/Standar
 
 **Q: What types should I use for integers?**
 A: Use fixed-width types from `stdint.h` (`uint8_t`, `uint32_t`, etc.). See [Standards.md](Core-Principles/Standards.md).
+
+**Q: How do I write tests?**
+A: Tests live with the code they test (e.g., `buffer_test.c` next to `buffer.c`). Use BMUnit framework. See [BMUnit-Testing.md](Implementation/BMUnit-Testing.md).
+
+**Q: Why isn't there a `tests/` folder?**
+A: Tests are embedded in modules, following Linux kernel convention. See [Module-Structure.md](Code-Organization/Module-Structure.md#module-testing).
 
 ## Document Maintenance
 

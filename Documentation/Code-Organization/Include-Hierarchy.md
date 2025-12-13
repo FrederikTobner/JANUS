@@ -2,6 +2,9 @@
 
 ## Include Philosophy
 
+> "Every program has at least one bug and can be shortened by at least one instruction—from which, by induction, it can be deduced that every program can be reduced to one instruction which doesn't work."
+> — *Unknown*
+
 **If your header doesn't compile on its own, it's broken. If it exposes internal details, it's wrong.**
 
 Headers must be:

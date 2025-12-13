@@ -2,6 +2,9 @@
 
 ## Module Organization Philosophy
 
+> "Controlling complexity is the essence of computer programming."
+> — *Brian Kernighan*
+
 **Flat hierarchy. Independent modules. No spaghetti.**
 
 TinyOS follows a modular structure inspired by Linux and LLVM: each major component is a first-class module with clear boundaries and **zero circular dependencies**. If you create a circular dependency, you've designed it wrong. Fix it.
@@ -14,19 +17,22 @@ TinyOS/
 ├── boot/             # Boot loader and initialization
 ├── arch/             # Architecture-specific code
 ├── lib/              # Utility libraries
-├── mm/               # Memory management (future)
+├── bmunit/           # BMUnit testing framework
+├── memoryman/        # Memory management
 ├── drivers/          # Device drivers (future)
 ├── fs/               # File systems (future)
 ├── net/              # Network stack (future)
 ├── include/          # Global headers
 ├── scripts/          # Build and utility scripts
 ├── cmake/            # CMake build modules
-├── tests/            # Testing framework
 ├── tools/            # Development tools
 └── Documentation/    # Technical documentation
 ```
 
 ## Module Design Principles
+
+> "The Linux philosophy is 'Laugh in the face of danger'. Oops. Wrong One. 'Do it yourself'. Yes, that's it."
+> — *Linus Torvalds*
 
 ### 1. Self-Contained Modules
 Each module is an independent unit that:
@@ -346,3 +352,82 @@ Each module must have:
 2. **API documentation** - In public headers
 3. **Implementation notes** - Complex algorithms explained
 4. **Dependency documentation** - What it needs and why
+
+## Module Testing
+
+### BMUnit: Embedded Testing
+
+**Tests live WITH the code they test, not in a separate directory.**
+
+TinyOS uses BMUnit (Bare Metal Unit), a KUnit-inspired testing framework designed for bare metal kernel development. Tests are embedded within modules and compiled conditionally.
+
+### Test File Organization
+
+```
+lib/libkbuffer/
+├── buffer.c              # Implementation
+├── buffer_test.c         # Tests (compiled only if BUILD_TESTS=ON)
+├── include/
+│   └── lib/
+│       └── buffer.h
+└── CMakeLists.txt
+
+arch/x86_64/
+├── io.c
+├── io_test.c             # I/O tests
+├── serial.c
+├── serial_test.c         # Serial port tests
+└── CMakeLists.txt
+
+kernel/
+├── main.c
+├── panic.c
+├── panic_test.c          # Panic handler tests
+└── CMakeLists.txt
+```
+
+### Why Embedded Tests?
+
+**Following Linux kernel convention:**
+- **Locality** - Tests right next to code being tested
+- **Module ownership** - Maintainer owns both code and tests
+- **No artificial separation** - Tests are part of the module
+- **Conditional compilation** - Enable/disable per module
+
+**No separate `tests/` folder.** That's a userspace pattern that doesn't fit kernel development.
+
+### CMake Test Integration
+
+```cmake
+# lib/libkbuffer/CMakeLists.txt
+
+# Always build the library
+add_library(kbuffer STATIC buffer.c)
+
+# Conditionally build tests
+if(BUILD_TESTS)
+    add_library(kbuffer_test STATIC
+        buffer_test.c
+    )
+    
+    target_link_libraries(kbuffer_test
+        kbuffer
+        bmunit
+    )
+    
+    set_property(GLOBAL APPEND PROPERTY BMUNIT_TEST_MODULES kbuffer_test)
+endif()
+```
+
+### Running Tests
+
+```bash
+# Build with tests enabled
+cmake -B build -DBUILD_TESTS=ON
+cmake --build build
+
+# Run test kernel in QEMU
+qemu-system-x86_64 -kernel build/tinyos_test.elf -serial stdio
+```
+
+**See [BMUnit-Testing.md](../Implementation/BMUnit-Testing.md) for complete testing documentation.**

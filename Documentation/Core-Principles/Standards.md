@@ -2,6 +2,9 @@
 
 ## Language Standard
 
+> "C is not a big language, and it is not well served by a big book."
+> — *Dennis Ritchie*
+
 ### C17 (ISO/IEC 9899:2018)
 
 **We use C17. Not C++. Not Rust. C17.**
@@ -38,6 +41,9 @@ If you're writing C++ features, you're doing it wrong. Go read Philosophy.md.
 
 ### Warning Policy
 
+> "If the code and the comments disagree, then both are probably wrong."
+> — *Norm Schryer*
+
 **Zero warnings. Period.**
 
 All code must compile cleanly with:
@@ -62,18 +68,35 @@ clang --analyze -Xanalyzer -analyzer-output=text ...
 
 ### Undefined Behavior
 
-**Undefined behavior is not a feature. It's a bug that will fuck you at 3AM on production hardware.**
+**In userspace, undefined behavior crashes your application. In kernel space, undefined behavior crashes the entire machine. Or worse - it bricks it.**
 
-These are bugs, not "implementation details":
+You're running in ring 0 with unrestricted hardware access. There are no safety rails. No process isolation. No memory protection. No "your application has stopped responding" dialog. When you fuck up with UB in kernel mode, you get:
+- Instant system crash (triple fault, page fault in interrupt handler)
+- Complete hardware lockup
+- Silent memory corruption across the entire system
+- Exploitable security vulnerabilities with full hardware access
+- **Permanent hardware damage**: Corrupt the boot sector, partition table, or UEFI firmware and your machine won't boot anymore
+- **Actual bricking**: With direct access to firmware flash memory, badly written kernel code can overwrite BIOS/UEFI, turning your motherboard into an expensive paperweight
+
+In a game or text editor, UB means the app crashes and users restart it. Annoying but tolerable. In an OS, a single undefined behavior is a **death sentence**. The entire machine goes down. All running applications die. Unsaved work is gone. (Though if you're a Windows user, you might think weekly BSODs are normal behavior.)
+
+**These are not "implementation details" - they are bugs that will take down the whole system:**
 - Uninitialized variables → Initialize your damn variables
-- Buffer overflows → Check your bounds
-- Null pointer dereferences → Check for NULL
+- Buffer overflows → Check your bounds (one byte over = kernel panic or worse)
+- Null pointer dereferences → Check for NULL (no segfault handler will save you)
 - Signed integer overflow → Use unsigned or check limits
 - Precision-losing conversions → Cast explicitly and know what you're doing
 
-Undefined behavior in kernel code means security vulnerabilities and crashes. Don't write it.
+**The difference between kernel and userspace UB:**
+- **Userspace**: Process terminates, OS cleans up, life goes on
+- **Kernel**: Triple fault, system reset, angry users, data loss
+
+You don't get exceptions. You don't get debugger popups. You get a frozen screen or instant reboot. Don't write undefined behavior.
 
 ## Type System
+
+> "C treats you like a consenting adult. Pascal treats you like a naughty child."
+> — *Dennis Ritchie (attributed)*
 
 ### Standard Integer Types
 Use exact-width types from `<stdint.h>`:
@@ -235,6 +258,9 @@ static inline uint8_t port_read_byte(uint16_t port) {
 ```
 
 ## Assembly Integration
+
+> "C is peculiar in a lot of ways, but it, like many other successful things, has a certain unity of approach that stems from development in a small group."
+> — *Dennis Ritchie*
 
 ### Inline Assembly
 Use for hardware-specific operations only:

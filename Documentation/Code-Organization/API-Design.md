@@ -2,6 +2,9 @@
 
 ## Function Design Principles
 
+> "Simplicity is prerequisite for reliability."
+> — *Edsger Dijkstra*
+
 ### 1. Clear Intent
 
 **If someone has to read the implementation to understand what your function does, you named it wrong.**
@@ -33,6 +36,9 @@ port_read_byte()      // read a byte from port
 ```
 
 ## Function Naming Patterns
+
+> "The only way to learn a new programming language is by writing programs in it."
+> — *Dennis Ritchie*
 
 ### Creation and Destruction
 ```c
@@ -215,6 +221,9 @@ if (mm_get_page_info(vaddr, &paddr, &flags) == 0) {
 ```
 
 ## Error Handling
+
+> "Talk is cheap. Show me the code."
+> — *Linus Torvalds*
 
 ### Explicit Error Codes
 Define module-specific error codes:

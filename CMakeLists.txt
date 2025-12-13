@@ -12,6 +12,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Include CMake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+# Testing support (BMUnit)
+option(BUILD_TESTS "Build BMUnit tests" OFF)
+
+if(BUILD_TESTS)
+    message(STATUS "BMUnit: Testing enabled")
+    add_subdirectory(bmunit)
+endif()
+
 # Build all library modules first
 add_subdirectory(lib/libkstd)
 add_subdirectory(lib/libkbuffer)
@@ -26,14 +34,11 @@ add_subdirectory(boot)
 # Core kernel modules
 add_subdirectory(kernel)
 
-# Memory management (future)
-# add_subdirectory(memoryman)
+# Memory management
+add_subdirectory(memoryman)
 
 # Device drivers (future)
 # add_subdirectory(drivers)
-
-# Testing framework
-add_subdirectory(tests)
 
 # Print build configuration
 message(STATUS "========================================")
