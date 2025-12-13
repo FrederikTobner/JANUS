@@ -4,14 +4,12 @@
 
 ### 1. Clear Intent
 
-**Function names that don't clearly state what they do are bad names.**
+**If someone has to read the implementation to understand what your function does, you named it wrong.**
 
 Your function must communicate:
 - What it does (the action)
 - What it modifies (side effects)
 - What it returns (return value meaning)
-
-If someone has to read the implementation to understand what your function does, you named it wrong.
 
 ### 2. Consistent Prefixing
 All functions use their module prefix:
@@ -103,7 +101,7 @@ void mmio_write_32(mmio_region_t* region, size_t offset, uint32_t value);
 
 ### Parameter Order
 
-**Consistent parameter ordering is not optional.**
+**Pick an order and stick to it. If your parameters are inconsistent across similar functions, you're making people memorize arbitrary bullshit.**
 
 1. **Input parameters** (const pointers, values to read)
 2. **Output parameters** (non-const pointers to write)

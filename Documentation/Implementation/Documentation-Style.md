@@ -26,7 +26,7 @@ counter++;
 counter++;
 ```
 
-**Delete comments that state the obvious. Keep comments that explain the non-obvious.**
+**Can a competent C programmer figure out what the code does by reading it? Then don't comment it. Comment why it exists, how it can be used, but not what it does.**
 
 ### Document Intent and Invariants
 

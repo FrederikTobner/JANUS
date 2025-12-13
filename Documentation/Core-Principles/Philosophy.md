@@ -19,7 +19,7 @@ Every design decision should be understandable and well-documented. Code serves 
 Following Linux kernel and LLVM design patterns, TinyOS is built as a collection of independent, well-defined modules. Each module has clear boundaries, explicit dependencies, and can be understood in isolation.
 
 ### 5. **Zero-Tolerance for Ambiguity**
-Function names, type names, and variable names should leave no doubt about their purpose, behavior, and side effects. If a name doesn't clearly communicate what it does, it's the wrong name.
+If a developer has to guess what your function does, what your type represents, or what your variable contains, you named it wrong.
 
 ## Design Principles
 

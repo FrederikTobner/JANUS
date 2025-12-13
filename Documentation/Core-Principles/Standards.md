@@ -45,7 +45,7 @@ All code must compile cleanly with:
 -Wall -Wextra -Wpedantic
 ```
 
-If it warns, fix it. Don't suppress it. Don't ignore it. **Fix it.**
+**Warnings are the compiler telling you that you fucked up.** Fix it. Don't suppress it. Don't ignore it.
 
 Common warnings that mean you fucked up:
 - Unused variables (delete them)
@@ -62,7 +62,7 @@ clang --analyze -Xanalyzer -analyzer-output=text ...
 
 ### Undefined Behavior
 
-**Zero tolerance. Undefined behavior is a bug, not a feature.**
+**Undefined behavior is not a feature. It's a bug that will fuck you at 3AM on production hardware.**
 
 These are bugs, not "implementation details":
 - Uninitialized variables → Initialize your damn variables

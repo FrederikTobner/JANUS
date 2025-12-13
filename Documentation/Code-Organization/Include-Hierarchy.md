@@ -2,7 +2,7 @@
 
 ## Include Philosophy
 
-**Headers define contracts. Make them clean.**
+**If your header doesn't compile on its own, it's broken. If it exposes internal details, it's wrong.**
 
 Headers must be:
 - **Self-contained** - Include all dependencies. Don't make users guess what to include.
