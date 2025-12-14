@@ -83,6 +83,7 @@ The type system prevents mistakes. You can't accidentally pass a physical addres
 ### Module Patterns
 
 Each module is self-contained with:
+
 - Its own `CMakeLists.txt`
 - An `include/` directory for public headers
 - Implementation files
@@ -114,6 +115,7 @@ Boot Sequence:
 ### The Multiboot2 Contract
 
 Multiboot2 defines:
+
 1. **Header format**: Magic number, architecture, checksum
 2. **Boot state**: CPU mode, registers, memory state when we're loaded
 3. **Information tags**: What data the bootloader provides (memory map, etc.)
@@ -159,6 +161,7 @@ multiboot_end:
 ```
 
 **What this does:**
+
 - Magic `0xe85250d6` identifies us as Multiboot2
 - Checksum validates the header structure
 - Information request asks GRUB for memory details
@@ -175,6 +178,7 @@ Without this header, GRUB won't recognize our kernel. The header is a contract: 
 GRUB has loaded our kernel and jumped to our entry point. We're running! Sort of.
 
 Here's our situation:
+
 - `EAX` = Multiboot2 magic (`0x36d76289`) — proof GRUB loaded us
 - `EBX` = Physical address of Multiboot info — memory map, bootloader name, etc.
 - Interrupts disabled — no timer ticks interrupting us
@@ -182,6 +186,7 @@ Here's our situation:
 - **No stack configured** — uh oh
 
 That last one is a problem. Without a stack, we can't:
+
 - Call C functions (they need stack frames)
 - Use local variables (stored on the stack)
 - Handle interrupts (CPU pushes state to stack)
@@ -265,48 +270,179 @@ Later, when we implement proper process management, each process gets its own mu
 
 <!-- TODO: Add handdrawn illustration of stack frame layout showing function calls and local variables -->
 
+## The Linker Script
+
+We have assembly files. We'll have C files. But how do we tell the linker how to combine them into a bootable kernel? That's where the linker script comes in.
+
+Linker scripts are weird. They're not C. They're not assembly. They're their own strange declarative language that tells `ld` (the linker): "put this section here, that section there, and make sure everything lines up."
+
+> **The Crux: Why Can't the Linker Just Figure It Out?**
+>
+> For normal programs, it can! The default linker script works fine because the OS loader handles the details. But we *are* the OS. We need exact control over:
+>
+> - Where in memory our code lives
+> - The order of sections (Multiboot header must be first!)
+> - Alignment (page boundaries matter for memory management)
+> - Section permissions (read-only vs. read-write)
+
+### Memory Layout Strategy
+
+Our kernel loads at **1MB** (physical address `0x100000`). Why?
+
+```
+Physical Memory Map:
+┌─────────────────────────────────────┐
+│ 0x00000000 - 0x000003FF │ Real Mode IVT         │ BIOS territory
+│ 0x00000400 - 0x000004FF │ BIOS Data Area        │ Don't touch!
+│ 0x00000500 - 0x00007BFF │ Usable                │ Too small for kernel
+│ 0x00007C00 - 0x00007DFF │ Bootloader            │ GRUB lives here
+│ 0x00007E00 - 0x0009FFFF │ Usable                │ Fragmented, messy
+│ 0x000A0000 - 0x000FFFFF │ Video/BIOS            │ Hardware mapped
+├─────────────────────────────────────┤
+│ 0x00100000 - ...        │ KERNEL LOADS HERE     │ ← Clean, contiguous
+└─────────────────────────────────────┘
+```
+
+The first 1MB is a minefield of BIOS tables, video memory, and historical baggage. Loading at 1MB gives us a clean slate.
+
+### Section Organization
+
+Our kernel has several sections, and their order matters:
+
+1. **`.multiboot`** — GRUB scans the first 32KB for this. Must be first!
+2. **`.text`** — Executable code (read-only, executable)
+3. **`.rodata`** — Read-only data (string literals, const variables)
+4. **`.data`** — Initialized global/static variables
+5. **`.bss`** — Uninitialized data (zeroed at boot, saves space in binary)
+
+Create `kernel/linker.ld`:
+
+```ld
+/* Entry point symbol defined in boot/boot.asm */
+ENTRY(_start)
+
+SECTIONS {
+    /* Kernel loads at 1MB - above BIOS reserved area */
+    . = 0x100000;
+    
+    /* Multiboot header must be at the very start */
+    .multiboot ALIGN(8) : {
+        *(.multiboot)
+    }
+    
+    /* Code section - executable instructions */
+    .text ALIGN(4K) : {
+        *(.text)
+        *(.text.*)
+    }
+    
+    /* Read-only data - string literals, const variables */
+    .rodata ALIGN(4K) : {
+        *(.rodata)
+        *(.rodata.*)
+    }
+    
+    /* Initialized data - global/static variables with initial values */
+    .data ALIGN(4K) : {
+        *(.data)
+        *(.data.*)
+    }
+    
+    /* Uninitialized data - global/static variables zeroed at boot */
+    .bss ALIGN(4K) : {
+        *(COMMON)
+        *(.bss)
+        *(.bss.*)
+    }
+    
+    /* Symbols for kernel bounds - useful for memory management */
+    kernel_start = 0x100000;
+    kernel_end = .;
+    kernel_size = kernel_end - kernel_start;
+}
+```
+
+### Linker Script Explained
+
+**Location counter (`.`)**: The magic `.` variable tracks our current position in memory. `. = 0x100000` says "start placing things at 1MB."
+
+**Section syntax**: `.text ALIGN(4K) : { *(.text) }` means:
+
+- Create a section named `.text`
+- Align it to a 4KB boundary (page size)
+- Include all `.text` sections from all input files (`*(.text)`)
+
+**Why `ALIGN(4K)`?** Pages are 4KB on x86-64. Aligning sections to page boundaries lets us set different permissions later (code is executable, data is not).
+
+**Wildcard patterns**: `*(.text.*)` catches compiler-generated sections like `.text.startup` or `.text.hot` (optimization artifacts).
+
+**COMMON**: Old C quirk. Multiple files can define the same uninitialized global, and the linker merges them. We put these in `.bss`.
+
+**Symbols**: `kernel_end = .;` creates a symbol we can reference in C:
+
+```c
+extern char kernel_end;  // Address of kernel's end
+void *end_addr = &kernel_end;
+```
+
+### What Happens During Linking
+
+When you run the linker:
+
+```bash
+ld -T kernel/linker.ld -o kernel.elf boot.o main.o
+```
+
+The linker:
+
+1. Reads all `.o` files (object files from assembler/compiler)
+2. Follows the linker script to arrange sections
+3. Resolves symbols (makes sure `call kernel_main` points to the right address)
+4. Outputs a single `kernel.elf` binary
+
+**Verify the layout:**
+
+```bash
+readelf -l kernel.elf
+```
+
+You should see sections starting at `0x100000` with proper alignment.
+
 ## What We've Built
 
 Let's take stock. We now have:
+
 - **Project structure** — directories organized, modules separated
 - **Multiboot2 header** — the secret handshake GRUB needs
 - **Boot assembly** — stack setup, register preservation, C function call
+- **Linker script** — memory layout and section organization
 
-Not bad for a few hundred bytes of assembly! Of course, we can't actually *boot* yet. For that, we need:
+Not bad! We can now assemble and link our boot code. Of course, we can't actually *boot* yet. For that, we still need:
 
-- A linker script (tells the linker where to put our code in memory)
 - A build system (CMake + Ninja to orchestrate compilation)
-- A kernel entry point (a C function, which we will be calling `kernel_main()`)
+- A kernel entry point (the C function `kernel_main()` we're calling)
+- Serial output (so we can see that it works!)
 
 **Current capabilities:**
 
 - GRUB can recognize our kernel (if we could link it)
 - We have a stack ready for C code
 - We preserve Multiboot information for later use
+- We know exactly where in memory everything lives
 - We gracefully halt if the kernel returns
 
 **Still missing:**
 
-- Linking everything together
+- Build automation
 - Any visible output
 - Memory management
 - Interrupt handling
 
-But we're standing on the foundation. Everything else builds from here.
-
-Those are coming in the next sections. For now, you can assemble these files manually if you're impatient:
+But we're standing on a solid foundation. Everything else builds from here.
 
 ## What's Next
 
 To complete the boot process, we still need:
-
-### Linker Script (TODO)
-
-Create `kernel/linker.ld` to define memory layout:
-
-- Where the kernel loads (1MB physical address)
-- Section order (.multiboot, .text, .rodata, .data, .bss)
-- Alignment requirements
 
 ### CMake Build System (TODO)
 
