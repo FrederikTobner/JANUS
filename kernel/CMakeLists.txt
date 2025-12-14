@@ -12,4 +12,5 @@ tinyos_add_module(kernel
         memory
         buffer
         fio
+        boot
 )
