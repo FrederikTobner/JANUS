@@ -2,9 +2,6 @@
 
 ## Module Organization Philosophy
 
-> "Controlling complexity is the essence of computer programming."
-> — *Brian Kernighan*
-
 **Flat hierarchy. Independent modules. No spaghetti.**
 
 TinyOS follows a modular structure inspired by Linux and LLVM: each major component is a first-class module with clear boundaries and **zero circular dependencies**. If you create a circular dependency, you've designed it wrong. Fix it.
@@ -30,9 +27,6 @@ TinyOS/
 ```
 
 ## Module Design Principles
-
-> "The Linux philosophy is 'Laugh in the face of danger'. Oops. Wrong One. 'Do it yourself'. Yes, that's it."
-> — *Linus Torvalds*
 
 ### 1. Self-Contained Modules
 Each module is an independent unit that:

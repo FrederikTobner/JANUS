@@ -1,8 +1,5 @@
 # TinyOS API Design Guidelines
 
-> "Simplicity is prerequisite for reliability."
-> — *Edsger Dijkstra*
-
 ## Function Design Principles
 
 ### 1. Clear Intent
@@ -10,11 +7,13 @@
 **If someone has to read the implementation to understand what your function does, you named it wrong.**
 
 Your function must communicate:
+
 - What it does (the action)
 - What it modifies (side effects)
 - What it returns (return value meaning)
 
 ### 2. Consistent Prefixing
+
 All functions use their module prefix:
 
 | Module | Prefix | Example |
@@ -26,6 +25,7 @@ All functions use their module prefix:
 | kernel | `kernel_` | `kernel_panic()` |
 
 ### 3. Verb-Noun Pattern
+
 Functions follow verb-noun or verb-object pattern:
 ```c
 buf_create()         // create a buffer
@@ -38,6 +38,7 @@ port_read_byte()      // read a byte from port
 ## Function Naming Patterns
 
 ### Creation and Destruction
+
 ```c
 // Allocation/creation functions return pointer
 char_buffer_t* buf_create(size_t capacity);
@@ -52,18 +53,8 @@ void buf_init(char_buffer_t* buffer, char* data, size_t size);
 void buf_cleanup(char_buffer_t* buffer);
 ```
 
-### Getters and Setters
-```c
-// Get operations - no side effects
-size_t buf_get_length(char_buffer_t const * buffer);
-uint64_t arch_get_cr3(void);
-
-// Set operations - explicit modification
-void buf_set_length(char_buffer_t* buffer, size_t new_length);
-void arch_set_cr3(uint64_t value);
-```
-
 ### Boolean Queries
+
 Use `is_`, `has_`, `can_` prefixes:
 ```c
 bool mm_is_page_present(virt_addr_t vaddr);
@@ -73,6 +64,7 @@ bool arch_can_enable_feature(uint32_t feature);
 
 ### Data Modification
 Make side effects explicit:
+
 ```c
 // Clearly modifies buffer
 void buf_append(char_buffer_t* buffer, char const * data);
@@ -85,7 +77,9 @@ char_buffer_view_t buf_readonly_view(char_buffer_t const * buf);
 ```
 
 ### Hardware Interaction
+
 Be explicit about I/O operations:
+
 ```c
 uint8_t port_read_byte(uint16_t port);
 uint16_t port_read_word(uint16_t port);
@@ -130,7 +124,9 @@ void mm_map_range(
 ```
 
 ### Const Correctness
+
 Always use const for read-only parameters:
+
 ```c
 // Good
 size_t buf_length(char_buffer_t const * buffer);
@@ -141,6 +137,7 @@ size_t buf_length(char_buffer_t* buffer);
 ```
 
 ### Pointer vs Value
+
 - **Structures**: Pass by pointer (const for read-only)
 - **Small types** (int, size_t, pointers): Pass by value
 - **Output parameters**: Always pass by pointer
@@ -160,6 +157,7 @@ int mm_get_page_flags(virt_addr_t vaddr, uint32_t* flags_out);
 ## Return Value Conventions
 
 ### Success/Failure Indication
+
 ```c
 // Option 1: Integer return codes
 int mm_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags);
@@ -175,7 +173,9 @@ page_frame_t* mm_alloc_page_frame(void);
 ```
 
 ### Error Code Convention
+
 Use negative values for errors:
+
 ```c
 #define KERNEL_SUCCESS                    0
 #define KERNEL_ERROR_INVALID_ADDRESS     -1
@@ -193,7 +193,9 @@ int mm_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags) {
 ```
 
 ### Multiple Return Values
+
 Use output parameters for additional return values:
+
 ```c
 /**
  * Get page flags and physical address
@@ -219,11 +221,10 @@ if (mm_get_page_info(vaddr, &paddr, &flags) == 0) {
 
 ## Error Handling
 
-> "Talk is cheap. Show me the code."
-> — *Linus Torvalds*
-
 ### Explicit Error Codes
+
 Define module-specific error codes:
+
 ```c
 // mm/include/mm/errors.h
 typedef enum {
@@ -237,6 +238,7 @@ typedef enum {
 ```
 
 ### Error Propagation
+
 ```c
 int mm_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags) {
     // Validate parameters
@@ -255,6 +257,7 @@ int mm_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags) {
 ```
 
 ### Panic vs Error Return
+
 ```c
 // Use panic for unrecoverable errors
 void kernel_panic(char const * message) __attribute__((noreturn));
@@ -274,10 +277,12 @@ int mm_map_page(...) {
 ## API Stability and Versioning
 
 ### Internal vs External APIs
+
 - **Internal APIs**: Can change freely within a module
 - **External APIs**: Require careful consideration of compatibility
 
 ### API Evolution
+
 When changing public APIs:
 1. Deprecate old function (keep it working)
 2. Add new function with `_v2` suffix
@@ -297,6 +302,7 @@ bool kbuf_append_safe(char_buffer_t* buf, char const * data, size_t len);
 ## Documentation Requirements
 
 ### Function Documentation Template
+
 ```c
 /**
  * [Brief one-line description]
@@ -325,6 +331,7 @@ char_buffer_t* buf_create(size_t capacity);
 ```
 
 ### Hardware-Specific Functions
+
 ```c
 /**
  * Write to Control Register 3 (CR3) - Page Table Base Address
@@ -345,6 +352,7 @@ void arch_write_cr3(phys_addr_t pml4_phys);
 ## Testing Considerations
 
 ### Testable API Design
+
 ```c
 // Good: Easy to test with different inputs
 int mm_map_page(virt_addr_t vaddr, phys_addr_t paddr, uint32_t flags);
@@ -354,7 +362,9 @@ void setup_everything_for_kernel(void);
 ```
 
 ### Interface Segregation
+
 Split large interfaces into focused ones:
+
 ```c
 // Instead of one monolithic interface
 typedef struct memory_manager {

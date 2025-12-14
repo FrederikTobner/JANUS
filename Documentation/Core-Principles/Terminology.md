@@ -2,9 +2,6 @@
 
 ## Core Terminology Philosophy
 
-> "The cheapest, fastest, and most reliable components are those that aren't there."
-> — *Gordon Bell*
-
 **Use precise terminology.** TinyOS uses explicit, hardware-aware terminology that reflects actual implementation rather than abstract concepts.
 
 If you call a hashtable a "map," you're hiding the implementation. If you call a character buffer a "string," you're importing assumptions from high-level languages. **Words matter. Use precise ones.**
@@ -38,6 +35,7 @@ typedef uint64_t phys_addr_t;
 ```
 
 #### Structure Names
+
 Use descriptive, implementation-specific names:
 ```c
 // Good: Implementation-based naming
@@ -53,6 +51,7 @@ typedef struct map map_t;
 ```
 
 #### Memory Management Types
+
 Be explicit about physical vs virtual, kernel vs user:
 ```c
 typedef struct page_frame page_frame_t;           // Physical memory frame
@@ -63,7 +62,9 @@ typedef struct kmalloc_block kmalloc_block_t;     // Kernel heap allocation
 ```
 
 #### Hardware Interface Types
+
 Use exact terminology from processor manuals:
+
 ```c
 // x86-64 specific (Intel/AMD manual terminology)
 typedef struct page_table_entry pte_t;
@@ -82,9 +83,10 @@ typedef struct cpu_regs cpu_regs_t;
 ### Module and Library Naming
 
 #### Kernel Library Structure
-Kernel libraries are organized under `lib/` without a common prefix:
+
+Kernel libraries are organized under `lib/`:
+
 - Simple, focused names that describe their purpose
-- No `libk` prefix (the `lib/` directory already indicates library code)
 - Each library is self-contained and focused
 
 ```
@@ -98,6 +100,7 @@ lib/
 #### Core Library Descriptions
 
 **`types`** - Basic Types and Compiler Attributes (Header-Only)
+
 - Fixed-width integer types (uint8_t, int32_t, etc.)
 - Boolean type and macros
 - Compiler attributes (__packed, __noreturn, likely/unlikely)
@@ -105,12 +108,14 @@ lib/
 - Platform-independent type definitions
 
 **`memory`** - Memory Operations
+
 - Low-level memory manipulation (memcpy, memmove, memset)
 - Memory comparison (memcmp)
 - Memory zeroing (memzero)
 - No libc dependency
 
 **`buffer`** - Character Buffer Operations
+
 - Character buffer manipulation and views
 - Buffer slicing and substring operations
 - Memory-safe buffer operations
@@ -118,6 +123,7 @@ lib/
 - Buffer comparison and searching
 
 **`fio`** - Formatted I/O Operations
+
 - Formatted output (printf family)
 - Character and buffer I/O
 - Debug output and logging
@@ -127,6 +133,7 @@ lib/
 ### Function Naming
 
 #### Module Prefixes
+
 Functions are prefixed with their module abbreviation:
 
 ```c
@@ -159,6 +166,7 @@ page_frame_t* mm_alloc_page_frame(void);
 ```
 
 #### Operation Clarity
+
 Function names must clearly indicate:
 1. **What they do** - The operation performed
 2. **What they modify** - Any side effects
@@ -182,6 +190,7 @@ char_buffer_view_t buf_readonly_view(const char_buffer_t* buf); // Read-only vie
 ### Variable Naming
 
 #### Local Variables
+
 Use descriptive names, avoid abbreviations unless common:
 ```c
 // Good
@@ -197,7 +206,9 @@ uint64_t addr;         // Address
 ```
 
 #### Global Variables
+
 Prefix with module name or `g_`:
+
 ```c
 // Module-prefixed
 static hashtable_t* kmalloc_cache_table;
@@ -208,7 +219,9 @@ volatile uint64_t g_system_tick_count;
 ```
 
 #### Constants and Macros
+
 Use UPPER_CASE with underscores:
+
 ```c
 #define KERNEL_VIRTUAL_BASE    0xFFFFFFFF80000000
 #define PAGE_SIZE              4096
@@ -222,7 +235,9 @@ Use UPPER_CASE with underscores:
 ### File Naming
 
 #### Source Files
+
 Use lowercase with underscores:
+
 ```
 buffer.c
 hashtable.c
@@ -231,6 +246,7 @@ interrupt_vector.c
 ```
 
 #### Header Files
+
 Match corresponding source file:
 ```
 buffer.h
@@ -240,7 +256,9 @@ interrupt_vector.h
 ```
 
 #### Architecture-Specific Files
+
 Include architecture in name:
+
 ```
 arch/x86_64/cpu.c
 arch/x86_64/io.c
@@ -253,13 +271,15 @@ arch/x86_64/interrupt.c
 
 When referring to hardware features, use the **exact** terminology from processor manuals:
 
-**x86-64 (Intel/AMD)**
+#### x86-64 (Intel/AMD)
+
 - Page Table Entry (PTE), not "page descriptor"
 - Control Register (CR0, CR3), not "control variable"
 - Model-Specific Register (MSR), not "CPU register"
 - Interrupt Descriptor Table (IDT), not "interrupt table"
 
-**Future ARM**
+#### Future ARM
+
 - Translation Table Entry (TTE)
 - Exception Vector Table (EVT)
 - System Control Register (SCTLR)
@@ -267,6 +287,7 @@ When referring to hardware features, use the **exact** terminology from processo
 ### Avoid High-Level Abstractions
 
 Prefer technical terms that expose implementation:
+
 - **Hashtable** over "Map" or "Dictionary"
 - **Character Buffer** over "String"
 - **Ring Buffer** over "Queue" (when circular)

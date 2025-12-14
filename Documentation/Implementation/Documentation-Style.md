@@ -5,15 +5,13 @@
 **Document why, not what. If your comment just repeats what the code says, delete it.**
 
 Documentation in TinyOS has a purpose:
+
 - **Explain complex logic** - Algorithms and design decisions that aren't obvious
 - **Define APIs** - Interfaces and contracts
 - **Educational value** - Help people learn, not just copy-paste
 - **Enable debugging** - Future you needs to understand this code at 3AM
 
 ## Comment Principles
-
-> "Don't comment bad code—rewrite it."
-> — *Brian Kernighan & P.J. Plauger*
 
 ### Write Comments That Explain "Why", Not "What"
 

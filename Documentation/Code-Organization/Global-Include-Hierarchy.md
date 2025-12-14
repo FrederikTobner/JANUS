@@ -4,11 +4,12 @@
 
 The [`include/tinyos/`](../../include/tinyos/) directory contains **truly global** headers that are used across many modules and don't belong to any single module.
 
-> **Rule**: If a header is only used by one or two modules, keep it in the module. Only promote to global if it's genuinely cross-cutting.
+> **Rule**: If a header is only used by a couple of modules, keep it in the module. Only promote to global if it's genuinely cross-cutting.
 
 ## What Goes in `include/tinyos/`
 
 ### Core Kernel Definitions
+
 Headers that define fundamental kernel-wide concepts:
 
 - **`types.h`** - Global type aliases and kernel-specific types
@@ -33,6 +34,7 @@ Headers that define fundamental kernel-wide concepts:
   - Error translation functions
 
 ### System-Wide Interfaces
+
 Headers that many subsystems need:
 
 - **`printk.h`** - Kernel logging
@@ -46,6 +48,7 @@ Headers that many subsystems need:
   - BUG() and BUG_ON() macros
 
 ### Hardware Abstractions (Global)
+
 Only truly platform-independent hardware abstractions:
 
 - **`atomic.h`** - Atomic operations
@@ -59,6 +62,7 @@ Only truly platform-independent hardware abstractions:
 ## What Does NOT Go in `include/tinyos/`
 
 ### Module-Specific Headers
+
 These stay in their modules:
 
 ```
@@ -73,6 +77,7 @@ mm/include/mm/page.h                # Page management
 **Reasoning:** These are specific to one subsystem. Modules can include each other's headers when needed.
 
 ### Implementation Details
+
 Internal headers never go in global include:
 
 ```

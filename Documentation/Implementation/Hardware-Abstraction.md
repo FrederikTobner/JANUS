@@ -2,9 +2,6 @@
 
 ## Philosophy
 
-> "UNIX is basically a simple operating system, but you have to be a genius to understand the simplicity."
-> — *Dennis Ritchie*
-
 **TinyOS provides direct hardware access with minimal abstraction.**
 
 TinyOS embraces low-level hardware programming:
@@ -18,12 +15,10 @@ Kernel code should directly express hardware operations rather than hiding them 
 
 ## Hardware Access Patterns
 
-> "Theory and practice sometimes clash. And when that happens, theory loses. Every single time."
-> — *Linus Torvalds*
-
 ### Memory-Mapped I/O (MMIO)
 
 #### Direct Register Access
+
 Use inline functions with volatile pointers for MMIO:
 
 ```c
@@ -67,6 +62,7 @@ static inline void mmio_write64(uint64_t addr, uint64_t value) {
 ```
 
 #### Register Structure Definitions
+
 Group related registers in structures:
 
 ```c
@@ -100,6 +96,7 @@ void uart_write_byte(uint8_t byte) {
 ### Port I/O (x86-specific)
 
 #### I/O Port Operations
+
 ```c
 /**
  * Read byte from I/O port
@@ -157,6 +154,7 @@ static inline void outl(uint16_t port, uint32_t value) {
 ```
 
 #### I/O Delay
+
 For hardware that requires timing delays:
 
 ```c
@@ -179,6 +177,7 @@ void slow_hardware_access(void) {
 ### Bit Manipulation
 
 #### Bit Operations Macros
+
 ```c
 // Set specific bit
 #define BIT_SET(value, bit)    ((value) |= (1U << (bit)))
@@ -204,6 +203,7 @@ void slow_hardware_access(void) {
 ```
 
 #### Usage Examples
+
 ```c
 // Register bit definitions
 #define UART_IER_RDA  0  // Received Data Available
@@ -241,6 +241,7 @@ void irq_enable(uint8_t irq_num) {
 ## Architecture-Specific Code Organization
 
 ### Directory Structure
+
 ```
 arch/
 ├── x86_64/
@@ -259,6 +260,7 @@ arch/
 ```
 
 ### Conditional Compilation
+
 ```c
 // arch/common/include/arch.h
 #ifndef TINYOS_ARCH_H
@@ -282,6 +284,7 @@ arch/
 ### x86-64 Specific
 
 #### Control Register Access
+
 ```c
 /**
  * Read CR0 control register
@@ -333,6 +336,7 @@ static inline void write_cr4(uint64_t value) {
 ```
 
 #### MSR (Model-Specific Register) Access
+
 ```c
 /**
  * Read Model-Specific Register
@@ -373,6 +377,7 @@ void enable_syscall(void) {
 ```
 
 #### CPUID Instruction
+
 ```c
 /**
  * Execute CPUID instruction
@@ -408,6 +413,7 @@ int cpu_has_feature_sse2(void) {
 ### Interrupt Control
 
 #### Interrupt Enable/Disable
+
 ```c
 /**
  * Disable interrupts
@@ -443,6 +449,7 @@ static inline int interrupts_enabled(void) {
 ```
 
 #### Critical Sections
+
 ```c
 /**
  * Save interrupt state and disable interrupts
@@ -478,6 +485,7 @@ void critical_operation(void) {
 ## Memory Barriers
 
 ### Compiler and Hardware Barriers
+
 ```c
 /**
  * Compiler barrier
@@ -520,6 +528,7 @@ void mmio_write_ordered(uint64_t addr1, uint32_t val1, uint64_t addr2, uint32_t 
 ## Cache Control
 
 ### Cache Line Management
+
 ```c
 /**
  * Flush cache line containing address
@@ -546,6 +555,7 @@ static inline void flush_tlb(void) {
 ## Atomic Operations
 
 ### Lock Prefix Instructions
+
 ```c
 /**
  * Atomic compare-and-swap
@@ -591,6 +601,7 @@ static inline void atomic_inc(uint64_t volatile * ptr) {
 ## Spinlocks
 
 ### Basic Spinlock Implementation
+
 ```c
 typedef struct {
     uint32_t volatile locked;
@@ -635,6 +646,7 @@ static inline int spinlock_tryacquire(spinlock_t * lock) {
 ## Hardware Abstraction Layer Organization
 
 ### Module Structure
+
 ```c
 // arch/x86_64/include/io.h - Architecture-specific interface
 #ifndef TINYOS_ARCH_X86_64_IO_H
@@ -666,6 +678,7 @@ void outb(uint16_t port, uint8_t value);
 ```
 
 ### Device Driver Pattern
+
 ```c
 // drivers/uart/uart.h - Generic UART interface
 typedef struct uart_device uart_device_t;

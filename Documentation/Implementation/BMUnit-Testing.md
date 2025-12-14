@@ -5,6 +5,7 @@
 **BMUnit** (Bare Metal Unit) is TinyOS's in-kernel testing framework, inspired by Linux kernel's KUnit but adapted for bare metal x86-64 development.
 
 **Design Philosophy:**
+
 - **Pure C17** - No C++ dependencies
 - **Freestanding** - Runs in kernel context, no libc
 - **Embedded tests** - Tests live with the code they verify
@@ -13,12 +14,10 @@
 
 ## Why BMUnit, Not GoogleTest?
 
-> "Simple things should be simple, complex things should be possible."
-> — *Alan Kay*
-
-GoogleTest is C++. We use C. End of discussion.
+GoogleTest is C++. We use C.
 
 Beyond the language issue:
+
 - GoogleTest requires exceptions, RTTI, and STL
 - Needs full userspace environment with heap allocation
 - Assumes threading primitives (pthreads)
@@ -31,11 +30,13 @@ Beyond the language issue:
 BMUnit is **based on KUnit** but adapted for TinyOS's specific needs:
 
 **Similarities to KUnit:**
+
 - Same basic assertion macros (`BMUNIT_EXPECT_EQ`, `BMUNIT_ASSERT_TRUE`, etc.)
 - Test case and test suite structure
 - Embedded in modules with conditional compilation
 
 **Differences from KUnit:**
+
 - **Simpler initialization** - KUnit assumes full Linux kernel environment
 - **Custom output** - KUnit uses `printk`, we use our serial/VGA output
 - **Bare metal focus** - No assumptions about kernel subsystems being available
@@ -44,9 +45,6 @@ BMUnit is **based on KUnit** but adapted for TinyOS's specific needs:
 **BMUnit may add features KUnit doesn't have or omit features we don't need.** It's our framework, designed for our kernel.
 
 ## Testing Approach: Embedded Tests
-
-> "Testing shows the presence, not the absence of bugs."
-> — *Edsger Dijkstra*
 
 ### Tests Live WITH Code, Not Separately
 
@@ -76,6 +74,7 @@ kernel/
 ```
 
 **Why?**
+
 - **Locality** - Tests right next to the code they test
 - **Ownership** - Module maintainer owns both code and tests
 - **No artificial separation** - Tests are part of the module
@@ -86,9 +85,6 @@ kernel/
 We don't use a separate top-level `tests/` directory. That's a userspace convention that doesn't fit kernel development.
 
 ## BMUnit API
-
-> "If you need more than 3 levels of indentation, you're screwed anyway, and should fix your program."
-> — *Linus Torvalds*
 
 ### Basic Test Structure
 
@@ -136,6 +132,7 @@ bmunit_test_suite(buffer_test_suite);
 ### Assertion Macros
 
 #### Equality Assertions
+
 ```c
 BMUNIT_EXPECT_EQ(test, actual, expected)      // Continue on failure
 BMUNIT_EXPECT_NE(test, actual, expected)      // Not equal
@@ -144,6 +141,7 @@ BMUNIT_ASSERT_NE(test, actual, expected)
 ```
 
 #### Boolean Assertions
+
 ```c
 BMUNIT_EXPECT_TRUE(test, condition)
 BMUNIT_EXPECT_FALSE(test, condition)
@@ -152,6 +150,7 @@ BMUNIT_ASSERT_FALSE(test, condition)
 ```
 
 #### Pointer Assertions
+
 ```c
 BMUNIT_EXPECT_NULL(test, ptr)
 BMUNIT_EXPECT_NOT_NULL(test, ptr)
@@ -160,12 +159,14 @@ BMUNIT_ASSERT_NOT_NULL(test, ptr)
 ```
 
 #### Pointer Equality
+
 ```c
 BMUNIT_EXPECT_PTR_EQ(test, ptr1, ptr2)        // Same address
 BMUNIT_EXPECT_PTR_NE(test, ptr1, ptr2)        // Different address
 ```
 
 #### String Assertions (when string functions available)
+
 ```c
 BMUNIT_EXPECT_STREQ(test, str1, str2)         // Strings equal
 BMUNIT_EXPECT_STRNE(test, str1, str2)         // Strings not equal
@@ -398,9 +399,6 @@ BMUnit Summary: 5 tests, 4 passed, 1 failed
 
 ## Testing Best Practices
 
-> "Regression testing? What's that? If it compiles, it is good; if it boots up, it is perfect."
-> — *Linus Torvalds (sarcastically)*
-
 ### Test Organization
 
 ```c
@@ -421,12 +419,14 @@ static void test_serial_init_default_config(struct bmunit *test) { }
 ### What to Test
 
 **Test public APIs:**
+
 - Input validation (null pointers, invalid values)
 - Expected behavior with valid inputs
 - Boundary conditions (empty, full, maximum size)
 - Error handling (return codes, error states)
 
 **Don't test:**
+
 - Internal helper functions (test through public API)
 - Trivial getters/setters unless they have logic
 - Code that just wraps hardware (test integration instead)
