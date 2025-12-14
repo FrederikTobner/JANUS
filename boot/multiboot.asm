@@ -7,7 +7,7 @@ align 8
 
 multiboot_start:
     ; Multiboot2 magic number
-    dd 0x36d76289
+    dd 0xe85250d6
     
     ; Architecture: 0 = i386/x86_64 protected mode
     dd 0
@@ -16,7 +16,7 @@ multiboot_start:
     dd multiboot_end - multiboot_start
     
     ; Checksum: -(magic + architecture + header_length)
-    dd -(0x36d76289 + 0 + (multiboot_end - multiboot_start))
+    dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
 
 ; Information request tag
 ; Requests specific information from the bootloader
