@@ -114,7 +114,7 @@ qemu-system-x86_64 --version
 
 **BMUnit** (included in repository)
 
-BMUnit is our bare-metal unit testing framework. It's included as a submodule/subdirectory in the project, so no external installation is needed.
+BMUnit is our bare-metal unit testing framework. It's included in `tools/bmunit/` as part of the project, so no external installation is needed.
 
 To build with tests enabled:
 ```bash

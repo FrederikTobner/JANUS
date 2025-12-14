@@ -17,7 +17,6 @@ TinyOS/
 ├── boot/             # Boot loader and initialization
 ├── arch/             # Architecture-specific code
 ├── lib/              # Utility libraries
-├── bmunit/           # BMUnit testing framework
 ├── mm/               # Memory management
 ├── drivers/          # Device drivers (future)
 ├── fs/               # File systems (future)
@@ -26,6 +25,7 @@ TinyOS/
 ├── scripts/          # Build and utility scripts
 ├── cmake/            # CMake build modules
 ├── tools/            # Development tools
+│   └── bmunit/       # BMUnit testing framework
 └── Documentation/    # Technical documentation
 ```
 
@@ -383,44 +383,57 @@ Each module must have:
 
 ### BMUnit: Embedded Testing
 
-**Tests live WITH the code they test, not in a separate directory.**
+**Tests live WITH the code they test in dedicated test directories.**
 
-TinyOS uses BMUnit (Bare Metal Unit), a KUnit-inspired testing framework designed for bare metal kernel development. Tests are embedded within modules and compiled conditionally.
+TinyOS uses BMUnit (Bare Metal Unit), a KUnit-inspired testing framework designed for bare metal kernel development. The framework is located in `tools/bmunit/`. Tests are organized in separate `tests/` directories within each module and compiled conditionally.
 
 ### Test File Organization
 
+Tests are organized in separate `tests/` subdirectories within each module:
+
 ```
-lib/libkbuffer/
+lib/buffer/
 ├── buffer.c              # Implementation
-├── buffer_test.c         # Tests (compiled only if BUILD_TESTS=ON)
 ├── include/
 │   └── lib/
 │       └── buffer.h
+├── tests/                # Test directory
+│   └── buffer_test.c     # Tests (compiled only if BUILD_TESTS=ON)
 └── CMakeLists.txt
 
 arch/x86_64/
 ├── io.c
-├── io_test.c             # I/O tests
 ├── serial.c
-├── serial_test.c         # Serial port tests
+├── include/
+│   └── arch/
+│       ├── io.h
+│       └── serial.h
+├── tests/                # Test directory
+│   ├── io_test.c         # I/O tests
+│   └── serial_test.c     # Serial port tests
 └── CMakeLists.txt
 
 kernel/
 ├── main.c
 ├── panic.c
-├── panic_test.c          # Panic handler tests
+├── include/
+│   └── kernel/
+│       ├── kernel.h
+│       └── panic.h
+├── tests/                # Test directory
+│   └── panic_test.c      # Panic handler tests
 └── CMakeLists.txt
 ```
 
-### Why Embedded Tests?
+### Why Separate Test Directories?
 
-**Following Linux kernel convention:**
-- **Locality** - Tests right next to code being tested
-- **Module ownership** - Maintainer owns both code and tests
-- **No artificial separation** - Tests are part of the module
+**Benefits of dedicated test directories:**
+- **Clean separation** - Source and tests physically separated
+- **Easier GLOB patterns** - Build system can distinguish source from tests
+- **Scalability** - Works well as test count grows
+- **Clear intent** - Test directory signals testing infrastructure
+- **Module ownership** - Tests still part of module, just organized
 - **Conditional compilation** - Enable/disable per module
-
-**No separate `tests/` folder.** That's a userspace pattern that doesn't fit kernel development.
 
 ### CMake Test Integration
 
@@ -432,6 +445,15 @@ tinyos_add_library(buffer
     SOURCES
         buffer.c
 )
+
+# Conditionally build tests
+if(BUILD_TESTS)
+    tinyos_add_test(buffer_test
+        SOURCES tests/buffer_test.c
+        DEPENDS buffer
+    )
+endif()
+```
 
 # Conditionally build tests
 if(BUILD_TESTS)

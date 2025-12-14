@@ -203,7 +203,7 @@ A: No. TinyOS is written in C17 only. See [Standards.md](Core-Principles/Standar
 A: Use fixed-width types from `stdint.h` (`uint8_t`, `uint32_t`, etc.). See [Standards.md](Core-Principles/Standards.md).
 
 **Q: How do I write tests?**
-A: Tests live with the code they test (e.g., `buffer_test.c` next to `buffer.c`). Use BMUnit framework. See [BMUnit-Testing.md](Implementation/BMUnit-Testing.md).
+A: Tests live in a `tests/` subdirectory within each module (e.g., `lib/buffer/tests/buffer_test.c`). Use BMUnit framework from `tools/bmunit/`. See [BMUnit-Testing.md](Implementation/BMUnit-Testing.md).
 
 **Q: Why isn't there a `tests/` folder?**
 A: Tests are embedded in modules, following Linux kernel convention. See [Module-Structure.md](Code-Organization/Module-Structure.md#module-testing).

@@ -270,7 +270,7 @@ tinyos_add_library(buffer
 # Conditionally build tests
 if(BUILD_TESTS)
     tinyos_add_test(buffer_test
-        SOURCES buffer_test.c
+        SOURCES tests/buffer_test.c
         DEPENDS buffer
     )
 endif()
@@ -387,7 +387,7 @@ BMUnit provides formatted test output via serial/VGA:
   [2/2] test_serial_write....................... FAIL
     Expected: 0
     Actual:   -1
-    Location: arch/x86_64/serial_test.c:42
+    Location: arch/x86_64/tests/serial_test.c:42
   
   Suite: serial - 2 tests, 1 passed, 1 failed
 
