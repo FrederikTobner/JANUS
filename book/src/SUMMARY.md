@@ -8,32 +8,43 @@
 # Part I: Getting Started
 
 - [Introduction](introduction.md)
-- [Setting Up Your Environment](chapter-01-setup.md)
+- [Part I Overview](part-01-getting-started/README.md)
+  - [Development Environment Setup](part-01-getting-started/setup.md)
 
 ---
 
 # Part II: The Boot Process
 
-- [Chapter 1: First Boot](chapter-02-first-boot.md)
+- [Part II Overview](part-02-boot-process/README.md)
+  - [Project Structure](part-02-boot-process/project-structure.md)
+  - [The Multiboot2 Header](part-02-boot-process/multiboot-header.md)
+  - [Boot Entry Assembly](part-02-boot-process/boot-assembly.md)
+  - [The Linker Script](part-02-boot-process/linker-script.md)
+  - [The CMake Build System](part-02-boot-process/build-system.md)
+  - [The Kernel Entry Point](part-02-boot-process/kernel-entry.md)
+  - [Creating a Bootable ISO](part-02-boot-process/creating-bootable-iso.md)
+  - [Summary](part-02-boot-process/summary.md)
 
 ---
 
 # Part III: Memory Management
 
-- [Chapter 2: Physical Memory](chapter-03-physical-memory.md)
-- [Chapter 3: Virtual Memory](chapter-04-virtual-memory.md)
+- [Part III Overview](part-03-memory/README.md)
+- [Physical Memory](part-03-memory/physical-memory.md)
+- [Virtual Memory](part-03-memory/virtual-memory.md)
 
 ---
 
 # Part IV: The Kernel
 
-- [Chapter 4: Kernel Basics](chapter-05-kernel-basics.md)
+- [Part IV Overview](part-04-kernel/README.md)
+- [Kernel Basics](part-04-kernel/kernel-basics.md)
 
 ---
 
 # Appendices
 
-- [Appendix A: x86_64 Architecture](appendix-a-x86-64.md)
-- [Appendix B: Build System](appendix-b-build-system.md)
-- [Appendix C: Debugging Tips](appendix-c-debugging.md)
-- [Appendix D: Further Reading](appendix-d-resources.md)
+- [Appendix A: x86_64 Architecture](appendices/appendix-a-x86-64.md)
+- [Appendix B: Build System](appendices/appendix-b-build-system.md)
+- [Appendix C: Debugging Tips](appendices/appendix-c-debugging.md)
+- [Appendix D: Further Reading](appendices/appendix-d-resources.md)

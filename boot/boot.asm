@@ -7,7 +7,7 @@
 ; See https://www.gnu.org/licenses/agpl-3.0.en.html
 
 ; This code is executed immediately after the bootloader transfers control.
-; It sets up the execution environment and calls the C kernel entry point.
+; It sets up 64-bit long mode and calls the C kernel entry point.
 
 global _start
 extern kernel_main
@@ -19,6 +19,15 @@ stack_bottom:
     resb 16384              ; 16 KiB stack
 stack_top:
 
+; Page tables for long mode (must be page-aligned)
+align 4096
+p4_table:
+    resb 4096
+p3_table:
+    resb 4096
+p2_table:
+    resb 4096
+
 section .text
 bits 32                     ; Bootloader puts us in 32-bit protected mode
 
@@ -27,38 +36,96 @@ _start:
     ; - EAX contains the multiboot2 magic value (0x36d76289)
     ; - EBX contains the physical address of the multiboot information structure
     ; - CPU is in 32-bit protected mode
-    ; - Interrupts are disabled
-    ; - Paging is disabled
     
-    ; Disable interrupts (in case bootloader didn't)
-    cli
+    ; Save multiboot info (we'll need them after switching to long mode)
+    mov edi, eax            ; Save magic
+    mov esi, ebx            ; Save multiboot info pointer
     
     ; Set up stack pointer
-    ; Stack grows downward, so we point ESP to the top
     mov esp, stack_top
     
-    ; Reset EFLAGS register
-    ; Clear all flags to ensure clean state
-    push 0
-    popf
+    ; Set up page tables for long mode
+    call setup_page_tables
+    call enable_paging
     
-    ; Clear direction flag (for string operations)
-    ; Ensures string operations increment (not decrement) pointers
-    cld
+    ; Load 64-bit GDT
+    lgdt [gdt64.pointer]
     
-    ; Save multiboot information for kernel
-    ; We need to preserve these before calling C code
-    ; C calling convention (cdecl): arguments pushed right-to-left
-    push ebx                ; Multiboot info structure pointer (2nd arg)
-    push eax                ; Multiboot magic number (1st arg)
+    ; Jump to 64-bit code
+    jmp gdt64.code:long_mode_start
+
+; Set up identity-mapped page tables
+; Maps first 2MB of physical memory
+setup_page_tables:
+    ; Map P4[0] -> P3
+    mov eax, p3_table
+    or eax, 0b11            ; Present + writable
+    mov [p4_table], eax
     
-    ; Call the C kernel entry point
-    ; void kernel_main(uint32_t magic, struct multiboot_info *mbi)
+    ; Map P3[0] -> P2
+    mov eax, p2_table
+    or eax, 0b11            ; Present + writable
+    mov [p3_table], eax
+    
+    ; Map P2[0] -> 0MB (2MB huge page)
+    mov eax, 0x0
+    or eax, 0b10000011      ; Present + writable + huge page
+    mov [p2_table], eax
+    
+    ret
+
+; Enable paging and enter long mode
+enable_paging:
+    ; Load P4 table address into CR3
+    mov eax, p4_table
+    mov cr3, eax
+    
+    ; Enable PAE (Physical Address Extension)
+    mov eax, cr4
+    or eax, 1 << 5          ; Set PAE bit
+    mov cr4, eax
+    
+    ; Enable long mode in EFER MSR
+    mov ecx, 0xC0000080     ; EFER MSR
+    rdmsr
+    or eax, 1 << 8          ; Set LM bit
+    wrmsr
+    
+    ; Enable paging
+    mov eax, cr0
+    or eax, 1 << 31         ; Set PG bit
+    mov cr0, eax
+    
+    ret
+
+; 64-bit code starts here
+bits 64
+long_mode_start:
+    ; Clear segment registers
+    xor ax, ax
+    mov ss, ax
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    
+    ; Call kernel main with preserved multiboot info
+    ; System V AMD64 ABI: first arg in RDI, second in RSI
+    ; (edi and esi were preserved from 32-bit mode)
     call kernel_main
     
-    ; If kernel_main returns (which it shouldn't), halt the CPU
-    ; This prevents executing random memory
+    ; If kernel_main returns, halt
 .hang:
-    cli                     ; Disable interrupts
-    hlt                     ; Halt CPU until next interrupt
-    jmp .hang               ; If we somehow wake up, halt again
+    cli
+    hlt
+    jmp .hang
+
+; Global Descriptor Table for 64-bit mode
+section .rodata
+gdt64:
+    dq 0                                    ; Null descriptor
+.code: equ $ - gdt64
+    dq (1<<43) | (1<<44) | (1<<47) | (1<<53) ; Code segment
+.pointer:
+    dw $ - gdt64 - 1                        ; GDT size
+    dq gdt64                                ; GDT address
