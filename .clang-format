@@ -1,7 +1,6 @@
 ---
 # TinyOS C formatting configuration
-Language: C
-Standard: c17
+Language: Cpp
 
 AlignConsecutiveMacros:
   Enabled: true

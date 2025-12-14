@@ -1,6 +1,8 @@
 # The Kernel Entry Point
 
-We have boot assembly that calls `kernel_main()`. We have a build system that links everything together. Time to write the actual C code that runs when the kernel starts.
+We have created the boot assembly that calls `kernel_main()`and the build system that links everything together. Time to write the actual C code that runs when the kernel starts.
+
+This is it—the moment where all that assembly setup pays off and we finally get to write normal C code. Well, "normal" is relative. We're still in a freestanding environment with no standard library, but at least we're not juggling registers and segment selectors anymore.
 
 > **The Crux: Why Verify the Magic Number?**
 >
@@ -61,16 +63,6 @@ void kernel_main(uint32_t magic, void *info)
         }
     }
     
-    // At this point:
-    // - Bootloader magic verified
-    // - Multiboot info pointer is valid
-    // - We're ready to start kernel initialization
-
-    // TODO: Initialize serial output
-    // TODO: Parse multiboot information
-    // TODO: Set up memory management
-    // TODO: Enable interrupts
-
     // Kernel initialization complete - infinite loop for now
     for (;;) {
         __asm__ volatile("hlt");
@@ -108,13 +100,13 @@ Check that `kernel_main` symbol exists:
 nm build/kernel.elf | grep kernel_main
 ```
 
-You should see:
+Output:
 
 ```
 0000000000101090 T kernel_main
 ```
 
-The `T` means it's in the text (code) section, and the address shows where it lives in memory.
+**What this shows:** The `T` means it's in the text (code) section, and `0000000000101090` is the address where `kernel_main` lives in memory.
 
 At this point, the kernel boots, verifies it was loaded correctly, and halts. Not exciting, but it's correct! We've established the foundation for everything else.
 

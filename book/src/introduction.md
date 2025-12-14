@@ -41,6 +41,8 @@ Because:
 
 Reading about paging is one thing. Debugging why your page table entries keep triple-faulting the CPU is *entirely different*. You'll understand memory management at a level that reading Wikipedia never achieves.
 
+It's like the difference between reading a recipe and actually cooking. Theory teaches you concepts. Practice beats them into your skull with a hammer made of segmentation faults.
+
 > **Aside: What's a Triple Fault?**
 >
 > When the CPU encounters an error (like a divide-by-zero or invalid memory access), it triggers a **fault**—an exception that calls an error handler. But what if the error handler *itself* triggers an error? The CPU triggers a **double fault** (exception #8) with a special double-fault handler.
@@ -48,8 +50,6 @@ Reading about paging is one thing. Debugging why your page table entries keep tr
 > But what if the *double fault handler* causes an error? The CPU gives up and triggers a **triple fault**, which immediately resets the processor—the CPU equivalent of flipping the table and walking away. For OS developers, triple faults are the bane of existence: instant reboot with no error message, no stack trace, just darkness.
 >
 > They're most common during boot when setting up page tables or interrupt handlers. If your page table entry is malformed, the CPU tries to handle the page fault but can't access the interrupt handler (because paging is broken), triggers a double fault, and then triple faults when even that fails.
-
-It's like the difference between reading a recipe and actually cooking. Theory teaches you concepts. Practice beats them into your skull with a hammer made of segmentation faults.
 
 ### 2. **Demystification**
 

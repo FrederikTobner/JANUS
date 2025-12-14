@@ -468,8 +468,22 @@ sudo apt install grub-pc-bin xorriso mtools
 
 ```bash
 ls -R build/iso/
-# Should show boot/kernel.elf and boot/grub/grub.cfg
 ```
+
+Output:
+
+```
+build/iso/:
+boot
+
+build/iso/boot:
+grub  kernel.elf
+
+build/iso/boot/grub:
+grub.cfg
+```
+
+**What this shows:** The ISO has the correct structure with `boot/kernel.elf` and `boot/grub/grub.cfg`.
 
 ### Black Screen Forever
 

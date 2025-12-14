@@ -2,7 +2,7 @@
 
 We have assembly files. We'll have C files. But how do we tell the linker how to combine them into a bootable kernel? That's where the linker script comes in.
 
-Linker scripts are weird. They're not C. They're not assembly. They're their own strange declarative language that tells `ld` (the linker): "put this section here, that section there, and make sure everything lines up."
+Linker scripts are weird. They're not C. They're not assembly. They're their own strange declarative language that tells `ld` (the linker): "put this section here, that section there, and make sure everything lines up." Think of it as interior design for memory—you're telling the linker where to place the furniture, except the furniture is code and if you put it in the wrong place, the CPU throws a tantrum and reboots.
 
 > **The Crux: Why Can't the Linker Just Figure It Out?**
 >
@@ -124,10 +124,37 @@ void *end_addr = &kernel_end;
 After building, verify the layout:
 
 ```bash
-readelf -l kernel.elf
+readelf -l build/kernel.elf
 ```
 
-You should see sections starting at `0x100000` with proper alignment.
+Output:
+
+```
+Elf file type is EXEC (Executable file)
+Entry point 0x101000
+There are 5 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000001000 0x0000000000100000 0x0000000000100000
+                 0x0000000000000030 0x0000000000000030  R      0x1000
+  LOAD           0x0000000000002000 0x0000000000101000 0x0000000000101000
+                 0x00000000000000da 0x00000000000000da  R E    0x1000
+  LOAD           0x0000000000003000 0x0000000000102000 0x0000000000102000
+                 0x000000000000001a 0x000000000000001a  R      0x1000
+  LOAD           0x0000000000000000 0x0000000000103000 0x0000000000103000
+                 0x0000000000000000 0x0000000000007000  RW     0x1000
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .multiboot 
+   01     .text 
+   02     .rodata 
+   03     .bss 
+```
+
+**What this shows:** All sections start at 0x100000 (1MB) as specified in our linker script, with proper 4KB alignment.
 
 ---
 

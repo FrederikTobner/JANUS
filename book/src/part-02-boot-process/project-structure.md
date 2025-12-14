@@ -170,8 +170,6 @@ Each module is self-contained with:
 - An `include/` directory for public headers
 - Implementation files
 
-We won't explain CMake details—you should already know `add_library()`, `target_link_libraries()`, and directory structure conventions.
-
 ---
 
 **Next: [The Multiboot2 Header →](multiboot-header.md)**

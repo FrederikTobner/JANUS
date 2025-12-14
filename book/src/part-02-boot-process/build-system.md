@@ -10,7 +10,7 @@ We have source files. We have a linker script. But manually assembling and linki
 
 ## Build System Architecture
 
-TinyOS uses a modular CMake structure where each component is self-contained:
+TinyOS utilizes a modular CMake structure where each component is self-contained:
 
 ```
 build system/
@@ -234,7 +234,16 @@ Check load addresses:
 readelf -l build/kernel.elf | grep LOAD
 ```
 
-You should see segments loading at 0x100000 (1MB).
+Output:
+
+```
+  LOAD           0x0000000000001000 0x0000000000100000 0x0000000000100000
+  LOAD           0x0000000000002000 0x0000000000101000 0x0000000000101000
+  LOAD           0x0000000000003000 0x0000000000102000 0x0000000000102000
+  LOAD           0x0000000000000000 0x0000000000103000 0x0000000000103000
+```
+
+**What this shows:** All LOAD segments have virtual and physical addresses starting at 0x100000 (1MB).
 
 **Check for Multiboot2 header:**
 
@@ -242,7 +251,13 @@ You should see segments loading at 0x100000 (1MB).
 readelf -S build/kernel.elf | grep multiboot
 ```
 
-The `.multiboot` section should be present and properly aligned.
+Output:
+
+```
+  [ 1] .multiboot        PROGBITS         0000000000100000  00001000
+```
+
+**What this shows:** The `.multiboot` section is at address 0x100000, the very first byte of our kernel image.
 
 ---
 
