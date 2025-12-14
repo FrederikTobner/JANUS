@@ -3,6 +3,7 @@
 ## Include Philosophy
 
 Headers must be:
+
 - **Self-contained** - Include all dependencies. Don't make users guess what to include.
 - **Minimal** - Only expose what's necessary. Internal implementation details remain private.
 - **Well-organized** - Clear public vs private separation. No dumping everything in one header.
@@ -52,6 +53,7 @@ TinyOS/
 ## Include Path Rules
 
 ### 1. Global Headers
+
 Use angle brackets for global headers:
 ```c
 #include <tinyos/types.h>
@@ -59,6 +61,7 @@ Use angle brackets for global headers:
 ```
 
 ### 2. Module Headers
+
 Use angle brackets with module path:
 ```c
 #include <lib/buffer.h>
@@ -68,6 +71,7 @@ Use angle brackets with module path:
 ```
 
 ### 3. Local Module Headers
+
 Use quotes for headers within the same module:
 ```c
 // In kernel/main.c
@@ -78,6 +82,7 @@ Use quotes for headers within the same module:
 ## Include Order
 
 ### Standard Include Order
+
 ```c
 // 1. Corresponding header (for .c files)
 #include "buffer.h"
@@ -102,6 +107,7 @@ Use quotes for headers within the same module:
 ```
 
 ### Example
+
 ```c
 // lib/buffer/buffer.c
 #include "lib/buffer.h"        // Corresponding header
@@ -119,6 +125,7 @@ Use quotes for headers within the same module:
 ## Header File Structure
 
 ### Public Header Template
+
 ```c
 // lib/buffer/include/lib/buffer.h
 #ifndef TINYOS_LIB_BUFFER_H
@@ -163,6 +170,7 @@ void buf_destroy(char_buffer_t* buffer);
 ```
 
 ### Private Header Template
+
 ```c
 // lib/buffer/buffer_internal.h
 #ifndef BUFFER_INTERNAL_H
@@ -188,6 +196,7 @@ void buffer_internal_realloc(char_buffer_t* buf, size_t new_capacity);
 ## Header Guards
 
 ### Naming Convention
+
 ```c
 // Format: TINYOS_<PATH>_<FILENAME>_H
 // Path components separated by underscores, uppercase
@@ -218,6 +227,7 @@ void buffer_internal_realloc(char_buffer_t* buf, size_t new_capacity);
 ```
 
 ### Private Headers
+
 ```c
 // Local headers can use simpler guards
 // lib/buffer/buffer_internal.h
@@ -251,6 +261,7 @@ typedef struct foo {
 ## Architecture-Specific Headers
 
 ### Conditional Inclusion
+
 ```c
 // arch/include/arch/cpu.h
 #ifndef TINYOS_ARCH_CPU_H
@@ -271,6 +282,7 @@ typedef struct foo {
 ```
 
 ### Architecture-Specific Implementation Header
+
 ```c
 // arch/x86_64/include/arch/x86_64/cpu.h
 #ifndef TINYOS_ARCH_X86_64_CPU_H
@@ -298,6 +310,7 @@ static inline void arch_enable_interrupts(void) {
 ## CMake Include Path Configuration
 
 ### Module Include Directories
+
 ```cmake
 # lib/buffer/CMakeLists.txt
 tinyos_add_library(buffer
@@ -308,6 +321,7 @@ tinyos_add_library(buffer
 ```
 
 ### Global Include Setup
+
 ```cmake
 # Root CMakeLists.txt
 include_directories(
@@ -323,6 +337,7 @@ add_subdirectory(lib/buffer)         # Adds lib/buffer/include/
 ## Header Documentation
 
 ### Header File Comments
+
 ```c
 /**
  * @file buffer.h
@@ -339,6 +354,7 @@ add_subdirectory(lib/buffer)         # Adds lib/buffer/include/
 ```
 
 ### Type Documentation
+
 ```c
 /**
  * Character buffer structure
@@ -356,7 +372,9 @@ typedef struct char_buffer {
 ## Include Best Practices
 
 ### 1. Minimize Dependencies
+
 Only include what you need:
+
 ```c
 // BAD: Including everything
 #include <lib/buffer.h>
@@ -369,6 +387,7 @@ Only include what you need:
 ```
 
 ### 2. Use Forward Declarations
+
 ```c
 // BAD: Full header for pointer-only usage
 #include "complex_structure.h"
@@ -379,7 +398,9 @@ void process(struct complex_structure* cs);
 ```
 
 ### 3. Keep Headers Self-Contained
+
 Each header should include its dependencies:
+
 ```c
 // buffer.h
 #ifndef TINYOS_LIB_BUFFER_H
@@ -391,6 +412,7 @@ Each header should include its dependencies:
 ```
 
 ### 4. Avoid Circular Dependencies
+
 ```c
 // BAD: A includes B, B includes A
 // a.h

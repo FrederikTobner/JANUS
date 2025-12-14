@@ -7,6 +7,7 @@ TinyOS uses `clang-format` to enforce consistent style. If you're coming from C+
 ## Basic Formatting (Quick Reference)
 
 **Don't waste time reading this if you know C:**
+
 - 4 spaces, no tabs
 - 120 column limit
 - Linux kernel brace style
@@ -139,12 +140,14 @@ for (size_t i = 0; i < count; i++) {
 Opaque handles (`typedef struct foo * foo_handle_t`) hide structure definitions from callers. This pattern is common in userspace libraries for API stability, but creates significant problems in kernel development:
 
 **Performance Concerns:**
+
 - Every field access requires pointer indirection
 - Forces heap allocation instead of enabling stack allocation
 - Reduces cache locality by requiring separate allocations
 - Adds function call overhead for simple field access
 
 **Debugging nightmare:**
+
 ```bash
 # Public structure - see everything
 (lldb) print buffer
@@ -160,6 +163,7 @@ Opaque handles (`typedef struct foo * foo_handle_t`) hide structure definitions 
 ```
 
 **Memory waste:**
+
 ```c
 // Public structure - stack allocation, zero malloc overhead
 kbuffer_t buffer;
@@ -170,6 +174,7 @@ handle_t * handle = handle_create(256);  // Pointless malloc
 ```
 
 **Cache murder:**
+
 ```c
 // Public structure - embedding means one allocation
 typedef struct parser {
@@ -189,6 +194,7 @@ typedef struct parser {
 **Encapsulation in kernel code:**
 
 Kernel developers need to understand data structure internals. Hiding implementation details creates barriers to debugging and optimization without providing meaningful benefits. Public structures enable:
+
 - Direct field access for performance-critical code
 - Stack allocation to avoid memory management overhead
 - Structure embedding for better cache behavior
@@ -220,6 +226,7 @@ void buf_destroy(buffer_t * buf);
 ### Why This is Better
 
 **Performance:**
+
 ```c
 buffer_t buffer;  // Stack allocation - zero malloc overhead
 buf_init(&buffer, 256);
@@ -230,6 +237,7 @@ if (buffer.length > 0) {  // Direct access - zero function call overhead
 ```
 
 **Debugging:**
+
 ```bash
 # Public structure - full visibility
 (lldb) print buffer
@@ -245,6 +253,7 @@ if (buffer.length > 0) {  // Direct access - zero function call overhead
 ```
 
 **Memory layout:**
+
 ```c
 typedef struct parser {
     buffer_t input;   // Embedded - one allocation for entire struct
@@ -285,16 +294,13 @@ typedef struct fs_driver * fs_driver_handle_t;
 ```
 
 **DO NOT use opaque handles for:**
+
 - Core data structures (buffers, lists, hashtables)
 - Anything performance-critical
 - Anything that needs stack allocation
 - Anything where you want developers to understand the layout
 
 If you find yourself typing `typedef struct foo * foo_handle_t` for a buffer or list or tree, **stop**. You're about to write bad code.
-
-### Document Your Structures
-
-Since structures are public, document them properly:
 
 ### Document Your Structures
 
@@ -331,6 +337,7 @@ pte->value = phys_addr | PTE_PRESENT | PTE_WRITABLE;
 ### Naming
 
 **Public structures:**
+
 ```c
 typedef struct char_buffer char_buffer_t;
 void buf_init(char_buffer_t * buf, size_t capacity);
@@ -338,25 +345,9 @@ void buf_destroy(char_buffer_t * buf);
 ```
 
 **Opaque handles (rare):**
+
 ```c
 typedef struct device * device_handle_t;
 device_handle_t device_create(device_type_t type);
 void device_destroy(device_handle_t handle);
-```
-
-## Editor Integration
-Configure your editor to run clang-format on save:
-
-**VS Code** (`.vscode/settings.json`):
-```json
-{
-    "editor.formatOnSave": true,
-    "C_Cpp.clang_format_path": "clang-format",
-    "C_Cpp.clang_format_style": "file"
-}
-```
-
-**Vim/Neovim**:
-```vim
-autocmd BufWritePre *.c,*.h :silent! !clang-format -i %
 ```
