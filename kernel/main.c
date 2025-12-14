@@ -34,9 +34,9 @@
  * - Paging is disabled
  * 
  * @param magic Multiboot2 magic number (should be 0x36d76289)
- * @param mbi Pointer to multiboot information structure
+ * @param info Pointer to multiboot information structure
  */
-void kernel_main(uint32_t magic, struct multiboot_info * mbi)
+void kernel_main(uint32_t magic, struct multiboot_info * info)
 {
     // Verify we were loaded by a Multiboot2-compliant bootloader
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
@@ -48,7 +48,7 @@ void kernel_main(uint32_t magic, struct multiboot_info * mbi)
     }
 
     // Verify multiboot info pointer is valid
-    if (mbi == ((void *) 0)) {
+    if (info == ((void *) 0)) {
         // Invalid multiboot info, hang
         for (;;) {
             __asm__ volatile("cli; hlt");

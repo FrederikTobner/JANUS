@@ -14,34 +14,17 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef TINYOS_TYPES_H
-#define TINYOS_TYPES_H
+#ifndef _STDBOOL_H
+#define _STDBOOL_H
 
 /**
- * @file types.h
- * @brief Global kernel type definitions
- * 
- * This header defines kernel-specific types used throughout TinyOS.
- * These types provide semantic meaning beyond basic integer sizes.
+ * @file stdbool.h
+ * @brief Boolean type (TinyOS freestanding implementation)
  */
 
-#include <stdint.h>
+#define bool _Bool
+#define true 1
+#define false 0
+#define __bool_true_false_are_defined 1
 
-// Physical and virtual memory addresses
-typedef uint64_t phys_addr_t;  ///< Physical memory address
-typedef uint64_t virt_addr_t;  ///< Virtual memory address
-
-// Page frame number (physical page identifier)
-typedef uint64_t pfn_t;        ///< Page frame number
-
-// Process and thread identifiers
-typedef int32_t pid_t;         ///< Process ID
-typedef int32_t tid_t;         ///< Thread ID
-
-// Device number
-typedef uint32_t dev_t;        ///< Device number
-
-// Generic error type for kernel operations
-typedef int32_t error_t;       ///< Error code (negative = error, 0 = success, positive = info)
-
-#endif /* TINYOS_TYPES_H */
+#endif /* _STDBOOL_H */
