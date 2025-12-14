@@ -41,9 +41,6 @@ sudo apt install clang
 # Arch Linux
 sudo pacman -S clang
 
-# macOS
-brew install llvm
-
 # Verify
 clang --version  # Should be 17.0 or higher
 ```
@@ -60,9 +57,6 @@ sudo apt install ninja-build
 
 # Arch Linux
 sudo pacman -S ninja
-
-# macOS
-brew install ninja
 
 # Verify
 ninja --version
@@ -81,9 +75,6 @@ sudo apt install nasm
 # Arch Linux
 sudo pacman -S nasm
 
-# macOS
-brew install nasm
-
 # Verify
 nasm --version
 ```
@@ -98,9 +89,6 @@ sudo apt install qemu-system-x86
 
 # Arch Linux
 sudo pacman -S qemu-system-x86
-
-# macOS
-brew install qemu
 
 # Verify
 qemu-system-x86_64 --version
@@ -117,9 +105,6 @@ sudo apt install lldb
 # Arch Linux
 sudo pacman -S lldb
 
-# macOS
-brew install llvm  # Includes lldb
-
 # Verify
 lldb --version
 ```
@@ -134,9 +119,6 @@ sudo apt install cmake
 
 # Arch Linux
 sudo pacman -S cmake
-
-# macOS
-brew install cmake
 
 # Verify
 cmake --version  # Must be 3.20 or higher
@@ -157,16 +139,6 @@ sudo apt install -y clang ninja-build nasm cmake \
 ```bash
 sudo pacman -S clang ninja nasm cmake \
                qemu-system-x86 lldb git
-```
-
-### macOS
-
-```bash
-brew install llvm ninja nasm cmake qemu git
-
-# Add LLVM tools to PATH
-echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
 ```
 
 ## Verifying Your Setup
@@ -264,6 +236,7 @@ git init
 ```
 
 We'll build the project incrementally throughout the book. Each chapter adds new components:
+
 - Boot code (Chapter 2)
 - Build system (Chapter 2)
 - Physical memory manager (Chapter 3)
@@ -275,6 +248,7 @@ Don't worry about CMake configuration yet. We'll create the build system piece b
 ## What We're Not Covering
 
 This chapter focuses on *toolchain setup*, not:
+
 - **Editor configuration**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors if you want it.
 - **Git workflows**: Assumed knowledge.
 - **Shell basics**: You should already know how to navigate directories and run commands.
@@ -314,6 +288,7 @@ cmake -B build -G Ninja -DCMAKE_ASM_NASM_COMPILER=/usr/bin/nasm
 ### Cross-compilation errors
 
 Verify your flags in `cmake/TinyOSPlatform.cmake`. We need:
+
 - `-target x86_64-elf` (Clang's built-in cross-compile)
 - `-ffreestanding` (no hosted environment)
 - `-nostdlib` (no standard library linking)
@@ -325,4 +300,3 @@ You now have a complete TinyOS development environment. In the next chapter, we'
 ---
 
 **Next: [Chapter 1: First Boot →](chapter-02-first-boot.md)**
-

@@ -50,16 +50,19 @@ TinyOS/
 Comprehensive documentation is in the [`Documentation/`](Documentation/) folder:
 
 ### Core Principles
+
 - [Philosophy.md](Documentation/Core-Principles/Philosophy.md) - Technical philosophy and design values
 - [Terminology.md](Documentation/Core-Principles/Terminology.md) - Naming conventions
 - [Standards.md](Documentation/Core-Principles/Standards.md) - C17 standards and compiler requirements
 
 ### Code Organization
+
 - [Module-Structure.md](Documentation/Code-Organization/Module-Structure.md) - Module hierarchy and dependencies
 - [API-Design.md](Documentation/Code-Organization/API-Design.md) - Function design and naming patterns
 - [Include-Hierarchy.md](Documentation/Code-Organization/Include-Hierarchy.md) - Header organization
 
 ### Implementation
+
 - [Coding-Style.md](Documentation/Implementation/Coding-Style.md) - Code style guide
 - [Hardware-Abstraction.md](Documentation/Implementation/Hardware-Abstraction.md) - Hardware interaction patterns
 - [Documentation-Style.md](Documentation/Implementation/Documentation-Style.md) - Comment guidelines
@@ -139,8 +142,4 @@ lldb build/kernel.elf -o "gdb-remote localhost:1234"
 
 ## License
 
-[License information to be added]
-
-## Contributing
-
-[Contributing guidelines to be added]
+This project is licensed under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE)
