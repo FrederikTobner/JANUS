@@ -2,9 +2,6 @@
 
 ## Philosophy
 
-> "UNIX is basically a simple operating system, but you have to be a genius to understand the simplicity."
-> — *Dennis Ritchie*
-
 **TinyOS provides direct hardware access with minimal abstraction.**
 
 TinyOS embraces low-level hardware programming:
@@ -17,9 +14,6 @@ TinyOS embraces low-level hardware programming:
 Kernel code should directly express hardware operations rather than hiding them behind multiple abstraction layers.
 
 ## Hardware Access Patterns
-
-> "Theory and practice sometimes clash. And when that happens, theory loses. Every single time."
-> — *Linus Torvalds*
 
 ### Memory-Mapped I/O (MMIO)
 

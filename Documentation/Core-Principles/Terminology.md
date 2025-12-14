@@ -2,9 +2,6 @@
 
 ## Core Terminology Philosophy
 
-> "The cheapest, fastest, and most reliable components are those that aren't there."
-> — *Gordon Bell*
-
 **Use precise terminology.** TinyOS uses explicit, hardware-aware terminology that reflects actual implementation rather than abstract concepts.
 
 If you call a hashtable a "map," you're hiding the implementation. If you call a character buffer a "string," you're importing assumptions from high-level languages. **Words matter. Use precise ones.**

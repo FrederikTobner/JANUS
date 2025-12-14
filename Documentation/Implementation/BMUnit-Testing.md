@@ -13,10 +13,7 @@
 
 ## Why BMUnit, Not GoogleTest?
 
-> "Simple things should be simple, complex things should be possible."
-> — *Alan Kay*
-
-GoogleTest is C++. We use C. End of discussion.
+GoogleTest is C++. We use C.
 
 Beyond the language issue:
 - GoogleTest requires exceptions, RTTI, and STL
@@ -44,9 +41,6 @@ BMUnit is **based on KUnit** but adapted for TinyOS's specific needs:
 **BMUnit may add features KUnit doesn't have or omit features we don't need.** It's our framework, designed for our kernel.
 
 ## Testing Approach: Embedded Tests
-
-> "Testing shows the presence, not the absence of bugs."
-> — *Edsger Dijkstra*
 
 ### Tests Live WITH Code, Not Separately
 
@@ -86,9 +80,6 @@ kernel/
 We don't use a separate top-level `tests/` directory. That's a userspace convention that doesn't fit kernel development.
 
 ## BMUnit API
-
-> "If you need more than 3 levels of indentation, you're screwed anyway, and should fix your program."
-> — *Linus Torvalds*
 
 ### Basic Test Structure
 
@@ -397,9 +388,6 @@ BMUnit Summary: 5 tests, 4 passed, 1 failed
 ```
 
 ## Testing Best Practices
-
-> "Regression testing? What's that? If it compiles, it is good; if it boots up, it is perfect."
-> — *Linus Torvalds (sarcastically)*
 
 ### Test Organization
 

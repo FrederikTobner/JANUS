@@ -2,9 +2,6 @@
 
 ## Language Standard
 
-> "C is not a big language, and it is not well served by a big book."
-> — *Dennis Ritchie*
-
 ### C17 (ISO/IEC 9899:2018)
 
 TinyOS uses C17 (ISO/IEC 9899:2018) as specified in `.clang-format`:
@@ -38,9 +35,6 @@ This project uses pure C, not C++. See [Philosophy.md](Philosophy.md) for the ra
 ## Code Quality Standards
 
 ### Warning Policy
-
-> "If the code and the comments disagree, then both are probably wrong."
-> — *Norm Schryer*
 
 **Zero warnings. All code must compile cleanly.**
 
@@ -99,9 +93,6 @@ There is no recovery mechanism. There is no debugger popup. The system freezes o
 **This is not theoretical.** Every item in this list can and will crash the entire system if it occurs in kernel code.
 
 ## Type System
-
-> "C treats you like a consenting adult. Pascal treats you like a naughty child."
-> — *Dennis Ritchie (attributed)*
 
 ### Standard Integer Types
 Use exact-width types from `<stdint.h>`:
@@ -263,9 +254,6 @@ static inline uint8_t port_read_byte(uint16_t port) {
 ```
 
 ## Assembly Integration
-
-> "C is peculiar in a lot of ways, but it, like many other successful things, has a certain unity of approach that stems from development in a small group."
-> — *Dennis Ritchie*
 
 ### Inline Assembly
 Use for hardware-specific operations only:

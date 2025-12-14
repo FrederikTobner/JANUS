@@ -19,9 +19,6 @@ Run `clang-format -i <file>` and move on.
 
 ## Multi-Dimensional Memory Access
 
-> "The programmer has to be able to see what the machine is doing."
-> — *Ken Thompson*
-
 ### Pointer Arithmetic for Multi-Dimensional Data
 
 TinyOS prefers **explicit pointer arithmetic** over array indexing for multi-dimensional data structures to make memory layout and performance characteristics visible.
@@ -136,9 +133,6 @@ for (size_t i = 0; i < count; i++) {
 ## Structure Encapsulation Philosophy
 
 ### Public Structures
-
-> "If you can't trust your kernel developers to not mess with internal fields, you have the wrong developers."
-> — *Linus Torvalds*
 
 **TinyOS uses public structure definitions rather than opaque handles.**
 

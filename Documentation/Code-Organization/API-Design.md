@@ -1,8 +1,5 @@
 # TinyOS API Design Guidelines
 
-> "Simplicity is prerequisite for reliability."
-> — *Edsger Dijkstra*
-
 ## Function Design Principles
 
 ### 1. Clear Intent
@@ -218,9 +215,6 @@ if (mm_get_page_info(vaddr, &paddr, &flags) == 0) {
 ```
 
 ## Error Handling
-
-> "Talk is cheap. Show me the code."
-> — *Linus Torvalds*
 
 ### Explicit Error Codes
 Define module-specific error codes:

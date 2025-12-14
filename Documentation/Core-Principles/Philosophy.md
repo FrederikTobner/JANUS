@@ -23,9 +23,6 @@ If a developer has to guess what your function does, what your type represents, 
 
 ## Design Principles
 
-> "A program that produces incorrect results twice as fast is infinitely slower."
-> — *John Osterhout (but embraced by Unix philosophy)*
-
 ### Explicitness
 - Explicit error handling (no hidden failure modes)
 - Explicit memory management (no garbage collection)
@@ -51,9 +48,6 @@ If a developer has to guess what your function does, what your type represents, 
 - Optimize where it matters, keep simple where it doesn't
 
 ### Memory Access Explicitness
-
-> "Bad programmers worry about the code. Good programmers worry about data structures and their relationships."
-> — *Linus Torvalds*
 
 **Prefer explicit pointer arithmetic over array indexing for multi-dimensional data structures.**
 
@@ -105,9 +99,6 @@ This approach trades convenient syntax for explicit understanding of memory beha
 ## Development Philosophy
 
 ### Why Not C++?
-
-> "C++ is a horrible language... And limiting your project to C means that people don't screw things up with any idiotic 'object model' crap."
-> — *Linus Torvalds*
 
 C++ introduces complexity that is incompatible with kernel development requirements:
 
@@ -192,9 +183,6 @@ Zig presents itself as a "better C" for systems programming, but introduces trad
 - Learning Zig while learning kernel development means tackling two moving targets simultaneously.
 
 ### C: Simple, Predictable, Proven
-
-> "C is quirky, flawed, and an enormous success."
-> — *Dennis Ritchie*
 
 TinyOS uses C for kernel development for several compelling reasons:
 

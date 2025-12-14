@@ -12,9 +12,6 @@ Documentation in TinyOS has a purpose:
 
 ## Comment Principles
 
-> "Don't comment bad code—rewrite it."
-> — *Brian Kernighan & P.J. Plauger*
-
 ### Write Comments That Explain "Why", Not "What"
 
 **If your comment just describes what the code does, you're wasting everyone's time.**
