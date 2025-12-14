@@ -1,0 +1,62 @@
+# LLDB configuration for TinyOS kernel debugging
+# This file is loaded automatically when LLDB starts in this directory
+
+# Set Intel syntax for assembly (more readable for x86-64)
+settings set target.x86-disassembly-flavor intel
+
+# Show source code when stopping
+settings set stop-disassembly-display never
+settings set stop-line-count-before 3
+settings set stop-line-count-after 3
+
+# Auto-confirm potentially destructive operations
+settings set auto-confirm true
+
+# Enable colors for better readability
+settings set use-color true
+
+# Symbol search paths (adjust as needed)
+settings append target.debug-file-search-paths ./build
+settings append target.exec-search-paths ./build
+
+# Connect to QEMU GDB stub on default port
+# Usage: (lldb) target create build/kernel.bin
+#        (lldb) gdb-remote localhost:1234
+define connect-qemu
+    gdb-remote localhost:1234
+end
+
+# Common breakpoint aliases for kernel development
+command alias bp breakpoint set
+command alias bpl breakpoint list
+command alias bpd breakpoint delete
+
+# Memory examination aliases
+command alias x-byte memory read --size 1 --format x --count
+command alias x-word memory read --size 2 --format x --count
+command alias x-dword memory read --size 4 --format x --count
+command alias x-qword memory read --size 8 --format x --count
+
+# Register examination
+command alias reg-all register read --all
+command alias reg-gen register read rax rbx rcx rdx rsi rdi rbp rsp
+command alias reg-seg register read cs ds es fs gs ss
+command alias reg-ctrl register read cr0 cr2 cr3 cr4
+
+# Print current stack frame
+command alias frame-info frame info
+
+# Kernel-specific type formatting
+type format add --format hex uint64_t
+type format add --format hex uint32_t
+type format add --format hex uint16_t
+type format add --format hex uint8_t
+type format add --format hex phys_addr_t
+type format add --format hex virt_addr_t
+
+# Summary for common kernel structures (examples, adjust as needed)
+# type summary add --summary-string "addr=${var.address%x} flags=${var.flags%x}" page_frame_t
+
+# Print message on startup
+script print("TinyOS LLDB configuration loaded")
+script print("Use 'connect-qemu' to attach to QEMU on localhost:1234")

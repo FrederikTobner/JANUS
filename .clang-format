@@ -1,0 +1,35 @@
+---
+# TinyOS C formatting configuration
+Language: C
+Standard: c17
+
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+AlignEscapedNewlines: Left
+AllowAllArgumentsOnNextLine: true
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+ColumnLimit: 120
+IndentWidth: 4
+IndentCaseBlocks: true
+InsertBraces: true
+PointerAlignment: Middle
+QualifierAlignment: Right
+SpaceBeforeAssignmentOperators: true
+UseTab: Never
+
+# C-specific formatting options
+BreakBeforeBraces: Linux
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterCStyleCast: true
+SpaceBeforeParens: ControlStatements
+BinPackArguments: false
+BinPackParameters: false

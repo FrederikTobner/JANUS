@@ -4,22 +4,37 @@
 /planning/
 
 ##############################
-## clang                    ##
+## clangd                   ##
 ##############################
 .[Cc][Aa][Cc][Hh][Ee]/
-.[Cc][Ll][Aa][Nn][Gg][Dd]
+.[Cc][Ll][Aa][Nn][Gg][Dd]/
+# Track .clangd config, ignore generated compile_commands.json
+compile_commands.json
 
 ##############################
 ## cmake                    ##
 ##############################
 [Bb][Uu][Ii][Ll][Dd]/
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
 
 ##############################
-## IntelliJ                 ##
+## Build Artifacts          ##
 ##############################
-.[Ii][Dd][Ee][Aa]/
+*.o
+*.a
+*.elf
+*.bin
+*.iso
+*.img
+*.map
 
 ##############################
-## vscode                   ##
+## Visual Studio 💩         ##
 ##############################
 .[Vv][Ss][Cc][Oo][Dd][Ee]/

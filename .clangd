@@ -1,0 +1,50 @@
+# clangd configuration for TinyOS kernel development
+# This file tells clangd (LSP) how to understand our freestanding kernel code
+
+CompileFlags:
+  Add:
+    # Force C language mode (not Objective-C)
+    - "-xc"
+    
+    # Kernel-specific compiler flags
+    - "--target=x86_64-elf"
+    - "-ffreestanding"
+    - "-nostdlib"
+    - "-fno-builtin"
+    - "-std=c17"
+    
+    # Include directories for all modules (relative to project root)
+    - "-Iinclude"
+    - "-Ilib/types/include"
+    - "-Ilib/memory/include"
+    - "-Ilib/buffer/include"
+    - "-Ilib/fio/include"
+    - "-Ikernel/include"
+    - "-Iarch/include"
+    - "-Iboot/include"
+    - "-Imm/include"
+    
+  Remove:
+    # Remove flags that confuse clangd analysis
+    - "-mno-red-zone"
+    - "-fno-stack-protector"
+    - "-march=*"
+    - "-mtune=*"
+
+Diagnostics:
+  # Don't complain about missing standard library
+  Suppress:
+    - "pp_file_not_found"
+  
+  UnusedIncludes: Strict
+  MissingIncludes: None
+
+Index:
+  Background: Build
+  StandardLibrary: No
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+  Designators: Yes

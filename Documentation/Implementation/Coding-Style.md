@@ -1,0 +1,368 @@
+# TinyOS Coding Style Guide
+
+## Overview
+
+TinyOS uses `clang-format` to enforce consistent style. If you're coming from C++, Rust, or Zig, most of this will be familiar. We only document the non-obvious parts here - things that might surprise you or are specific to kernel development.
+
+## Basic Formatting (Quick Reference)
+
+**Don't waste time reading this if you know C:**
+- 4 spaces, no tabs
+- 120 column limit
+- Linux kernel brace style
+- Pointer alignment middle: `uint8_t * ptr`
+- Qualifiers right: `uint32_t const value`
+- Space after casts: `(uint32_t) value`
+- Always use braces, even for single statements
+
+Run `clang-format -i <file>` and move on.
+
+## Multi-Dimensional Memory Access
+
+> "The programmer has to be able to see what the machine is doing."
+> — *Ken Thompson*
+
+### Pointer Arithmetic for Multi-Dimensional Data
+
+TinyOS prefers **explicit pointer arithmetic** over array indexing for multi-dimensional data structures to make memory layout and performance characteristics visible.
+
+#### Framebuffer and Pixel Data
+
+```c
+// Preferred: Explicit pointer arithmetic
+uint32_t * pixel_ptr = framebuffer + (y * pitch) + x;
+*pixel_ptr = color;
+
+// Also acceptable: shows the calculation clearly
+uint8_t * pixel_base = framebuffer + (y * pitch) + (x * bytes_per_pixel);
+uint8_t r = *(pixel_base + 0);
+uint8_t g = *(pixel_base + 1);
+uint8_t b = *(pixel_base + 2);
+uint8_t a = *(pixel_base + 3);
+
+// Avoid: Hidden memory layout
+uint32_t color = framebuffer[y][x];  // Where's the pitch? Is this cache-friendly?
+```
+
+#### Matrix Operations
+
+```c
+// Preferred: Cache behavior visible
+void matrix_multiply(float * result, float const * a, float const * b, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+        for (size_t j = 0; j < n; j++) {
+            float * result_elem = result + (i * n) + j;
+            *result_elem = 0.0f;
+            
+            for (size_t k = 0; k < n; k++) {
+                // Shows: a[i,k] is sequential, b[k,j] jumps by n
+                *result_elem += *(a + i * n + k) * *(b + k * n + j);
+            }
+        }
+    }
+}
+
+// Avoid: Hidden memory access patterns
+result[i][j] += a[i][k] * b[k][j];  // How far apart are these elements?
+```
+
+#### Page Tables and Nested Structures
+
+```c
+// Preferred: Shows multi-level pointer traversal
+uint64_t * pml4 = (uint64_t *) read_cr3();
+uint64_t pml4_entry = *(pml4 + pml4_index);
+
+if (pml4_entry & PAGE_PRESENT) {
+    uint64_t * pdpt = (uint64_t *) (pml4_entry & PAGE_ADDR_MASK);
+    uint64_t pdpt_entry = *(pdpt + pdpt_index);
+    // ...
+}
+
+// Shows exactly what memory is being accessed at each level
+```
+
+#### Helper Macros for Common Patterns
+
+When pointer arithmetic becomes repetitive, use macros:
+
+```c
+// Define access pattern once
+#define PIXEL_AT(fb, pitch, x, y) ((fb) + ((y) * (pitch)) + (x))
+
+// Use consistently
+uint32_t * pixel = PIXEL_AT(framebuffer, pitch, x, y);
+*pixel = color;
+
+// Or for 2D matrices
+#define MATRIX_ELEM(matrix, cols, row, col) ((matrix) + ((row) * (cols)) + (col))
+
+float * element = MATRIX_ELEM(matrix, num_cols, i, j);
+*element = value;
+```
+
+#### When to Comment the Layout
+
+```c
+/*
+ * Framebuffer layout:
+ * - Width: 1024 pixels
+ * - Height: 768 pixels  
+ * - Pitch: 1024 pixels (may differ if aligned)
+ * - Format: 32-bit RGBA
+ * - Memory: width * height * 4 bytes
+ * - Row N starts at: base + (N * pitch * 4)
+ */
+uint32_t * pixel = framebuffer + (y * pitch) + x;
+```
+
+#### One-Dimensional Arrays: Array Syntax OK
+
+For simple 1D arrays, traditional indexing is fine:
+
+```c
+// OK: Simple 1D array
+char buffer[256];
+buffer[i] = 'x';
+
+// Also OK for simple sequential access
+for (size_t i = 0; i < count; i++) {
+    array[i] = initial_value;
+}
+```
+
+**Key Principle**: If the memory layout and access pattern matter for performance or understanding, make them explicit.
+
+## Structure Encapsulation Philosophy
+
+### Public Structures
+
+> "If you can't trust your kernel developers to not mess with internal fields, you have the wrong developers."
+> — *Linus Torvalds*
+
+**TinyOS uses public structure definitions rather than opaque handles.**
+
+Opaque handles (`typedef struct foo * foo_handle_t`) hide structure definitions from callers. This pattern is common in userspace libraries for API stability, but creates significant problems in kernel development:
+
+**Performance Concerns:**
+- Every field access requires pointer indirection
+- Forces heap allocation instead of enabling stack allocation
+- Reduces cache locality by requiring separate allocations
+- Adds function call overhead for simple field access
+
+**Debugging nightmare:**
+```bash
+# Public structure - see everything
+(lldb) print buffer
+(kbuffer_t) {
+  data = 0x7fff "Hello, World!"
+  length = 13
+  capacity = 256
+}
+
+# Opaque handle - see nothing
+(lldb) print handle
+(void *) 0x7fff8000  # Congratulations, you have an address
+```
+
+**Memory waste:**
+```c
+// Public structure - stack allocation, zero malloc overhead
+kbuffer_t buffer;
+kbuf_init(&buffer, 256);
+
+// Opaque handle - forces heap allocation you don't need
+handle_t * handle = handle_create(256);  // Pointless malloc
+```
+
+**Cache murder:**
+```c
+// Public structure - embedding means one allocation
+typedef struct parser {
+    kbuffer_t input;   // Embedded, contiguous memory
+    kbuffer_t output;  // Better cache locality
+    size_t pos;
+} parser_t;
+
+// Opaque handle - pointer chasing across memory
+typedef struct parser {
+    handle_t * input;   // Pointer to heap allocation
+    handle_t * output;  // Another pointer to different heap allocation
+    size_t pos;
+} parser_t;  // Likely worse cache behavior
+```
+
+**Encapsulation in kernel code:**
+
+Kernel developers need to understand data structure internals. Hiding implementation details creates barriers to debugging and optimization without providing meaningful benefits. Public structures enable:
+- Direct field access for performance-critical code
+- Stack allocation to avoid memory management overhead
+- Structure embedding for better cache behavior
+- Full visibility during debugging
+
+### Default: Public Structures
+
+**Core data structures use public definitions:**
+
+```c
+// include/buffer/buffer.h - Public structure definition
+typedef struct buffer {
+    uint8_t * data;
+    size_t length;
+    size_t capacity;
+} buffer_t;
+
+// Inline helpers for convenience
+static inline size_t buf_length(buffer_t const * buf) {
+    return buf->length;
+}
+
+// Complex operations as functions
+void buf_init(buffer_t * buf, size_t initial_capacity);
+int buf_append(buffer_t * buf, uint8_t const * data, size_t len);
+void buf_destroy(buffer_t * buf);
+```
+
+### Why This is Better
+
+**Performance:**
+```c
+buffer_t buffer;  // Stack allocation - zero malloc overhead
+buf_init(&buffer, 256);
+
+if (buffer.length > 0) {  // Direct access - zero function call overhead
+    process(buffer.data);
+}
+```
+
+**Debugging:**
+```bash
+# Public structure - full visibility
+(lldb) print buffer
+(buffer_t) $0 = {
+  data = 0x00007ffff7fb0000 "actual data you can see"
+  length = 23
+  capacity = 256
+}
+
+# Opaque handle - limited information
+(lldb) print handle
+(void *) $0 = 0x00007ffff7fb0000
+```
+
+**Memory layout:**
+```c
+typedef struct parser {
+    buffer_t input;   // Embedded - one allocation for entire struct
+    buffer_t output;  // Not a pointer - better cache locality
+    size_t pos;
+} parser_t;
+```
+
+### When Direct Access is Expected
+
+Direct field access is **normal and encouraged**:
+
+```c
+// Hot loop? Access fields directly.
+for (size_t i = 0; i < buffer.length; i++) {
+    process(buffer.data[i]);
+}
+
+// Need to check something? Just check it.
+if (buffer.capacity < required) {
+    buf_resize(&buffer, required);
+}
+
+// Setting up a structure? Initialize the fields.
+packet.payload.length = new_size;
+```
+
+### Opaque Handles: The Rare Exception
+
+Use opaque handles ONLY when you have **actual** abstraction needs:
+
+```c
+// Hardware varies wildly - VGA text vs VESA graphics vs EFI framebuffer
+typedef struct framebuffer * framebuffer_handle_t;
+
+// Plugin interface where external code must work with future changes
+typedef struct fs_driver * fs_driver_handle_t;
+```
+
+**DO NOT use opaque handles for:**
+- Core data structures (buffers, lists, hashtables)
+- Anything performance-critical
+- Anything that needs stack allocation
+- Anything where you want developers to understand the layout
+
+If you find yourself typing `typedef struct foo * foo_handle_t` for a buffer or list or tree, **stop**. You're about to write bad code.
+
+### Document Your Structures
+
+Since structures are public, document them properly:
+
+### Document Your Structures
+
+Since structures are public, document them properly:
+
+```c
+/**
+ * Page table entry (x86-64)
+ * 
+ * Bit layout:
+ *   0-11:   Flags
+ *   12-51:  Physical page frame number  
+ *   52-62:  Available for OS
+ *   63:     Execute disable
+ * 
+ * Invariants:
+ *   - Physical address is 4KB aligned
+ *   - If !PRESENT, other flags are undefined
+ * 
+ * Direct bit manipulation allowed.
+ */
+typedef struct page_table_entry {
+    uint64_t value;
+} pte_t;
+
+static inline bool pte_is_present(pte_t const * pte) {
+    return (pte->value & PTE_PRESENT) != 0;
+}
+
+// Direct manipulation when you know what you're doing
+pte->value = phys_addr | PTE_PRESENT | PTE_WRITABLE;
+```
+
+### Naming
+
+**Public structures:**
+```c
+typedef struct char_buffer char_buffer_t;
+void buf_init(char_buffer_t * buf, size_t capacity);
+void buf_destroy(char_buffer_t * buf);
+```
+
+**Opaque handles (rare):**
+```c
+typedef struct device * device_handle_t;
+device_handle_t device_create(device_type_t type);
+void device_destroy(device_handle_t handle);
+```
+
+## Editor Integration
+Configure your editor to run clang-format on save:
+
+**VS Code** (`.vscode/settings.json`):
+```json
+{
+    "editor.formatOnSave": true,
+    "C_Cpp.clang_format_path": "clang-format",
+    "C_Cpp.clang_format_style": "file"
+}
+```
+
+**Vim/Neovim**:
+```vim
+autocmd BufWritePre *.c,*.h :silent! !clang-format -i %
+```
