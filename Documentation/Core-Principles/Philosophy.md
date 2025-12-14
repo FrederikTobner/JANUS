@@ -238,30 +238,6 @@ The CPU knows about:
 - CPU registers and instruction sequencing
 - Cache lines and memory alignment
 
-C exposes exactly these things. When you understand how the computer works, C becomes the natural way to express that understanding.
-
-**Example - Memory-Mapped Hardware:**
-
-```c
-// This is how the CPU sees hardware:
-volatile uint32_t *uart_base = (uint32_t *)0x10000000;
-uart_base[0] = 'H';  // Write to address 0x10000000
-
-// This maps 1:1 to assembly:
-// movabs rax, 0x10000000    ; Load address into register
-// mov dword ptr [rax], 0x48 ; Write 'H' (0x48) to that address
-```
-
-No abstractions. No runtime. No hidden behavior. Just an address and a write. The CPU does exactly what you told it to do.
-
-**When You Think Like a Computer:**
-- You understand that memory is flat and addressed
-- You know that functions are just jump instructions
-- You recognize that loops compile to branches and jumps
-- You see that data structures are memory layout specifications
-
-When you understand these things, C stops being a "low-level language" and becomes the **correct level of abstraction**. It's not low-level - it's **machine-level**. And that's exactly where kernel code needs to be.
-
 We embrace C's strengths:
 - Direct hardware access
 - Predictable performance
@@ -296,7 +272,7 @@ Each language excels in its target domain. For kernel development, C's directnes
 - macOS (XNU kernel): C for Mach and BSD layers, restricted C++ for IOKit driver framework
 - Windows NT: Restricted C++ (no exceptions, no RTTI, minimal STL usage)
 
-The vast majority of production operating systems are written in C. The few exceptions use heavily restricted subsets of other languages that remove most of their distinctive features. Alternative systems languages have yet to produce kernels running production workloads at scale, though projects like Rust-for-Linux and RedoxOS are exploring new approaches.
+The vast majority of production operating systems are written in C. Windows uses restricted C++ but disables most of the language's defining features, leaving primarily the complexity without the benefits. Furthermore, Windows' reputation for stability issues (blue screens, driver crashes, forced reboots) makes it a poor architectural reference for a reliability-focused kernel project. Alternative systems languages have yet to produce kernels running production workloads at scale, though projects like Rust-for-Linux and RedoxOS are exploring new approaches.
 
 ### Kernel-Space Discipline
 Kernel code requires higher standards:

@@ -6,7 +6,7 @@ section .multiboot
 align 8
 
 multiboot_start:
-    ; Multiboot2 magic number
+    ; Multiboot2 header magic number
     dd 0xe85250d6
     
     ; Architecture: 0 = i386/x86_64 protected mode
@@ -15,7 +15,7 @@ multiboot_start:
     ; Header length (from start to end tag)
     dd multiboot_end - multiboot_start
     
-    ; Checksum: -(magic + architecture + header_length)
+    ; Checksum: -(header magic + architecture + header_length)
     dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
 
 ; Information request tag
