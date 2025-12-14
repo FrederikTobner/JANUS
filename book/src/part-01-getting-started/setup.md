@@ -307,7 +307,7 @@ Don't worry about CMake configuration yet. We'll create the build system piece b
 
 This chapter focuses on *toolchain setup*, not:
 
-- **Editor configuration**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors if you want it.
+- **Editor configuration**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (Language Server Protocol - provides autocomplete, go-to-definition, error highlighting) if you want it.
 - **Git workflows**: Assumed knowledge.
 - **Shell basics**: You should already know how to navigate directories and run commands.
 - **C language tutorial**: We'll write plenty of C, but won't explain pointers or struct syntax.

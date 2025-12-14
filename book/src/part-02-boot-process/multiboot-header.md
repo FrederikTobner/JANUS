@@ -91,7 +91,7 @@ info_request_start:
     
     dd 4                    ; Request: basic memory info
     dd 6                    ; Request: memory map
-    dd 8                    ; Request: framebuffer info
+    dd 8                    ; Request: framebuffer info (graphics display info)
 info_request_end:
 
 ; End tag (required)

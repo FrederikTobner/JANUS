@@ -2,7 +2,7 @@
 
 ## Overview
 
-**BMUnit** (Bare Metal Unit) is TinyOS's in-kernel testing framework, inspired by Linux kernel's KUnit but adapted for bare metal x86-64 development.
+**BMUnit** (Bare Metal Unit) is TinyOS's in-kernel testing framework, inspired by Linux kernel's KUnit but adapted for our needs, that we plan to implement as part of TinyOS.
 
 **Design Philosophy:**
 
@@ -321,82 +321,6 @@ cmake --build build --target tinyos_test.elf
 qemu-system-x86_64 -kernel build/tinyos_test.elf -serial stdio -display none
 ```
 
-## BMUnit Framework Implementation
-
-### Directory Structure
-
-```
-bmunit/
-├── include/
-│   └── bmunit/
-│       ├── test.h           # Main BMUnit API
-│       ├── types.h          # BMUnit types
-│       └── runner.h         # Test runner
-├── bmunit_core.c            # Core framework
-├── bmunit_assertions.c      # Assertion implementations
-├── bmunit_runner.c          # Test execution
-└── CMakeLists.txt
-```
-
-### Framework Types
-
-```c
-// include/bmunit/types.h
-
-struct bmunit;
-struct bmunit_suite;
-
-typedef void (*bmunit_test_func_t)(struct bmunit *test);
-typedef int (*bmunit_init_func_t)(struct bmunit_suite *suite);
-typedef void (*bmunit_exit_func_t)(struct bmunit_suite *suite);
-
-struct bmunit_case {
-    char const * name;
-    bmunit_test_func_t run;
-};
-
-struct bmunit_suite {
-    char const * name;
-    bmunit_init_func_t init;
-    bmunit_exit_func_t exit;
-    struct bmunit_case const * test_cases;
-};
-
-struct bmunit {
-    struct bmunit_suite const * suite;
-    char const * test_name;
-    bool failed;
-    uint32_t assertions_passed;
-    uint32_t assertions_failed;
-};
-```
-
-## Test Output
-
-BMUnit provides formatted test output via serial/VGA:
-
-```
-[BMUnit] Running test suite: charbuffer
-  [1/3] test_buffer_create...................... PASS
-  [2/3] test_buffer_append...................... PASS
-  [3/3] test_buffer_destroy.................... PASS
-  
-  Suite: charbuffer - 3 tests, 3 passed, 0 failed
-
-[BMUnit] Running test suite: serial
-  [1/2] test_serial_init........................ PASS
-  [2/2] test_serial_write....................... FAIL
-    Expected: 0
-    Actual:   -1
-    Location: arch/x86_64/tests/serial_test.c:42
-  
-  Suite: serial - 2 tests, 1 passed, 1 failed
-
-==============================================
-BMUnit Summary: 5 tests, 4 passed, 1 failed
-==============================================
-```
-
 ## Testing Best Practices
 
 ### Test Organization
@@ -462,6 +386,7 @@ static void test_append(struct bmunit *test) {
 BMUnit may add features beyond KUnit as TinyOS needs them:
 
 ### Parameterized Tests (Planned)
+
 ```c
 // Run same test with different inputs
 BMUNIT_PARAMETERIZED_TEST(test_buffer_sizes, size, 
@@ -474,6 +399,7 @@ BMUNIT_PARAMETERIZED_TEST(test_buffer_sizes, size,
 ```
 
 ### Performance Benchmarks (Planned)
+
 ```c
 BMUNIT_BENCHMARK(bench_buffer_append) {
     char_buffer_t * buf = charbuf_create(1024);
@@ -489,6 +415,7 @@ BMUNIT_BENCHMARK(bench_buffer_append) {
 ```
 
 ### Hardware Mock Support (Planned)
+
 ```c
 // Mock hardware registers for testing without real hardware
 BMUNIT_MOCK_MMIO(UART_BASE, uart_mock_data);
@@ -511,5 +438,5 @@ test_serial_write();  // Uses mock instead of real UART
 
 ## References
 
-- Linux KUnit documentation: https://www.kernel.org/doc/html/latest/dev-tools/kunit/
-- Linux kernel testing: https://www.kernel.org/doc/html/latest/dev-tools/testing-overview.html
+- Linux KUnit documentation: <https://www.kernel.org/doc/html/latest/dev-tools/kunit/>
+- Linux kernel testing: <https://www.kernel.org/doc/html/latest/dev-tools/testing-overview.html>

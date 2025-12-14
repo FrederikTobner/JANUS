@@ -25,7 +25,6 @@ TinyOS/
 ├── boot/             # Multiboot2 boot loader
 ├── arch/             # Architecture-specific code (x86_64)
 ├── lib/              # Kernel libraries (types, memory, buffer, fio)
-├── bmunit/           # BMUnit testing framework
 ├── mm/               # Memory management
 ├── drivers/          # Device drivers
 ├── include/          # Global headers
@@ -43,102 +42,112 @@ TinyOS/
 - **Assembler**: NASM (Intel syntax)
 - **Build System**: CMake 3.20+
 - **Target**: x86_64-elf (bare metal)
-- **Testing**: BMUnit (Bare Metal Unit testing framework)
+- **Testing**: Planned - BMUnit (Bare Metal Unit testing framework)
 
 ## Documentation
 
 Comprehensive documentation is in the [`Documentation/`](Documentation/) folder:
 
-### Core Principles
-
-- [Philosophy.md](Documentation/Core-Principles/Philosophy.md) - Technical philosophy and design values
-- [Terminology.md](Documentation/Core-Principles/Terminology.md) - Naming conventions
-- [Standards.md](Documentation/Core-Principles/Standards.md) - C17 standards and compiler requirements
-
-### Code Organization
-
-- [Module-Structure.md](Documentation/Code-Organization/Module-Structure.md) - Module hierarchy and dependencies
-- [API-Design.md](Documentation/Code-Organization/API-Design.md) - Function design and naming patterns
-- [Include-Hierarchy.md](Documentation/Code-Organization/Include-Hierarchy.md) - Header organization
-
-### Implementation
-
-- [Coding-Style.md](Documentation/Implementation/Coding-Style.md) - Code style guide
-- [Hardware-Abstraction.md](Documentation/Implementation/Hardware-Abstraction.md) - Hardware interaction patterns
-- [Documentation-Style.md](Documentation/Implementation/Documentation-Style.md) - Comment guidelines
-- [BMUnit-Testing.md](Documentation/Implementation/BMUnit-Testing.md) - Testing framework and best practices
-
 ## Testing
 
-TinyOS uses **BMUnit** (Bare Metal Unit), a testing framework inspired by Linux kernel's KUnit but adapted for bare metal development.
+**Planned:** TinyOS will use **BMUnit** (Bare Metal Unit), a testing framework inspired by Linux kernel's KUnit but adapted for our needs.
 
-Tests are embedded within modules (not in a separate `tests/` folder):
+The planned approach will embed tests within modules (not in a separate `tests/` folder):
 
 ```
-lib/libkbuffer/
+lib/buffer/
 ├── buffer.c              # Implementation
-├── buffer_test.c         # Tests
+├── buffer_test.c         # Tests (planned)
 └── include/lib/buffer.h
 ```
 
-**Build and run tests:**
-
-```bash
-# Build with tests enabled
-cmake -B build -DBUILD_TESTS=ON
-cmake --build build
-
-# Run test kernel
-qemu-system-x86_64 -kernel build/tinyos_test.elf -serial stdio -display none
-```
-
-See [BMUnit-Testing.md](Documentation/Implementation/BMUnit-Testing.md) for complete testing documentation.
-
-## Development Principles
-
-- **Hardware-First**: Direct hardware interaction, no unnecessary abstractions
-- **Modular Architecture**: Independent modules with zero circular dependencies
-- **Explicit Over Implicit**: Clear, verbose code over clever abstractions
-- **Zero Warnings**: All code compiles cleanly with `-Wall -Wextra -Wpedantic`
-- **Exposed Structures**: No opaque handles (Linux kernel philosophy)
-- **Educational Focus**: Code as both implementation and teaching material
+See [BMUnit-Testing.md](Documentation/Implementation/BMUnit-Testing.md) for the planned testing framework design.
 
 ## Building
 
 ### Prerequisites
 
-- Clang 17+
-- NASM
-- CMake 3.20+
-- QEMU (for testing)
+- **Clang 17+** - C compiler with x86_64-elf cross-compilation support
+- **NASM** - Assembler for boot code and low-level kernel code
+- **CMake 3.20+** - Build system generator
+- **Ninja** - Fast build tool (recommended) or Make
+- **QEMU** - x86_64 system emulator for testing
+- **GRUB tools** - grub-pc-bin, xorriso, mtools (for creating bootable ISO images)
+- **LLDB** - Debugger for kernel debugging (optional but recommended)
+
+Installation:
+
+```bash
+# Debian/Ubuntu
+sudo apt install clang nasm cmake ninja-build qemu-system-x86 \
+                 grub-pc-bin xorriso mtools lldb
+
+# Arch Linux
+sudo pacman -S clang nasm cmake ninja qemu-system-x86 \
+               grub xorriso mtools lldb
+
+# macOS
+brew install llvm nasm cmake ninja qemu grub xorriso mtools
+```
+
+See [Documentation/Setup.md](Documentation/Setup.md) for detailed installation instructions.
 
 ### Build Commands
 
 ```bash
-# Debug build
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
+# Configure build
+cmake -B build -G Ninja
+
+# Build kernel
+ninja -C build
+
+# Create bootable ISO
+ninja -C build iso
+
+# Build and run in QEMU
+ninja -C build run
+
+# Build and run with debugger
+ninja -C build debug
+```
+
+Alternative build types:
+
+```bash
+# Debug build (default)
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 
 # Release build
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-
-# Build with tests
-cmake -B build -DBUILD_TESTS=ON
-cmake --build build
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 ```
 
 ## Running
 
 ```bash
-# Run in QEMU with serial output
-qemu-system-x86_64 -kernel build/kernel.elf -serial stdio
+# Run bootable ISO in QEMU
+ninja -C build run
 
-# Run with debugging
-qemu-system-x86_64 -kernel build/kernel.elf -s -S -serial stdio
-# In another terminal:
-lldb build/kernel.elf -o "gdb-remote localhost:1234"
+# Or manually:
+qemu-system-x86_64 -cdrom build/tinyos.iso -boot d -serial stdio
 ```
+
+### Debugging with LLDB
+
+```bash
+# Terminal 1: Start QEMU with debugger waiting
+ninja -C build debug
+
+# Terminal 2: Connect LLDB
+lldb build/kernel.elf
+(lldb) gdb-remote localhost:1234
+(lldb) b kernel_main
+(lldb) c
+(lldb) register read
+(lldb) n  # step to next line
+(lldb) bt # show backtrace
+```
+
+See the [book](book/src/part-02-boot-process/creating-bootable-iso.md#proving-the-kernel-works-with-lldb) for detailed LLDB usage and debugging examples.
 
 ## License
 

@@ -11,23 +11,7 @@ Documentation in TinyOS has a purpose:
 - **Educational value** - Help people learn, not just copy-paste
 - **Enable debugging** - Future you needs to understand this code at 3AM
 
-## Comment Principles
-
-### Write Comments That Explain "Why", Not "What"
-
-**If your comment just describes what the code does, you're wasting everyone's time.**
-
-```c
-// USELESS: Anyone can read C
-// Increment the counter
-counter++;
-
-// USEFUL: Explains the reason
-// Track page faults for memory pressure detection
-counter++;
-```
-
-**Can a competent C programmer figure out what the code does by reading it? Then don't comment it. Comment why it exists, how it can be used, but not what it does.**
+## Documentation Requirements
 
 ### Document Intent and Invariants
 
@@ -129,18 +113,13 @@ void * memcpy(void * dest, void const * src, size_t count);
 void * kmalloc(size_t size);
 ```
 
-## Inline Comments
-
-### When to Use Inline Comments
+## Complex Algorithm Documentation
 
 ```c
 void handle_page_fault(uint64_t fault_addr) {
-    // Save fault address before it's overwritten
     uint64_t addr = fault_addr;
     
-    // Check if fault is in user space
     if (addr < USER_SPACE_END) {
-        // User space page fault - check if it's a valid mapping
         if (!is_valid_user_address(addr)) {
             terminate_process(SIGSEGV);
             return;

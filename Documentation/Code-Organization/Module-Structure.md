@@ -26,21 +26,9 @@ TinyOS/
 └── Documentation/    # Technical documentation
 ```
 
-## Module Design Principles
+## Module Dependencies
 
-### 1. Self-Contained Modules
-Each module is an independent unit that:
-- Builds as a static library (`.a` file)
-- Has its own include directory
-- Declares explicit dependencies
-- Exports a clear public interface
-- Can be tested independently
-
-### 2. No Circular Dependencies
-
-**Circular dependencies indicate incorrect abstraction layering.** If module A depends on B and B depends on A, the module boundaries are incorrectly designed.
-
-Dependencies must flow in **one direction**:
+Dependencies flow in **one direction**:
 
 ```
            ┌──────────┐
@@ -63,6 +51,7 @@ Dependencies must flow in **one direction**:
 If `buffer` needs something from `kernel`, you've layered it wrong. Move the functionality or redesign the interface.
 
 ### 3. Clear Layering
+
 ```
 ┌─────────────────────────────────────────┐
 │  Application Layer (future)             │
@@ -82,9 +71,11 @@ If `buffer` needs something from `kernel`, you've layered it wrong. Move the fun
 ## Core Modules
 
 ### `kernel/` - Core Kernel
+
 Main kernel functionality and entry point.
 
 **Structure:**
+
 ```
 kernel/
 ├── main.c              # Kernel entry point
@@ -100,15 +91,18 @@ kernel/
 ```
 
 **Responsibilities:**
+
 - Kernel initialization sequence
 - Main kernel loop
 - Panic and error handling
 - Global kernel state
 
 ### `boot/` - Boot Module
+
 Boot loader interface and early initialization.
 
 **Structure:**
+
 ```
 boot/
 ├── multiboot.asm       # Multiboot2 header
@@ -120,14 +114,17 @@ boot/
 ```
 
 **Responsibilities:**
+
 - Multiboot2 header and compliance
 - Initial CPU state setup (stack, registers)
 - Transition from boot loader to kernel
 
 ### `arch/` - Architecture Abstraction
+
 Architecture-specific code with generic interfaces.
 
 **Structure:**
+
 ```
 arch/
 ├── x86_64/            # x86-64 implementation
@@ -148,6 +145,7 @@ arch/
 ```
 
 **Responsibilities:**
+
 - Hardware I/O operations
 - CPU-specific functions
 - Platform initialization
@@ -156,9 +154,11 @@ arch/
 ## Library Modules
 
 ### `lib/types/` - Basic Types and Compiler Attributes
+
 Fundamental type definitions and compiler-specific macros.
 
 **Structure:**
+
 ```
 lib/types/
 ├── include/
@@ -169,17 +169,20 @@ lib/types/
 ```
 
 **Responsibilities:**
+
 - Fixed-width integer types (uint8_t, int32_t, etc.)
 - Size types (size_t, ssize_t, ptrdiff_t)
 - Boolean type (bool, true, false)
 - NULL definition
-- Compiler attributes (__packed, __aligned, etc.)
+- Compiler attributes (__packed,__aligned, etc.)
 - Common macros (likely, unlikely, ARRAY_SIZE)
 
 ### `lib/memory/` - Memory Manipulation
+
 Low-level memory operations without libc.
 
 **Structure:**
+
 ```
 lib/memory/
 ├── memory.c           # Memory operations implementation
@@ -190,14 +193,17 @@ lib/memory/
 ```
 
 **Responsibilities:**
+
 - memcpy, memmove, memset, memcmp
 - memzero (explicit zero-fill)
 - Raw memory region operations
 
 ### `lib/buffer/` - Character Buffer Operations
+
 Character buffer manipulation, views, and operations.
 
 **Structure:**
+
 ```
 lib/buffer/
 ├── buffer.c           # Buffer implementation
@@ -208,15 +214,18 @@ lib/buffer/
 ```
 
 **Responsibilities:**
+
 - Character buffer creation and destruction
 - Buffer manipulation (append, insert, delete)
 - Buffer views and slicing
 - Memory-safe buffer operations
 
 ### `lib/fio/` - Formatted Input/Output
+
 Formatted I/O, logging, and debug output.
 
 **Structure:**
+
 ```
 lib/fio/
 ├── fio.c              # Formatted I/O implementation
@@ -227,6 +236,7 @@ lib/fio/
 ```
 
 **Responsibilities:**
+
 - Formatted output (printf-style)
 - Debug output and hex dumps
 - Stream abstractions
@@ -235,6 +245,7 @@ lib/fio/
 ## Module Dependencies
 
 ### Dependency Graph (Phase 1)
+
 ```
 kernel
 ├── depends on: fio, buffer, arch, boot
@@ -253,6 +264,7 @@ memory
 ```
 
 ### CMake Dependency Declaration
+
 ```cmake
 # lib/buffer/CMakeLists.txt
 add_library(buffer STATIC buffer.c)
@@ -285,7 +297,9 @@ target_link_libraries(kernel
 ## Module Build System
 
 ### Static Library Generation
+
 Each module builds as a static library:
+
 ```
 build/
 ├── lib/
@@ -300,7 +314,9 @@ build/
 ```
 
 ### Final Kernel Linking
+
 All libraries link into final kernel binary:
+
 ```
 buffer.a + fio.a + arch.a + boot.a + kernel.o → kernel.bin
 ```
@@ -310,16 +326,19 @@ buffer.a + fio.a + arch.a + boot.a + kernel.o → kernel.bin
 ### Public vs Private Headers
 
 **Public headers** (in `include/` directories):
+
 - Exported to other modules
 - Define module's public API
 - Installed to global include path
 
 **Private headers** (in module root or subdirs):
+
 - Internal to module only
 - Not visible to other modules
 - Implementation details
 
 Example:
+
 ```
 lib/buffer/
 ├── buffer.c              # Implementation
@@ -332,6 +351,7 @@ lib/buffer/
 ## Future Module Expansion
 
 ### Memory Management Module
+
 ```
 mm/
 ├── page_frame.c       # Physical memory management
@@ -345,6 +365,7 @@ mm/
 ```
 
 ### Device Driver Module
+
 ```
 drivers/
 ├── keyboard/
@@ -357,6 +378,7 @@ drivers/
 ```
 
 ### File System Module
+
 ```
 fs/
 ├── vfs/               # Virtual file system
@@ -368,6 +390,7 @@ fs/
 ## Module Documentation Requirements
 
 Each module must have:
+
 1. **README.md** - Module purpose and overview
 2. **API documentation** - In public headers
 3. **Implementation notes** - Complex algorithms explained
@@ -422,6 +445,7 @@ kernel/
 ### Why Separate Test Directories?
 
 **Benefits of dedicated test directories:**
+
 - **Clean separation** - Source and tests physically separated
 - **Easier GLOB patterns** - Build system can distinguish source from tests
 - **Scalability** - Works well as test count grows
@@ -450,12 +474,14 @@ endif()
 ```
 
 # Conditionally build tests
+
 if(BUILD_TESTS)
     tinyos_add_test(buffer_test
         SOURCES buffer_test.c
         DEPENDS buffer
     )
 endif()
+
 ```
 
 ### Running Tests

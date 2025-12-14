@@ -108,18 +108,28 @@ brew install qemu
 qemu-system-x86_64 --version
 ```
 
-## Optional Dependencies
+### Bootloader Tools
 
-### Testing Framework
+**GRUB and xorriso**
 
-**BMUnit** (included in repository)
+These tools are required to create bootable ISO images.
 
-BMUnit is our bare-metal unit testing framework. It's included in `tools/bmunit/` as part of the project, so no external installation is needed.
-
-To build with tests enabled:
 ```bash
-cmake -B build -DBUILD_TESTS=ON
+# Debian/Ubuntu
+sudo apt install grub-pc-bin xorriso mtools
+
+# Arch Linux
+sudo pacman -S grub xorriso mtools
+
+# macOS
+brew install grub xorriso mtools
+
+# Verify installation
+grub-mkrescue --version
+xorriso --version
 ```
+
+## Optional Dependencies
 
 ### Language Server (for IDE support)
 
@@ -148,14 +158,21 @@ git clone <repository-url>
 cd TinyOS
 
 # Configure the build
-cmake -B build
+cmake -B build -G Ninja
 
-# Build the project
-cmake --build build
+# Build the kernel
+ninja -C build
 
-# (Optional) Build with tests
-cmake -B build -DBUILD_TESTS=ON
-cmake --build build
+# Create bootable ISO
+ninja -C build iso
+
+# Run in QEMU
+ninja -C build run
+
+# Or run with debugging support
+ninja -C build debug
+# In another terminal:
+lldb build/kernel.elf -o "gdb-remote localhost:1234"
 ```
 
 ## Verification
@@ -164,23 +181,25 @@ To verify your setup is complete:
 
 ```bash
 # Check all required tools
-cmake --version     # ≥ 3.20
-clang --version     # ≥ 17.0
+cmake --version            # ≥ 3.20
+clang --version            # ≥ 17.0
 nasm --version
 lldb --version
 qemu-system-x86_64 --version
+grub-mkrescue --version
+xorriso --version
 
 # Try to configure the project
-cmake -B build
+cmake -B build -G Ninja
 
-# You should see:
-# -- Host platform: Linux (or macOS)
-# -- Compiler: Clang 17.x.x
-# -- Build type: Debug
-# -- Target: x86_64-elf
-# ...
-# -- Configuring done
-# -- Generating done
+# Build and test
+ninja -C build
+ninja -C build iso
+
+# Run the kernel
+ninja -C build run
+# You should see QEMU start and the kernel boot (blank screen is expected)
+# Press Ctrl+C to exit
 ```
 
 If all commands succeed, you're ready to start development!
@@ -190,6 +209,7 @@ If all commands succeed, you're ready to start development!
 ### CMake version too old
 
 If your distribution provides an older CMake version, you can:
+
 - Install from [Kitware's APT repository](https://apt.kitware.com/) (Ubuntu/Debian)
 - Download binaries from [cmake.org](https://cmake.org/download/)
 - Use pip: `pip3 install cmake`
@@ -205,18 +225,35 @@ cmake -B build -DCMAKE_C_COMPILER=clang-17
 ### NASM not found
 
 Verify NASM is in your PATH:
+
 ```bash
 which nasm
 ```
 
 If CMake can't find it, specify explicitly:
+
 ```bash
 cmake -B build -DCMAKE_ASM_NASM_COMPILER=/usr/bin/nasm
+```
+
+### grub-mkrescue not found
+
+Ensure GRUB tools are installed. On Ubuntu/Debian, you specifically need `grub-pc-bin` (for BIOS boot support), not just `grub-common`:
+
+```bash
+sudo apt install grub-pc-bin xorriso mtools
+```
+
+On some systems, grub-mkrescue may be in a non-standard location. Find it with:
+
+```bash
+which grub-mkrescue
 ```
 
 ### Cross-compilation issues
 
 TinyOS targets `x86_64-elf`, which is a freestanding environment. If you get linker errors about missing standard library functions, verify that your CMakeLists.txt uses the correct flags:
+
 - `-nostdlib` - Don't link standard libraries
 - `-ffreestanding` - Freestanding environment
 - `-target x86_64-elf` - Target triple

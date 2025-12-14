@@ -17,11 +17,15 @@ When our boot assembly calls `kernel_main()`, here's what we're guaranteed:
 - Stack configured (16 KiB)
 - Interrupts disabled (`IF` flag clear)
 
+> **Aside: Interrupts and the IF Flag**
+>
+> **Interrupts** are signals that pause normal execution to handle events (keyboard press, timer tick, hardware errors). The **IF (Interrupt Flag)** in the CPU's FLAGS register controls whether interrupts are enabled. When IF=0 (cleared), the CPU ignores maskable interrupts. GRUB disables interrupts before calling our kernel because we haven't set up interrupt handlers yet—if an interrupt fired, the CPU wouldn't know where to jump and would triple fault.
+
 **CPU mode:**
 
-- 32-bit protected mode
-- Paging disabled (physical = virtual addresses)
-- All selectors loaded with valid descriptors
+- 64-bit long mode (boot assembly transitions from 32-bit to 64-bit before calling us)
+- Paging enabled (identity-mapped first 2MB)
+- All segment registers cleared (flat memory model)
 
 **What we're NOT guaranteed:**
 

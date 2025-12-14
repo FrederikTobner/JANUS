@@ -205,6 +205,17 @@ build/kernel.elf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV),
 statically linked, with debug_info, not stripped
 ```
 
+> **Aside: What's an ELF File?**
+>
+> ELF (Executable and Linkable Format) is the standard executable format on Unix-like systems (Linux, BSD, etc.). It's a container that holds:
+>
+> - **Machine code** (your compiled program)
+> - **Section headers** (where different parts of code/data live)
+> - **Program headers** (how to load the file into memory)
+> - **Symbol tables** (function names, variable names for debugging)
+>
+> The `.elf` extension is optional—on Linux, executables typically have no extension. We use it to make it clear this is not a normal userspace program but a freestanding kernel. GRUB knows how to parse ELF files and load them according to their program headers.
+
 Check the entry point:
 
 ```bash

@@ -160,9 +160,20 @@ gdt64:
 2. **Call kernel**: Pass multiboot info via System V AMD64 ABI (RDI, RSI)
 3. **Halt on return**: If kernel returns, halt forever
 
+> **Aside: System V AMD64 ABI**
+>
+> ABI stands for Application Binary Interface—the rules for how functions are called at the assembly level. The System V AMD64 ABI (used by Linux, BSD, and most Unix-like systems) specifies:
+>
+> - **First 6 integer arguments** go in registers: RDI, RSI, RDX, RCX, R8, R9
+> - **Return value** goes in RAX
+> - **Stack must be 16-byte aligned** before a call instruction
+> - **Certain registers are callee-saved** (RBX, RBP, R12-R15) - the called function must preserve them
+>
+> So when we call `kernel_main(uint32_t magic, void *info)`, the magic number goes in RDI (or EDI for 32-bit values) and the info pointer goes in RSI. Our assembly code preserves these values from 32-bit mode (EDI, ESI) and they automatically extend to RDI, RSI in 64-bit mode.
+
 > **The Crux: Why All This Setup?**
 >
-> GRUB's Multiboot2 with architecture=0 boots in 32-bit protected mode. But we compiled our kernel for x86_64 (64-bit). We can't just call 64-bit code from 32-bit mode—the CPU would triple-fault! We need to enable "long mode" which requires:
+> GRUB's Multiboot2 with architecture=0 boots in 32-bit protected mode. But we compiled our kernel for x86_64 (64-bit). We can't just call 64-bit code from 32-bit mode—the CPU would triple-fault (see Introduction for what that means)! We need to enable "long mode" which requires:
 >
 > - **Paging enabled** with 4-level page tables (P4 → P3 → P2 → physical)
 > - **PAE enabled** (Physical Address Extension)
@@ -170,6 +181,24 @@ gdt64:
 > - **64-bit GDT loaded** with proper code segment
 >
 > Only then can we jump to 64-bit code. This is one of the trickier parts of OS development—getting the CPU into the mode you need.
+
+## Understanding the Key Components
+
+Before diving into the page tables, let's clarify what these acronyms mean:
+
+**PAE (Physical Address Extension):** Originally added to 32-bit x86 to access more than 4GB of RAM, PAE extends physical addresses from 32 bits to 36 bits. In 64-bit mode, PAE is *required*—you can't enable long mode without it. It changes the paging structure from 2-level (page directory → page table) to 4-level paging.
+
+**EFER (Extended Feature Enable Register):** A Model-Specific Register (MSR) that controls advanced CPU features. The important bit for us is bit 8 (LME - Long Mode Enable), which tells the CPU we want to use 64-bit mode. Once we set this bit *and* enable paging, long mode activates.
+
+**MSR (Model-Specific Register):** Special registers that aren't accessed like normal registers (EAX, EBX, etc.). Instead, you use `rdmsr` (read) and `wrmsr` (write) instructions with the MSR number in ECX. EFER is MSR `0xC0000080`. These registers control CPU-specific features that vary between processor models.
+
+**Control Registers (CR0, CR3, CR4):** Special CPU registers that control processor behavior:
+
+- **CR0:** Contains system control flags. Bit 31 (PG) enables paging, bit 0 (PE) enables protected mode.
+- **CR3:** Holds the physical address of the top-level page table (P4/PML4). The CPU reads this to know where paging structures live.
+- **CR4:** Contains extension flags. Bit 5 (PAE) enables Physical Address Extension, which we need for 64-bit mode.
+
+**GDT (Global Descriptor Table):** A table that defines memory segments. In 32-bit protected mode, segments define memory regions with permissions and limits. In 64-bit long mode, segmentation is mostly disabled (flat memory model), but we still need a GDT with at least a code segment descriptor to tell the CPU "yes, we're in 64-bit mode."
 
 ## Page Tables and Long Mode
 
@@ -184,6 +213,17 @@ p3_table:    ; Level 3 (PDPT)
 p2_table:    ; Level 2 (PD)
     resb 4096
 ```
+
+> **Aside: Page Table Naming**
+>
+> The names are confusing because Intel and AMD use different terminology:
+>
+> - **P4/PML4** = Page Map Level 4 (top level)
+> - **P3/PDPT** = Page Directory Pointer Table
+> - **P2/PD** = Page Directory
+> - **P1/PT** = Page Table (we skip this by using huge pages)
+>
+> We use the shorter P4/P3/P2 names for simplicity. Just know that PML4, PDPT, and PD all mean the same things.
 
 Each page table is 4KB (one page) and must be page-aligned. We use 2MB huge pages for simplicity—this lets us skip Level 1 (page table) and map 2MB chunks directly.
 

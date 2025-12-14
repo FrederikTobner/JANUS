@@ -41,6 +41,14 @@ Because:
 
 Reading about paging is one thing. Debugging why your page table entries keep triple-faulting the CPU is *entirely different*. You'll understand memory management at a level that reading Wikipedia never achieves.
 
+> **Aside: What's a Triple Fault?**
+>
+> When the CPU encounters an error (like a divide-by-zero or invalid memory access), it triggers a **fault**—an exception that calls an error handler. But what if the error handler *itself* triggers an error? The CPU triggers a **double fault** (exception #8) with a special double-fault handler.
+>
+> But what if the *double fault handler* causes an error? The CPU gives up and triggers a **triple fault**, which immediately resets the processor—the CPU equivalent of flipping the table and walking away. For OS developers, triple faults are the bane of existence: instant reboot with no error message, no stack trace, just darkness.
+>
+> They're most common during boot when setting up page tables or interrupt handlers. If your page table entry is malformed, the CPU tries to handle the page fault but can't access the interrupt handler (because paging is broken), triggers a double fault, and then triple faults when even that fails.
+
 It's like the difference between reading a recipe and actually cooking. Theory teaches you concepts. Practice beats them into your skull with a hammer made of segmentation faults.
 
 ### 2. **Demystification**
@@ -88,18 +96,23 @@ TinyOS is a **teaching OS**, designed to illustrate concepts clearly rather than
 ## What You'll Learn
 
 ### Part I: Getting Started
+
 You'll set up your development environment: compiler, assembler, emulator, and debugger. We'll verify everything works by compiling freestanding code.
 
 ### Part II: The Boot Process
+
 We'll write a bootloader compliant with the Multiboot specification, set up the stack, enable 64-bit mode, and jump into C code. By the end, you'll understand exactly what happens between pressing the power button and running your kernel.
 
 ### Part III: Memory Management
+
 First, we'll build a **physical memory manager** that tracks which RAM pages are free. Then we'll implement **virtual memory** with page tables, enabling process isolation and memory protection.
 
 ### Part IV: The Kernel
+
 We'll create a minimal kernel with interrupt handling, basic system calls, and the ability to load and run user programs.
 
 Each chapter includes:
+
 - **Concepts**: What we're building and why
 - **Code**: Step-by-step implementation
 - **Challenges**: Extensions and experiments
@@ -110,6 +123,7 @@ Each chapter includes:
 This book assumes you're already a competent programmer with:
 
 ### Required Knowledge
+
 - **C language**: Pointers, structs, function pointers, bitwise operations, manual memory management
 - **Assembly basics**: Understanding of registers, instruction execution, calling conventions
 - **CMake**: Creating targets, linking libraries, setting compiler flags
@@ -117,6 +131,7 @@ This book assumes you're already a competent programmer with:
 - **Git**: Branching, checking out code, basic version control workflows
 
 ### Computer Architecture
+
 - **CPU fundamentals**: Registers, instruction execution, stack operations
 - **Memory concepts**: RAM, addresses, virtual vs. physical memory
 - **Number systems**: Binary, hexadecimal, bitwise operations
@@ -124,6 +139,7 @@ This book assumes you're already a competent programmer with:
 If you're uncertain about C, assembly, or CMake, **spend time with foundational resources first**. This book won't teach the basics—it builds on them. OS development is challenging enough without simultaneously learning prerequisite skills.
 
 You **don't** need prior experience with:
+
 - Operating system internals (that's what we're here to learn)
 - x86_64 architecture specifics (we'll cover what's needed)
 - Bootloaders or low-level hardware (we build from scratch)
@@ -149,6 +165,7 @@ The next chapter covers installation.
 All code is available at: `https://github.com/yourusername/TinyOS`
 
 Each chapter has a corresponding branch:
+
 ```bash
 git checkout chapter-01  # Code state after Chapter 1
 git checkout chapter-02  # Code state after Chapter 2
@@ -174,6 +191,7 @@ Each chapter includes common issues and debugging strategies. Use them. And reme
 ## A Note on Style
 
 The code in this book prioritizes **clarity** over cleverness. We use:
+
 - Explicit variable names
 - Comments explaining "why," not just "what"
 - Consistent formatting

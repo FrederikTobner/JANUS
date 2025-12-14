@@ -35,35 +35,7 @@ This project uses pure C, not C++. See [Philosophy.md](Philosophy.md) for the ra
 -mno-red-zone               # No red zone (required for interrupt handling)
 ```
 
-## Code Quality Standards
-
-### Warning Policy
-
-**Zero warnings. All code must compile cleanly.**
-
-All code must compile without warnings using:
-
-```bash
--Wall -Wextra -Wpedantic
-```
-
-**Warnings indicate problems that must be addressed, not suppressed:**
-
-- Unused variables: Remove them
-- Implicit function declarations: Add the appropriate include
-- Type mismatches: Ensure type correctness
-- Signed/unsigned comparisons: Use explicit casts with clear intent
-- Missing return statements: Every code path must return a value
-
-### Static Analysis
-
-Code should pass clang static analyzer:
-
-```bash
-clang --analyze -Xanalyzer -analyzer-output=text ...
-```
-
-### Undefined Behavior
+## Undefined Behavior in Kernel Space
 
 **Kernel-space undefined behavior has catastrophic consequences.**
 

@@ -31,6 +31,10 @@ Physical Memory Map:
 └─────────────────────────────────────┘
 ```
 
+> **Aside: What's the IVT?**
+>
+> IVT stands for Interrupt Vector Table—a table used in Real Mode (16-bit mode the CPU starts in at power-on) that contains addresses of interrupt handlers. Each entry is 4 bytes (segment:offset pair). It's at address 0x0 for historical reasons dating back to the original 8086 processor. We don't use it (we're in protected/long mode), but the BIOS does, so we leave it alone.
+
 The first 1MB is a minefield of BIOS tables, video memory, and historical baggage. Loading at 1MB gives us a clean slate.
 
 ## Section Organization
