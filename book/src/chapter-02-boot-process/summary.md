@@ -73,11 +73,33 @@ Of course, we can't *see* any of this yet. For that, we still need:
 
 But we're standing on a solid foundation. Everything else builds from here
 
-## What's Next
+## Challenges
 
-The kernel boots. It verifies the bootloader. It halts gracefully. But we're flying blind—no output, no way to see what's happening.
+Before moving on, try these exercises to deepen your understanding. Some are research-oriented, others are hands-on implementation.
 
-**Next up: Serial I/O**. We'll initialize the COM1 serial port and finally see our kernel say "Hello, TinyOS!" That single message will prove everything works: boot → C code → hardware I/O.
+1. **RISC-V Boot Process** (Research): Read about how RISC-V systems boot. What's the equivalent of the Multiboot2 protocol? How does the CPU start up (machine mode vs supervisor mode vs user mode)? What would need to change in our boot code?
+
+2. **ARM64 Long Mode** (Research): ARM64 has "Exception Levels" (EL0-EL3) instead of x86's ring levels. Research how ARM64 handles the equivalent of our long mode transition. What's the ARM version of page table setup? Write a short comparison (no code needed).
+
+3. **Page Table Portability** (Design): Our page table setup is x86_64-specific (4-level paging with P4/P3/P2/P1). Design a generic abstraction for pagetables using a struct that could work for both x86_64 and ARM64. What operations would it need to expose? What would be architecture-specific vs portable?
+
+4. **UEFI Boot Transition** (Research): Read the UEFI specification's boot services section. How does UEFI give control to an OS? What information does it provide (compare to Multiboot2's tags)? Why can it skip the 32-bit→64-bit transition we had to implement?
+
+5. **Limine Protocol** (Implementation): Limine is a modern bootloader with a simpler protocol than Multiboot2. Read the Limine protocol specification, then:
+   - Compare it to Multiboot2. What's simpler? What's missing?
+   - (Bonus) Implement a Limine boot header for TinyOS
+   - (Bonus) Add boot protocol abstraction to support both Multiboot2 and Limine
+
+6. **Custom Bootloader** (Implementation): Write a tiny bootloader in assembly that:
+   - Loads your kernel from disk (use BIOS int 0x13)
+   - Switches to 32-bit protected mode
+   - Passes a custom boot info structure to your kernel
+   - (Hint: You'll need to write it to the boot sector and create a disk image)
+
+7. **Bootloader Compatibility** (Research): Test if your kernel works with bootloaders other than GRUB:
+    - Try GRUB2 vs GRUB Legacy
+    - Research: Could syslinux boot a Multiboot2 kernel?
+    - What would need to change for U-Boot (ARM bootloader)?
 
 ---
 

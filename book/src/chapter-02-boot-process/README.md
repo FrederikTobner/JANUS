@@ -18,6 +18,20 @@ By the end of this chapter, we'll have a bootable kernel that verifies it was lo
 
 **Note:** This kernel won't produce any visible output yet—that comes in the next chapter when we add serial I/O. For now, we're building the foundation that everything else depends on.
 
+> **Design Note: Why x86_64?**
+>
+> This book focuses exclusively on the x86_64 architecture (64-bit Intel/AMD processors). Why not ARM, RISC-V, or a portable abstraction layer?
+>
+> **Learning comes from specifics, not abstractions.** Understanding how x86_64 does paging, interrupts, and system calls teaches you OS fundamentals. Once you deeply understand ONE architecture, porting to others becomes straightforward—you'll know what needs to change and why.
+>
+> Adding architecture abstraction now would:
+>
+> - Hide hardware details behind generic interfaces
+> - Add complexity without educational value
+> - Solve problems we don't have yet
+>
+> Real-world OS projects start concrete: Linux was x86-only for years, MINIX started on x86, xv6 teaches with RISC-V or x86 separately (not abstracted). Build one well first, then generalize.
+
 ---
 
 ## Sections

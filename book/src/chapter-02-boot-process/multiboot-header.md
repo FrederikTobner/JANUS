@@ -20,6 +20,26 @@ Boot Sequence:
 >
 > Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? Use LILO. Want FreeBSD? Different loader. GRUB said "enough of this nonsense" and created Multiboot—a universal protocol. Now any OS that implements it can boot from GRUB.
 
+> **Design Note: Boot Protocol Choices**
+>
+> There are several ways to boot an operating system:
+>
+> - **BIOS + Multiboot2** (what we're using) - Industry standard, well-documented, works everywhere
+> - **UEFI** - Modern standard, boots directly into 64-bit mode, more complex setup
+> - **Limine Protocol** - Modern hobby OS-friendly bootloader with cleaner protocol
+> - **Custom bootloader** - Maximum control, maximum work
+>
+> We're using Multiboot2 for this book because:
+>
+> 1. **It's the standard** - Works with GRUB, widely understood, extensive documentation
+> 2. **Educational value** - The 32-bit to 64-bit transition we'll implement teaches important concepts about CPU modes and paging. UEFI skips this by booting directly into 64-bit mode, which is convenient but hides crucial details.
+> 3. **Real hardware support** - Works on actual PCs, not just emulators
+> 4. **Simple tooling** - GRUB handles all the complexity of disk formats, filesystems, etc.
+>
+> **What about UEFI?** It's the modern replacement for BIOS and has real advantages (better hardware discovery, graphics modes, Secure Boot support). But it's significantly more complex for beginners. Once you understand booting with Multiboot2, adding UEFI support is a natural next step—you'll know exactly what the bootloader needs to provide and why.
+>
+> For now, focus on understanding the fundamentals. Boot protocol abstraction can come later once you have a working kernel.
+
 ## The Multiboot2 Contract
 
 Multiboot2 defines:
