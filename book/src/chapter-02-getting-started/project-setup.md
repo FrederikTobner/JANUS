@@ -2,6 +2,10 @@
 
 Now that your tools are installed and verified, let's create the project structure.
 
+[!side]
+We build incrementally. Each chapter adds structure as we need it, not all upfront.
+[/!side]
+
 ## Creating the Project Directory
 
 ```bash
@@ -23,11 +27,20 @@ We'll build the project incrementally throughout the book. For now, just create 
 
 Don't create subdirectories yet—we'll build them piece by piece as we understand what we're building.
 
+[!side]
+Premature structure leads to `misc/`, `utils/`, and `stuff/` directories. We avoid that by building only what we need.
+[/!side]
+
 ## What We're Not Covering
 
 This chapter focuses on *toolchain setup*, not:
 
 - **Editor configuration**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (Language Server Protocol - provides autocomplete, go-to-definition, error highlighting) if you want it.
+
+[!side]
+Vim, Emacs, VS Code, whatever. The book doesn't assume an editor. If you want IDE features, clangd works with most editors.
+[/!side]
+
 - **Git workflows**: Assumed knowledge.
 - **Shell basics**: You should already know how to navigate directories and run commands.
 - **C language tutorial**: We'll write plenty of C, but won't explain pointers or struct syntax.
@@ -44,6 +57,10 @@ Throughout this book, we'll use these compiler flags for cross-compilation:
 - `-nostdlib` - No standard library linking
 - `-mno-red-zone` - Disable red zone (x86_64 ABI quirk for kernel code)
 - `-fno-stack-protector` - No stack canaries (we're the OS!)
+
+[!side]
+Red zone is a 128-byte area below the stack pointer that functions can use without adjusting `rsp`. Interrupts break this assumption in kernel code.
+[/!side]
 
 Don't worry about memorizing these. We'll explain each flag when we use it.
 

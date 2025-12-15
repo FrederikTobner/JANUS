@@ -14,6 +14,10 @@ QEMU should open with... a blank screen. Just black. Nothing.
 
 **Don't panic. This is success.**
 
+[!side]
+Every OS developer's first kernel: a beautifully crafted black rectangle. Embrace it!
+[/!side]
+
 I know, I know—a black screen doesn't *feel* like success. But think about what's actually happening behind that void:
 
 1. GRUB boots and scans the first 32KB of your kernel
@@ -37,6 +41,10 @@ Press Ctrl+C to exit QEMU. But how do we know it's actually working?
 A blank screen doesn't feel like success. Let's use LLDB to prove the kernel is actually running our code.
 
 **What is LLDB?** LLDB is a debugger (like GDB) that lets you pause a running program, inspect memory and registers, and step through code line by line. QEMU has a "GDB stub" that lets debuggers connect to the virtual machine and control the CPU.
+
+[!side]
+The GDB stub speaks the GDB Remote Serial Protocol. LLDB understands this protocol too.
+[/!side]
 
 ### The Debugging Setup
 
@@ -107,6 +115,10 @@ Tell LLDB to pause when we enter `kernel_main`:
 (lldb) b kernel_main
 Breakpoint 1: where = kernel.elf`kernel_main + 15 at main.c:42:15
 ```
+
+[!side]
+Breakpoints work by replacing the instruction at that address with a special INT3 instruction that traps to the debugger.
+[/!side]
 
 **What this means:** LLDB found the `kernel_main` function in our kernel at line 42 of main.c. When execution reaches that address, LLDB will pause the CPU.
 

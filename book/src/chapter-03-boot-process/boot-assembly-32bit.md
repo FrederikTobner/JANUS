@@ -2,6 +2,10 @@
 
 GRUB finds our Multiboot header, validates it, and jumps to our entry point. But there's a problem: GRUB leaves the CPU in an undefined state. Interrupts might be enabled, the stack pointer is garbage, and we need to set up a minimal runtime environment before calling our C kernel.
 
+[!side]
+This section shows the naive approach that fails. We learn by seeing what goes wrong.
+[/!side]
+
 Let's start with the simplest possible boot code.
 
 ## The Naive Approach
@@ -130,6 +134,10 @@ Triple fault. Halting for inspection.
 **TODO:** Replace with real validated output
 
 **Triple fault!** The CPU couldn't recover from an exception and reset itself.
+
+[!side]
+Triple faults are the CPU's way of saying "I give up." It's the ultimate error condition.
+[/!side]
 
 ## What Went Wrong?
 

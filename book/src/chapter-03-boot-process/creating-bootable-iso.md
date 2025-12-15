@@ -16,6 +16,10 @@ An ISO image is a bootable CD/DVD image that contains:
 - Our kernel executable
 - GRUB configuration (the menu you see when booting)
 
+[!side]
+ISO 9660 is the CD-ROM filesystem standard from 1988. Still widely used because it works everywhere.
+[/!side]
+
 This is the standard way to distribute and test operating systems. Burn it to a USB drive and it'll boot on real hardware. Or just test it in QEMU—same image works everywhere.
 
 ## CMake Targets for ISO Creation
@@ -172,6 +176,10 @@ Writing to 'stdio:/home/user/TinyOS/build/tinyos.iso' completed successfully.
 3. **Generated GRUB config** - `grub.cfg` with our boot menu
 4. **Added GRUB modules** - 587 files (GRUB bootloader, modules, fonts)
 5. **Added our kernel** - 4 more files (kernel + directory entries)
+
+[!side]
+GRUB is modular. Those 587 files include filesystem drivers, video modes, compression support, etc.
+[/!side]
 6. **Created hybrid boot** - Works with both BIOS (i386-pc) and UEFI (x86_64-efi)
 7. **Wrote ISO** - Final image is ~11MB (5747 sectors × 2KB)
 

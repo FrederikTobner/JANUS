@@ -2,6 +2,10 @@
 
 Let's make sure everything actually works before we get three chapters in and discover your assembler is from 2003.
 
+[!side]
+This section takes 2 minutes. Do it. Future you will thank present you.
+[/!side]
+
 ## Version Check
 
 Run these commands and verify the versions:
@@ -30,6 +34,10 @@ All tools should be found and display version information.
 > It's liberating and terrifying in equal measure.
 
 Let's verify Clang can compile freestanding code for x86_64:
+
+[!side]
+The `_start` symbol is the entry point for freestanding programs. The OS doesn't set this up—we do.
+[/!side]
 
 ```c
 // test.c
@@ -75,6 +83,10 @@ _start:
     hlt
     jmp _start
 ```
+
+[!side]
+`hlt` halts the CPU until the next interrupt. Without it, the CPU would execute random memory as code.
+[/!side]
 
 Assemble it:
 

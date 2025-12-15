@@ -2,6 +2,10 @@
 
 Before diving into OS development, you need a solid foundation in several areas. This isn't application programming where the OS handles the hard parts—we're building the OS itself.
 
+[!side]
+If you can write a linked list in C and understand what `mov eax, 5` does, you're ready.
+[/!side]
+
 ## Required Knowledge
 
 ### Programming Skills
@@ -9,6 +13,10 @@ Before diving into OS development, you need a solid foundation in several areas.
 - **C language**: Pointers, structs, memory management, function pointers, bitwise operations
 - **Assembly basics**: Registers, instruction execution, calling conventions, stack operations
 - **Command line**: Shell navigation, build tools, environment variables
+
+[!side]
+OS development is where C truly shines. No garbage collection, direct memory access, inline assembly—this is C's home turf.
+[/!side]
 
 ### Build Systems
 
@@ -88,12 +96,20 @@ We develop on **Linux** (or WSL2 on Windows). TinyOS targets **x86_64** architec
 - No virtualization overhead for testing
 - Industry-standard OS development environment
 
+[!side]
+WSL2 on Windows works great for this. macOS also works but requires Homebrew for GRUB tools.
+[/!side]
+
 **Why x86_64?**
 
 - Widely documented architecture
 - QEMU has excellent x86_64 emulation
 - Most developers have access to x86_64 hardware
 - Rich ecosystem of tools and documentation
+
+[!side]
+ARM is tempting but its documentation is scattered across vendor-specific implementations. x86_64 has the Intel and AMD manuals—everything you need.
+[/!side]
 
 ## Time Commitment
 

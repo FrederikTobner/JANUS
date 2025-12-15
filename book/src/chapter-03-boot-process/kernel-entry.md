@@ -40,6 +40,10 @@ When our boot assembly calls `kernel_main()`, here's what we're guaranteed:
 > Our boot.asm preserves EDI and ESI through the mode switch,
 > which become RDI and RSI in 64-bit mode. Perfect!
 
+[!side]
+Windows uses a different ABI (RCX, RDX, R8, R9). We follow System V because it's the Unix/Linux standard.
+[/!side]
+
 **Register state:**
 
 - `RDI` (was `EAX`) = Multiboot2 magic number (`0x36d76289`)
@@ -113,6 +117,10 @@ __asm__ volatile("hlt");
 ```
 
 The `volatile` keyword tells the compiler: "Don't optimize this away, even though it looks useless." Without it, an optimizing compiler might think "this loop does nothing" and remove it. We *want* the infinite loop.
+
+[!side]
+Compilers are too smart for their own good sometimes. `volatile` is our way of saying "trust me on this one."
+[/!side]
 
 ## Testing the Kernel
 

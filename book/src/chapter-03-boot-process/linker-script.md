@@ -4,6 +4,10 @@ We have assembly files. We'll have C files. But how do we tell the linker how to
 
 Linker scripts are weird. They're not C. They're not assembly. They're their own strange declarative language that tells `ld` (the linker): "put this section here, that section there, and make sure everything lines up." Think of it as interior design for memory—you're telling the linker where to place the furniture, except the furniture is code and if you put it in the wrong place, the CPU throws a tantrum and reboots.
 
+[!side]
+Linker script syntax is arcane. Don't try to memorize it. Copy, modify, and reference as needed.
+[/!side]
+
 > **The Crux: Why Can't the Linker Just Figure It Out?**
 >
 > For normal programs, it can! The default linker script works fine because the OS loader handles the details. But we *are* the OS. We need exact control over:
@@ -37,6 +41,10 @@ Physical Memory Map:
 
 The first 1MB is a minefield of BIOS tables, video memory, and historical baggage. Loading at 1MB gives us a clean slate.
 
+[!side]
+1MB was "high memory" in 1981. Now it's the standard kernel load address for x86.
+[/!side]
+
 ## Section Organization
 
 Our kernel has several sections, and their order matters:
@@ -46,6 +54,10 @@ Our kernel has several sections, and their order matters:
 3. **`.rodata`** — Read-only data (string literals, const variables)
 4. **`.data`** — Initialized global/static variables
 5. **`.bss`** — Uninitialized data (zeroed at boot, saves space in binary)
+
+[!side]
+BSS = Block Started by Symbol (historical IBM assembler term). Saves disk space—no need to store zeros.
+[/!side]
 
 ### Kernel Memory Layout After Linking
 

@@ -8,6 +8,10 @@ We have source files. We have a linker script. But manually assembling and linki
 >
 > CMake handles dependency tracking, parallel builds, cross-platform differences, and more. It's the industry standard for good reason.
 
+[!side]
+The Linux kernel uses Makefiles directly. We use CMake because it's easier to learn and more portable.
+[/!side]
+
 ## Build System Architecture
 
 TinyOS utilizes a modular CMake structure where each component is self-contained:
@@ -45,6 +49,10 @@ This module detects your environment and sets up cross-compilation:
 -ffreestanding          # Freestanding environment
 -mno-red-zone           # Disable red zone (x86-64 ABI quirk)
 -fno-stack-protector    # No stack canaries (we're the OS!)
+
+[!side]
+Stack protectors insert canary values to detect buffer overflows. Requires runtime support we don't have yet.
+[/!side]
 ```
 
 ## Helper Functions

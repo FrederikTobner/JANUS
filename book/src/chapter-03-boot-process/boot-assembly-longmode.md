@@ -6,6 +6,10 @@ In the previous section, we learned the hard way that you can't call 64-bit code
 
 GRUB boots us in **32-bit protected mode**, but our kernel needs **64-bit long mode**. The transition requires:
 
+[!side]
+Unlike 32-bit mode, long mode *requires* paging to be enabled. No paging = no 64-bit mode.
+[/!side]
+
 1. Set up page tables (long mode requires paging)
 2. Enable PAE (Physical Address Extension)
 3. Set the long mode bit in EFER MSR
@@ -96,12 +100,20 @@ enable_paging:
     mov eax, cr4
     or eax, 1 << 5          ; Set PAE bit
     mov cr4, eax
+
+[!side]
+PAE extends 32-bit addressing to 36 bits (64GB). Required stepping stone to 64-bit mode.
+[/!side]
     
     ; Enable long mode in EFER MSR
     mov ecx, 0xC0000080     ; EFER MSR
     rdmsr
     or eax, 1 << 8          ; Set LM bit
     wrmsr
+
+[!side]
+EFER = Extended Feature Enable Register. MSRs are special CPU registers accessed with `rdmsr`/`wrmsr`.
+[/!side]
     
     ; Enable paging
     mov eax, cr0

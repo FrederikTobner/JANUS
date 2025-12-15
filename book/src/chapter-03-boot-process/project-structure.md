@@ -2,6 +2,10 @@
 
 Before we write a single line of assembly, let's talk organization. A well-structured OS project is the difference between "I know exactly where that code lives" and "I wrote this three weeks ago and now I can't find anything."
 
+[!side]
+Good structure pays dividends. You'll reference this code constantly as the project grows.
+[/!side]
+
 ## Setting Up the Directory Structure
 
 TinyOS follows a modular, library-based design inspired by the Linux kernel and LLVM.
@@ -70,6 +74,10 @@ typedef __UINT8_TYPE__  uint8_t;
 typedef __UINT16_TYPE__ uint16_t;
 typedef __UINT32_TYPE__ uint32_t;
 typedef __UINT64_TYPE__ uint64_t;
+
+[!side]
+`__UINT32_TYPE__` is a compiler builtin. Clang and GCC both provide these, making our headers portable.
+[/!side]
 
 typedef __INT8_TYPE__  int8_t;
 typedef __INT16_TYPE__ int16_t;

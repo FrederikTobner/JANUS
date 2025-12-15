@@ -1,0 +1,162 @@
+/* Side Notes - Crafting Interpreters Style */
+
+/* 
+ * Root cause solution: Use a container-based approach where side notes
+ * are positioned within a defined margin area, not absolutely positioned
+ * outside the content flow.
+ */
+
+/* Ensure the page wrapper can contain both content and margin area */
+.page-wrapper {
+    min-width: 0;
+    overflow: visible !important;
+}
+
+/* Allow content to overflow so margin notes are visible */
+main {
+    overflow: visible !important;
+}
+
+/* Main content area - leave space on the right for margin notes */
+.content {
+    max-width: 750px;
+    overflow: visible !important;
+    /* No margin-right here - we'll use padding on the wrapper */
+}
+
+/* On wider screens, adjust content width */
+@media (min-width: 1280px) {
+    .content {
+        max-width: 800px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .content {
+        max-width: 900px;
+    }
+}
+
+/* Elements containing side notes need relative positioning */
+p:has(.side-note),
+h1:has(.side-note),
+h2:has(.side-note),
+h3:has(.side-note),
+h4:has(.side-note),
+li:has(.side-note),
+blockquote:has(.side-note),
+div:has(.side-note) {
+    position: relative;
+}
+
+/* 
+ * Side notes: positioned absolutely, but constrained to viewport
+ * Key insight: use calc() with viewport units to prevent overflow
+ */
+.side-note {
+    position: absolute;
+    left: 100%;
+    margin-left: 20px;
+    width: 220px;
+
+    /* Spacing */
+    margin-top: 0;
+    margin-bottom: 1em;
+    padding-left: 10px;
+
+    /* Typography */
+    font-size: 0.85em;
+    line-height: 1.4;
+    color: #666;
+
+    /* Visual style */
+    border-left: 2px solid #e0e0e0;
+
+    /* Prevent excessive height */
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Ensure side notes don't extend beyond viewport on narrower screens */
+@media (min-width: 1080px) and (max-width: 1400px) {
+    .side-note {
+        width: 180px;
+        font-size: 0.8em;
+    }
+}
+
+.side-note p {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+}
+
+.side-note p:last-child {
+    margin-bottom: 0;
+}
+
+/* Code in side notes */
+.side-note code {
+    font-size: 0.9em;
+    background-color: #f5f5f560;
+    padding: 1px 3px;
+    border-radius: 3px;
+    word-break: break-word;
+}
+
+/* Links in side notes */
+.side-note a {
+    color: #4a90e2;
+    text-decoration: none;
+}
+
+.side-note a:hover {
+    text-decoration: underline;
+}
+
+/* 
+ * On screens too narrow for side notes, convert to inline callouts
+ * This prevents any cut-off issues
+ */
+@media (max-width: 1079px) {
+    .content {
+        max-width: 750px;
+    }
+
+    .side-note {
+        /* Reset absolute positioning */
+        position: static;
+        width: auto;
+        max-height: none;
+        margin-left: 0;
+        left: auto;
+
+        /* Make it an inline callout instead */
+        margin: 1em 1em;
+        padding: 0.5em 0.5em 0.5em 0.75em;
+
+        /* Visual style for inline mode */
+        background-color: #f5f5f5;
+        border-left: 3px solid #4a90e2;
+    }
+}
+
+@media (max-width: 768px) {
+    .side-note {
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+    }
+}
+
+/* Print styles - show inline */
+@media print {
+    .margin-note {
+        position: static;
+        width: auto;
+        margin-left: 2em;
+        margin-right: 2em;
+        background-color: #f5f5f5;
+        border-left: 3px solid #333;
+        page-break-inside: avoid;
+        font-size: 0.9em;
+    }
+}

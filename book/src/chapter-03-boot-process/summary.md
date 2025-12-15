@@ -73,6 +73,10 @@ Of course, we can't *see* any of this yet. For that, we still need:
 
 But we're standing on a solid foundation. Everything else builds from here
 
+[!side]
+You now understand more about x86_64 booting than most programmers ever will. Nice work!
+[/!side]
+
 ## Challenges
 
 Before moving on, try these exercises to deepen your understanding. Some are research-oriented, others are hands-on implementation.

@@ -2,6 +2,10 @@
 
 When you power on a PC, the BIOS loads GRUB from disk. GRUB then scans the first 32KB of our kernel binary looking for a magic number—a secret handshake that says "hey, I'm a bootable kernel, load me!"
 
+[!side]
+The magic number 0xe85250d6 was chosen randomly. It's unlikely to appear by accident in executable code.
+[/!side]
+
 No magic number? GRUB ignores you. Your kernel sits there on disk, lifeless.
 
 ```
@@ -149,6 +153,10 @@ multiboot_end:
 - Checksum validates the header structure
 - Information request asks GRUB for memory details
 - End tag terminates the header
+
+[!side]
+The checksum is like a parity bit for the entire header. It catches corruption from bad disk reads or linker bugs.
+[/!side]
 
 GRUB validates the checksum by ensuring `magic + architecture + length + checksum = 0`.
 

@@ -29,5 +29,11 @@ Then open <http://localhost:3000> in your browser.
 - `book.toml` - Book configuration
 - `src/` - Markdown source files
   - `SUMMARY.md` - Table of contents (controls chapter order)
-  - `*/` - Individual parts
-    - `*.md` - Individual chapters
+  - `chapter-01-introduction/` - Chapter 1: Introduction
+  - `chapter-02-getting-started/` - Chapter 2: Getting Started
+  - `chapter-03-boot-process/` - Chapter 3: The Boot Process
+  - `chapter-04-io/` - Chapter 4: Input/Output
+  - `chapter-05-memory/` - Chapter 5: Memory Management
+  - `chapter-06-kernel/` - Chapter 6: The Kernel
+  - `appendices/` - Appendix content
+- `preprocessors/side-notes/` - Custom mdBook preprocessor for side notes

@@ -5,6 +5,10 @@
 
 Operating system development requires specialized tools. Unlike application development where you compile against an existing OS, we're building the OS itself—there's no standard library, no runtime, just bare metal.
 
+[!side]
+Total install time: 5-10 minutes on most systems. The actual learning starts in Chapter 3.
+[/!side]
+
 ## Required Tools Overview
 
 We need:
@@ -23,6 +27,10 @@ We use Clang because:
 1. **Cross-compilation just works** — `clang -target x86_64-elf` and we're done. No spending an afternoon building binutils and GCC from source.
 2. **Error messages are actually helpful** — "expected ';' before '}' token" beats GCC's cryptic template error novels.
 3. **Consistent across platforms** — same behavior on Linux, macOS, and even WSL.
+
+[!side]
+The Linux kernel uses GCC. We on the other hand are using Clang. Both work. Clang is just easier for learning since cross-compilation is built-in.
+[/!side]
 
 ### Installation
 
@@ -52,6 +60,10 @@ InstalledDir: /usr/local/bin
 
 NASM assembles x86_64 boot code and low-level kernel code.
 
+[!side]
+NASM uses Intel syntax (`mov eax, 5`). GAS (GNU Assembler) uses AT&T syntax (`movl $5, %eax`). Intel is more readable.
+[/!side]
+
 ```bash
 # Debian/Ubuntu
 sudo apt install nasm
@@ -73,6 +85,10 @@ NASM version 2.15.05
 
 CMake generates build files, and Ninja executes them blazingly fast.
 
+[!side]
+Ninja rebuilds only changed files. On large projects it's noticeably faster than Make. For TinyOS the difference is negligible.
+[/!side]
+
 ```bash
 # Debian/Ubuntu
 sudo apt install cmake ninja-build
@@ -90,6 +106,10 @@ ninja --version
 ## Emulator: QEMU
 
 QEMU emulates a complete x86_64 system, letting us test without rebooting real hardware.
+
+[!side]
+QEMU can also expose a GDB server for debugging. We'll use this extensively to step through boot code.
+[/!side]
 
 ```bash
 # Debian/Ubuntu

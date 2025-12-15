@@ -1,15 +1,15 @@
 [book]
 title = "Building TinyOS: A Journey in Operating System Development"
-authors = ["Frederik"]
+authors = ["Frederik Tobner"]
 language = "en"
 src = "src"
 description = "A hands-on guide to building a minimal operating system from scratch"
 
 [build]
-build-dir = "book"
+build-dir = "build"
 create-missing = true
 
-[preprocessor.index]
+[preprocessor.side-notes]
 
 [output.html]
 default-theme = "rust"
@@ -18,6 +18,7 @@ git-repository-url = "https://github.com/yourusername/TinyOS"
 edit-url-template = "https://github.com/yourusername/TinyOS/edit/main/book/{path}"
 site-url = "/TinyOS/"
 cname = ""
+additional-css = ["theme/side-notes.css"]
 
 [output.html.fold]
 enable = true

@@ -5,6 +5,10 @@
 
 We have our tools installed. Time to write some code that talks directly to hardware. No operating system beneath us. No safety net. Just us, some assembly, and blind faith that GRUB will cooperate.
 
+[!side]
+This chapter is where OS development gets real. Every instruction you write executes directly on the CPU.
+[/!side]
+
 In this chapter, we'll:
 
 - Set up the TinyOS project structure
@@ -17,6 +21,10 @@ In this chapter, we'll:
 By the end of this chapter, we'll have a bootable kernel that verifies it was loaded correctly and halts gracefully.
 
 **Note:** This kernel won't produce any visible output yet—that comes in the next chapter when we add serial I/O. For now, we're building the foundation that everything else depends on.
+
+[!side]
+A working kernel that produces no output is like a tree falling in the forest. But Chapter 3 fixes this!
+[/!side]
 
 > **Design Note: Why x86_64?**
 >
