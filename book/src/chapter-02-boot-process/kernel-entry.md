@@ -12,10 +12,38 @@ This is it—the moment where all that assembly setup pays off and we finally ge
 
 When our boot assembly calls `kernel_main()`, here's what we're guaranteed:
 
+### CPU State on Entry to kernel_main
+
+```
+    Assembly World  │  Transition  │     C World
+   (boot.asm)       │              │  (kernel_main)
+                    │              │
+  32-bit regs:      │  Preserved:  │  64-bit regs:
+  ┌──────────┐     │              │  ┌──────────┐
+  │ EAX = magic│────┼─────────────▶│  │ RDI = magic│  (arg 1)
+  │ EBX = info │────┼─────────────▶│  │ RSI = info │  (arg 2)
+  └──────────┘     │              │  └──────────┘
+                    │              │
+  Stack:            │              │  Stack:
+  ESP ───▶ top      │              │  RSP ───▶ same location
+                    │              │  (16 KiB available)
+                    │              │
+  CPU Mode:         │              │  CPU Mode:
+  Protected (32-bit)│  Switched!   │  Long (64-bit)
+  Paging: OFF       │              │  Paging: ON
+  Interrupts: OFF   │              │  Interrupts: OFF
+                    │              │  (still disabled!)
+```
+
+> **System V AMD64 ABI Calling Convention**:
+> First 6 integer arguments go in: RDI, RSI, RDX, RCX, R8, R9
+> Our boot.asm preserves EDI and ESI through the mode switch,
+> which become RDI and RSI in 64-bit mode. Perfect!
+
 **Register state:**
 
-- `EAX` = Multiboot2 magic number (`0x36d76289`)
-- `EBX` = Physical address of Multiboot information structure
+- `RDI` (was `EAX`) = Multiboot2 magic number (`0x36d76289`)
+- `RSI` (was `EBX`) = Physical address of Multiboot information structure
 - Stack configured (16 KiB)
 - Interrupts disabled (`IF` flag clear)
 

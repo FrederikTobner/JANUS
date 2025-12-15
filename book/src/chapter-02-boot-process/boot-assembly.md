@@ -143,6 +143,28 @@ gdt64:
 
 **What's happening here?**
 
+### CPU Mode Transition Journey
+
+```
+The 32-bit to 64-bit Transition:
+
+  32-bit Mode              Transition                64-bit Mode
+  (GRUB gives us)      (Our boot.asm does)        (kernel_main runs)
+┌──────────────┐      ┌──────────────────┐       ┌──────────────┐
+│ 32-bit regs  │      │ 1. Page tables   │       │ 64-bit regs  │
+│ ESP stack    │ ───▶ │ 2. Enable PAE    │ ───▶  │ RSP stack    │
+│ EAX = magic  │      │ 3. Set EFER.LM   │       │ RDI = magic  │
+│ EBX = info   │      │ 4. Enable paging │       │ RSI = info   │
+│              │      │ 5. Load GDT64    │       │              │
+│              │      │ 6. Far jump      │       │              │
+└──────────────┘      └──────────────────┘       └──────────────┘
+    Protected              The Scary Part            Long Mode
+     Mode                 (Don't mess up!)            Enabled!
+```
+
+> **TODO: Hand-drawn illustration idea**
+> Draw the CPU as a character going through a transformation sequence like a video game power-up. Panel 1: "32-bit CPU" looking small and limited. Panel 2: Eating a "PAE mushroom" and "EFER crystal". Panel 3: Growing bigger with sparkles, now "64-bit CPU" with flexed muscles and a cape, saying "I can address SO MUCH MEMORY now!"
+
 **32-bit setup (bits 32):**
 
 1. **Save multiboot info**: GRUB passes magic in `EAX` and info pointer in `EBX`
@@ -187,6 +209,39 @@ gdt64:
 Before diving into the page tables, let's clarify what these acronyms mean:
 
 **PAE (Physical Address Extension):** Originally added to 32-bit x86 to access more than 4GB of RAM, PAE extends physical addresses from 32 bits to 36 bits. In 64-bit mode, PAE is *required*—you can't enable long mode without it. It changes the paging structure from 2-level (page directory → page table) to 4-level paging.
+
+### 4-Level Page Table Structure
+
+```
+Virtual Address Translation (Simplified):
+
+ Virtual Address                     Physical Address
+┌────────────────┐                  ┌────────────────┐
+│  0x00101234    │                  │  0x00101234    │
+└────────┬───────┘                  └────────▲───────┘
+         │                                   │
+         ▼                                   │
+    ┌─────────┐                              │
+    │  CR3    │──▶ P4 Table (PML4)           │
+    └─────────┘      │                       │
+                     ├─▶ Entry[0]            │
+                     │      │                │
+                     ▼      ▼                │
+                          P3 Table (PDPT)    │
+                            │                │
+                            ├─▶ Entry[0]     │
+                            │      │         │
+                            ▼      ▼         │
+                                 P2 Table (PD)
+                                   │
+                                   ├─▶ Entry[0] (2MB huge page)
+                                   │      │
+                                   ▼      └──────────┘
+                                         0x00000000
+                                         (Identity mapped!)
+```
+
+We're using a 2MB **huge page** which skips the P1 (page table) level entirely. This maps the entire first 2MB in one entry instead of 512 individual 4KB pages.
 
 **EFER (Extended Feature Enable Register):** A Model-Specific Register (MSR) that controls advanced CPU features. The important bit for us is bit 8 (LME - Long Mode Enable), which tells the CPU we want to use 64-bit mode. Once we set this bit *and* enable paging, long mode activates.
 

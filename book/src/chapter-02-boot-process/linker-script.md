@@ -47,6 +47,37 @@ Our kernel has several sections, and their order matters:
 4. **`.data`** — Initialized global/static variables
 5. **`.bss`** — Uninitialized data (zeroed at boot, saves space in binary)
 
+### Kernel Memory Layout After Linking
+
+```
+Virtual Memory Layout (kernel.elf loaded at 0x100000):
+
+    Address         Section          Contents              Permissions
+┌──────────────────────────────────────────────────────────────────┐
+│  0x100000      .multiboot   │ Magic: 0xe85250d6       │    R      │
+│                             │ Tags, checksums         │           │
+├──────────────────────────────────────────────────────────────────┤
+│  0x101000      .text        │ _start:                 │   R-X     │
+│  (4KB aligned)              │   mov esp, stack_top    │ Read+Exec │
+│                             │   call setup_page...    │           │
+│                             │ kernel_main:            │           │
+│                             │   if (magic != ...)     │           │
+├──────────────────────────────────────────────────────────────────┤
+│  0x103000      .rodata      │ String literals         │    R      │
+│  (4KB aligned)              │ Const data              │ Read-only │
+├──────────────────────────────────────────────────────────────────┤
+│  0x104000      .data        │ Initialized globals     │   RW-     │
+│  (4KB aligned)              │ Static variables        │ Read+Write│
+├──────────────────────────────────────────────────────────────────┤
+│  0x105000      .bss         │ stack_bottom:           │   RW-     │
+│  (4KB aligned)              │   resb 16384            │ Read+Write│
+│                             │ Uninitialized data      │  (zeroed) │
+└──────────────────────────────────────────────────────────────────┘
+         ▲                                                  ▲
+         │                                                  │
+    kernel_start                                       kernel_end
+```
+
 ## Creating the Linker Script
 
 Create the file `kernel/linker.ld`:

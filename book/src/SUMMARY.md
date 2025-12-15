@@ -5,40 +5,51 @@
 
 ---
 
-# Part I: Getting Started
+# Chapter 1: Getting Started
 
 - [Introduction](introduction.md)
-- [Part I Overview](part-01-getting-started/README.md)
-  - [Development Environment Setup](part-01-getting-started/setup.md)
+- [Chapter 1 Overview](chapter-01-getting-started/README.md)
+  - [Development Environment Setup](chapter-01-getting-started/setup.md)
 
 ---
 
-# Part II: The Boot Process
+# Chapter 2: The Boot Process
 
-- [Part II Overview](part-02-boot-process/README.md)
-  - [Project Structure](part-02-boot-process/project-structure.md)
-  - [The Multiboot2 Header](part-02-boot-process/multiboot-header.md)
-  - [Boot Entry Assembly](part-02-boot-process/boot-assembly.md)
-  - [The Linker Script](part-02-boot-process/linker-script.md)
-  - [The CMake Build System](part-02-boot-process/build-system.md)
-  - [The Kernel Entry Point](part-02-boot-process/kernel-entry.md)
-  - [Creating a Bootable ISO](part-02-boot-process/creating-bootable-iso.md)
-  - [Summary](part-02-boot-process/summary.md)
-
----
-
-# Part III: Memory Management
-
-- [Part III Overview](part-03-memory/README.md)
-- [Physical Memory](part-03-memory/physical-memory.md)
-- [Virtual Memory](part-03-memory/virtual-memory.md)
+- [Chapter 2 Overview](chapter-02-boot-process/README.md)
+  - [Project Structure](chapter-02-boot-process/project-structure.md)
+  - [The Multiboot2 Header](chapter-02-boot-process/multiboot-header.md)
+  - [Boot Entry Assembly](chapter-02-boot-process/boot-assembly.md)
+  - [The Linker Script](chapter-02-boot-process/linker-script.md)
+  - [The CMake Build System](chapter-02-boot-process/build-system.md)
+  - [The Kernel Entry Point](chapter-02-boot-process/kernel-entry.md)
+  - [Creating a Bootable ISO](chapter-02-boot-process/creating-bootable-iso.md)
+  - [Booting Up](chapter-02-boot-process/booting-up.md)
+  - [Summary](chapter-02-boot-process/summary.md)
 
 ---
 
-# Part IV: The Kernel
+# Chapter 3: Input/Output
 
-- [Part IV Overview](part-04-kernel/README.md)
-- [Kernel Basics](part-04-kernel/kernel-basics.md)
+- [Chapter 3 Overview](chapter-03-io/README.md)
+  - [Serial Output](chapter-03-io/serial-output.md)
+  - [VGA Text Mode](chapter-03-io/vga-text-mode.md)
+  - [Keyboard Input](chapter-03-io/keyboard-input.md)
+  - [Summary](chapter-03-io/summary.md)
+
+---
+
+# Chapter 4: Memory Management
+
+- [Chapter 4 Overview](chapter-04-memory/README.md)
+  - [Physical Memory](chapter-04-memory/physical-memory.md)
+  - [Virtual Memory](chapter-04-memory/virtual-memory.md)
+
+---
+
+# Chapter 5: The Kernel
+
+- [Chapter 5 Overview](chapter-05-kernel/README.md)
+  - [Kernel Basics](chapter-05-kernel/kernel-basics.md)
 
 ---
 

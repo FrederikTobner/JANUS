@@ -28,6 +28,27 @@ Multiboot2 defines:
 2. **Boot state**: CPU mode, registers, memory state when we're loaded
 3. **Information tags**: What data the bootloader provides (memory map, etc.)
 
+### Multiboot2 Header Structure
+
+```
+Multiboot2 Header Layout (must be in first 32KB):
+┌─────────────────────────────────────────┐
+│  Offset  │  Field         │  Value      │
+├─────────────────────────────────────────┤
+│  0x00    │  Magic         │  0xe85250d6 │ ← GRUB looks for this
+│  0x04    │  Architecture  │  0 (i386)   │
+│  0x08    │  Header Length │  (computed) │
+│  0x0C    │  Checksum      │  (computed) │
+├─────────────────────────────────────────┤
+│          │  Tags...       │             │ ← Optional info requests
+├─────────────────────────────────────────┤
+│          │  End Tag (0)   │             │ ← Required terminator
+└─────────────────────────────────────────┘
+```
+
+> **TODO: Hand-drawn illustration idea**
+> Draw GRUB as a detective with a magnifying glass scanning through a pile of binary (represented as 1s and 0s), suddenly spotting the magic number 0xe85250d6 and exclaiming "Aha! Found it!" with the kernel hiding behind the pile looking nervous.
+
 ### Create the Multiboot Header File
 
 First, create `boot/include/boot/multiboot.h` to define the constants we'll use:

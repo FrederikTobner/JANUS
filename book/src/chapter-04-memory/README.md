@@ -1,6 +1,7 @@
-# Part III: Memory Management
+# Chapter 4: Memory Management
 
-> *"Memory management is the art of controlling chaos."*
+> *"Controlling complexity is the essence of computer programming."
+> — Brian Kernighan
 
 This part covers the physical and virtual memory subsystems that form the foundation of the kernel.
 
@@ -13,4 +14,4 @@ This part covers the physical and virtual memory subsystems that form the founda
 
 ---
 
-**Status:** Coming soon after boot process is complete.
+**Status:** Coming soon after io is completed.

@@ -1,4 +1,4 @@
-# Part I: Getting Started
+# Chapter 1: Getting Started
 
 > *"Give me six hours to chop down a tree and I will spend the first four sharpening the axe."*  
 > — Abraham Lincoln
@@ -9,7 +9,7 @@ Unlike normal programming where you have an operating system beneath you, we're 
 
 ## What You'll Learn
 
-In this part, you'll set up:
+In this chapter, you'll set up:
 
 - Cross-compilation toolchain (Clang or GCC)
 - Build system (CMake and Ninja)

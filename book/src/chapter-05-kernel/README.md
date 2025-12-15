@@ -1,6 +1,7 @@
-# Part IV: Kernel Basics
+# Chapter 5: Kernel Basics
 
-> *"The kernel is where the magic happens—and where things go horribly wrong."*
+> *"UNIX is very simple, it just needs a genius to understand its simplicity."
+> — Dennis Ritchie
 
 This part covers the core kernel subsystems: interrupts, scheduling, and system services.
 

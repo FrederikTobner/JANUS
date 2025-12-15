@@ -176,14 +176,36 @@ This produces `build/kernel.elf` - a bootable ELF executable.
 ## Build Flow
 
 ```
-NASM → multiboot.o, boot.o (boot module)
-     ↓
-Clang → *.o files (kernel, libraries)
-     ↓
-Linker (using linker.ld)
-     ↓
-kernel.elf (bootable!)
+                    Source Files
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+        ▼               ▼               ▼
+   multiboot.asm   boot.asm        main.c, lib/*.c
+        │               │               │
+        ▼               ▼               ▼
+     [NASM]          [NASM]         [Clang]
+        │               │               │
+        ▼               ▼               ▼
+   multiboot.o      boot.o           *.o files
+        │               │               │
+        └───────┬───────┴───────┬───────┘
+                │               │
+                ▼               ▼
+            boot.a          lib*.a
+                │               │
+                └───────┬───────┘
+                        ▼
+                   [Linker LD]
+                   (linker.ld)
+                        │
+                        ▼
+                  kernel.elf ✓
+                (Bootable!)
 ```
+
+> **TODO: Hand-drawn illustration idea**
+> Draw a factory assembly line where source files (.asm, .c) are raw materials on a conveyor belt. NASM and Clang are workers at stations with hammers/tools transforming them into .o files (boxes). These boxes all funnel into a big "Linker" machine that looks like it's under pressure (steam coming out, gears turning), and out pops a shiny kernel.elf with a "Grade A Bootable" stamp and a smiley face.
 
 **Parallel builds:** Ninja automatically compiles modules in parallel. On a 4-core machine, this is 3-4× faster than sequential builds.
 

@@ -95,19 +95,23 @@ TinyOS is a **teaching OS**, designed to illustrate concepts clearly rather than
 
 ## What You'll Learn
 
-### Part I: Getting Started
+### Chapter 1: Getting Started
 
 You'll set up your development environment: compiler, assembler, emulator, and debugger. We'll verify everything works by compiling freestanding code.
 
-### Part II: The Boot Process
+### Chapter 2: The Boot Process
 
 We'll write a bootloader compliant with the Multiboot specification, set up the stack, enable 64-bit mode, and jump into C code. By the end, you'll understand exactly what happens between pressing the power button and running your kernel.
 
-### Part III: Memory Management
+### Chapter 3: Input/Output
+
+We'll implement serial port output for debugging, VGA text mode for screen display, and keyboard input for user interaction. Finally, our kernel can communicate!
+
+### Chapter 4: Memory Management
 
 First, we'll build a **physical memory manager** that tracks which RAM pages are free. Then we'll implement **virtual memory** with page tables, enabling process isolation and memory protection.
 
-### Part IV: The Kernel
+### Chapter 5: The Kernel
 
 We'll create a minimal kernel with interrupt handling, basic system calls, and the ability to load and run user programs.
 

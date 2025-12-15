@@ -2,10 +2,6 @@
 
 Before we write a single line of assembly, let's talk organization. A well-structured OS project is the difference between "I know exactly where that code lives" and "I wrote this three weeks ago and now I can't find anything."
 
-> **The Crux: Why Bother with Structure?**
->
-> You might be tempted to throw everything in one directory and call it a day. Don't. In a few chapters, you'll have boot code, memory managers, device drivers, and interrupt handlers. Without clear boundaries, you'll end up with a 10,000-line `kernel.c` that nobody (including future you) can navigate.
-
 ## Setting Up the Directory Structure
 
 TinyOS follows a modular, library-based design inspired by the Linux kernel and LLVM.
