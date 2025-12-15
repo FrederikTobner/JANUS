@@ -25,7 +25,7 @@
   - [Project Structure](chapter-03-boot-process/project-structure.md)
   - [The Multiboot2 Header](chapter-03-boot-process/multiboot-header.md)
   - [Boot Entry Assembly: 32-bit](chapter-03-boot-process/boot-assembly-32bit.md)
-  - [Boot Entry Assembly: Long Mode](chapter-03-boot-process/boot-assembly-longmode.md)
+  - [Boot Entry Assembly: 64-bit](chapter-03-boot-process/boot-assembly-64bit.md)
   - [The Linker Script](chapter-03-boot-process/linker-script.md)
   - [The CMake Build System](chapter-03-boot-process/build-system.md)
   - [The Kernel Entry Point](chapter-03-boot-process/kernel-entry.md)

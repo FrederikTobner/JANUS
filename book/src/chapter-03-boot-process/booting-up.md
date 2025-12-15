@@ -48,28 +48,37 @@ The GDB stub speaks the GDB Remote Serial Protocol. LLDB understands this protoc
 
 ### The Debugging Setup
 
+```mermaid
+sequenceDiagram
+    participant T1 as Terminal 1<br/>(ninja debug)
+    participant QEMU as QEMU<br/>(GDB stub on :1234)
+    participant T2 as Terminal 2<br/>(lldb)
+    
+    Note over T1: Start QEMU with<br/>debugging enabled
+    T1->>QEMU: ninja debug
+    QEMU->>QEMU: Start, pause CPU<br/>Wait on port 1234
+    Note over QEMU: CPU: PAUSED<br/>Waiting for debugger
+    
+    Note over T2: Connect debugger
+    T2->>T2: lldb kernel.elf
+    T2->>QEMU: gdb-remote :1234
+    QEMU-->>T2: Connected!
+    
+    Note over T2: Set breakpoint
+    T2->>QEMU: b kernel_main
+    QEMU-->>T2: Breakpoint set
+    
+    Note over T2: Continue execution
+    T2->>QEMU: continue
+    QEMU->>QEMU: GRUB → Boot → kernel_main
+    QEMU-->>T2: Hit breakpoint!
+    
+    Note over T2: Inspect registers
+    T2->>QEMU: p/x $rdi
+    QEMU-->>T2: 0x36d76289<br/>(Multiboot magic!)
+    
+    Note over QEMU,T2: Full control over CPU<br/>from debugger
 ```
-  Terminal 1                          Terminal 2
-┌──────────────────────┐            ┌──────────────────────┐
-│                      │            │                      │
-│ $ ninja debug        │            │ $ lldb kernel.elf    │
-│                      │            │ (lldb) gdb-remote    │
-│ ┌─────────────────┐  │   Port     │      :1234           │
-│ │                 │  │   1234     │                      │
-│ │  QEMU           │ ◀├──────────┤▶ LLDB Debugger       │
-│ │  (waiting...)   │  │  GDB stub  │  (controlling CPU)   │
-│ │                 │  │            │                      │
-│ │  [CPU: PAUSED]  │  │◀──────────┤  (lldb) b kernel_main│
-│ │                 │  │  Commands  │  (lldb) c            │
-│ │  GRUB ▶ Boot ▶  │  │            │  (lldb) p/x $rdi     │
-│ │  Kernel ▶ STOP! │  │            │  Magic verified!     │
-│ └─────────────────┘  │            │                      │
-└──────────────────────┘            └──────────────────────┘
-
-   Run the kernel                  Control & inspect it
-```
-
-**TODO:** Replace with a better diagram using drawio
 
 ### Starting the Debugging Session
 

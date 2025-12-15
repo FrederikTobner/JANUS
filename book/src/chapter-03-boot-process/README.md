@@ -20,6 +20,28 @@ In this chapter, we'll:
 
 By the end of this chapter, we'll have a bootable kernel that verifies it was loaded correctly and halts gracefully.
 
+## Boot Sequence Overview
+
+```mermaid
+flowchart TD
+    Start(["Power On"]) --> BIOS["BIOS/UEFI<br/>Hardware Init"]
+    BIOS --> GRUB["GRUB Bootloader<br/>Loads kernel"]
+    GRUB --> MB["Finds Multiboot2 Header<br/>Magic: 0xe85250d6"]
+    MB --> Load["Loads kernel to 0x100000<br/>(1MB physical memory)"]
+    Load --> Jump["Jumps to _start<br/>(32-bit mode)"]
+    Jump --> Stack["Boot Assembly:<br/>Setup stack"]
+    Stack --> PT["Setup page tables<br/>(Identity map 2MB)"]
+    PT --> PAE["Enable PAE<br/>(Physical Address Extension)"]
+    PAE --> LM["Set EFER.LM bit<br/>(Long Mode Enable)"]
+    LM --> Paging["Enable paging<br/>(Activates long mode)"]
+    Paging --> GDT["Load 64-bit GDT"]
+    GDT --> Far["Far jump to 64-bit code"]
+    Far --> Clear["Clear segment registers"]
+    Clear --> Call["Call kernel_main()<br/>(C code)"]
+    Call --> Verify["Verify Multiboot magic<br/>0x36d76289"]
+    Verify --> Halt["Infinite halt loop<br/>hlt instruction"]
+```
+
 **Note:** This kernel won't produce any visible output yet—that comes in the next chapter when we add serial I/O. For now, we're building the foundation that everything else depends on.
 
 [!side]

@@ -11,6 +11,9 @@ create-missing = true
 
 [preprocessor.side-notes]
 
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
 [output.html]
 default-theme = "rust"
 preferred-dark-theme = "navy"
@@ -20,6 +23,7 @@ site-url = "/TinyOS/"
 cname = ""
 additional-css = ["theme/side-notes.css"]
 mathjax-support = true
+additional-js = ["additional-js/mermaid/mermaid.min.js", "additional-js/mermaid/mermaid-init.js"]
 
 [output.html.fold]
 enable = true
