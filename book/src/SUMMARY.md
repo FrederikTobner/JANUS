@@ -2,14 +2,15 @@
 
 [Preface](preface.md)
 [Acknowledgments](acknowledgments.md)
-
----
+[Introduction](introduction.md)
 
 # Chapter 1: Getting Started
 
-- [Introduction](introduction.md)
 - [Chapter 1 Overview](chapter-01-getting-started/README.md)
-  - [Development Environment Setup](chapter-01-getting-started/setup.md)
+  - [Prerequisites](chapter-01-getting-started/prerequisites.md)
+  - [Installing Tools](chapter-01-getting-started/installing-tools.md)
+  - [Verification](chapter-01-getting-started/verification.md)
+  - [Project Setup](chapter-01-getting-started/project-setup.md)
 
 ---
 

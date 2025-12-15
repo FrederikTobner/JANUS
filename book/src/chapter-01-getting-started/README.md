@@ -14,12 +14,15 @@ In this chapter, you'll set up:
 - Cross-compilation toolchain (Clang or GCC)
 - Build system (CMake and Ninja)
 - Assembly tools (NASM)
-- Debugging and testing environment (QEMU, GDB)
+- Debugging and testing environment (QEMU, LLDB)
 
 ## Sections
 
-1. [Development Environment Setup](setup.md)
+1. [Prerequisites](prerequisites.md)
+2. [Installing Tools](installing-tools.md)
+3. [Verification](verification.md)
+4. [Project Setup](project-setup.md)
 
 ---
 
-**Next: [Setup →](setup.md)**
+**Next: [Prerequisites](prerequisites.md)**
