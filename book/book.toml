@@ -19,6 +19,7 @@ edit-url-template = "https://github.com/yourusername/TinyOS/edit/main/book/{path
 site-url = "/TinyOS/"
 cname = ""
 additional-css = ["theme/side-notes.css"]
+mathjax-support = true
 
 [output.html.fold]
 enable = true

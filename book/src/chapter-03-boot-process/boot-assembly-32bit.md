@@ -67,7 +67,7 @@ _start:
 
 **What this code does:**
 
-1. **Stack setup**: Point `ESP` to our 16 KiB stack
+1. **Stack setup**: Point `ESP` to our 16 KiB stack (\\(16384 = 2^{14}\\) bytes)
 2. **Preserve arguments**: Push magic number and info pointer for `kernel_main`
 3. **Call kernel**: Jump to our C code
 4. **Halt loop**: If `kernel_main` returns, halt the CPU

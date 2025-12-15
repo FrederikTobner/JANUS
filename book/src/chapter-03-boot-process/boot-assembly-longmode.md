@@ -222,6 +222,8 @@ We create a simple identity mapping: virtual address 0x0 → physical address 0x
 - Bit 1 (Writable): Page can be written to
 - Bit 7 (Huge page): This is a 2MB page, not a 4KB page
 
+The flag value `0b11` equals \\(2^0 + 2^1 = 3\\) (present + writable), and `0b10000011` equals \\(2^0 + 2^1 + 2^7 = 131\\) (present + writable + huge page).
+
 ### 4-Level Page Table Structure
 
 ```
@@ -255,6 +257,10 @@ Virtual Address Translation (Simplified):
 
 We're using a 2MB **huge page** which skips the P1 (page table) level entirely. This maps the entire first 2MB in one entry instead of 512 individual 4KB pages.
 
+**Math:** A standard 4KB page would require \\(512\\) entries
+
+(since \\(2\\text{MB} = 2^{21}\\) bytes and \\(4\\text{KB} = 2^{12}\\) bytes, so \\(2^{21} / 2^{12} = 2^9 = 512\\) pages).
+
 ### Step 3: Enable PAE
 
 ```nasm
@@ -264,6 +270,8 @@ mov cr4, eax
 ```
 
 **PAE (Physical Address Extension):** Originally added to 32-bit x86 to access more than 4GB of RAM, PAE extends physical addresses from 32 bits to 36 bits. In 64-bit mode, PAE is *required*—you can't enable long mode without it.
+
+**Math:** Without PAE, 32-bit addressing allows \\(2^{32} = 4\\text{GB}\\) of physical memory. With PAE, 36-bit addressing allows \\(2^{36} = 64\\text{GB}\\) of physical memory.
 
 ### Step 4: Enable Long Mode
 
@@ -314,6 +322,13 @@ The code segment descriptor sets:
 - Bit 44: Code/Data segment
 - Bit 47: Present
 - Bit 53: 64-bit mode
+
+The value
+\\((1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)\\)
+
+creates a 64-bit value with these specific bits set:
+
+\\(2^{43} + 2^{44} + 2^{47} + 2^{53}\\).
 
 ### Step 7: Far Jump to 64-bit Code
 
