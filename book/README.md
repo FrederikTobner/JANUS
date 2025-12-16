@@ -6,9 +6,12 @@ This directory contains the source for the TinyOS book, written using [mdBook](h
 
 ### Prerequisites
 
-Install mdBook:
+Install mdBook and custom preprocessors:
+
 ```bash
 cargo install mdbook
+cargo install --path preprocessors/mdbook-side-notes
+cargo install --path preprocessors/mdbook-code-diff
 ```
 
 ### Build and Serve
@@ -21,27 +24,19 @@ mdbook build
 mdbook serve
 ```
 
-Then open http://localhost:3000 in your browser.
+Then open <http://localhost:3000> in your browser.
 
 ### Structure
 
 - `book.toml` - Book configuration
 - `src/` - Markdown source files
   - `SUMMARY.md` - Table of contents (controls chapter order)
-  - `*.md` - Individual chapters
-
-## Writing Guidelines
-
-- Keep chapters focused on one concept
-- Include code snippets directly from the TinyOS source when possible
-- Add diagrams for complex concepts (ASCII art is fine!)
-- End each chapter with practical exercises
-- Update SUMMARY.md when adding new chapters
-
-## Publishing
-
-To publish to GitHub Pages:
-```bash
-mdbook build
-# Push the book/ directory to gh-pages branch
-```
+  - `chapter-01-introduction/` - Chapter 1: Introduction
+  - `chapter-02-getting-started/` - Chapter 2: Getting Started
+  - `chapter-03-boot-process/` - Chapter 3: The Boot Process
+  - `chapter-04-io/` - Chapter 4: Input/Output
+  - `chapter-05-memory/` - Chapter 5: Memory Management
+  - `chapter-06-kernel/` - Chapter 6: The Kernel
+  - `appendices/` - Appendix content
+- `preprocessors/mdbook-side-notes/` - Custom mdBook preprocessor for side notes
+- `preprocessors/mdbook-code-diff/` - Custom mdBook preprocessor for code diffs

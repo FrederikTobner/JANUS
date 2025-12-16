@@ -1,14 +1,5 @@
 # TinyOS Include Hierarchy and Header Organization
 
-## Include Philosophy
-
-Headers must be:
-
-- **Self-contained** - Include all dependencies. Don't make users guess what to include.
-- **Minimal** - Only expose what's necessary. Internal implementation details remain private.
-- **Well-organized** - Clear public vs private separation. No dumping everything in one header.
-- **Portable** - Work across architectures when possible. Architecture-specific code goes in arch/.
-
 ## Include Directory Structure
 
 ```
@@ -55,6 +46,7 @@ TinyOS/
 ### 1. Global Headers
 
 Use angle brackets for global headers:
+
 ```c
 #include <tinyos/types.h>
 #include <tinyos/config.h>
@@ -63,6 +55,7 @@ Use angle brackets for global headers:
 ### 2. Module Headers
 
 Use angle brackets with module path:
+
 ```c
 #include <lib/buffer.h>
 #include <lib/io.h>
@@ -73,6 +66,7 @@ Use angle brackets with module path:
 ### 3. Local Module Headers
 
 Use quotes for headers within the same module:
+
 ```c
 // In kernel/main.c
 #include "kernel/kernel.h"    // Public header (in kernel/include/)
@@ -367,64 +361,4 @@ typedef struct char_buffer {
     size_t length;    ///< Current buffer length in bytes
     size_t capacity;  ///< Total allocated capacity in bytes
 } char_buffer_t;
-```
-
-## Include Best Practices
-
-### 1. Minimize Dependencies
-
-Only include what you need:
-
-```c
-// BAD: Including everything
-#include <lib/buffer.h>
-#include <lib/io.h>
-#include <arch/cpu.h>
-#include <mm/page_frame.h>
-
-// GOOD: Only what's needed
-#include <lib/buffer.h>  // Used in this file
-```
-
-### 2. Use Forward Declarations
-
-```c
-// BAD: Full header for pointer-only usage
-#include "complex_structure.h"
-
-// GOOD: Forward declaration
-struct complex_structure;
-void process(struct complex_structure* cs);
-```
-
-### 3. Keep Headers Self-Contained
-
-Each header should include its dependencies:
-
-```c
-// buffer.h
-#ifndef TINYOS_LIB_BUFFER_H
-#define TINYOS_LIB_BUFFER_H
-
-#include <tinyos/types.h>  // Needed for size_t
-
-// Now buffer.h can be included anywhere without prerequisites
-```
-
-### 4. Avoid Circular Dependencies
-
-```c
-// BAD: A includes B, B includes A
-// a.h
-#include "b.h"
-
-// b.h  
-#include "a.h"
-
-// GOOD: Use forward declarations
-// a.h
-struct b;  // Forward declaration
-
-// b.h
-struct a;  // Forward declaration
 ```

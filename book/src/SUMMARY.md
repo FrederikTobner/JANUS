@@ -3,37 +3,75 @@
 [Preface](preface.md)
 [Acknowledgments](acknowledgments.md)
 
----
+# Chapter 1: Introduction
 
-# Part I: Getting Started
-
-- [Introduction](introduction.md)
-- [Setting Up Your Environment](chapter-01-setup.md)
-
----
-
-# Part II: The Boot Process
-
-- [Chapter 1: First Boot](chapter-02-first-boot.md)
-
----
-
-# Part III: Memory Management
-
-- [Chapter 2: Physical Memory](chapter-03-physical-memory.md)
-- [Chapter 3: Virtual Memory](chapter-04-virtual-memory.md)
+- [Chapter 1 Overview](chapter-01-introduction/README.md)
+  - [What is an Operating System?](chapter-01-introduction/what-is-an-os.md)
+  - [Why Build One?](chapter-01-introduction/why-build-one.md)
+  - [What We'll Build](chapter-01-introduction/what-well-build.md)
+  - [Prerequisites](chapter-01-introduction/prerequisites.md)
+  - [Common Misconceptions](chapter-01-introduction/misconceptions.md)
+  - [Development Environment](chapter-01-introduction/development-environment.md)
+  - [How to Use This Book](chapter-01-introduction/how-to-use.md)
+  - [Getting Started](chapter-01-introduction/getting-started.md)
 
 ---
 
-# Part IV: The Kernel
+# Chapter 2: Getting Started
 
-- [Chapter 4: Kernel Basics](chapter-05-kernel-basics.md)
+- [Chapter 2 Overview](chapter-02-getting-started/README.md)
+  - [Installing Tools](chapter-02-getting-started/installing-tools.md)
+  - [Verification](chapter-02-getting-started/verification.md)
+  - [Project Setup](chapter-02-getting-started/project-setup.md)
+  - [Summary](chapter-02-getting-started/summary.md)
+
+---
+
+# Chapter 3: The Boot Process
+
+- [Chapter 3 Overview](chapter-03-boot-process/README.md)
+  - [Project Structure](chapter-03-boot-process/project-structure.md)
+  - [The Multiboot2 Header](chapter-03-boot-process/multiboot-header.md)
+  - [Boot Entry Assembly: 32-bit](chapter-03-boot-process/boot-assembly-32bit.md)
+  - [Boot Entry Assembly: 64-bit](chapter-03-boot-process/boot-assembly-64bit.md)
+  - [The Linker Script](chapter-03-boot-process/linker-script.md)
+  - [The CMake Build System](chapter-03-boot-process/build-system.md)
+  - [The Kernel Entry Point](chapter-03-boot-process/kernel-entry.md)
+  - [Creating a Bootable ISO](chapter-03-boot-process/creating-bootable-iso.md)
+  - [Booting Up](chapter-03-boot-process/booting-up.md)
+  - [Summary](chapter-03-boot-process/summary.md)
+
+---
+
+# Chapter 4: Input/Output
+
+- [Chapter 4 Overview](chapter-04-io/README.md)
+  - [Multiboot Verification](chapter-04-io/multiboot-verification.md)
+  - [Serial Output](chapter-04-io/serial-output.md)
+  - [VGA Text Mode](chapter-04-io/vga-text-mode.md)
+  - [Keyboard Input](chapter-04-io/keyboard-input.md)
+  - [Summary](chapter-04-io/summary.md)
+
+---
+
+# Chapter 5: Memory Management
+
+- [Chapter 5 Overview](chapter-05-memory/README.md)
+  - [Physical Memory](chapter-05-memory/physical-memory.md)
+  - [Virtual Memory](chapter-05-memory/virtual-memory.md)
+
+---
+
+# Chapter 6: The Kernel
+
+- [Chapter 6 Overview](chapter-06-kernel/README.md)
+  - [Kernel Basics](chapter-06-kernel/kernel-basics.md)
 
 ---
 
 # Appendices
 
-- [Appendix A: x86_64 Architecture](appendix-a-x86-64.md)
-- [Appendix B: Build System](appendix-b-build-system.md)
-- [Appendix C: Debugging Tips](appendix-c-debugging.md)
-- [Appendix D: Further Reading](appendix-d-resources.md)
+- [Appendix A: x86_64 Architecture](appendices/appendix-a-x86-64.md)
+- [Appendix B: Build System](appendices/appendix-b-build-system.md)
+- [Appendix C: Debugging Tips](appendices/appendix-c-debugging.md)
+- [Appendix D: Further Reading](appendices/appendix-d-resources.md)

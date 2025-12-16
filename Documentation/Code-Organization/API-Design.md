@@ -2,17 +2,7 @@
 
 ## Function Design Principles
 
-### 1. Clear Intent
-
-**If someone has to read the implementation to understand what your function does, you named it wrong.**
-
-Your function must communicate:
-
-- What it does (the action)
-- What it modifies (side effects)
-- What it returns (return value meaning)
-
-### 2. Consistent Prefixing
+### Consistent Prefixing
 
 All functions use their module prefix:
 
@@ -27,6 +17,7 @@ All functions use their module prefix:
 ### 3. Verb-Noun Pattern
 
 Functions follow verb-noun or verb-object pattern:
+
 ```c
 buf_create()         // create a buffer
 buf_destroy()        // destroy a buffer
@@ -56,6 +47,7 @@ void buf_cleanup(char_buffer_t* buffer);
 ### Boolean Queries
 
 Use `is_`, `has_`, `can_` prefixes:
+
 ```c
 bool mm_is_page_present(virt_addr_t vaddr);
 bool buf_has_capacity(char_buffer_t const * buf, size_t required);
@@ -63,6 +55,7 @@ bool arch_can_enable_feature(uint32_t feature);
 ```
 
 ### Data Modification
+
 Make side effects explicit:
 
 ```c
@@ -123,30 +116,12 @@ void mm_map_range(
 );
 ```
 
-### Const Correctness
+### Pointer vs Value for Structures
 
-Always use const for read-only parameters:
-
-```c
-// Good
-size_t buf_length(char_buffer_t const * buffer);
-void buf_print(char_buffer_t const * buffer);
-
-// Bad - missing const
-size_t buf_length(char_buffer_t* buffer);
-```
-
-### Pointer vs Value
-
-- **Structures**: Pass by pointer (const for read-only)
-- **Small types** (int, size_t, pointers): Pass by value
-- **Output parameters**: Always pass by pointer
+Structures always pass by pointer:
 
 ```c
-// Structures by pointer
 void buf_append_buffer(char_buffer_t* dest, char_buffer_t const * source);
-
-// Small types by value
 uint8_t port_read_byte(uint16_t port);
 bool mm_is_aligned(uint64_t address, size_t alignment);
 
@@ -284,6 +259,7 @@ int mm_map_page(...) {
 ### API Evolution
 
 When changing public APIs:
+
 1. Deprecate old function (keep it working)
 2. Add new function with `_v2` suffix
 3. Update documentation

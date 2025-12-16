@@ -67,6 +67,37 @@ add_subdirectory(mm)
 # Device drivers (future)
 # add_subdirectory(drivers)
 
+# Generate grub.cfg from template
+configure_file(
+    ${CMAKE_SOURCE_DIR}/cmake/grub.cfg.in
+    ${CMAKE_BINARY_DIR}/grub.cfg
+    @ONLY
+)
+
+# ISO creation target
+add_custom_target(iso
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/grub.cfg ${CMAKE_BINARY_DIR}/iso/boot/grub/grub.cfg
+    COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/tinyos.iso ${CMAKE_BINARY_DIR}/iso/
+    DEPENDS kernel.elf ${CMAKE_BINARY_DIR}/grub.cfg
+    COMMENT "Creating bootable ISO image"
+)
+
+# Run in QEMU target
+add_custom_target(run
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio
+    DEPENDS iso
+    COMMENT "Running TinyOS in QEMU"
+)
+
+# Debug in QEMU target (waits for debugger on port 1234)
+add_custom_target(debug
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio -s -S
+    DEPENDS iso
+    COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
+)
+
 # Print build configuration
 message(STATUS "========================================")
 message(STATUS "TinyOS Build Configuration")
@@ -75,4 +106,10 @@ message(STATUS "C Standard: C${CMAKE_C_STANDARD}")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER}")
+message(STATUS "========================================")
+message(STATUS "Available targets:")
+message(STATUS "  ninja           - Build kernel.elf")
+message(STATUS "  ninja iso       - Create bootable ISO")
+message(STATUS "  ninja run       - Build and run in QEMU")
+message(STATUS "  ninja debug     - Build and run with debugger")
 message(STATUS "========================================")

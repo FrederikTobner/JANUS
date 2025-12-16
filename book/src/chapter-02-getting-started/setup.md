@@ -42,7 +42,16 @@ sudo apt install clang
 sudo pacman -S clang
 
 # Verify
-clang --version  # Should be 17.0 or higher
+clang --version
+```
+
+You should see output like:
+
+```
+clang version 17.0.0
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/local/bin
 ```
 
 **Alternative:** GCC 13+ with a cross-compiler targeting `x86_64-elf` works but requires building from source. See Appendix B for GCC setup.
@@ -62,6 +71,14 @@ sudo pacman -S ninja
 ninja --version
 ```
 
+You should see:
+
+```
+1.10.1
+```
+
+(Or a similar recent version)
+
 **Alternative:** Make also works. Omit `-G Ninja` from CMake commands to use Make instead.
 
 ### Assembler: NASM
@@ -79,6 +96,12 @@ sudo pacman -S nasm
 nasm --version
 ```
 
+You should see:
+
+```
+NASM version 2.15.05
+```
+
 ### Emulator: QEMU
 
 QEMU emulates a complete x86_64 system, letting us test without rebooting real hardware.
@@ -92,6 +115,13 @@ sudo pacman -S qemu-system-x86
 
 # Verify
 qemu-system-x86_64 --version
+```
+
+You should see:
+
+```
+QEMU emulator version 6.2.0 (or newer)
+Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
 ```
 
 ### Debugger: LLDB
@@ -124,6 +154,32 @@ sudo pacman -S cmake
 cmake --version  # Must be 3.20 or higher
 ```
 
+### Bootloader Tools: GRUB and ISO Creation
+
+We need GRUB tools to create bootable ISO images for testing.
+
+```bash
+# Debian/Ubuntu
+sudo apt install grub-pc-bin xorriso mtools
+
+# Arch Linux
+sudo pacman -S grub xorriso mtools
+
+# macOS (requires Homebrew)
+brew install grub xorriso mtools
+
+# Verify
+grub-mkrescue --version
+xorriso --version
+mformat --version
+```
+
+**What these do:**
+
+- `grub-mkrescue` - Creates bootable ISO images with GRUB
+- `xorriso` - ISO 9660 filesystem creator (required by grub-mkrescue)
+- `mtools` - FAT filesystem tools (required by grub-mkrescue)
+
 ## Complete Installation
 
 ### Ubuntu/Debian
@@ -131,14 +187,16 @@ cmake --version  # Must be 3.20 or higher
 ```bash
 sudo apt update
 sudo apt install -y clang ninja-build nasm cmake \
-                    qemu-system-x86 lldb git
+                    qemu-system-x86 lldb git \
+                    grub-pc-bin xorriso mtools
 ```
 
 ### Arch Linux
 
 ```bash
 sudo pacman -S clang ninja nasm cmake \
-               qemu-system-x86 lldb git
+               qemu-system-x86 lldb git \
+               grub xorriso mtools
 ```
 
 ## Verifying Your Setup
@@ -249,7 +307,7 @@ Don't worry about CMake configuration yet. We'll create the build system piece b
 
 This chapter focuses on *toolchain setup*, not:
 
-- **Editor configuration**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors if you want it.
+- **Editor configuration**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (Language Server Protocol - provides autocomplete, go-to-definition, error highlighting) if you want it.
 - **Git workflows**: Assumed knowledge.
 - **Shell basics**: You should already know how to navigate directories and run commands.
 - **C language tutorial**: We'll write plenty of C, but won't explain pointers or struct syntax.

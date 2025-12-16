@@ -1,0 +1,174 @@
+/* Code Diff Styling */
+
+/* Container */
+.code-diff-container {
+    position: relative;
+    margin: 1.5em 0;
+}
+
+/* Side annotation (like side notes) */
+.code-diff-annotation {
+    position: absolute;
+    right: -280px;
+    width: 250px;
+    font-size: 0.85em;
+    color: #666;
+    line-height: 1.4;
+    padding-top: 0.5em;
+}
+
+.code-diff-annotation .file-path {
+    display: block;
+    font-family: 'Source Code Pro', 'Consolas', monospace;
+    color: #0366d6;
+    margin-bottom: 0.25em;
+    font-weight: 500;
+}
+
+.code-diff-annotation .placement {
+    display: block;
+    font-style: italic;
+    color: #586069;
+}
+
+/* Code lines container */
+.code-diff-lines {
+    font-family: 'Source Code Pro', 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.45;
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+}
+
+/* Individual diff lines */
+.diff-line {
+    display: block;
+    margin: 0;
+    padding: 0 0.5em;
+    white-space: pre;
+    min-height: 1.45em;
+}
+
+.diff-line code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+    font-family: inherit;
+    border: none;
+    color: inherit;
+}
+
+/* Context lines (existing code) - dimmed */
+.diff-context {
+    opacity: 0.45;
+    color: #6a737d;
+}
+
+/* Added lines - highlighted with left border */
+.diff-add {
+    background-color: rgba(40, 167, 69, 0.08);
+    border-left: 3px solid #28a745;
+    padding-left: calc(0.5em - 3px);
+}
+
+/* Removed lines - strikethrough */
+.diff-remove {
+    background-color: rgba(215, 58, 73, 0.08);
+    border-left: 3px solid #d73a49;
+    padding-left: calc(0.5em - 3px);
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+/* Dark theme support */
+.ayu .code-diff-lines,
+.coal .code-diff-lines,
+.navy .code-diff-lines {
+    background: #191f26;
+    border-color: #0d1117;
+}
+
+.ayu .code-diff-annotation,
+.coal .code-diff-annotation,
+.navy .code-diff-annotation {
+    color: #8b949e;
+}
+
+.ayu .code-diff-annotation .file-path,
+.coal .code-diff-annotation .file-path,
+.navy .code-diff-annotation .file-path {
+    color: #58a6ff;
+}
+
+.ayu .diff-context,
+.coal .diff-context,
+.navy .diff-context {
+    color: #8b949e;
+    opacity: 0.4;
+}
+
+.ayu .diff-add,
+.coal .diff-add,
+.navy .diff-add {
+    background-color: rgba(46, 160, 67, 0.15);
+}
+
+.ayu .diff-remove,
+.coal .diff-remove,
+.navy .diff-remove {
+    background-color: rgba(248, 81, 73, 0.15);
+}
+
+/* Responsive - move annotation inline on small screens */
+@media (max-width: 1200px) {
+    .code-diff-annotation {
+        position: static;
+        width: auto;
+        right: auto;
+        margin-bottom: 0.75em;
+        padding: 0.75em;
+        background: #f6f8fa;
+        border-left: 3px solid #0366d6;
+        border-radius: 6px;
+    }
+
+    .ayu .code-diff-annotation,
+    .coal .code-diff-annotation,
+    .navy .code-diff-annotation {
+        background: #1f2430;
+        border-left-color: #58a6ff;
+    }
+}
+
+/* Print styles */
+@media print {
+    .diff-context {
+        opacity: 1;
+        color: #999 !important;
+    }
+
+    .diff-add {
+        background: none;
+        border-left: 2px solid #000;
+        color: #000 !important;
+    }
+
+    .diff-remove {
+        background: none;
+        border-left: 2px solid #666;
+    }
+
+    .code-diff-annotation {
+        position: static;
+        margin-bottom: 0.5em;
+        font-size: 0.8em;
+        page-break-inside: avoid;
+    }
+
+    .code-diff-container {
+        page-break-inside: avoid;
+    }
+}

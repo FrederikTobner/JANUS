@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOs.                                              *
+ * This file is part of TinyOS.                                             *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -17,7 +17,7 @@
 /**
  * @file main.c
  * @brief TinyOS Kernel Entry Point
- * 
+ *
  * This is called by boot.asm after the bootloader transfers control.
  */
 
@@ -26,13 +26,13 @@
 
 /**
  * @brief Main kernel entry point
- * 
+ *
  * Called from boot.asm after initial setup. At this point:
  * - Stack is configured (16 KiB)
  * - CPU is in 32-bit protected mode
  * - Interrupts are disabled
  * - Paging is disabled
- * 
+ *
  * @param magic Multiboot2 magic number (should be 0x36d76289)
  * @param info Pointer to multiboot information structure
  */
