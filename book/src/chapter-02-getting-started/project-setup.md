@@ -18,7 +18,23 @@ git init
 
 ## Initial Directory Structure
 
-We'll build the project incrementally throughout the book. For now, just create the top-level directory. Each chapter adds new components:
+We'll build the project incrementally throughout the book. For now, just create the top-level directory. Each chapter adds new components as we need them.
+
+### Project Evolution Roadmap
+
+```mermaid
+graph TD
+    CH2["<b>Chapter 2: Boot Process</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── cmake/<br/>└── CMakeLists.txt"]
+    CH3["<b>Chapter 3: I/O</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── cmake/<br/>└── CMakeLists.txt"]
+    CH4["<b>Chapter 4: Memory</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── mm/<br/>├── cmake/<br/>└── CMakeLists.txt"]
+    CH5["<b>Chapter 5+: Full Kernel</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── mm/<br/>├── lib/<br/>├── arch/<br/>├── include/<br/>├── cmake/<br/>└── CMakeLists.txt"]
+    
+    CH2 --> CH3
+    CH3 --> CH4
+    CH4 --> CH5
+```
+
+**Chapter-by-chapter additions:**
 
 - **Chapter 2**: Boot code, build system, Multiboot header
 - **Chapter 3**: I/O drivers (serial, VGA, keyboard)
@@ -31,22 +47,22 @@ Don't create subdirectories yet—we'll build them piece by piece as we understa
 Premature structure leads to `misc/`, `utils/`, and `stuff/` directories. We avoid that by building only what we need.
 [/!side]
 
-## What We're Not Covering
+## Scope: What This Book Focuses On
 
-This chapter focuses on *toolchain setup*, not:
+This book teaches OS development, not prerequisite tools. We assume you're already comfortable with:
 
-- **Editor configuration**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (Language Server Protocol - provides autocomplete, go-to-definition, error highlighting) if you want it.
+- **Your editor**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (autocomplete, go-to-definition, error highlighting) if you want it.
 
 [!side]
-Vim, Emacs, VS Code, whatever. The book doesn't assume an editor. If you want IDE features, clangd works with most editors.
+Vim, Emacs, VS Code, CLion—whatever makes you productive. The code is the same regardless.
 [/!side]
 
-- **Git workflows**: Assumed knowledge.
-- **Shell basics**: You should already know how to navigate directories and run commands.
-- **C language tutorial**: We'll write plenty of C, but won't explain pointers or struct syntax.
-- **CMake tutorials**: We'll use it extensively, but won't teach the basics.
+- **Git workflows**: We use version control but don't teach it.
+- **Shell navigation**: Basic command-line skills (cd, ls, running commands).
+- **C fundamentals**: Pointers, structs, memory management.
+- **Build systems**: We use CMake extensively but focus on *what* we're building, not CMake syntax itself.
 
-We're here to build an OS, not learn prerequisite tools. If those feel unfamiliar, get comfortable with them first.
+If any of these feel unfamiliar, get comfortable with them first. The OS development is challenging enough without fighting your tools.
 
 ## Cross-Compilation Flags
 
@@ -64,19 +80,6 @@ Red zone is a 128-byte area below the stack pointer that functions can use witho
 
 Don't worry about memorizing these. We'll explain each flag when we use it.
 
-## Next Steps
-
-You now have a complete TinyOS development environment and an empty project directory.
-
-In the next chapter, we'll:
-
-1. Create the project structure
-2. Write a Multiboot2 header for GRUB
-3. Write boot assembly code
-4. Set up the build system with CMake
-5. Create a bootable ISO
-6. Boot our kernel in QEMU!
-
 ---
 
-**Next: [Chapter 2: The Boot Process](../chapter-02-boot-process/README.md)**
+**Next: [Chapter 2: The Boot Process](../chapter-03-boot-process/README.md)**

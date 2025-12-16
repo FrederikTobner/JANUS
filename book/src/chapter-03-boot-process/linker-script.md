@@ -35,9 +35,9 @@ Physical Memory Map:
 └─────────────────────────────────────┘
 ```
 
-> **Aside: What's the IVT?**
->
-> IVT stands for Interrupt Vector Table—a table used in Real Mode (16-bit mode the CPU starts in at power-on) that contains addresses of interrupt handlers. Each entry is 4 bytes (segment:offset pair). It's at address 0x0 for historical reasons dating back to the original 8086 processor. We don't use it (we're in protected/long mode), but the BIOS does, so we leave it alone.
+[!side]
+IVT = Interrupt Vector Table from Real Mode (16-bit). The BIOS uses it, we don't, but we can't overwrite it.
+[/!side]
 
 The first 1MB is a minefield of BIOS tables, video memory, and historical baggage. Loading at 1MB gives us a clean slate.
 
@@ -59,108 +59,209 @@ Our kernel has several sections, and their order matters:
 BSS = Block Started by Symbol (historical IBM assembler term). Saves disk space—no need to store zeros.
 [/!side]
 
-### Kernel Memory Layout After Linking
+## Building the Linker Script
 
-```
-Virtual Memory Layout (kernel.elf loaded at 0x100000):
+Let's build our linker script incrementally. Create `kernel/linker.ld` and we'll add to it step by step.
 
-    Address         Section          Contents              Permissions
-┌──────────────────────────────────────────────────────────────────┐
-│  0x100000      .multiboot   │ Magic: 0xe85250d6       │    R      │
-│                             │ Tags, checksums         │           │
-├──────────────────────────────────────────────────────────────────┤
-│  0x101000      .text        │ _start:                 │   R-X     │
-│  (4KB aligned)              │   mov esp, stack_top    │ Read+Exec │
-│                             │   call setup_page...    │           │
-│                             │ kernel_main:            │           │
-│                             │   if (magic != ...)     │           │
-├──────────────────────────────────────────────────────────────────┤
-│  0x103000      .rodata      │ String literals         │    R      │
-│  (4KB aligned)              │ Const data              │ Read-only │
-├──────────────────────────────────────────────────────────────────┤
-│  0x104000      .data        │ Initialized globals     │   RW-     │
-│  (4KB aligned)              │ Static variables        │ Read+Write│
-├──────────────────────────────────────────────────────────────────┤
-│  0x105000      .bss         │ stack_bottom:           │   RW-     │
-│  (4KB aligned)              │   resb 16384            │ Read+Write│
-│                             │ Uninitialized data      │  (zeroed) │
-└──────────────────────────────────────────────────────────────────┘
-         ▲                                                  ▲
-         │                                                  │
-    kernel_start                                       kernel_end
-```
+### Step 1: Entry Point and Load Address
 
-## Creating the Linker Script
-
-Create the file `kernel/linker.ld`:
+Start with the skeleton—where execution begins and where the kernel loads:
 
 ```ld
-/* Entry point symbol defined in boot/boot.asm */
 ENTRY(_start)
 
 SECTIONS {
-    /* Kernel loads at 1MB - above BIOS reserved area */
+    . = 0x100000;
+}
+```
+
+**What this does:**
+
+- `ENTRY(_start)` — Execution starts at our `_start` label from boot.asm
+- `SECTIONS { }` — Container for all our memory layout
+- `. = 0x100000` — Load address (the **location counter** `.` tracks our position)
+
+The location counter is like a cursor. As we add sections, it moves forward automatically.
+
+### Step 2: Multiboot Header Section
+
+GRUB scans the first 32KB for the Multiboot header. Add it right after the load address:
+
+```ld
+.multiboot ALIGN(8) : {
+    *(.multiboot)
+}
+```
+
+**What this does:**
+
+- `.multiboot` — Section name
+- `ALIGN(8)` — 8-byte alignment (Multiboot2 requirement)
+- `*(.multiboot)` — Pull in `.multiboot` sections from all object files (`*` = wildcard)
+
+This must come first or GRUB won't find it.
+
+### Step 3: Code Section
+
+Add the executable code section after `.multiboot`:
+
+```ld
+.text ALIGN(4K) : {
+    *(.text)
+    *(.text.*)
+}
+```
+
+**What this does:**
+
+- `.text` — Executable instructions
+- `ALIGN(4K)` — Page-aligned (4096 bytes, x86-64 page size)
+- `*(.text.*)` — Catches compiler subsections (`.text.startup`, `.text.hot`, etc.)
+
+Page alignment lets us set memory permissions cleanly (executable vs. non-executable).
+
+### Step 4: Read-Only Data
+
+Add the read-only data section after `.text`:
+
+```ld
+.rodata ALIGN(4K) : {
+    *(.rodata)
+    *(.rodata.*)
+}
+```
+
+**What this does:**
+
+- `.rodata` — Read-only data (strings, const globals)
+- Separate from `.text` so we can mark it non-executable (prevents code injection)
+
+### Step 5: Initialized Data
+
+Add the initialized data section after `.rodata`:
+
+```ld
+.data ALIGN(4K) : {
+    *(.data)
+    *(.data.*)
+}
+```
+
+**What this does:**
+
+- `.data` — Initialized variables (values stored in ELF, loaded into memory)
+- Read-write permissions
+
+### Step 6: Uninitialized Data (BSS)
+
+Add the BSS section after `.data`:
+
+```ld
+.bss ALIGN(4K) : {
+    *(COMMON)
+    *(.bss)
+    *(.bss.*)
+}
+```
+
+**What this does:**
+
+- `.bss` — Uninitialized data (zeroed by bootloader)
+- `*(COMMON)` — Tentative definitions (old C feature for globals declared in multiple files)
+- Not stored in ELF—saves disk space
+
+### Step 7: Kernel Boundary Symbols
+
+Finally, add these symbols at the end of the `SECTIONS` block (after `.bss`):
+
+```ld
+kernel_start = 0x100000;
+kernel_end = .;
+kernel_size = kernel_end - kernel_start;
+```
+
+**What this does:**
+
+- `kernel_start` — Address where kernel begins
+- `kernel_end = .;` — Current location (end of all sections)
+- `kernel_size` — Total size
+
+These become usable in C:
+
+```c
+extern char kernel_end;
+void *end = &kernel_end;  // Get the address
+```
+
+That's the complete linker script! Save it as `kernel/linker.ld`.
+
+## Complete Reference
+
+Here's the final linker script for reference:
+
+```ld
+ENTRY(_start)
+
+SECTIONS {
     . = 0x100000;
     
-    /* Multiboot header must be at the very start */
     .multiboot ALIGN(8) : {
         *(.multiboot)
     }
     
-    /* Code section - executable instructions */
     .text ALIGN(4K) : {
         *(.text)
         *(.text.*)
     }
     
-    /* Read-only data - string literals, const variables */
     .rodata ALIGN(4K) : {
         *(.rodata)
         *(.rodata.*)
     }
     
-    /* Initialized data - global/static variables with initial values */
     .data ALIGN(4K) : {
         *(.data)
         *(.data.*)
     }
     
-    /* Uninitialized data - global/static variables zeroed at boot */
     .bss ALIGN(4K) : {
         *(COMMON)
         *(.bss)
         *(.bss.*)
     }
     
-    /* Symbols for kernel bounds - useful for memory management */
     kernel_start = 0x100000;
     kernel_end = .;
     kernel_size = kernel_end - kernel_start;
 }
 ```
 
-## Linker Script Explained
+## Checkpoint: Understanding the Linker Script
 
-**Location counter (`.`)**: The magic `.` variable tracks our current position in memory. `. = 0x100000` says "start placing things at 1MB."
+Before moving on, make sure you understand:
 
-**Section syntax**: `.text ALIGN(4K) : { *(.text) }` means:
+**The Big Picture:**
 
-- Create a section named `.text`
-- Align it to a 4KB boundary (page size)
-- Include all `.text` sections from all input files (`*(.text)`)
+- Why we need exact memory control (we are the OS, no loader to help us)
+- Why 1MB is our starting address (BIOS owns the first 1MB)
+- Why section order matters (Multiboot header must be first for GRUB to find it)
 
-**Why `ALIGN(4K)`?** Pages are 4KB on x86-64. Aligning sections to page boundaries lets us set different permissions later (code is executable, data is not).
+**Key Concepts:**
 
-**Wildcard patterns**: `*(.text.*)` catches compiler-generated sections like `.text.startup` or `.text.hot` (optimization artifacts).
+- **Location counter (`.`)**: Tracks where we're placing things in memory
+- **ALIGN(4K)**: Aligns sections to page boundaries (4096 bytes)
+- **Wildcards (`*`)**: Pulls in sections from all object files
+- **Section permissions**: .text is executable, .rodata is read-only, .data/.bss are writable
 
-**COMMON**: Old C quirk. Multiple files can define the same uninitialized global, and the linker merges them. We put these in `.bss`.
+**Test Your Understanding:**
 
-**Symbols**: `kernel_end = .;` creates a symbol we can reference in C:
+- What would happen if `.multiboot` wasn't first? (GRUB wouldn't find it, boot fails)
+- Why align to 4KB? (Page size on x86-64, needed for memory protection)
+- Why is `.bss` separate from `.data`? (Saves disk space—uninitialized = no zeros stored)
 
-```c
-extern char kernel_end;  // Address of kernel's end
-void *end_addr = &kernel_end;
-```
+[!side]
+If any of these feel unclear, re-read the sections above. The linker script controls your entire memory layout—worth understanding deeply.
+[/!side]
 
 ## Verification
 
@@ -173,10 +274,6 @@ readelf -l build/kernel.elf
 Output:
 
 ```
-Elf file type is EXEC (Executable file)
-Entry point 0x101000
-There are 5 program headers, starting at offset 64
-
 Program Headers:
   Type           Offset             VirtAddr           PhysAddr
                  FileSiz            MemSiz              Flags  Align
@@ -188,16 +285,9 @@ Program Headers:
                  0x000000000000001a 0x000000000000001a  R      0x1000
   LOAD           0x0000000000000000 0x0000000000103000 0x0000000000103000
                  0x0000000000000000 0x0000000000007000  RW     0x1000
-
- Section to Segment mapping:
-  Segment Sections...
-   00     .multiboot 
-   01     .text 
-   02     .rodata 
-   03     .bss 
 ```
 
-**What this shows:** All sections start at 0x100000 (1MB) as specified in our linker script, with proper 4KB alignment.
+All sections start at 0x100000 (1MB) with 4KB alignment.
 
 ---
 
