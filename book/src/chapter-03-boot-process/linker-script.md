@@ -69,6 +69,7 @@ Start with the skeleton—where execution begins and where the kernel loads:
 
 ```ld-diff
 file: kernel/linker.ld
+after: entire file
 ---
 +ENTRY(_start)
 +

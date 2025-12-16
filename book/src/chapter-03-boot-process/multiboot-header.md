@@ -118,38 +118,6 @@ after: #include <stdint.h>
 
 Two magic numbers, two different jobs. The header magic (`0xe85250d6`) goes in our assembly—GRUB scans for it to find our kernel. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register as proof it loaded us correctly. Think of them as matching halves of a secret handshake.
 
-#### Step 3: Add Architecture Constants
-
-```c-diff
-file: boot/include/boot/multiboot.h
-after: MULTIBOOT2_HEADER_MAGIC definition
----
- #define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
-+
-+// Architecture types
-+#define MULTIBOOT2_ARCHITECTURE_I386 0
- 
- #endif // BOOT_MULTIBOOT_H
-```
-
-Tells GRUB we want to start in 32-bit protected mode. Yes, we're building a 64-bit kernel, but we'll handle the upgrade ourselves in assembly. GRUB gives us a solid 32-bit foundation and we take it from there.
-
-#### Step 4: Forward Declaration for Future Use
-
-```c-diff
-file: boot/include/boot/multiboot.h
-after: MULTIBOOT2_ARCHITECTURE_I386 definition
----
- #define MULTIBOOT2_ARCHITECTURE_I386 0
-+
-+// Forward declaration - full definition later
-+struct multiboot_info;
- 
- #endif // BOOT_MULTIBOOT_H
-```
-
-A promise to the compiler: "Trust me, this struct exists, I'll show you the details later." Forward declarations let us use `struct multiboot_info*` in function signatures without defining the entire structure yet. We'll fill in the real definition once we need to actually parse the multiboot data.
-
 ### Create the Assembly Header
 
 Now let's build the Multiboot2 header in assembly. Create an empty file:

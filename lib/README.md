@@ -1,26 +1,31 @@
 # TinyOS Kernel Libraries
 
 This directory contains utility libraries used by the TinyOS kernel. Each library is a separate module with clear responsibilities and dependencies.
+Only a stub for now.
 
 ## Library Modules
 
 ### types
+
 **Fixed-width types and compiler attributes**
 
 Header-only library providing:
+
 - Fixed-width integer types (uint8_t, int32_t, etc.)
 - Size types (size_t, ssize_t, ptrdiff_t)
 - Boolean type (bool, true, false)
 - NULL definition
-- Compiler attributes (__packed, __aligned, __noreturn, etc.)
+- Compiler attributes (__packed,__aligned, __noreturn, etc.)
 - Common macros (likely, unlikely, ARRAY_SIZE, min, max)
 
 **Dependencies:** None (header-only)
 
 ### memory
+
 **Low-level memory manipulation**
 
 Provides essential memory operations without libc:
+
 - memcpy - Copy memory regions
 - memmove - Copy with overlap support
 - memset - Fill memory with byte value
@@ -30,9 +35,11 @@ Provides essential memory operations without libc:
 **Dependencies:** types
 
 ### buffer
+
 **Character buffer operations**
 
 Dynamic character buffer with safe operations:
+
 - Buffer creation and destruction
 - Append, insert, delete operations
 - Buffer views and slicing
@@ -41,9 +48,11 @@ Dynamic character buffer with safe operations:
 **Dependencies:** memory, types
 
 ### fio
+
 **Formatted input/output**
 
 Formatted I/O for kernel logging and debugging:
+
 - Printf-style formatting
 - Kernel logging (printk)
 - Debug output

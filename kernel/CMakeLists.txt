@@ -10,10 +10,6 @@ tinyos_create_kernel(
         ${KERNEL_SOURCES}
     LIBRARIES
         boot           # Boot assembly objects
-        memory
-        buffer
-        fio
-        arch           # Architecture abstraction
     LINKER_SCRIPT
         ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
 )

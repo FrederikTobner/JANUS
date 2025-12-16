@@ -1,6 +1,7 @@
 # drivers - Device Drivers Module
 
 Kernel device drivers for hardware interaction.
+Only a stub for now.
 
 ## Purpose
 
@@ -9,20 +10,24 @@ Provides device drivers for keyboards, storage, network cards, and other hardwar
 ## Planned Contents
 
 ### Input Devices
+
 - PS/2 keyboard driver
 - PS/2 mouse driver
 - USB HID support (future)
 
 ### Storage Devices
+
 - ATA/IDE disk driver
 - AHCI SATA driver
 - NVMe driver (future)
 
 ### Network Devices
+
 - Intel E1000 network driver
 - RTL8139 network driver (future)
 
 ### Other Devices
+
 - PCI/PCIe bus enumeration
 - ACPI power management
 - RTC (Real-Time Clock)

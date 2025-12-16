@@ -94,7 +94,7 @@ after: #include <boot/multiboot.h>
 ---
  #include <boot/multiboot.h>
 +
-+void kernel_main(uint32_t magic, multiboot_info * info)
++void kernel_main(uint32_t magic, void * info)
 +{
 +}
 ```
@@ -108,9 +108,9 @@ First we need to verify we were loaded by a Multiboot2-compliant bootloader
 
 ```c-diff
 file: kernel/main.c
-after: void kernel_main(uint32_t magic, multiboot_info * info)
+after: void kernel_main(uint32_t magic, void * info)
 ---
- void kernel_main(uint32_t magic, multiboot_info * info)
+ void kernel_main(uint32_t magic, void * info)
  {
 +    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
 +        // Magic number mismatch - halt
@@ -182,15 +182,16 @@ Compilers are too smart for their own good sometimes. `volatile` is our way  of 
 
 Create `kernel/CMakeLists.txt` to build the final executable:
 
-```cmake
-# kernel/CMakeLists.txt
-
-# Create kernel executable with linker script
-tinyos_create_kernel(
-    SOURCES main.c
-    LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
-    LIBRARIES ${BOOT_OBJECTS}
-)
+```cmake-diff
+file: kernel/CMakeLists.txt
+after: entire file
+---
++# Create kernel executable with linker script
++tinyos_create_kernel(
++    SOURCES main.c
++    LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
++    LIBRARIES ${BOOT_OBJECTS}
++)
 ```
 
 This uses the `tinyos_create_kernel()` helper function (defined in `cmake/TinyOSHelpers.cmake`) to:

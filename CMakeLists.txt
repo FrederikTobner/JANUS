@@ -25,9 +25,6 @@ configure_file(
 # Add generated config.h to include path
 include_directories("${CMAKE_BINARY_DIR}/include")
 
-# Options
-option(BUILD_TESTS "Build BMUnit tests" OFF)
-
 # Print build configuration
 tinyos_print_config()
 
@@ -43,26 +40,11 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
     )
 endif()
 
-# Testing framework
-if(BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(bmunit)
-endif()
-
-# Library modules
-add_subdirectory(lib)
-
-# Architecture layer
-add_subdirectory(arch)
-
 # Boot module
 add_subdirectory(boot)
 
 # Core kernel modules
 add_subdirectory(kernel)
-
-# Memory management
-add_subdirectory(mm)
 
 # Device drivers (future)
 # add_subdirectory(drivers)

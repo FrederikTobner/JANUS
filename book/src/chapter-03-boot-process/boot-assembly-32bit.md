@@ -27,42 +27,45 @@ Simple, right? Let's try it.
 
 Create `boot/boot.asm`:
 
-```nasm
-; Boot entry point - called by GRUB in 32-bit protected mode
-global _start
-extern kernel_main
-
-; Reserve stack space in BSS section
-section .bss
-align 16
-stack_bottom:
-    resb 16384              ; 16 KiB stack
-stack_top:
-
-section .text
-bits 32                     ; GRUB puts us in 32-bit protected mode
-
-_start:
-    ; At this point:
-    ; - EAX = multiboot magic (0x36d76289)
-    ; - EBX = physical address of multiboot info structure
-    ; - CPU is in 32-bit protected mode
-    
-    ; Set up stack pointer
-    mov esp, stack_top
-    
-    ; Push multiboot info onto stack for kernel_main
-    push ebx                ; multiboot info pointer (arg 2)
-    push eax                ; multiboot magic (arg 1)
-    
-    ; Call kernel (this is where things go wrong...)
-    call kernel_main
-    
-    ; If kernel_main returns, halt
-.hang:
-    cli
-    hlt
-    jmp .hang
+```nasm-diff
+file: boot/boot.asm
+after: entire file
+---
++; Boot entry point - called by GRUB in 32-bit protected mode
++global _start
++extern kernel_main
++
++; Reserve stack space in BSS section
++section .bss
++align 16
++stack_bottom:
++    resb 16384              ; 16 KiB stack
++stack_top:
++
++section .text
++bits 32                     ; GRUB puts us in 32-bit protected mode
++
++_start:
++    ; At this point:
++    ; - EAX = multiboot magic (0x36d76289)
++    ; - EBX = physical address of multiboot info structure
++    ; - CPU is in 32-bit protected mode
++    
++    ; Set up stack pointer
++    mov esp, stack_top
++    
++    ; Push multiboot info onto stack for kernel_main
++    push ebx                ; multiboot info pointer (arg 2)
++    push eax                ; multiboot magic (arg 1)
++    
++    ; Call kernel (this is where things go wrong...)
++    call kernel_main
++    
++    ; If kernel_main returns, halt
++.hang:
++    cli
++    hlt
++    jmp .hang
 ```
 
 **What this code does:**
@@ -78,23 +81,26 @@ Looks reasonable. Let's add it to our CMake build and try it.
 
 Update `boot/CMakeLists.txt`:
 
-```cmake
-# Assemble boot files
-add_library(boot STATIC)
-
-target_sources(boot PRIVATE
-    multiboot.asm
-    boot.asm           # Add our new boot assembly
-)
-
-set_target_properties(boot PROPERTIES
-    NASM_OBJ_FORMAT elf64
-    LINKER_LANGUAGE C
-)
-
-target_include_directories(boot PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+```cmake-diff
+file: boot/CMakeLists.txt
+replace: entire file
+---
++# Assemble boot files
++add_library(boot STATIC)
++
++target_sources(boot PRIVATE
++    multiboot.asm
++    boot.asm           # Add our new boot assembly
++)
++
++set_target_properties(boot PROPERTIES
++    NASM_OBJ_FORMAT elf64
++    LINKER_LANGUAGE C
++)
++
++target_include_directories(boot PUBLIC
++    ${CMAKE_CURRENT_SOURCE_DIR}/include
++)
 ```
 
 Now build and create the ISO:
@@ -103,6 +109,10 @@ Now build and create the ISO:
 cmake -B build -G Ninja
 ninja -C build iso
 ```
+
+> **TODO**
+>
+> Validate this and then restructure. Otherwise throw away or just say it in the next chapter
 
 ## The Moment of Truth
 
