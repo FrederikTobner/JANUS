@@ -6,10 +6,12 @@ This directory contains the source for the TinyOS book, written using [mdBook](h
 
 ### Prerequisites
 
-Install mdBook:
+Install mdBook and custom preprocessors:
 
 ```bash
 cargo install mdbook
+cargo install --path preprocessors/mdbook-side-notes
+cargo install --path preprocessors/mdbook-code-diff
 ```
 
 ### Build and Serve
@@ -36,4 +38,5 @@ Then open <http://localhost:3000> in your browser.
   - `chapter-05-memory/` - Chapter 5: Memory Management
   - `chapter-06-kernel/` - Chapter 6: The Kernel
   - `appendices/` - Appendix content
-- `preprocessors/side-notes/` - Custom mdBook preprocessor for side notes
+- `preprocessors/mdbook-side-notes/` - Custom mdBook preprocessor for side notes
+- `preprocessors/mdbook-code-diff/` - Custom mdBook preprocessor for code diffs
