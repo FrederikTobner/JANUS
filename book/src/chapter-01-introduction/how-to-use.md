@@ -1,14 +1,14 @@
 # How to Use This Book
 
-## Following Along
-
 [!side]Typing code yourself is like the difference between watching someone cook and actually cooking. You notice details you'd otherwise miss.[/!side]
 
 I strongly recommend **typing the code yourself** rather than copy-pasting. Muscle memory helps understanding.
 
 That said, if you get stuck or want to skip ahead, the chapter branches are there. No judgment.
 
-## Experiments
+The code in this book prioritizes **clarity** over cleverness. We use explicit variable names, comments explaining "why" not "what", consistent formatting, and assertions.
+
+Performance matters in OS development, but premature optimization obscures concepts. We'll optimize only when needed and explain the trade-offs.
 
 [!side]The challenges marked "Advanced" can take hours. They're optional, but that's where the deep learning happens.[/!side]
 
@@ -31,12 +31,6 @@ Each chapter includes common issues and debugging strategies. When you're truly 
 **Ask for help.** OSDev forums, Reddit's r/osdev, Discord communities.
 
 Remember: bugs you fix teach you more than code that works on the first try.
-
-## A Note on Style
-
-The code in this book prioritizes **clarity** over cleverness. We use explicit variable names, comments explaining "why" not "what", consistent formatting, and assertions.
-
-Performance matters in OS development, but premature optimization obscures concepts. We'll optimize only when needed and explain the trade-offs.
 
 ---
 

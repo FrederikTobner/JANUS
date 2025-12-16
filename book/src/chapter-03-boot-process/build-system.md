@@ -59,53 +59,56 @@ Stack protectors insert canary values to detect buffer overflows. Requires runti
 
 Create `cmake/TinyOSHelpers.cmake` with helper functions for kernel development:
 
-```cmake
-# cmake/TinyOSHelpers.cmake
-
-# Create kernel executable with custom linker script
-function(tinyos_create_kernel)
-    cmake_parse_arguments(
-        ARG
-        ""
-        "LINKER_SCRIPT"
-        "SOURCES;LIBRARIES"
-        ${ARGN}
-    )
-    
-    # Create the kernel executable
-    add_executable(kernel.elf ${ARG_SOURCES})
-    
-    # Link with provided libraries and objects
-    if(ARG_LIBRARIES)
-        target_link_libraries(kernel.elf PRIVATE ${ARG_LIBRARIES})
-    endif()
-    
-    # Apply linker script
-    if(ARG_LINKER_SCRIPT)
-        target_link_options(kernel.elf PRIVATE
-            -T ${ARG_LINKER_SCRIPT}
-            -nostdlib
-            -static
-        )
-        # Ensure rebuild when linker script changes
-        set_target_properties(kernel.elf PROPERTIES
-            LINK_DEPENDS ${ARG_LINKER_SCRIPT}
-        )
-    endif()
-    
-    # Set kernel-specific flags
-    target_compile_options(kernel.elf PRIVATE
-        -ffreestanding
-        -fno-stack-protector
-        -mno-red-zone
-    )
-    
-    # Include directories
-    target_include_directories(kernel.elf PRIVATE
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/boot/include
-    )
-endfunction()
+```cmake-diff
+file: cmake/TinyOSHelpers.cmake
+replace: entire file
+---
++# cmake/TinyOSHelpers.cmake
++
++# Create kernel executable with custom linker script
++function(tinyos_create_kernel)
++    cmake_parse_arguments(
++        ARG
++        ""
++        "LINKER_SCRIPT"
++        "SOURCES;LIBRARIES"
++        ${ARGN}
++    )
++    
++    # Create the kernel executable
++    add_executable(kernel.elf ${ARG_SOURCES})
++    
++    # Link with provided libraries and objects
++    if(ARG_LIBRARIES)
++        target_link_libraries(kernel.elf PRIVATE ${ARG_LIBRARIES})
++    endif()
++    
++    # Apply linker script
++    if(ARG_LINKER_SCRIPT)
++        target_link_options(kernel.elf PRIVATE
++            -T ${ARG_LINKER_SCRIPT}
++            -nostdlib
++            -static
++        )
++        # Ensure rebuild when linker script changes
++        set_target_properties(kernel.elf PROPERTIES
++            LINK_DEPENDS ${ARG_LINKER_SCRIPT}
++        )
++    endif()
++    
++    # Set kernel-specific flags
++    target_compile_options(kernel.elf PRIVATE
++        -ffreestanding
++        -fno-stack-protector
++        -mno-red-zone
++    )
++    
++    # Include directories
++    target_include_directories(kernel.elf PRIVATE
++        ${CMAKE_SOURCE_DIR}/include
++        ${CMAKE_SOURCE_DIR}/boot/include
++    )
++endfunction()
 ```
 
 Key functions:
@@ -121,37 +124,40 @@ Key functions:
 
 First, create the root `CMakeLists.txt`:
 
-```cmake
-# CMakeLists.txt (root)
-cmake_minimum_required(VERSION 3.20)
-project(TinyOS ASM_NASM C)
-
-# Include our helper functions
-include(cmake/TinyOSHelpers.cmake)
-
-# Set C standard
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
-# Kernel compile flags
-add_compile_options(
-    -target x86_64-elf
-    -ffreestanding
-    -nostdlib
-    -mno-red-zone
-    -fno-stack-protector
-    -Wall -Wextra
-)
-
-# Include directories
-include_directories(
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/boot/include
-)
-
-# Build subdirectories
-add_subdirectory(boot)
-add_subdirectory(kernel)
+```cmake-diff
+file: CMakeLists.txt
+replace: entire file
+---
++# CMakeLists.txt (root)
++cmake_minimum_required(VERSION 3.20)
++project(TinyOS ASM_NASM C)
++
++# Include our helper functions
++include(cmake/TinyOSHelpers.cmake)
++
++# Set C standard
++set(CMAKE_C_STANDARD 11)
++set(CMAKE_C_STANDARD_REQUIRED ON)
++
++# Kernel compile flags
++add_compile_options(
++    -target x86_64-elf
++    -ffreestanding
++    -nostdlib
++    -mno-red-zone
++    -fno-stack-protector
++    -Wall -Wextra
++)
++
++# Include directories
++include_directories(
++    ${CMAKE_SOURCE_DIR}/include
++    ${CMAKE_SOURCE_DIR}/boot/include
++)
++
++# Build subdirectories
++add_subdirectory(boot)
++add_subdirectory(kernel)
 ```
 
 **Configure:**
@@ -235,7 +241,7 @@ build/kernel.elf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV),
 statically linked, with debug_info, not stripped
 ```
 
-> **Aside: What's an ELF File?**
+> **New to ELF?**
 >
 > ELF (Executable and Linkable Format) is the standard executable format on Unix-like systems (Linux, BSD, etc.). It's a container that holds:
 >

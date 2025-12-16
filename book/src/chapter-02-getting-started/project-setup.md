@@ -6,21 +6,12 @@ Now that your tools are installed and verified, let's create the project structu
 We build incrementally. Each chapter adds structure as we need it, not all upfront.
 [/!side]
 
-## Creating the Project Directory
-
 ```bash
 mkdir -p TinyOS
 cd TinyOS
-
-# Initialize git repository
-git init
 ```
 
-## Initial Directory Structure
-
 We'll build the project incrementally throughout the book. For now, just create the top-level directory. Each chapter adds new components as we need them.
-
-### Project Evolution Roadmap
 
 ```mermaid
 graph TD
@@ -46,23 +37,6 @@ Don't create subdirectories yet—we'll build them piece by piece as we understa
 [!side]
 Premature structure leads to `misc/`, `utils/`, and `stuff/` directories. We avoid that by building only what we need.
 [/!side]
-
-## Scope: What This Book Focuses On
-
-This book teaches OS development, not prerequisite tools. We assume you're already comfortable with:
-
-- **Your editor**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (autocomplete, go-to-definition, error highlighting) if you want it.
-
-[!side]
-Vim, Emacs, VS Code, CLion—whatever makes you productive. The code is the same regardless.
-[/!side]
-
-- **Git workflows**: We use version control but don't teach it.
-- **Shell navigation**: Basic command-line skills (cd, ls, running commands).
-- **C fundamentals**: Pointers, structs, memory management.
-- **Build systems**: We use CMake extensively but focus on *what* we're building, not CMake syntax itself.
-
-If any of these feel unfamiliar, get comfortable with them first. The OS development is challenging enough without fighting your tools.
 
 ## Cross-Compilation Flags
 

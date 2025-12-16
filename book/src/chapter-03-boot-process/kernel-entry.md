@@ -69,37 +69,89 @@ Windows uses a different ABI (RCX, RDX, R8, R9). We follow System V because it's
 
 ## Implementing kernel_main()
 
-Create `kernel/main.c`:
+Let's build the kernel entry point step by step. Create an empty file:
 
-```c
-// kernel/main.c
-#include <stdint.h>
-#include <stddef.h>
-#include <boot/multiboot.h>
+```bash
+touch kernel/main.c
+```
 
-void kernel_main(uint32_t magic, void *info)
-{
-    // Verify we were loaded by a Multiboot2-compliant bootloader
-    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        // Magic number mismatch - halt
-        for (;;) {
-            __asm__ volatile("cli; hlt");
-        }
-    }
+First we need to include some of the headers we have created in the previous chapters:
 
-    // Verify multiboot info pointer is valid
-    if (info == NULL) {
-        // Null pointer - halt
-        for (;;) {
-            __asm__ volatile("cli; hlt");
-        }
-    }
-    
-    // Kernel initialization complete - infinite loop for now
-    for (;;) {
-        __asm__ volatile("hlt");
-    }
-}
+```c-diff
+file: kernel/main.c
+replace: entire file
+---
++#include <stdint.h>
++#include <stddef.h>
++#include <boot/multiboot.h>
+```
+
+Lets create the main entry point of our kernel:
+
+```c-diff
+file: kernel/main.c
+after: #include <boot/multiboot.h>
+---
+ #include <boot/multiboot.h>
++
++void kernel_main(uint32_t magic, multiboot_info * info)
++{
++}
+```
+
+Our function takes:
+
+- `magic` - The Multiboot2 magic number from RDI (was EAX in 32-bit mode)
+- `info` - Pointer to Multiboot information structure from RSI (was EBX in 32-bit mode)
+
+First we need to verify we were loaded by a Multiboot2-compliant bootloader
+
+```c-diff
+file: kernel/main.c
+after: void kernel_main(uint32_t magic, multiboot_info * info)
+---
+ void kernel_main(uint32_t magic, multiboot_info * info)
+ {
++    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
++        // Magic number mismatch - halt
++        for (;;) {
++            __asm__ volatile("cli; hlt");
++        }
++    }
+ }
+```
+
+Now we verify that the multiboot info pointer is valid.
+
+```c-diff
+file: kernel/main.c
+after: magic check closing brace
+---
+         }
+     }
++
++    if (info == NULL) {
++        // Null pointer - halt
++        for (;;) {
++            __asm__ volatile("cli; hlt");
++        }
++    }
+ }
+```
+
+If we reach this point, the kernel was loaded successfully. For now we will just do an infinite loop.
+
+```c-diff
+file: kernel/main.c
+after: info NULL check closing brace
+---
+         }
+     }
++    
++    for (;;) {
++        __asm__ volatile("hlt");
++    }
+ }
 ```
 
 ## What This Does
@@ -110,50 +162,21 @@ void kernel_main(uint32_t magic, void *info)
 
 **The halt loops:** `cli` disables interrupts (redundant, but explicit). `hlt` puts the CPU to sleep until the next interrupt. Since interrupts are disabled, this halts the CPU permanently.
 
-## Why `volatile`?
-
-```c
-__asm__ volatile("hlt");
-```
-
-The `volatile` keyword tells the compiler: "Don't optimize this away, even though it looks useless." Without it, an optimizing compiler might think "this loop does nothing" and remove it. We *want* the infinite loop.
-
 [!side]
-Compilers are too smart for their own good sometimes. `volatile` is our way of saying "trust me on this one."
+Compilers are too smart for their own good sometimes. `volatile` is our way  of saying "trust me on this one."
 [/!side]
 
-## Testing the Kernel
-
-Let's build and verify:
-
-```bash
-ninja -C build
-```
-
-Check that `kernel_main` symbol exists:
-
-```bash
-nm build/kernel.elf | grep kernel_main
-```
-
-Output:
-
-```
-0000000000101090 T kernel_main
-```
-
-**What this shows:** The `T` means it's in the text (code) section, and `0000000000101090` is the address where `kernel_main` lives in memory.
-
-At this point, the kernel boots, verifies it was loaded correctly, and halts. Not exciting, but it's correct! We've established the foundation for everything else.
-
-**What happens if you boot this kernel?**
-
-- GRUB loads it and jumps to `_start`
-- Boot assembly sets up stack and calls `kernel_main`
-- `kernel_main` verifies magic number
-- Kernel halts (CPU sleeps forever)
-
-**What you'll see:** Nothing. The screen stays blank because we haven't initialized any output yet. But QEMU won't crash, and a debugger would show we're sitting in that `hlt` instruction. Success!
+> **New to `volatile`?**
+>
+> ```c
+> __asm__ volatile("hlt");
+> ```
+>
+> The `volatile` keyword tells the compiler: "Don't optimize this away, even though it looks useless."
+> Without it, an optimizing compiler might think "this loop does nothing" and remove it. We *want* the infinite loop.
+>
+>
+>
 
 ## Creating the Kernel Build File
 

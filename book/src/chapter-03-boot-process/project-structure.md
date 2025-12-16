@@ -18,14 +18,11 @@ mkdir -p TinyOS
 cd TinyOS
 
 # Create module directories
-mkdir -p boot kernel arch/x86_64/include/arch
-mkdir -p include/tinyos cmake
+mkdir -p boot kernel include/tinyos cmake
 
 # Create placeholder CMakeLists.txt files
 touch boot/CMakeLists.txt
 touch kernel/CMakeLists.txt
-touch arch/CMakeLists.txt
-touch arch/x86_64/CMakeLists.txt
 touch CMakeLists.txt
 ```
 
@@ -34,30 +31,24 @@ Your structure should now look like this:
 ```
 TinyOS/
 ├── boot/                   # Boot module
-│   ├── multiboot.asm      # Multiboot2 header
-│   ├── boot.asm           # Early boot assembly
 │   └── CMakeLists.txt     # Boot build config
 ├── kernel/                 # Core kernel module
-│   ├── main.c             # Kernel entry point
-│   ├── linker.ld          # Memory layout
 │   └── CMakeLists.txt     # Kernel build config
-├── arch/                   # Architecture abstraction
-│   └── x86_64/            # x86-64 implementation
-│       ├── include/
-│       │   └── arch/      # Architecture headers
-│       ├── io.c           # Port I/O (future)
-│       └── serial.c       # Serial driver (future)
 ├── include/                # Standard library headers (freestanding)
-│   ├── stdint.h           # Fixed-width types (uint32_t, etc.)
-│   ├── stddef.h           # Basic definitions (size_t, NULL)
-│   ├── stdbool.h          # Boolean type (bool, true, false)
 │   └── tinyos/            # TinyOS-specific kernel headers
-│       └── types.h        # Kernel semantic types
 ├── cmake/                  # Build system modules
 │   ├── TinyOSPlatform.cmake
 │   └── TinyOSHelpers.cmake
 └── CMakeLists.txt          # Root build config
 ```
+
+We will organize our code in different modules
+Each module is self-contained with:
+
+- Its own `CMakeLists.txt`
+- An `include/` directory for public headers
+- Implementation files
+The only outlier here is the include directory that includes our header files.
 
 ## The Tiny Standard Library
 
@@ -65,87 +56,97 @@ Since we're in freestanding mode (no host OS), we can't use the system's C stand
 
 ### Create `include/stdint.h`
 
-```c
-#ifndef _STDINT_H
-#define _STDINT_H
-
-// Fixed-width integer types using compiler builtins
-typedef __UINT8_TYPE__  uint8_t;
-typedef __UINT16_TYPE__ uint16_t;
-typedef __UINT32_TYPE__ uint32_t;
-typedef __UINT64_TYPE__ uint64_t;
-
-[!side]
-`__UINT32_TYPE__` is a compiler builtin. Clang and GCC both provide these, making our headers portable.
-[/!side]
-
-typedef __INT8_TYPE__  int8_t;
-typedef __INT16_TYPE__ int16_t;
-typedef __INT32_TYPE__ int32_t;
-typedef __INT64_TYPE__ int64_t;
-
-// Limits
-#define UINT8_MAX  0xFF
-#define UINT16_MAX 0xFFFF
-#define UINT32_MAX 0xFFFFFFFF
-#define UINT64_MAX 0xFFFFFFFFFFFFFFFF
-
-#define INT8_MIN   (-128)
-#define INT8_MAX   127
-#define INT16_MIN  (-32768)
-#define INT16_MAX  32767
-#define INT32_MIN  (-2147483648)
-#define INT32_MAX  2147483647
-#define INT64_MIN  (-9223372036854775808L)
-#define INT64_MAX  9223372036854775807L
-
-#endif // _STDINT_H
+```c-diff
+file: include/stdint.h
+replace: entire file
+---
++#ifndef _STDINT_H
++#define _STDINT_H
++
++// Fixed-width integer types using compiler builtins
++typedef __UINT8_TYPE__  uint8_t;
++typedef __UINT16_TYPE__ uint16_t;
++typedef __UINT32_TYPE__ uint32_t;
++typedef __UINT64_TYPE__ uint64_t;
++
++typedef __INT8_TYPE__  int8_t;
++typedef __INT16_TYPE__ int16_t;
++typedef __INT32_TYPE__ int32_t;
++typedef __INT64_TYPE__ int64_t;
++
++// Limits
++#define UINT8_MAX  0xFF
++#define UINT16_MAX 0xFFFF
++#define UINT32_MAX 0xFFFFFFFF
++#define UINT64_MAX 0xFFFFFFFFFFFFFFFF
++
++#define INT8_MIN   (-128)
++#define INT8_MAX   127
++#define INT16_MIN  (-32768)
++#define INT16_MAX  32767
++#define INT32_MIN  (-2147483648)
++#define INT32_MAX  2147483647
++#define INT64_MIN  (-9223372036854775808L)
++#define INT64_MAX  9223372036854775807L
++
++#endif // _STDINT_H
 ```
+
+`__UINT32_TYPE__` is a compiler builtin. Clang and GCC both provide these, making our headers portable.
 
 ### Create `include/stddef.h`
 
-```c
-#ifndef _STDDEF_H
-#define _STDDEF_H
-
-// Basic type definitions
-typedef __SIZE_TYPE__ size_t;
-typedef __PTRDIFF_TYPE__ ptrdiff_t;
-
-#define NULL ((void*)0)
-#define offsetof(type, member) __builtin_offsetof(type, member)
-
-#endif // _STDDEF_H
+```c-diff
+file: include/stddef.h
+replace: entire file
+---
++#ifndef _STDDEF_H
++#define _STDDEF_H
++
++// Basic type definitions
++typedef __SIZE_TYPE__ size_t;
++typedef __PTRDIFF_TYPE__ ptrdiff_t;
++
++#define NULL ((void*)0)
++#define offsetof(type, member) __builtin_offsetof(type, member)
++
++#endif // _STDDEF_H
 ```
 
 ### Create `include/stdbool.h`
 
-```c
-#ifndef _STDBOOL_H
-#define _STDBOOL_H
-
-#define bool  _Bool
-#define true  1
-#define false 0
-
-#define __bool_true_false_are_defined 1
-
-#endif // _STDBOOL_H
+```c-diff
+file: include/stdbool.h
+replace: entire file
+---
++#ifndef _STDBOOL_H
++#define _STDBOOL_H
++
++#define bool  _Bool
++#define true  1
++#define false 0
++
++#define __bool_true_false_are_defined 1
++
++#endif // _STDBOOL_H
 ```
 
 ### Create `include/tinyos/types.h`
 
-```c
-#ifndef TINYOS_TYPES_H
-#define TINYOS_TYPES_H
-
-#include <stdint.h>
-
-// Semantic type aliases for kernel addresses
-typedef uint64_t phys_addr_t;  // Physical memory address
-typedef uint64_t virt_addr_t;  // Virtual memory address
-
-#endif // TINYOS_TYPES_H
+```c-diff
+file: include/tinyos/types.h
+replace: entire file
+---
++#ifndef TINYOS_TYPES_H
++#define TINYOS_TYPES_H
++
++#include <stdint.h>
++
++// Semantic type aliases for kernel addresses
++typedef uint64_t phys_addr_t;  // Physical memory address
++typedef uint64_t virt_addr_t;  // Virtual memory address
++
++#endif // TINYOS_TYPES_H
 ```
 
 **Why standard names?** Familiarity. Every C programmer knows `uint32_t` and `size_t`. Using standard interfaces means:
@@ -165,14 +166,6 @@ uint64_t count = 256;         // "This is just a number"
 ```
 
 The type system prevents mistakes. You can't accidentally pass a physical address where a virtual address is expected—the compiler catches the type mismatch.
-
-## Module Patterns
-
-Each module is self-contained with:
-
-- Its own `CMakeLists.txt`
-- An `include/` directory for public headers
-- Implementation files
 
 ---
 

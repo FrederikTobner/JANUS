@@ -67,12 +67,14 @@ Let's build our linker script incrementally. Create `kernel/linker.ld` and we'll
 
 Start with the skeleton—where execution begins and where the kernel loads:
 
-```ld
-ENTRY(_start)
-
-SECTIONS {
-    . = 0x100000;
-}
+```ld-diff
+file: kernel/linker.ld
+---
++ENTRY(_start)
++
++SECTIONS {
++    . = 0x100000;
++}
 ```
 
 **What this does:**
@@ -87,10 +89,16 @@ The location counter is like a cursor. As we add sections, it moves forward auto
 
 GRUB scans the first 32KB for the Multiboot header. Add it right after the load address:
 
-```ld
-.multiboot ALIGN(8) : {
-    *(.multiboot)
-}
+```ld-diff
+file: kernel/linker.ld
+after: . = 0x100000;
+---
+     . = 0x100000;
++    
++    .multiboot ALIGN(8) : {
++        *(.multiboot)
++    }
+ }
 ```
 
 **What this does:**
@@ -105,11 +113,19 @@ This must come first or GRUB won't find it.
 
 Add the executable code section after `.multiboot`:
 
-```ld
-.text ALIGN(4K) : {
-    *(.text)
-    *(.text.*)
-}
+```ld-diff
+file: kernel/linker.ld
+after: .multiboot section
+---
+     .multiboot ALIGN(8) : {
+         *(.multiboot)
+     }
++    
++    .text ALIGN(4K) : {
++        *(.text)
++        *(.text.*)
++    }
+ }
 ```
 
 **What this does:**
@@ -124,11 +140,20 @@ Page alignment lets us set memory permissions cleanly (executable vs. non-execut
 
 Add the read-only data section after `.text`:
 
-```ld
-.rodata ALIGN(4K) : {
-    *(.rodata)
-    *(.rodata.*)
-}
+```ld-diff
+file: kernel/linker.ld
+after: .text section
+---
+     .text ALIGN(4K) : {
+         *(.text)
+         *(.text.*)
+     }
++    
++    .rodata ALIGN(4K) : {
++        *(.rodata)
++        *(.rodata.*)
++    }
+ }
 ```
 
 **What this does:**
@@ -140,11 +165,20 @@ Add the read-only data section after `.text`:
 
 Add the initialized data section after `.rodata`:
 
-```ld
-.data ALIGN(4K) : {
-    *(.data)
-    *(.data.*)
-}
+```ld-diff
+file: kernel/linker.ld
+after: .rodata section
+---
+     .rodata ALIGN(4K) : {
+         *(.rodata)
+         *(.rodata.*)
+     }
++    
++    .data ALIGN(4K) : {
++        *(.data)
++        *(.data.*)
++    }
+ }
 ```
 
 **What this does:**
@@ -156,12 +190,21 @@ Add the initialized data section after `.rodata`:
 
 Add the BSS section after `.data`:
 
-```ld
-.bss ALIGN(4K) : {
-    *(COMMON)
-    *(.bss)
-    *(.bss.*)
-}
+```ld-diff
+file: kernel/linker.ld
+after: .data section
+---
+     .data ALIGN(4K) : {
+         *(.data)
+         *(.data.*)
+     }
++    
++    .bss ALIGN(4K) : {
++        *(COMMON)
++        *(.bss)
++        *(.bss.*)
++    }
+ }
 ```
 
 **What this does:**
@@ -174,10 +217,20 @@ Add the BSS section after `.data`:
 
 Finally, add these symbols at the end of the `SECTIONS` block (after `.bss`):
 
-```ld
-kernel_start = 0x100000;
-kernel_end = .;
-kernel_size = kernel_end - kernel_start;
+```ld-diff
+file: kernel/linker.ld
+after: .bss section
+---
+     .bss ALIGN(4K) : {
+         *(COMMON)
+         *(.bss)
+         *(.bss.*)
+     }
++    
++    kernel_start = 0x100000;
++    kernel_end = .;
++    kernel_size = kernel_end - kernel_start;
+ }
 ```
 
 **What this does:**

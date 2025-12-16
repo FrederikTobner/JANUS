@@ -19,143 +19,225 @@ Unlike 32-bit mode, long mode *requires* paging to be enabled. No paging = no 64
 
 Let's implement each step.
 
-## The Complete Boot Assembly
+## Building the Boot Assembly
 
-Replace `boot/boot.asm` with this corrected version:
+We'll build `boot/boot.asm` incrementally, adding each piece as we explain it.
 
-```nasm
-; Boot entry point - called by GRUB in 32-bit protected mode
-global _start
-extern kernel_main
+### Step 1: Declarations and BSS Section
 
-; Reserve stack space in BSS section
-section .bss
-align 16
-stack_bottom:
-    resb 16384              ; 16 KiB stack
-stack_top:
+Start with the global declarations and stack/page table reservations:
 
-; Page tables for long mode (must be page-aligned)
-align 4096
-p4_table:
-    resb 4096
-p3_table:
-    resb 4096
-p2_table:
-    resb 4096
-
-section .text
-bits 32                     ; GRUB puts us in 32-bit protected mode
-
-_start:
-    ; At this point:
-    ; - EAX = multiboot magic (0x36d76289)
-    ; - EBX = physical address of multiboot info structure
-    ; - CPU is in 32-bit protected mode
-    
-    ; Save multiboot info (we'll need them after switching to long mode)
-    mov edi, eax            ; Save magic
-    mov esi, ebx            ; Save multiboot info pointer
-    
-    ; Set up stack pointer
-    mov esp, stack_top
-    
-    ; Set up page tables and enable long mode
-    call setup_page_tables
-    call enable_paging
-    
-    ; Load 64-bit GDT
-    lgdt [gdt64.pointer]
-    
-    ; Jump to 64-bit code
-    jmp gdt64.code:long_mode_start
-
-; Set up identity-mapped page tables
-; Maps first 2MB of physical memory
-setup_page_tables:
-    ; Map P4[0] -> P3
-    mov eax, p3_table
-    or eax, 0b11            ; Present + writable
-    mov [p4_table], eax
-    
-    ; Map P3[0] -> P2
-    mov eax, p2_table
-    or eax, 0b11            ; Present + writable
-    mov [p3_table], eax
-    
-    ; Map P2[0] -> 0MB (2MB huge page)
-    mov eax, 0x0
-    or eax, 0b10000011      ; Present + writable + huge page
-    mov [p2_table], eax
-    
-    ret
-
-; Enable paging and enter long mode
-enable_paging:
-    ; Load P4 table address into CR3
-    mov eax, p4_table
-    mov cr3, eax
-    
-    ; Enable PAE (Physical Address Extension)
-    mov eax, cr4
-    or eax, 1 << 5          ; Set PAE bit
-    mov cr4, eax
-
-[!side]
-PAE extends 32-bit addressing to 36 bits (64GB). Required stepping stone to 64-bit mode.
-[/!side]
-    
-    ; Enable long mode in EFER MSR
-    mov ecx, 0xC0000080     ; EFER MSR
-    rdmsr
-    or eax, 1 << 8          ; Set LM bit
-    wrmsr
-
-[!side]
-EFER = Extended Feature Enable Register. MSRs are special CPU registers accessed with `rdmsr`/`wrmsr`.
-[/!side]
-    
-    ; Enable paging
-    mov eax, cr0
-    or eax, 1 << 31         ; Set PG bit
-    mov cr0, eax
-    
-    ret
-
-; 64-bit code starts here
-bits 64
-long_mode_start:
-    ; Clear segment registers
-    xor ax, ax
-    mov ss, ax
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    
-    ; Call kernel main with preserved multiboot info
-    ; System V AMD64 ABI: first arg in RDI, second in RSI
-    ; (edi and esi were preserved from 32-bit mode)
-    call kernel_main
-    
-    ; If kernel_main returns, halt
-.hang:
-    cli
-    hlt
-    jmp .hang
-
-; Global Descriptor Table for 64-bit mode
-section .rodata
-gdt64:
-    dq 0                                    ; Null descriptor
-.code: equ $ - gdt64
-    dq (1<<43) | (1<<44) | (1<<47) | (1<<53) ; Code segment
-.pointer:
-    dw $ - gdt64 - 1                        ; GDT size
-    dq gdt64                                ; GDT address
+```asm-diff
+file: boot/boot.asm
+replace: entire file
+---
++; Boot entry point - called by GRUB in 32-bit protected mode
++global _start
++extern kernel_main
++
++; Reserve stack space in BSS section
++section .bss
++align 16
++stack_bottom:
++    resb 16384              ; 16 KiB stack
++stack_top:
++
++; Page tables for long mode (must be page-aligned)
++align 4096
++p4_table:
++    resb 4096
++p3_table:
++    resb 4096
++p2_table:
++    resb 4096
 ```
 
-## Understanding the Transition
+We reserve space in the BSS (uninitialized data) section for our stack and page tables. The page tables must be 4096-byte (4KB) aligned because that's the page size the CPU expects.
+
+### Step 2: 32-bit Entry Point
+
+Add the entry point where GRUB transfers control to us:
+
+```asm-diff
+file: boot/boot.asm
+after: resb 4096
+---
+ p2_table:
+     resb 4096
++
++section .text
++bits 32                     ; GRUB puts us in 32-bit protected mode
++
++_start:
++    ; At this point:
++    ; - EAX = multiboot magic (0x36d76289)
++    ; - EBX = physical address of multiboot info structure
++    ; - CPU is in 32-bit protected mode
++    
++    ; Save multiboot info (we'll need them after switching to long mode)
++    mov edi, eax            ; Save magic
++    mov esi, ebx            ; Save multiboot info pointer
++    
++    ; Set up stack pointer
++    mov esp, stack_top
++    
++    ; Set up page tables and enable long mode
++    call setup_page_tables
++    call enable_paging
++    
++    ; Load 64-bit GDT
++    lgdt [gdt64.pointer]
++    
++    ; Jump to 64-bit code
++    jmp gdt64.code:long_mode_start
+```
+
+GRUB passes parameters in EAX (multiboot magic number) and EBX (pointer to multiboot info). We save them to EDI and ESI because these registers are preserved across the mode switch. In 64-bit mode, EDI becomes RDI and ESI becomes RSI—exactly where the System V AMD64 ABI expects the first two function arguments.
+
+### Step 3: Page Table Setup Function
+
+Now add the function that creates our page tables:
+
+```asm-diff
+file: boot/boot.asm
+after: jmp gdt64.code:long_mode_start
+---
+     jmp gdt64.code:long_mode_start
++
++; Set up identity-mapped page tables
++; Maps first 2MB of physical memory
++setup_page_tables:
++    ; Map P4[0] -> P3
++    mov eax, p3_table
++    or eax, 0b11            ; Present + writable
++    mov [p4_table], eax
++    
++    ; Map P3[0] -> P2
++    mov eax, p2_table
++    or eax, 0b11            ; Present + writable
++    mov [p3_table], eax
++    
++    ; Map P2[0] -> 0MB (2MB huge page)
++    mov eax, 0x0
++    or eax, 0b10000011      ; Present + writable + huge page
++    mov [p2_table], eax
++    
++    ret
+```
+
+We create a simple identity mapping: virtual address 0x0 → physical address 0x0 for the first 2MB. The page entry flags are:
+
+- Bit 0 (Present): Page is present in memory
+- Bit 1 (Writable): Page can be written to
+- Bit 7 (Huge page): This is a 2MB page, not a 4KB page
+
+The flag value `0b11` equals \\(2^0 + 2^1 = 3\\) (present + writable), and `0b10000011` equals \\(2^0 + 2^1 + 2^7 = 131\\) (present + writable + huge page).
+
+We're using a 2MB **huge page** which skips the P1 (page table) level entirely. This maps the entire first 2MB in one entry instead of 512 individual 4KB pages. A standard 4KB page would require \\(512\\) entries (since \\(2\\text{MB} = 2^{21}\\) bytes and \\(4\\text{KB} = 2^{12}\\) bytes, so \\(2^{21} / 2^{12} = 2^9 = 512\\) pages).
+
+### Step 4: Enable Paging and Long Mode
+
+Add the critical function that transitions the CPU to 64-bit mode:
+
+```asm-diff
+file: boot/boot.asm
+after: setup_page_tables ret
+---
+     ret
++
++; Enable paging and enter long mode
++enable_paging:
++    ; Load P4 table address into CR3
++    mov eax, p4_table
++    mov cr3, eax
++    
++    ; Enable PAE (Physical Address Extension)
++    mov eax, cr4
++    or eax, 1 << 5          ; Set PAE bit
++    mov cr4, eax
++    
++    ; Enable long mode in EFER MSR
++    mov ecx, 0xC0000080     ; EFER MSR
++    rdmsr
++    or eax, 1 << 8          ; Set LM bit
++    wrmsr
++    
++    ; Enable paging
++    mov eax, cr0
++    or eax, 1 << 31         ; Set PG bit
++    mov cr0, eax
++    
++    ret
+```
+
+This function performs the mode transition sequence:
+
+1. **CR3** ← P4 table address (tells CPU where page tables are)
+2. **PAE** (Physical Address Extension) extends 32-bit addressing from 32 bits to 36 bits, allowing access to 64GB of physical memory (\\(2^{36}\\) bytes instead of \\(2^{32} = 4\\text{GB}\\)). PAE is required for 64-bit mode—you can't enable long mode without it.
+3. **EFER.LM** (Extended Feature Enable Register, Long Mode bit) tells the CPU we want 64-bit mode. EFER is a Model-Specific Register (MSR) accessed with `rdmsr`/`wrmsr` instructions instead of normal register operations. You specify which MSR using ECX (0xC0000080 for EFER).
+4. **CR0.PG** (Paging bit) activates paging. Once paging is enabled *and* LME is set in EFER, the CPU enters long mode!
+
+### Step 5: 64-bit Entry Point
+
+We're finally in long mode! Add the 64-bit entry point that calls our kernel:
+
+```asm-diff
+file: boot/boot.asm
+after: enable_paging ret
+---
+     ret
++
++; 64-bit code starts here
++bits 64
++long_mode_start:
++    ; Clear segment registers
++    xor ax, ax
++    mov ss, ax
++    mov ds, ax
++    mov es, ax
++    mov fs, ax
++    mov gs, ax
++    
++    ; Call kernel main with preserved multiboot info
++    ; System V AMD64 ABI: first arg in RDI, second in RSI
++    ; (edi and esi were preserved from 32-bit mode)
++    call kernel_main
++    
++    ; If kernel_main returns, halt
++.hang:
++    cli
++    hlt
++    jmp .hang
+```
+
+In long mode, segment registers aren't used for addressing (flat memory model), but we zero them out for cleanliness. The EDI and ESI registers we saved in Step 2 are now RDI and RSI, perfectly positioned as the first two function arguments per the System V AMD64 calling convention.
+
+### Step 6: Global Descriptor Table
+
+Finally, add the GDT that defines our 64-bit code segment:
+
+```asm-diff
+file: boot/boot.asm
+after: .hang loop
+---
+     jmp .hang
++
++; Global Descriptor Table for 64-bit mode
++section .rodata
++gdt64:
++    dq 0                                    ; Null descriptor
++.code: equ $ - gdt64
++    dq (1<<43) | (1<<44) | (1<<47) | (1<<53) ; Code segment
++.pointer:
++    dw $ - gdt64 - 1                        ; GDT size
++    dq gdt64                                ; GDT address
+```
+
+The GDT (Global Descriptor Table) defines memory segments. In 64-bit long mode, segmentation is mostly disabled (flat memory model), but we still need a GDT with at least a code segment to tell the CPU we're in 64-bit mode.
+
+The code segment descriptor sets bits for: executable (bit 43), code/data segment (bit 44), present (bit 47), and 64-bit mode (bit 53). The value \\((1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)\\) creates a 64-bit value with these specific bits set.
+
+## Visualizing the Transition
 
 ### CPU Mode Transition Journey
 
@@ -171,181 +253,9 @@ graph LR
 ```
 
 > **TODO: Hand-drawn illustration idea**
-> Draw the CPU as a character going through a transformation sequence like a video game power-up. Panel 1: "32-bit CPU" looking small and limited. Panel 2: Eating a "PAE mushroom" and "EFER crystal". Panel 3: Growing bigger with sparkles, now "64-bit CPU" with flexed muscles and a cape, saying "I can address SO MUCH MEMORY now!"
+> Draw the CPU as a character going through a transformation sequence like a video game power-up. Panel 1: "32-bit CPU" looking small and limited. Panel 2: runnung into a "PAE mushroom" and "EFER star". Panel 3: Powered up"
 
-## Step-by-Step Breakdown
-
-### Step 1: Save Multiboot Parameters
-
-```nasm
-mov edi, eax            ; Save magic
-mov esi, ebx            ; Save multiboot info pointer
-```
-
-GRUB passes parameters in EAX and EBX. We save them to EDI and ESI because:
-
-- These registers are preserved across the mode switch
-- In 64-bit mode, EDI becomes RDI and ESI becomes RSI
-- The System V AMD64 ABI expects function arguments in RDI and RSI
-
-### Step 2: Set Up Page Tables
-
-```nasm
-setup_page_tables:
-    ; Map P4[0] -> P3
-    mov eax, p3_table
-    or eax, 0b11            ; Present + writable
-    mov [p4_table], eax
-    
-    ; Map P3[0] -> P2
-    mov eax, p2_table
-    or eax, 0b11            ; Present + writable
-    mov [p3_table], eax
-    
-    ; Map P2[0] -> 0MB (2MB huge page)
-    mov eax, 0x0
-    or eax, 0b10000011      ; Present + writable + huge page
-    mov [p2_table], eax
-```
-
-We create a simple identity mapping: virtual address 0x0 → physical address 0x0 for the first 2MB.
-
-**Page entry flags:**
-
-- Bit 0 (Present): Page is present in memory
-- Bit 1 (Writable): Page can be written to
-- Bit 7 (Huge page): This is a 2MB page, not a 4KB page
-
-The flag value `0b11` equals \\(2^0 + 2^1 = 3\\) (present + writable), and `0b10000011` equals \\(2^0 + 2^1 + 2^7 = 131\\) (present + writable + huge page).
-
-### 4-Level Page Table Structure
-
-```mermaid
-graph TD
-    VA["Virtual Address<br/>0x00101234"]
-    PA["Physical Address<br/>0x00101234<br/>(Identity mapped!)"]
-    
-    CR3["CR3 Register"]
-    P4["P4 Table (PML4)"]
-    P4E0["Entry[0]"]
-    P3["P3 Table (PDPT)"]
-    P3E0["Entry[0]"]
-    P2["P2 Table (PD)"]
-    P2E0["Entry[0]<br/>(2MB huge page)"]
-    PHYS["Physical Memory<br/>0x00000000"]
-    
-    VA --> CR3
-    CR3 --> P4
-    P4 --> P4E0
-    P4E0 --> P3
-    P3 --> P3E0
-    P3E0 --> P2
-    P2 --> P2E0
-    P2E0 --> PHYS
-    PHYS --> PA
-```
-
-We're using a 2MB **huge page** which skips the P1 (page table) level entirely. This maps the entire first 2MB in one entry instead of 512 individual 4KB pages.
-
-**Math:** A standard 4KB page would require \\(512\\) entries (since \\(2\\text{MB} = 2^{21}\\) bytes and \\(4\\text{KB} = 2^{12}\\) bytes, so \\(2^{21} / 2^{12} = 2^9 = 512\\) pages).
-
-### Step 3: Enable PAE
-
-```nasm
-mov eax, cr4
-or eax, 1 << 5          ; Set PAE bit (bit 5)
-mov cr4, eax
-```
-
-**PAE (Physical Address Extension):** Originally added to 32-bit x86 to access more than 4GB of RAM, PAE extends physical addresses from 32 bits to 36 bits. In 64-bit mode, PAE is *required*—you can't enable long mode without it.
-
-**Math:** Without PAE, 32-bit addressing allows \\(2^{32} = 4\\text{GB}\\) of physical memory. With PAE, 36-bit addressing allows \\(2^{36} = 64\\text{GB}\\) of physical memory.
-
-### Step 4: Enable Long Mode
-
-```nasm
-mov ecx, 0xC0000080     ; EFER MSR number
-rdmsr                   ; Read MSR into EDX:EAX
-or eax, 1 << 8          ; Set LM bit (bit 8)
-wrmsr                   ; Write back to MSR
-```
-
-**EFER (Extended Feature Enable Register):** A Model-Specific Register (MSR) that controls advanced CPU features. Bit 8 (LME - Long Mode Enable) tells the CPU we want 64-bit mode.
-
-**MSR (Model-Specific Register):** Special registers accessed via `rdmsr` (read) and `wrmsr` (write) instructions, not like normal registers. You specify which MSR using ECX.
-
-### Step 5: Enable Paging
-
-```nasm
-mov eax, cr0
-or eax, 1 << 31         ; Set PG bit (bit 31)
-mov cr0, eax
-```
-
-**CR0:** Control Register 0 contains system control flags. Setting bit 31 (PG) enables paging. Once paging is enabled *and* LME is set in EFER, the CPU enters long mode!
-
-### Step 6: Load 64-bit GDT
-
-```nasm
-lgdt [gdt64.pointer]
-```
-
-**GDT (Global Descriptor Table):** Defines memory segments. In 64-bit long mode, segmentation is mostly disabled (flat memory model), but we still need a GDT with at least a code segment to tell the CPU we're in 64-bit mode.
-
-Our GDT has two entries:
-
-```nasm
-gdt64:
-    dq 0                                    ; Null descriptor (required)
-.code: equ $ - gdt64
-    dq (1<<43) | (1<<44) | (1<<47) | (1<<53) ; Code segment (64-bit)
-.pointer:
-    dw $ - gdt64 - 1                        ; GDT size
-    dq gdt64                                ; GDT address
-```
-
-The code segment descriptor sets:
-
-- Bit 43: Executable
-- Bit 44: Code/Data segment
-- Bit 47: Present
-- Bit 53: 64-bit mode
-
-The value
-\\((1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)\\)
-
-creates a 64-bit value with these specific bits set:
-
-\\(2^{43} + 2^{44} + 2^{47} + 2^{53}\\).
-
-### Step 7: Far Jump to 64-bit Code
-
-```nasm
-jmp gdt64.code:long_mode_start
-```
-
-A **far jump** jumps to a different code segment. This loads the 64-bit code segment selector into CS and jumps to `long_mode_start`. At this point, we're officially in 64-bit long mode!
-
-### Step 8: 64-bit Code Execution
-
-```nasm
-bits 64
-long_mode_start:
-    ; Clear segment registers
-    xor ax, ax
-    mov ss, ax
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    
-    ; Call kernel main
-    call kernel_main
-```
-
-In long mode, segment registers aren't used for addressing (flat memory model), but we zero them out for cleanliness. Then we call `kernel_main` with our preserved Multiboot parameters (now in RDI and RSI).
-
-## Key Concepts Explained
+## Key Concepts
 
 > **Aside: System V AMD64 ABI**
 >

@@ -45,21 +45,26 @@ brew install grub xorriso mtools
 
 The ISO creation uses a GRUB configuration template. First, create `cmake/grub.cfg.in`:
 
-```
-set timeout=0
-set default=0
-
-menuentry "TinyOS" {
-    multiboot2 /boot/kernel.elf
-    boot
-}
+```cfg-diff
+file: cmake/grub.cfg.in
+replace: entire file
+---
++set timeout=0
++set default=0
++
++menuentry "TinyOS" {
++    multiboot2 /boot/kernel.elf
++    boot
++}
 ```
 
 Now open the root `CMakeLists.txt` and add these sections after the `add_subdirectory()` commands:
 
-```diff
- # Memory management
- add_subdirectory(mm)
+```cmake-diff
+file: CMakeLists.txt
+after: add_subdirectory(kernel)
+---
+ add_subdirectory(kernel)
 +
 +# Generate grub.cfg from template
 +configure_file(
@@ -94,8 +99,6 @@ Now open the root `CMakeLists.txt` and add these sections after the `add_subdire
  
  # Print build configuration
  message(STATUS "========================================")
-```
-
 ```
 
 ```

@@ -40,11 +40,39 @@ Press Ctrl+C to exit QEMU. But how do we know it's actually working?
 
 A blank screen doesn't feel like success. Let's use LLDB to prove the kernel is actually running our code.
 
-**What is LLDB?** LLDB is a debugger (like GDB) that lets you pause a running program, inspect memory and registers, and step through code line by line. QEMU has a "GDB stub" that lets debuggers connect to the virtual machine and control the CPU.
-
 [!side]
 The GDB stub speaks the GDB Remote Serial Protocol. LLDB understands this protocol too.
 [/!side]
+
+**What is LLDB?** LLDB is a debugger (like GDB) that lets you pause a running program, inspect memory and registers, and step through code line by line. QEMU has a "GDB stub" that lets debuggers connect to the virtual machine and control the CPU.
+
+> **New to LLDB? Don't panic.**
+>
+> Yes, it's a command-line debugger. No, you don't need to memorize 47 arcane incantations. If you've used VS Code's debugger or CLion's, you already know the concepts—breakpoints, stepping, inspecting variables. LLDB just does it via text instead of clicking pretty buttons. Think of it as your GUI debugger's grumpy but efficient terminal-dwelling cousin.
+>
+> Another key difference also comes from using QEMU: we need to debug *remotely* over a network connection to QEMU's virtual CPU.
+>
+> **Kernel debugging quirks you need to know:**
+>
+> - **Registers are your best friends now.** Variables? Sure, they exist. But when debugging at this level, you'll spend more time looking at `$rdi` (first function argument) and `$rsi` (second argument) than at named variables. The x86-64 calling convention puts the first 6 arguments in RDI, RSI, RDX, RCX, R8, R9. Your kernel lives in these registers before it lives anywhere else.
+> - **No printf debugging.** Seriously. You have no console output yet. Want to check if a value is 0x36d76289? Use `p/x variable` and squint at hex numbers like it's 1975. (We'll fix this eventually with serial output in chapter 4, but for now, embrace the old ways.)
+> - **Your call stack is adorably tiny.** Run `bt` and you'll see exactly two frames: `kernel_main` ← `long_mode_start`. That's it. That's your entire kernel so far.
+> - **Format specifiers are your friends:** `p/x` for hex (addresses, magic numbers), `p/t` for binary (flags, bitmasks), `p/d` for decimal (counts).
+>
+> **Essential commands (the cheat sheet):**
+>
+> | Command | What it does |
+> |---------|-------------|
+> | `gdb-remote localhost:1234` | Connect to QEMU's debugger |
+> | `b kernel_main` | Set breakpoint at entry point of the function kernel_main |
+> | `b main.c:42` | Set breakpoint at line 42 in main |
+> | `c` | Continue execution until breakpoint |
+> | `n` | Next line (step over function calls) |
+> | `p/x variable` | Print in hexadecimal |
+> | `p/x $rdi` | Print register RDI in hex |
+> | `register read` | Show all CPU registers |
+> | `bt` | Show backtrace (call stack) |
+> | `q` | Quit LLDB |
 
 ### The Debugging Setup
 
@@ -259,27 +287,6 @@ Using LLDB, we verified:
 5. **Parameters are correct** - GRUB passed valid magic number and info pointer
 
 **Your kernel is working.** The blank screen isn't a bug—it's exactly what we programmed it to do. We haven't written any video or serial output code yet, so there's nothing to display. But under the hood, the kernel booted successfully, verified the bootloader, and entered its main loop.
-
-## Common LLDB Commands
-
-For future debugging sessions:
-
-| Command | What it does |
-|---------|-------------|
-| `gdb-remote localhost:1234` | Connect to QEMU's debugger |
-| `b function_name` | Set breakpoint at function |
-| `b file.c:123` | Set breakpoint at line 123 of file.c |
-| `c` | Continue execution until breakpoint |
-| `n` | Next line (step over function calls) |
-| `s` | Step into function calls |
-| `p variable` | Print variable value |
-| `p/x variable` | Print variable in hexadecimal |
-| `register read` | Show all CPU registers |
-| `register read rax rbx` | Show specific registers |
-| `bt` | Show backtrace (call stack) |
-| `frame variable` | Show all local variables |
-| `list` | Show source code around current line |
-| `q` | Quit LLDB |
 
 ## Common Issues
 

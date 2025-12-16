@@ -9,7 +9,7 @@ Operating system development requires specialized tools. Unlike application deve
 Total install time: 5-10 minutes on most systems. The actual learning starts in Chapter 3.
 [/!side]
 
-## Required Tools Overview
+## Required Tools
 
 We need:
 
@@ -20,7 +20,7 @@ We need:
 5. **Debugger** - LLDB (or GDB)
 6. **Bootloader Tools** - GRUB, xorriso, mtools
 
-## Compiler: Clang 17+
+**Compiler: Clang 17+**
 
 We use Clang because:
 
@@ -32,31 +32,17 @@ We use Clang because:
 The Linux kernel uses GCC. We on the other hand are using Clang. Both work. Clang is just easier for learning since cross-compilation is built-in.
 [/!side]
 
-### Installation
-
 ```bash
 # Debian/Ubuntu
 sudo apt install clang
 
 # Arch Linux
 sudo pacman -S clang
-
-# Verify
-clang --version
-```
-
-Expected output:
-
-```
-clang version 17.0.0
-Target: x86_64-unknown-linux-gnu
-Thread model: posix
-InstalledDir: /usr/local/bin
 ```
 
 **Alternative:** GCC 13+ with a cross-compiler targeting `x86_64-elf` works but requires building from source. See Appendix B for GCC setup.
 
-## Assembler: NASM
+**Assembler**
 
 NASM assembles x86_64 boot code and low-level kernel code.
 
@@ -70,18 +56,9 @@ sudo apt install nasm
 
 # Arch Linux
 sudo pacman -S nasm
-
-# Verify
-nasm --version
 ```
 
-Expected output:
-
-```
-NASM version 2.15.05
-```
-
-## Build System: CMake and Ninja
+**Build System: CMake and Ninja**
 
 CMake generates build files, and Ninja executes them blazingly fast.
 
@@ -95,15 +72,11 @@ sudo apt install cmake ninja-build
 
 # Arch Linux
 sudo pacman -S cmake ninja
-
-# Verify
-cmake --version  # Must be 3.20 or higher
-ninja --version
 ```
 
 **Alternative:** Make also works. Omit `-G Ninja` from CMake commands to use Make instead.
 
-## Emulator: QEMU
+**Emulator: QEMU**
 
 QEMU emulates a complete x86_64 system, letting us test without rebooting real hardware.
 
@@ -117,19 +90,9 @@ sudo apt install qemu-system-x86
 
 # Arch Linux
 sudo pacman -S qemu-system-x86
-
-# Verify
-qemu-system-x86_64 --version
 ```
 
-Expected output:
-
-```
-QEMU emulator version 6.2.0 (or newer)
-Copyright (c) 2003-2021 Fabrice Bellard and the QEMU Project developers
-```
-
-## Debugger: LLDB
+**Debugger: LLDB**
 
 LLDB debugs TinyOS by connecting to QEMU's GDB server.
 
@@ -146,7 +109,7 @@ lldb --version
 
 **Alternative:** GDB works equally well. Use `gdb` instead of `lldb` in debugging commands.
 
-## Bootloader Tools: GRUB and ISO Creation
+**Bootloader Tools: GRUB and ISO Creation**
 
 We need GRUB tools to create bootable ISO images for testing.
 
@@ -156,14 +119,6 @@ sudo apt install grub-pc-bin xorriso mtools
 
 # Arch Linux
 sudo pacman -S grub xorriso mtools
-
-# macOS (requires Homebrew)
-brew install grub xorriso mtools
-
-# Verify
-grub-mkrescue --version
-xorriso --version
-mformat --version
 ```
 
 **What these do:**
@@ -174,67 +129,21 @@ mformat --version
 
 ## Complete Installation
 
-### Ubuntu/Debian (One Command)
+**Ubuntu/Debian (One Command)**
 
 ```bash
 sudo apt update
 sudo apt install -y clang ninja-build nasm cmake \
-                    qemu-system-x86 lldb git \
+                    qemu-system-x86 lldb \
                     grub-pc-bin xorriso mtools
 ```
 
-### Arch Linux (One Command)
+**Arch Linux (One Command)**
 
 ```bash
 sudo pacman -S clang ninja nasm cmake \
-               qemu-system-x86 lldb git \
+               qemu-system-x86 lldb \
                grub xorriso mtools
-```
-
-## Common Issues
-
-### Clang version too old
-
-Your distribution might have an older Clang. Install from LLVM's official packages:
-
-```bash
-# Add LLVM repository (Ubuntu)
-wget https://apt.llvm.org/llvm.sh
-chmod +x llvm.sh
-sudo ./llvm.sh 17
-```
-
-Or use GCC as an alternative.
-
-### CMake can't find Clang
-
-Explicitly specify the compiler:
-
-```bash
-cmake -B build -G Ninja -DCMAKE_C_COMPILER=clang
-```
-
-### NASM not found
-
-Ensure it's in your PATH:
-
-```bash
-which nasm
-```
-
-If CMake still can't find it:
-
-```bash
-cmake -B build -G Ninja -DCMAKE_ASM_NASM_COMPILER=/usr/bin/nasm
-```
-
-### GRUB tools missing
-
-Make sure you installed `grub-pc-bin` (not just `grub`):
-
-```bash
-dpkg -l | grep grub-pc-bin  # Ubuntu/Debian
-pacman -Q | grep grub       # Arch
 ```
 
 ---

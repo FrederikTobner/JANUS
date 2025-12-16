@@ -20,7 +20,6 @@
 # Chapter 2: Getting Started
 
 - [Chapter 2 Overview](chapter-02-getting-started/README.md)
-  - [Prerequisites](chapter-02-getting-started/prerequisites.md)
   - [Installing Tools](chapter-02-getting-started/installing-tools.md)
   - [Verification](chapter-02-getting-started/verification.md)
   - [Project Setup](chapter-02-getting-started/project-setup.md)
@@ -47,6 +46,7 @@
 # Chapter 4: Input/Output
 
 - [Chapter 4 Overview](chapter-04-io/README.md)
+  - [Multiboot Verification](chapter-04-io/multiboot-verification.md)
   - [Serial Output](chapter-04-io/serial-output.md)
   - [VGA Text Mode](chapter-04-io/vga-text-mode.md)
   - [Keyboard Input](chapter-04-io/keyboard-input.md)

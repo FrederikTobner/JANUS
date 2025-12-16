@@ -10,6 +10,10 @@ build-dir = "build"
 create-missing = true
 
 [preprocessor.side-notes]
+command = "mdbook-side-notes"
+
+[preprocessor.code-diff]
+command = "mdbook-code-diff"
 
 [preprocessor.mermaid]
 command = "mdbook-mermaid"
@@ -21,9 +25,9 @@ git-repository-url = "https://github.com/yourusername/TinyOS"
 edit-url-template = "https://github.com/yourusername/TinyOS/edit/main/book/{path}"
 site-url = "/TinyOS/"
 cname = ""
-additional-css = ["theme/side-notes.css"]
+additional-css = ["theme/side-notes.css", "theme/css/code-diff.css"]
 mathjax-support = true
-additional-js = ["additional-js/mermaid/mermaid.min.js", "additional-js/mermaid/mermaid-init.js"]
+additional-js = ["additional-js/mermaid/mermaid.min.js", "additional-js/mermaid/mermaid-init.js", "theme/js/code-diff.js"]
 
 [output.html.fold]
 enable = true

@@ -20,9 +20,10 @@ Boot Sequence:
                                     Header
 ```
 
-> **Aside: Why "Multiboot"?**
->
-> Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? Use LILO. Want FreeBSD? Different loader. GRUB said "enough of this nonsense" and created Multiboot—a universal protocol. Now any OS that implements it can boot from GRUB.
+[!side]
+**Aside: Why "Multiboot"?**
+Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? Use LILO. Want FreeBSD? Different loader. GRUB said "enough of this nonsense" and created Multiboot—a universal protocol. Now any OS that implements it can boot from GRUB.
+[/!side]
 
 > **Design Note: Boot Protocol Choices**
 >
@@ -75,88 +76,189 @@ Multiboot2 Header Layout (must be in first 32KB):
 
 ### Create the Multiboot Header File
 
-First, create `boot/include/boot/multiboot.h` to define the constants we'll use:
+First, create the directory structure and an empty header file:
 
 ```bash
 mkdir -p boot/include/boot
+touch boot/include/boot/multiboot.h
 ```
 
-```c
-// boot/include/boot/multiboot.h
-#ifndef BOOT_MULTIBOOT_H
-#define BOOT_MULTIBOOT_H
+Now let's build the header incrementally.
 
-#include <stdint.h>
+#### Step 1: Header Guards and Basic Structure
 
-// Multiboot2 magic value passed by bootloader in EAX
-#define MULTIBOOT2_BOOTLOADER_MAGIC 0x36d76289
-
-// Multiboot2 header magic (in the header itself)
-#define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
-
-// Architecture types
-#define MULTIBOOT2_ARCHITECTURE_I386 0
-
-// Forward declaration - full definition later
-struct multiboot_info;
-
-#endif // BOOT_MULTIBOOT_H
+```c-diff
+file: boot/include/boot/multiboot.h
+replace: entire file
+---
++#ifndef BOOT_MULTIBOOT_H
++#define BOOT_MULTIBOOT_H
++
++#include <stdint.h>
++
++#endif // BOOT_MULTIBOOT_H
 ```
 
-For now, we just need the magic numbers. We'll expand this header when we start parsing multiboot information.
+#### Step 2: Add Multiboot2 Magic Numbers
+
+```c-diff
+file: boot/include/boot/multiboot.h
+after: #include <stdint.h>
+---
+ #include <stdint.h>
++
++// Multiboot2 magic value passed by bootloader in EAX
++#define MULTIBOOT2_BOOTLOADER_MAGIC 0x36d76289
++
++// Multiboot2 header magic (in the header itself)
++#define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
+ 
+ #endif // BOOT_MULTIBOOT_H
+```
+
+Two magic numbers, two different jobs. The header magic (`0xe85250d6`) goes in our assembly—GRUB scans for it to find our kernel. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register as proof it loaded us correctly. Think of them as matching halves of a secret handshake.
+
+#### Step 3: Add Architecture Constants
+
+```c-diff
+file: boot/include/boot/multiboot.h
+after: MULTIBOOT2_HEADER_MAGIC definition
+---
+ #define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
++
++// Architecture types
++#define MULTIBOOT2_ARCHITECTURE_I386 0
+ 
+ #endif // BOOT_MULTIBOOT_H
+```
+
+Tells GRUB we want to start in 32-bit protected mode. Yes, we're building a 64-bit kernel, but we'll handle the upgrade ourselves in assembly. GRUB gives us a solid 32-bit foundation and we take it from there.
+
+#### Step 4: Forward Declaration for Future Use
+
+```c-diff
+file: boot/include/boot/multiboot.h
+after: MULTIBOOT2_ARCHITECTURE_I386 definition
+---
+ #define MULTIBOOT2_ARCHITECTURE_I386 0
++
++// Forward declaration - full definition later
++struct multiboot_info;
+ 
+ #endif // BOOT_MULTIBOOT_H
+```
+
+A promise to the compiler: "Trust me, this struct exists, I'll show you the details later." Forward declarations let us use `struct multiboot_info*` in function signatures without defining the entire structure yet. We'll fill in the real definition once we need to actually parse the multiboot data.
 
 ### Create the Assembly Header
 
-Now create `boot/multiboot.asm`:
+Now let's build the Multiboot2 header in assembly. Create an empty file:
 
-```nasm
-; Multiboot2 header - must be in first 32KB of kernel image
-section .multiboot
-align 8
+```bash
+touch boot/multiboot.asm
+```
 
-multiboot_start:
-    ; Magic number - identifies this as Multiboot2
-    dd 0xe85250d6
-    
-    ; Architecture: 0 = i386 protected mode
-    dd 0
-    
-    ; Header length
-    dd multiboot_end - multiboot_start
-    
-    ; Checksum: -(magic + arch + length)
-    dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
+#### Step 1: Section and Alignment
 
-; Information request tag
-align 8
-info_request_start:
-    dw 1                    ; Type = information request
-    dw 0                    ; Flags = required
-    dd info_request_end - info_request_start
-    
-    dd 4                    ; Request: basic memory info
-    dd 6                    ; Request: memory map
-    dd 8                    ; Request: framebuffer info (graphics display info)
-info_request_end:
+```asm-diff
+file: boot/multiboot.asm
+replace: entire file
+---
++; Multiboot2 header - must be in first 32KB of kernel image
++section .multiboot
++align 8
+```
 
-; End tag (required)
-align 8
-    dw 0                    ; Type = end
-    dw 0                    ; Flags
-    dd 8                    ; Size
-multiboot_end:
+The `.multiboot` section gets its own VIP spot at the start of our kernel binary (thanks to our linker script later). The `align 8` ensures everything starts on an 8-byte boundary—Multiboot2 is picky about alignment, and misaligned headers mean GRUB ignores you completely.
+
+#### Step 2: Magic Number and Architecture
+
+```asm-diff
+file: boot/multiboot.asm
+after: align 8
+---
+ align 8
++
++multiboot_start:
++    ; Magic number - identifies this as Multiboot2
++    dd 0xe85250d6
++    
++    ; Architecture: 0 = i386 protected mode
++    dd 0
+```
+
+First, we need our old friend the Multiboot2 header magic number—the same `0xe85250d6` we defined in the C header. GRUB scans the first 32KB of our kernel looking for this exact number.
+
+The architecture field tells GRUB what CPU mode we expect: `0` means i386 protected mode (32-bit). Even though we'll transition to 64-bit later, GRUB starts us in 32-bit mode and we handle the upgrade ourselves.
+
+#### Step 3: Header Length and Checksum
+
+```asm-diff
+file: boot/multiboot.asm
+after: Architecture definition
+---
+     dd 0
++    
++    ; Header length
++    dd multiboot_end - multiboot_start
++    
++    ; Checksum: -(magic + arch + length)
++    dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
+```
+
+The checksum ensures the header is valid. GRUB verifies that `magic + arch + length + checksum = 0`.
+
+[!side]
+The checksum is like a parity bit for the entire header. It catches corruption from bad disk reads or linker bugs.
+[/!side]
+
+#### Step 4: Information Request Tag
+
+Ask GRUB for memory information we'll need later:
+
+```asm-diff
+file: boot/multiboot.asm
+after: Checksum definition
+---
+     dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
++
++; Information request tag
++align 8
++info_request_start:
++    dw 1                    ; Type = information request
++    dw 0                    ; Flags = required
++    dd info_request_end - info_request_start
++    
++    dd 4                    ; Request: basic memory info
++    dd 6                    ; Request: memory map
++    dd 8                    ; Request: framebuffer info (graphics display info)
++info_request_end:
+```
+
+#### Step 5: End Tag (Required Terminator)
+
+Every Multiboot2 header must end with this tag:
+
+```asm-diff
+file: boot/multiboot.asm
+after: info_request_end label
+---
+ info_request_end:
++
++; End tag (required)
++align 8
++    dw 0                    ; Type = end
++    dw 0                    ; Flags
++    dd 8                    ; Size
++multiboot_end:
 ```
 
 **What this does:**
 
 - Magic `0xe85250d6` identifies us as Multiboot2
-- Checksum validates the header structure
+- Checksum validates the header structure  
 - Information request asks GRUB for memory details
 - End tag terminates the header
-
-[!side]
-The checksum is like a parity bit for the entire header. It catches corruption from bad disk reads or linker bugs.
-[/!side]
 
 GRUB validates the checksum by ensuring `magic + architecture + length + checksum = 0`.
 
