@@ -9,7 +9,6 @@ tinyos_add_library(buffer
         ${BUFFER_SOURCES}
     DEPENDENCIES
         memory
-        types
 )
 
 # Add tests if enabled

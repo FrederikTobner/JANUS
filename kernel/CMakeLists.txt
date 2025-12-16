@@ -10,7 +10,6 @@ tinyos_create_kernel(
         ${KERNEL_SOURCES}
     LIBRARIES
         boot           # Boot assembly objects
-        types
         memory
         buffer
         fio

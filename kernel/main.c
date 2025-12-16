@@ -22,7 +22,7 @@
  */
 
 #include <boot/multiboot.h>
-#include <lib/types.h>
+#include <tinyos/types.h>
 
 /**
  * @brief Main kernel entry point

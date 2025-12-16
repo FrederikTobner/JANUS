@@ -4,28 +4,28 @@ This document explains how types are organized across different headers in TinyO
 
 ## Three-Level Type Hierarchy
 
-### Level 1: Basic Types (`lib/types/include/lib/types.h`)
+### Level 1: Basic Types (`include/stdint.h`)
 
 **Purpose:** Freestanding replacement for standard C library type headers.
 
 **Contents:**
+
 - Fixed-width integer types: `int8_t`, `uint8_t`, `int16_t`, `uint16_t`, `int32_t`, `uint32_t`, `int64_t`, `uint64_t`
 - Pointer-sized integers: `intptr_t`, `uintptr_t`
-- Size types: `size_t`, `ssize_t`, `ptrdiff_t`
-- Boolean type: `bool`, `true`, `false`
 - NULL pointer definition
 - Integer limits (`INT8_MIN`, `UINT32_MAX`, etc.)
 - `offsetof` macro
 
-**Replaces:** `<stdint.h>`, `<stddef.h>`, `<stdbool.h>` from the standard library.
+**Replaces:** `<stdint.h>` from the standard library.
 
 **Used by:** All kernel code that needs basic types.
 
-### Level 2: Compiler Utilities (`lib/types/include/lib/compiler.h`)
+### Level 2: Compiler Utilities (`/include/compiler.h`)
 
 **Purpose:** Compiler-specific attributes and portable macros.
 
 **Contents:**
+
 - Compiler attributes: `__packed`, `__aligned`, `__noreturn`, `__unused`, `__used`, `__section`, `__weak`, `__always_inline`, `__noinline`, `__pure`, `__const`, `__cold`, `__hot`
 - Branch prediction: `likely()`, `unlikely()`
 - Memory barrier: `barrier()`
@@ -40,6 +40,7 @@ This document explains how types are organized across different headers in TinyO
 **Purpose:** High-level kernel-specific type definitions.
 
 **Contents:**
+
 - Memory address types: `phys_addr_t`, `virt_addr_t`
 - Page frame number: `pfn_t`
 - Process/thread identifiers: `pid_t`, `tid_t`
@@ -85,16 +86,19 @@ This document explains how types are organized across different headers in TinyO
 ### When to Use Each Level
 
 **Use `lib/types.h` when:**
+
 - Writing low-level utility libraries
 - You only need basic C types
 - The code should be reusable outside the kernel context
 
 **Use `tinyos/types.h` when:**
+
 - Writing kernel-specific code
 - Working with memory addresses, processes, or hardware
 - You need kernel abstractions
 
 **Use `lib/compiler.h` when:**
+
 - You need compiler attributes (`__packed`, `__noreturn`, etc.)
 - Optimizing performance with `likely()`/`unlikely()`
 - Using utility macros like `ARRAY_SIZE()` or `container_of()`
@@ -102,19 +106,23 @@ This document explains how types are organized across different headers in TinyO
 ### Type Semantics
 
 **Memory Addresses:**
+
 ```c
 phys_addr_t paddr;  // Physical address (hardware address)
 virt_addr_t vaddr;  // Virtual address (program address)
 ```
+
 These are both `uint64_t` but have different semantic meaning.
 
 **Process Identifiers:**
+
 ```c
 pid_t pid;  // Process ID (signed, allows -1 for error)
 tid_t tid;  // Thread ID (signed, allows -1 for error)
 ```
 
 **Error Codes:**
+
 ```c
 error_t err;
 // err < 0: Error occurred

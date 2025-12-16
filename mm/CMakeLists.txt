@@ -8,7 +8,6 @@ tinyos_add_module(mm
     SOURCES
         ${MM_SOURCES}
     DEPENDENCIES
-        types
         memory
 )
 

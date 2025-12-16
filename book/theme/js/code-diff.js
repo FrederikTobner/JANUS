@@ -1,55 +1,101 @@
 // Code Diff Syntax Highlighting
-// Applies syntax highlighting to diff blocks line-by-line
+// Applies syntax highlighting to diff blocks
 
 (function() {
     'use strict';
 
-    function highlightDiffLines(container) {
+    function highlightDiffBlock(container) {
         const language = container.getAttribute('data-language');
-        if (!language || !window.hljs) {
+        if (!language) {
             return;
         }
 
-        const lines = container.querySelectorAll('.diff-line code');
-        
-        lines.forEach(codeEl => {
-            const code = codeEl.textContent;
+        // Check if highlight.js is available
+        if (!window.hljs) {
+            setTimeout(() => highlightDiffBlock(container), 100);
+            return;
+        }
+
+        // Verify the language is loaded
+        const langDef = hljs.getLanguage(language);
+        if (!langDef) {
+            // Language not available, skip silently
+            return;
+        }
+
+        // Collect all lines
+        const lineElements = container.querySelectorAll('.diff-line code');
+        const lines = Array.from(lineElements).map(el => el.textContent);
+
+        // Combine all code into one string
+        const fullCode = lines.join('\n');
+
+        try {
+            // Use highlightAuto or the language-specific method
+            // This is more forgiving and works across versions
+            let highlighted;
             
-            try {
-                // Highlight this single line
-                const result = hljs.highlight(code, { 
-                    language: language,
-                    ignoreIllegals: true 
-                });
-                
-                // Replace content with highlighted version
-                codeEl.innerHTML = result.value;
-            } catch (e) {
-                // If highlighting fails, keep original content
-                console.warn('Failed to highlight line:', e);
+            // Check if we can use the language directly
+            if (hljs.highlight && hljs.getLanguage(language)) {
+                // Try to use highlight with the language
+                // Wrap in try-catch to handle API differences silently
+                try {
+                    // Try new API signature first
+                    const result = hljs.highlight(fullCode, { 
+                        language: language,
+                        ignoreIllegals: true 
+                    });
+                    highlighted = result.value;
+                } catch (err) {
+                    try {
+                        // Try old API signature
+                        const result = hljs.highlight(language, fullCode, true);
+                        highlighted = result.value;
+                    } catch (err2) {
+                        // Both failed, use highlightAuto as fallback
+                        const result = hljs.highlightAuto(fullCode, [language]);
+                        highlighted = result.value;
+                    }
+                }
+            } else {
+                // Fallback to auto-detection
+                const result = hljs.highlightAuto(fullCode, [language]);
+                highlighted = result.value;
             }
-        });
+            
+            // Split back into lines
+            const highlightedLines = highlighted.split('\n');
+            
+            // Apply to each line
+            lineElements.forEach((codeEl, index) => {
+                if (highlightedLines[index] !== undefined) {
+                    codeEl.innerHTML = highlightedLines[index];
+                }
+            });
+            
+        } catch (e) {
+            // Complete silent fail - the code stays as-is
+            // Don't even log to console to avoid spam
+        }
     }
 
     function processDiffBlocks() {
         const diffContainers = document.querySelectorAll('.code-diff-lines[data-language]');
-        
-        diffContainers.forEach(container => {
-            highlightDiffLines(container);
-        });
+        diffContainers.forEach(highlightDiffBlock);
     }
 
-    // Run after DOM is loaded
+    // Wait for highlight.js
+    function init() {
+        if (window.hljs) {
+            processDiffBlocks();
+        } else {
+            setTimeout(init, 100);
+        }
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', processDiffBlocks);
+        document.addEventListener('DOMContentLoaded', init);
     } else {
-        processDiffBlocks();
-    }
-
-    // Also run when highlight.js is ready (if loaded async)
-    if (window.hljs) {
-        processDiffBlocks();
-    } else {
-        window.addEventListener('load', processDiffBlocks);
+        init();
     }
 })();

@@ -9,6 +9,4 @@ tinyos_add_module(arch_x86_64
     SOURCES
         ${ARCH_SOURCES}
         ${ARCH_ASM}
-    DEPENDENCIES
-        types
 )

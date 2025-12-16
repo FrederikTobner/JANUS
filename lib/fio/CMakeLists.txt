@@ -8,8 +8,7 @@ tinyos_add_library(fio
     SOURCES
         ${FIO_SOURCES}
     DEPENDENCIES
-        buffer
-        types
+        buffer        
 )
 
 # Add tests if enabled

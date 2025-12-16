@@ -15,7 +15,6 @@ CompileFlags:
     
     # Include directories for all modules (relative to project root)
     - "-Iinclude"
-    - "-Ilib/types/include"
     - "-Ilib/memory/include"
     - "-Ilib/buffer/include"
     - "-Ilib/fio/include"

@@ -20,22 +20,23 @@
 /**
  * @file memory.h
  * @brief Memory manipulation operations for TinyOS
- * 
+ *
  * Provides freestanding implementations of standard memory functions
  * (memcpy, memset, memmove, memcmp, memzero) for kernel use.
- * 
+ *
  * These are basic implementations that can be optimized later with
  * architecture-specific SIMD or specialized instructions.
  */
 
-#include <lib/types.h>
+#include <stddef.h>
+#include <tinyos/types.h>
 
 /**
  * @brief Copy memory from source to destination
- * 
+ *
  * Copies n bytes from src to dest. Regions must not overlap.
  * For overlapping regions, use memmove().
- * 
+ *
  * @param dest Destination pointer
  * @param src Source pointer
  * @param n Number of bytes to copy
@@ -45,9 +46,9 @@ void * memcpy(void * dest, void const * src, size_t n);
 
 /**
  * @brief Copy memory with overlap handling
- * 
+ *
  * Copies n bytes from src to dest, correctly handling overlapping regions.
- * 
+ *
  * @param dest Destination pointer
  * @param src Source pointer
  * @param n Number of bytes to copy
@@ -57,9 +58,9 @@ void * memmove(void * dest, void const * src, size_t n);
 
 /**
  * @brief Fill memory with a constant byte
- * 
+ *
  * Sets n bytes at dest to the value c (converted to unsigned char).
- * 
+ *
  * @param dest Destination pointer
  * @param c Value to set (only lowest byte used)
  * @param n Number of bytes to set
@@ -69,9 +70,9 @@ void * memset(void * dest, int c, size_t n);
 
 /**
  * @brief Compare memory regions
- * 
+ *
  * Compares n bytes at s1 and s2.
- * 
+ *
  * @param s1 First memory region
  * @param s2 Second memory region
  * @param n Number of bytes to compare
@@ -81,9 +82,9 @@ int memcmp(void const * s1, void const * s2, size_t n);
 
 /**
  * @brief Zero-fill memory
- * 
+ *
  * Sets n bytes at dest to zero. Convenience wrapper around memset.
- * 
+ *
  * @param dest Destination pointer
  * @param n Number of bytes to zero
  * @return dest pointer
