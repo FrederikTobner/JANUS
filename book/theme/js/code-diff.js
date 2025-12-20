@@ -34,19 +34,8 @@
             // Use highlightAuto or the language-specific method
             // This is more forgiving and works across versions
             let highlighted;
-            
             // Check if we can use the language directly
             if (hljs.highlight && hljs.getLanguage(language)) {
-                // Try to use highlight with the language
-                // Wrap in try-catch to handle API differences silently
-                try {
-                    // Try new API signature first
-                    const result = hljs.highlight(fullCode, { 
-                        language: language,
-                        ignoreIllegals: true 
-                    });
-                    highlighted = result.value;
-                } catch (err) {
                     try {
                         // Try old API signature
                         const result = hljs.highlight(language, fullCode, true);
@@ -56,7 +45,7 @@
                         const result = hljs.highlightAuto(fullCode, [language]);
                         highlighted = result.value;
                     }
-                }
+            
             } else {
                 // Fallback to auto-detection
                 const result = hljs.highlightAuto(fullCode, [language]);

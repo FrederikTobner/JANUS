@@ -1,4 +1,4 @@
-# Chapter 2: The Boot Process
+# Chapter 3: The Boot Process
 
 > *"There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies, and the other way is to make it so complicated that there are no obvious deficiencies."*  
 > — C.A.R. Hoare
@@ -68,8 +68,12 @@ A working kernel that produces no output is like a tree falling in the forest. B
 
 1. [Project Structure](project-structure.md)
 2. [The Multiboot2 Header](multiboot-header.md)
-3. [Boot Entry Assembly](boot-assembly.md)
+3. [Boot Entry Assembly 32bit](boot-assembly-32bit.md)
 4. [The Linker Script](linker-script.md)
 5. [The CMake Build System](build-system.md)
 6. [The Kernel Entry Point](kernel-entry.md)
-7. [Summary: What We've Built](summary.md)
+7. [Creating a Bootable ISO](creating-bootable-iso.md)
+8. [Booting up](booting-up.md)
+9. [Boot info verification](boot-info-verification.md)
+10. [Boot Entry Assembly 64bit](boot-assembly-64bit.md)
+11. [Summary: What We've Built](summary.md)

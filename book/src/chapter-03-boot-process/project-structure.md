@@ -96,6 +96,8 @@ replace: entire file
 
 ### Create `include/stddef.h`
 
+> **TODO: Consider doing this later whenever it is needed**
+
 ```c-diff
 file: include/stddef.h
 replace: entire file
@@ -115,6 +117,8 @@ replace: entire file
 
 ### Create `include/stdbool.h`
 
+> **TODO: Consider doing this later whenever it is needed**
+
 ```c-diff
 file: include/stdbool.h
 replace: entire file
@@ -132,6 +136,8 @@ replace: entire file
 ```
 
 ### Create `include/tinyos/types.h`
+
+> **TODO: Consider doing this later in Chapter 4 or 5**
 
 ```c-diff
 file: include/tinyos/types.h
@@ -165,7 +171,7 @@ phys_addr_t addr = 0x100000;  // "This is a physical address"
 uint64_t count = 256;         // "This is just a number"
 ```
 
-The type system prevents mistakes. You can't accidentally pass a physical address where a virtual address is expected—the compiler catches the type mismatch.
+These typedefs add semantic meaning for the developer and documentation, but the compiler still treats them as plain uint64_t. So, while they help you and your editor, they don’t enforce type safety at compile time.
 
 ---
 

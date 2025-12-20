@@ -48,7 +48,7 @@ void kernel_main(uint32_t magic, struct multiboot_info * info)
     }
 
     // Verify multiboot info pointer is valid
-    if (info == ((void *) 0)) {
+    if (info == 0) {
         // Invalid multiboot info, hang
         for (;;) {
             __asm__ volatile("cli; hlt");

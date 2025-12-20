@@ -259,14 +259,6 @@ replace: entire file
 +add_subdirectory(kernel)
 ```
 
-Key changes from the simplified version:
-
-1. **Version in project()**: `VERSION 0.1.0` sets `PROJECT_VERSION_MAJOR/MINOR/PATCH` variables
-2. **Build timestamp**: Captured when CMake runs (not when you compile)
-3. **configure_file()**: Transforms `config.h.in` → `build/include/tinyos/config.h`
-4. **@ONLY**: Only replace `@VAR@` placeholders (not `${VAR}` which would conflict with shell syntax)
-5. **Include build directory**: So `#include <tinyos/config.h>` finds the generated file
-
 > **Timestamp caveat:**
 >
 > The timestamp is generated when you run `cmake -B build`, not when you run `ninja`. If you want per-build timestamps, you'd need a custom command that runs on every build. For kernels, knowing when the build system was configured is usually sufficient.
@@ -337,6 +329,8 @@ This produces `build/kernel.elf` - a bootable ELF executable.
 **Incremental builds:** Change one `.c` file, only that file and the final link step re-run. No wasted rebuilds.
 
 ## Verification
+
+> TODO: Is this possible without kernel entry point?
 
 After building, verify the kernel:
 

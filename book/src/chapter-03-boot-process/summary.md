@@ -3,55 +3,18 @@
 Let's take stock. We now have:
 
 - **Project structure** — directories organized, modules separated
-- **Standard library headers** — `stdint.h`, `stddef.h`, `stdbool.h`
+- **Standard library header** — `stdint.h`
 - **Multiboot2 header** — the secret handshake GRUB needs
-- **Boot assembly** — stack setup, register preservation, C function call
 - **Linker script** — memory layout and section organization
 - **CMake build system** — automated compilation with Ninja
 - **Kernel entry point** — C function with Multiboot verification
+- **CPU mode transition** - Switching to 64-bit long mode.
 
 We can now build a bootable kernel with a single command. The kernel boots, verifies it was loaded correctly.
 
 ## Current Capabilities
 
-You now have a complete bootable kernel! Let's verify:
-
-```bash
-# Check kernel file type
-file build/kernel.elf
-```
-
-Output:
-
-```
-build/kernel.elf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), 
-statically linked, with debug_info, not stripped
-```
-
-```bash
-# Check entry point
-readelf -h build/kernel.elf | grep Entry
-```
-
-Output:
-
-```
-  Entry point address:               0x101000
-```
-
-```bash
-# Verify symbols
-nm build/kernel.elf | grep -E "(start|kernel_main)"
-```
-
-Output:
-
-```
-0000000000101000 T _start
-0000000000101090 T kernel_main
-```
-
-**What this means:**
+You now have a complete bootable kernel! Lets summarize what we have now.
 
 - Build produces valid `kernel.elf` executable
 - Entry point correctly set to `_start` (0x101000) from boot assembly
@@ -64,7 +27,7 @@ Output:
 
 ## Still Missing
 
-Of course, we can't *see* any of this yet. For that, we still need:
+Of course, we can't *see* anything without using the debugger. For that, we still need:
 
 - Any visible output (serial or VGA)
 - Memory management
@@ -95,14 +58,14 @@ You now understand more about x86_64 booting than most programmers ever will. Ni
 > - (Bonus) Implement a Limine boot header for TinyOS
 > - (Bonus) Add boot protocol abstraction to support both Multiboot2 and > Limine
 >
-> 6. **Custom Bootloader** (Implementation): Write a tiny bootloader in > assembly that:
+> 1. **Custom Bootloader** (Implementation): Write a tiny bootloader in > assembly that:
 >
 > - Loads your kernel from disk (use BIOS int 0x13)
 > - Switches to 32-bit protected mode
 > - Passes a custom boot info structure to your kernel
 > - (Hint: You'll need to write it to the boot sector and create a disk > image)
 >
-> 7. **Bootloader Compatibility** (Research): Test if your kernel works with > bootloaders other than GRUB:
+> 1. **Bootloader Compatibility** (Research): Test if your kernel works with > bootloaders other than GRUB:
 >     - Try GRUB2 vs GRUB Legacy
 >     - Research: Could syslinux boot a Multiboot2 kernel?
 >     - What would need to change for U-Boot (ARM bootloader)?

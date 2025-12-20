@@ -1,10 +1,12 @@
 # Understanding the 64-bit Transition
 
-In the previous section, we discovered that GRUB2 already puts us in 32-bit protected mode when loading a 64-bit kernel. Therefor we will need to handle the transition ourself.
+In the previous section, we discovered that GRUB2 already puts us in 64-bit mode when loading a 64-bit kernel. But **how** does GRUB do that? And how do we write proper boot code that preserves multiboot parameters correctly?
 
-## Why Implement What other bootloaders already do?
+This chapter answers both questions by implementing the complete boot sequence ourselves—including the mode transition that GRUB normally handles for us.
 
-Some other bootloaders already handle the transition like Limine. So why are we doing this?
+## Why Implement What GRUB Already Does?
+
+Modern GRUB2 with Multiboot2 already transitions to 64-bit mode for us. So why learn how?
 
 Because understanding the transition teaches you **fundamental OS concepts** you'll need later:
 
@@ -18,11 +20,11 @@ These concepts are essential for memory management (Chapter 5), context switchin
 
 Think of it like learning to drive a manual transmission—even if you'll mostly drive automatic cars, understanding how the clutch and gears work makes you a better driver.
 
-Additionally if you would like to support Bootloaders that leave you in 32-bit mode like GRUB you need to do this all manually.
+Additionally if you would like to support Bootloaders that leave you in 32-bit mode (e.g., Multiboot1, legacy GRUB, or bare metal) you need to do this all manually.
 
 ## The Complete Boot Sequence
 
-We'll implement what other bootloaders do behind the scenes. The transition requires:
+We'll implement what GRUB does behind the scenes. The transition requires:
 
 [!side]
 Unlike 32-bit mode, long mode *requires* paging to be enabled. No paging = no 64-bit mode.
@@ -36,6 +38,19 @@ Unlike 32-bit mode, long mode *requires* paging to be enabled. No paging = no 64
 6. **Load 64-bit GDT** defining our code segment
 7. **Jump to 64-bit code** with a far jump
 8. **Restore parameters** and call kernel_main
+
+[!side]
+**Can we skip the 32-bit code?**
+
+If you're using GRUB2 with Multiboot2 and a 64-bit kernel, yes! GRUB starts you directly in 64-bit mode at step 7. But we're implementing the full sequence to:
+
+1. Understand how the CPU mode transition works
+2. Support older bootloaders or bare metal scenarios  
+3. Learn page table setup before Chapter 5
+4. Properly preserve multiboot parameters
+
+You can skip to Step 5 (64-bit entry) if you only care about modern GRUB2, but I recommend reading the full sequence for educational value.
+[!side]
 
 Let's implement each step.
 
@@ -301,8 +316,6 @@ graph LR
 
 ## Testing the Fixed Boot Code
 
-> TODO: Test registers and show variables
-
 Now rebuild and test:
 
 ```bash
@@ -340,7 +353,7 @@ In order to run from boot standards that do not guarantee that your CPU is in lo
 
 ; This code is executed immediately after the bootloader transfers control.
 ; It sets up 64-bit long mode and calls the C kernel entry point.
-; For Bootloaders that leave you in 32-bit mode (e.g., GRUB using Multiboot)
+; For Bootloaders that leave you in 32-bit mode (e.g., Multiboot1, legacy GRUB, or bare metal)
 
 global _start
 extern kernel_main

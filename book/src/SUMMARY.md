@@ -33,11 +33,11 @@
   - [Project Structure](chapter-03-boot-process/project-structure.md)
   - [The Multiboot2 Header](chapter-03-boot-process/multiboot-header.md)
   - [Boot Entry Assembly: 32-bit](chapter-03-boot-process/boot-assembly-32bit.md)
-  - [Boot Entry Assembly: 64-bit](chapter-03-boot-process/boot-assembly-64bit.md)
   - [The Linker Script](chapter-03-boot-process/linker-script.md)
   - [The CMake Build System](chapter-03-boot-process/build-system.md)
   - [The Kernel Entry Point](chapter-03-boot-process/kernel-entry.md)
   - [Creating a Bootable ISO](chapter-03-boot-process/creating-bootable-iso.md)
+  - [Boot info verification](chapter-03-boot-process/boot-info-verification.md)
   - [Booting Up](chapter-03-boot-process/booting-up.md)
   - [Summary](chapter-03-boot-process/summary.md)
 
@@ -46,7 +46,6 @@
 # Chapter 4: Input/Output
 
 - [Chapter 4 Overview](chapter-04-io/README.md)
-  - [Multiboot Verification](chapter-04-io/multiboot-verification.md)
   - [Serial Output](chapter-04-io/serial-output.md)
   - [VGA Text Mode](chapter-04-io/vga-text-mode.md)
   - [Keyboard Input](chapter-04-io/keyboard-input.md)

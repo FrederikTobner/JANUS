@@ -104,50 +104,14 @@ Our function takes:
 - `magic` - The Multiboot2 magic number from RDI (was EAX in 32-bit mode)
 - `info` - Pointer to Multiboot information structure from RSI (was EBX in 32-bit mode)
 
-First we need to verify we were loaded by a Multiboot2-compliant bootloader
+For now we will just do an infinite loop.
 
 ```c-diff
 file: kernel/main.c
-after: void kernel_main(uint32_t magic, void * info)
+after: after function entry point
 ---
- void kernel_main(uint32_t magic, void * info)
- {
-+    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-+        // Magic number mismatch - halt
-+        for (;;) {
-+            __asm__ volatile("cli; hlt");
-+        }
-+    }
- }
-```
-
-Now we verify that the multiboot info pointer is valid.
-
-```c-diff
-file: kernel/main.c
-after: magic check closing brace
----
-         }
-     }
-+
-+    if (info == NULL) {
-+        // Null pointer - halt
-+        for (;;) {
-+            __asm__ volatile("cli; hlt");
-+        }
-+    }
- }
-```
-
-If we reach this point, the kernel was loaded successfully. For now we will just do an infinite loop.
-
-```c-diff
-file: kernel/main.c
-after: info NULL check closing brace
----
-         }
-     }
-+    
+void kernel_main(uint32_t magic, void * info)
+{  
 +    for (;;) {
 +        __asm__ volatile("hlt");
 +    }
@@ -155,10 +119,6 @@ after: info NULL check closing brace
 ```
 
 ## What This Does
-
-**Magic number check:** If GRUB didn't load us, `magic` will be garbage. We halt immediately rather than continuing with corrupted state.
-
-**Null pointer check:** Defense against bootloader bugs. The Multiboot spec says `EBX` contains a valid pointer, but we verify anyway.
 
 **The halt loops:** `cli` disables interrupts (redundant, but explicit). `hlt` puts the CPU to sleep until the next interrupt. Since interrupts are disabled, this halts the CPU permanently.
 

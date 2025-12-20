@@ -13,6 +13,8 @@
 
 What it *won't* do: network stack, advanced scheduling, POSIX compliance, or graphics. Text mode is enough to learn OS concepts.
 
+> TODO: Consider modeling OS after DOS to some extend (simple, single-user, single-task, and direct hardware access) in the first chapters and then transition to UNIX. First we ignore multitasking, user-space, memory protection, etc.
+
 ## What You'll Learn
 
 TinyOS develops incrementally, with each chapter building on the previous:
@@ -25,8 +27,6 @@ TinyOS develops incrementally, with each chapter building on the previous:
 6. **Kernel Basics** - Interrupts, system calls, and user programs
 
 [!side]Each chapter follows the same pattern: concepts first, then incremental implementation with working code at each step. We show failures and debugging, not just successes.[/!side]
-
-The hardest conceptual jump is the boot process (Chapter 3), where you'll learn how the CPU actually works. After that, everything builds on established patterns.
 
 ---
 

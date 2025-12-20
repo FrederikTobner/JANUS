@@ -1,21 +1,33 @@
-# Boot Entry Assembly (32-bit)
+# Boot Entry Assembly
 
-GRUB finds our Multiboot header, validates it, and jumps to our entry point. But there's a problem: GRUB leaves the CPU in an undefined state. Interrupts might be enabled, the stack pointer is garbage, and we need to set up a minimal runtime environment before calling our C kernel.
+GRUB finds our Multiboot header, validates it, and jumps to our entry point. But what state does GRUB leave the CPU in? The answer might surprise you.
+
+## What Does GRUB Give Us?
+
+With Multiboot2 and a 64-bit ELF kernel, GRUB2 is surprisingly helpful. When it detects we're loading a 64-bit kernel, it:
+
+- **Already transitions to 64-bit long mode** for us
+- Sets up basic identity-mapped page tables
+- Loads a 64-bit GDT
+- Puts the CPU in 64-bit long mode
+
+When control reaches our entry point:
+
+- **EAX** = Multiboot2 magic number (0x36d76289)
+- **EBX** = Physical address of Multiboot information structure
+- **EIP** = Our entry point (but we're in 64-bit mode, so it's really RIP!)
+- CPU is **already in 64-bit long mode**
+- Everything else is undefined (stack, other registers, interrupts)
 
 [!side]
-This section shows the naive approach that fails. We learn by seeing what goes wrong.
-[/!side]
+**Wait, GRUB does all that for us?**
 
-Let's start with the simplest possible boot code.
+Yes! Modern GRUB2 with Multiboot2 detects 64-bit ELF kernels and handles the mode transition automatically. Older GRUB (pre-2.0) or Multiboot1 started in 32-bit mode and required manual transition. We'll learn the manual transition in the next chapter because understanding it teaches you how the CPU actually works—but for now, GRUB's doing the heavy lifting.
+[!side]
 
 ## The Naive Approach
 
-GRUB boots us in 32-bit protected mode and gives us:
-
-- `EAX` = Multiboot2 magic number (0x36d76289)
-- `EBX` = Physical address of Multiboot information structure
-- CPU in 32-bit protected mode
-- Everything else is undefined
+Let's try the simplest possible boot code:
 
 Our plan:
 
@@ -23,19 +35,20 @@ Our plan:
 2. Preserve the Multiboot parameters
 3. Call `kernel_main`
 
-Simple, right? Let's try it.
+Since GRUB already put us in 64-bit mode, let's write simple 64-bit boot code:
+
+1. Set up a stack
+2. Call `kernel_main`
 
 Create `boot/boot.asm`:
 
-```nasm-diff
+```x86asm-diff
 file: boot/boot.asm
-after: entire file
 ---
-+; Boot entry point - called by GRUB in 32-bit protected mode
++; Boot entry point - GRUB puts us in 64-bit long mode
 +global _start
 +extern kernel_main
 +
-+; Reserve stack space in BSS section
 +section .bss
 +align 16
 +stack_bottom:
@@ -43,25 +56,11 @@ after: entire file
 +stack_top:
 +
 +section .text
-+bits 32                     ; GRUB puts us in 32-bit protected mode
++bits 64                     ; We're already in 64-bit mode!
 +
 +_start:
-+    ; At this point:
-+    ; - EAX = multiboot magic (0x36d76289)
-+    ; - EBX = physical address of multiboot info structure
-+    ; - CPU is in 32-bit protected mode
-+    
-+    ; Set up stack pointer
-+    mov esp, stack_top
-+    
-+    ; Push multiboot info onto stack for kernel_main
-+    push ebx                ; multiboot info pointer (arg 2)
-+    push eax                ; multiboot magic (arg 1)
-+    
-+    ; Call kernel (this is where things go wrong...)
 +    call kernel_main
 +    
-+    ; If kernel_main returns, halt
 +.hang:
 +    cli
 +    hlt
@@ -70,10 +69,9 @@ after: entire file
 
 **What this code does:**
 
-1. **Stack setup**: Point `ESP` to our 16 KiB stack (\\(16384 = 2^{14}\\) bytes)
-2. **Preserve arguments**: Push magic number and info pointer for `kernel_main`
-3. **Call kernel**: Jump to our C code
-4. **Halt loop**: If `kernel_main` returns, halt the CPU
+1. **Stack setup**: Point `RSP` to our 16 KiB stack (\\(16384 = 2^{14}\\) bytes)
+2. **Call kernel**: Jump to our C code (but with wrong calling convention!)
+3. **Halt loop**: If `kernel_main` returns, halt the CPU
 
 Looks reasonable. Let's add it to our CMake build and try it.
 
@@ -85,146 +83,39 @@ Update `boot/CMakeLists.txt`:
 file: boot/CMakeLists.txt
 replace: entire file
 ---
-+# Assemble boot files
-+add_library(boot STATIC)
++# Boot assembly - Entry point from GRUB
++enable_language(ASM_NASM)
++set(CMAKE_ASM_NASM_OBJECT_FORMAT elf64)
 +
-+target_sources(boot PRIVATE
++set(BOOT_ASM_SOURCES
 +    multiboot.asm
-+    boot.asm           # Add our new boot assembly
++    boot.asm
 +)
 +
-+set_target_properties(boot PROPERTIES
-+    NASM_OBJ_FORMAT elf64
-+    LINKER_LANGUAGE C
-+)
++foreach(ASM_FILE ${BOOT_ASM_SOURCES})
++    get_filename_component(ASM_NAME ${ASM_FILE} NAME_WE)
++    set(ASM_OBJ ${CMAKE_CURRENT_BINARY_DIR}/${ASM_NAME}.o)
++    
++    add_custom_command(
++        OUTPUT ${ASM_OBJ}
++        COMMAND nasm -f elf64 -o ${ASM_OBJ} ${CMAKE_CURRENT_SOURCE_DIR}/${ASM_FILE}
++        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${ASM_FILE}
++        COMMENT "Assembling ${ASM_FILE}"
++    )
++    
++    list(APPEND BOOT_OBJECTS ${ASM_OBJ})
++endforeach()
 +
-+target_include_directories(boot PUBLIC
-+    ${CMAKE_CURRENT_SOURCE_DIR}/include
-+)
++set(BOOT_OBJECTS ${BOOT_OBJECTS} PARENT_SCOPE)
 ```
 
-Now build and create the ISO:
+Build and create the ISO:
 
 ```bash
 cmake -B build -G Ninja
 ninja -C build iso
 ```
 
-> **TODO**
->
-> Validate this and then restructure. Otherwise throw away or just say it in the next chapter
-
-## The Moment of Truth
-
-Let's boot our kernel:
-
-```bash
-ninja -C build run
-```
-
-**TODO:** Validate this and consider providing screenshots
-
-**What happens:** The QEMU window opens... and immediately closes. Or it reboots continuously. Something is very wrong.
-
-## Debugging the Triple Fault
-
-Let's get more information. Run QEMU with logging:
-
-```bash
-qemu-system-x86_64 -cdrom build/tinyos.iso -boot d \
-    -d int,cpu_reset -D qemu.log -no-reboot
-```
-
-Check `qemu.log`:
-
-```
-Triple fault. Halting for inspection.
-```
-
-**TODO:** Replace with real validated output
-
-**Triple fault!** The CPU couldn't recover from an exception and reset itself.
-
-[!side]
-Triple faults are the CPU's way of saying "I give up." It's the ultimate error condition.
-[/!side]
-
-## What Went Wrong?
-
-Look at the CPU state carefully:
-
-- `RIP` = 0x0000000000101090 (trying to execute at this address)
-- Notice the **R** prefix on registers (RAX, RBX, RIP) - these are 64-bit registers!
-- But we're in 32-bit mode!
-
-**The problem:** Our kernel is compiled for x86_64 (64-bit mode), but the CPU is still in 32-bit protected mode. When GRUB jumped to `_start`, we set up a stack and called `kernel_main`, which contains 64-bit instructions. The CPU can't execute 64-bit instructions in 32-bit mode, so it throws an exception. The exception handler isn't set up, so it throws another exception. This cascades into a **triple fault**, and the CPU gives up and resets.
-
-Let's verify this by checking our kernel:
-
-```bash
-file build/kernel.elf
-```
-
-Output:
-
-```
-build/kernel.elf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), 
-statically linked, with debug_info, not stripped
-```
-
-**There it is:** Our kernel is a 64-bit executable. But we're trying to run it in 32-bit mode.
-
-## The Real Boot Handoff Problem
-
-GRUB boots us in **32-bit protected mode**, but our kernel is compiled for **64-bit long mode**. We can't just call the kernel directly—we need to transition the CPU to 64-bit mode first.
-
-This transition requires:
-
-1. Setting up page tables (long mode requires paging)
-2. Enabling PAE (Physical Address Extension)
-3. Setting the long mode bit in the EFER MSR
-4. Enabling paging
-5. Loading a 64-bit GDT
-6. Performing a far jump to 64-bit code
-
-In other words, our "simple" boot code wasn't simple enough—we skipped the most critical part!
-
-## Lessons Learned
-
-This is a valuable lesson in OS development:
-
-- **The CPU mode matters.** You can't mix 32-bit and 64-bit code without explicit transitions.
-- **Triple faults are cryptic.** QEMU's logging (`-d int,cpu_reset`) is essential for debugging.
-- **Assumptions kill kernels.** We assumed calling `kernel_main` would just work. It didn't.
-
-Don't feel bad if you made this mistake—I did too! It's a rite of passage in OS development.
-
-> **Why Learn This if UEFI Skips It?**
->
-> You might wonder: "Modern systems use UEFI, which boots directly into 64-bit mode. Why are we learning this 32-bit to 64-bit transition?"
->
-> Because **understanding the transition teaches you how the CPU actually works.** You're learning about:
->
-> - CPU operating modes and their constraints
-> - Page table structure and virtual memory setup
-> - Control registers (CR0, CR3, CR4) and MSRs
-> - The relationship between paging and long mode
-> - GDT structure and segment selectors
->
-> These concepts are fundamental to OS development. UEFI's convenience hides them, but you still need to understand them for memory management, context switching, and system calls later.
->
-> Think of it like learning to drive a manual transmission—even if you'll mostly drive automatic cars, understanding how the clutch and gears work makes you a better driver overall.
-
-## What's Next
-
-Now that we understand *why* we need to transition to long mode, let's actually do it. In the next section, we'll write the proper boot assembly that:
-
-1. Starts in 32-bit mode (as GRUB gives us)
-2. Sets up page tables
-3. Enables PAE and long mode
-4. Switches to 64-bit code
-5. Calls our 64-bit kernel successfully
-
 ---
 
-**Next: [Transitioning to Long Mode](boot-assembly-longmode.md)**
+**Next: [Understanding the 64-bit Transition](boot-assembly-64bit.md)**
