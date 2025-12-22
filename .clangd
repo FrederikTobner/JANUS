@@ -14,15 +14,15 @@ CompileFlags:
     - "-std=c17"
     
     # Include directories for all modules (relative to project root)
-    - "-Iinclude"
-    - "-Ilib/memory/include"
-    - "-Ilib/buffer/include"
-    - "-Ilib/fio/include"
     - "-Ikernel/include"
-    - "-Iarch/include"
-    - "-Iboot/include"
-    - "-Imm/include"
-    
+    - "-Ikernel/lib/memory/include"
+    - "-Ikernel/lib/buffer/include"
+    - "-Ikernel/lib/fio/include"
+    - "-Ikernel/kernel/include"
+    - "-Ikernel/arch/include"
+    - "-Ikernel/boot/include"
+    - "-Ikernel/mm/include"
+ 
   Remove:
     # Remove flags that confuse clangd analysis
     - "-mno-red-zone"

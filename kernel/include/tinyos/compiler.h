@@ -32,29 +32,29 @@
 #define __hot           __attribute__((hot))
 
 // Likely/unlikely for branch prediction
-#define likely(x)       __builtin_expect(!!(x), 1)
-#define unlikely(x)     __builtin_expect(!!(x), 0)
+#define LIKELY(x)       __builtin_expect(!!(x), 1)
+#define UNLIKELY(x)     __builtin_expect(!!(x), 0)
 
 // Barrier for compiler optimization
-#define barrier()       __asm__ __volatile__("" ::: "memory")
+#define BARRIER()       __asm__ __volatile__("" ::: "memory")
 
 // Static assertion
-#define static_assert(expr, msg) _Static_assert(expr, msg)
+#define STATIC_ASSERT(expr, msg) _Static_assert(expr, msg)
 
 // Array size
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 // Container of macro
-#define container_of(ptr, type, member) \
+#define CONTAINER_OF(ptr, type, member) \
     ((type *) ((char *) (ptr) - offsetof(type, member)))
 
 // Min/max macros
-#define min(a, b) \
+#define MIN(a, b) \
     ({ __typeof__(a) _a = (a); \
        __typeof__(b) _b = (b); \
        _a < _b ? _a : _b; })
 
-#define max(a, b) \
+#define MAX(a, b) \
     ({ __typeof__(a) _a = (a); \
        __typeof__(b) _b = (b); \
        _a > _b ? _a : _b; })

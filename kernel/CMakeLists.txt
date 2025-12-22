@@ -1,30 +1,26 @@
-# Kernel core module
 
-# Automatically find all source files
-file(GLOB_RECURSE KERNEL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
-file(GLOB_RECURSE KERNEL_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-
-# Create bootable kernel executable
-tinyos_create_kernel(
-    SOURCES
-        ${KERNEL_SOURCES}
-    LIBRARIES
-        boot           # Boot assembly objects
-    LINKER_SCRIPT
-        ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
+# Configure config.h from config.h.in
+configure_file(
+    "${CMAKE_SOURCE_DIR}/include/tinyos/config.h.in"
+    "${CMAKE_BINARY_DIR}/include/tinyos/config.h"
+    @ONLY
 )
 
-# Custom target to display kernel information
-add_custom_target(kernel-info
-    COMMAND ${CMAKE_COMMAND} -E echo "=========================================="
-    COMMAND ${CMAKE_COMMAND} -E echo "Kernel Information"
-    COMMAND ${CMAKE_COMMAND} -E echo "=========================================="
-    COMMAND ${CMAKE_COMMAND} -E echo "Location: ${CMAKE_BINARY_DIR}/kernel.elf"
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND readelf -h ${CMAKE_BINARY_DIR}/kernel.elf
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND readelf -l ${CMAKE_BINARY_DIR}/kernel.elf
-    DEPENDS kernel.elf
-    COMMENT "Displaying kernel information"
-    VERBATIM
+# Add generated config.h to include path
+include_directories("${CMAKE_BINARY_DIR}/kernel/include")
+
+# Boot module
+add_subdirectory(boot)
+
+# Core kernel modules
+add_subdirectory(core)
+
+# Device drivers (future)
+# add_subdirectory(drivers)
+
+# Generate grub.cfg from template
+configure_file(
+    ${CMAKE_SOURCE_DIR}/cmake/grub.cfg.in
+    ${CMAKE_BINARY_DIR}/kernel/grub.cfg
+    @ONLY
 )

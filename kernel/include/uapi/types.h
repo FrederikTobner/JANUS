@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOS.                                              *
+ * This file is part of TinyOs.                                              *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,24 +14,35 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef _STDDEF_H
-#define _STDDEF_H
+#ifndef UAPI_TYPES_H
+#define UAPI_TYPES_H
 
 /**
- * @file stddef.h
- * @brief Common definitions (TinyOS freestanding implementation)
+ * @file int-ll64.h
+ * @brief 64-bit integer types (TinyOS freestanding implementation)
  */
 
-/* Size type for sizeof operator */
-typedef __SIZE_TYPE__ size_t;
 
-/* Type for pointer arithmetic */
-typedef __PTRDIFF_TYPE__ ptrdiff_t;
+/**
+ * @brief 64-bit integer types (TinyOS freestanding implementation)
+ *
+ * This is TinyOS's implementation of the C standard stdint.h header.
+ * In freestanding mode, we provide our own using compiler builtins.
+ */
 
-/* Null pointer constant */
-#define NULL ((void*)0)
+/* Unsigned integer types */
+typedef __UINT8_TYPE__   __u8;
+typedef __UINT16_TYPE__  __u16;
+typedef __UINT32_TYPE__  __u32;
+typedef __UINT64_TYPE__  __u64;
 
-/* Offset of member in structure */
-#define offsetof(type, member) __builtin_offsetof(type, member)
+/* Signed integer types */
+typedef __INT8_TYPE__    __s8;
+typedef __INT16_TYPE__   __s16;
+typedef __INT32_TYPE__   __s32;
+typedef __INT64_TYPE__   __s64;
 
-#endif /* _STDDEF_H */
+// Define boolean type
+#define __bool _Bool;
+
+#endif /* UAPI_TYPES_H */

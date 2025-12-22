@@ -38,7 +38,7 @@ after: after function entry point
 ---
 void kernel_main(uint32_t magic, void * info)
 {  
-  +   if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
++   if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
 +       for (;;) {
 +           __asm__ volatile("cli; hlt");
 +       }

@@ -61,14 +61,14 @@ BSS = Block Started by Symbol (historical IBM assembler term). Saves disk spaceâ
 
 ## Building the Linker Script
 
-Let's build our linker script incrementally. Create `kernel/linker.ld` and we'll add to it step by step.
+Let's build our linker script incrementally. Create `kernel/core/linker.ld` and we'll add to it step by step.
 
 ### Step 1: Entry Point and Load Address
 
 Start with the skeletonâ€”where execution begins and where the kernel loads:
 
 ```ld-diff
-file: kernel/linker.ld
+file: kernel/core/linker.ld
 after: entire file
 ---
 +ENTRY(_start)
@@ -91,7 +91,7 @@ The location counter is like a cursor. As we add sections, it moves forward auto
 GRUB scans the first 32KB for the Multiboot header. Add it right after the load address:
 
 ```ld-diff
-file: kernel/linker.ld
+file: kernel/core/linker.ld
 after: . = 0x100000;
 ---
      . = 0x100000;
@@ -115,7 +115,7 @@ This must come first or GRUB won't find it.
 Add the executable code section after `.multiboot`:
 
 ```ld-diff
-file: kernel/linker.ld
+file: kernel/core/linker.ld
 after: .multiboot section
 ---
      .multiboot ALIGN(8) : {
@@ -167,7 +167,7 @@ after: .text section
 Add the initialized data section after `.rodata`:
 
 ```ld-diff
-file: kernel/linker.ld
+file: kernel/core/linker.ld
 after: .rodata section
 ---
      .rodata ALIGN(4K) : {
@@ -219,7 +219,7 @@ after: .data section
 Finally, add these symbols at the end of the `SECTIONS` block (after `.bss`):
 
 ```ld-diff
-file: kernel/linker.ld
+file: kernel/core/linker.ld
 after: .bss section
 ---
      .bss ALIGN(4K) : {

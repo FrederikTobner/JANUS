@@ -148,6 +148,22 @@ after: add_custom_target(run)
 - **`run`** - Depends on `iso`, then boots the ISO in QEMU
 - **`debug`** - Same as `run` but with GDB stub enabled on port 1234
 
+Lets update the printed build configuration to show this:
+
+
+```cmake-diff
+file: CMakeLists.txt
+after: printing build info
+---
+message(STATUS "========================================")
++message(STATUS "Available targets:")
++message(STATUS "  ninja           - Build kernel.elf")
++message(STATUS "  ninja iso       - Create bootable ISO")
++message(STATUS "  ninja run       - Build and run in QEMU")
++message(STATUS "  ninja debug     - Build and run with debugger")
++message(STATUS "========================================")
+```
+
 Reconfigure CMake to pick up the new targets:
 
 ```bash

@@ -25,8 +25,7 @@
  * See: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
  */
 
-#include <compiler.h>
-#include <stdbool.h>
+#include <tinyos/compiler.h>
 #include <tinyos/types.h>
 
 // Multiboot2 magic value passed by bootloader in EAX
@@ -80,8 +79,8 @@
  * This is passed to the kernel by the bootloader
  */
 struct multiboot_info {
-    uint32_t total_size;
-    uint32_t reserved;
+    u32 total_size;
+    u32 reserved;
     // Followed by tags
 } __packed;
 
@@ -89,38 +88,38 @@ struct multiboot_info {
  * Common tag structure
  */
 struct multiboot_tag {
-    uint32_t type;
-    uint32_t size;
+    u32 type;
+    u32 size;
 } __packed;
 
 /**
  * Basic memory information tag
  */
 struct multiboot_tag_basic_meminfo {
-    uint32_t type;
-    uint32_t size;
-    uint32_t mem_lower; // Amount of lower memory in KB
-    uint32_t mem_upper; // Amount of upper memory in KB
+    u32 type;
+    u32 size;
+    u32 mem_lower; // Amount of lower memory in KB
+    u32 mem_upper; // Amount of upper memory in KB
 } __packed;
 
 /**
  * Memory map entry
  */
 struct multiboot_mmap_entry {
-    uint64_t addr;
-    uint64_t len;
-    uint32_t type;
-    uint32_t reserved;
+    u64 addr;
+    u64 len;
+    u32 type;
+    u32 reserved;
 } __packed;
 
 /**
  * Memory map tag
  */
 struct multiboot_tag_mmap {
-    uint32_t type;
-    uint32_t size;
-    uint32_t entry_size;
-    uint32_t entry_version;
+    u32 type;
+    u32 size;
+    u32 entry_size;
+    u32 entry_version;
     struct multiboot_mmap_entry entries[];
 } __packed;
 
@@ -128,8 +127,8 @@ struct multiboot_tag_mmap {
  * Boot command line tag
  */
 struct multiboot_tag_string {
-    uint32_t type;
-    uint32_t size;
+    u32 type;
+    u32 size;
     char string[];
 } __packed;
 
@@ -137,10 +136,10 @@ struct multiboot_tag_string {
  * Module tag
  */
 struct multiboot_tag_module {
-    uint32_t type;
-    uint32_t size;
-    uint32_t mod_start;
-    uint32_t mod_end;
+    u32 type;
+    u32 size;
+    u32 mod_start;
+    u32 mod_end;
     char cmdline[];
 } __packed;
 
@@ -151,7 +150,7 @@ struct multiboot_tag_module {
  */
 static inline struct multiboot_tag * multiboot_first_tag(struct multiboot_info * info)
 {
-    return (struct multiboot_tag *) ((uint8_t *) info + 8);
+    return (struct multiboot_tag *) ((u8 *) info + 8);
 }
 
 /**
@@ -162,8 +161,8 @@ static inline struct multiboot_tag * multiboot_first_tag(struct multiboot_info *
 static inline struct multiboot_tag * multiboot_next_tag(struct multiboot_tag * tag)
 {
     // Tags are 8-byte aligned
-    uint32_t size = (tag->size + 7) & ~7;
-    return (struct multiboot_tag *) ((uint8_t *) tag + size);
+    u32 size = (tag->size + 7) & ~7;
+    return (struct multiboot_tag *) ((u8 *) tag + size);
 }
 
 /**

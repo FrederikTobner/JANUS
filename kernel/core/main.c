@@ -36,7 +36,7 @@
  * @param magic Multiboot2 magic number (should be 0x36d76289)
  * @param info Pointer to multiboot information structure
  */
-void kernel_main(uint32_t magic, struct multiboot_info * info)
+void kernel_main(u32 magic, struct multiboot_info * info)
 {
     // Verify we were loaded by a Multiboot2-compliant bootloader
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {

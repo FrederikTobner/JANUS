@@ -40,10 +40,10 @@ Since GRUB already put us in 64-bit mode, let's write simple 64-bit boot code:
 1. Set up a stack
 2. Call `kernel_main`
 
-Create `boot/boot.asm`:
+Create `kernel/boot/boot.asm`:
 
 ```x86asm-diff
-file: boot/boot.asm
+file: kernel/boot/boot.asm
 ---
 +; Boot entry point - GRUB puts us in 64-bit long mode
 +global _start
@@ -77,10 +77,10 @@ Looks reasonable. Let's add it to our CMake build and try it.
 
 ## Building the Kernel
 
-Update `boot/CMakeLists.txt`:
+Update `kernel/boot/CMakeLists.txt`:
 
 ```cmake-diff
-file: boot/CMakeLists.txt
+file: kernel/boot/CMakeLists.txt
 replace: entire file
 ---
 +# Boot assembly - Entry point from GRUB

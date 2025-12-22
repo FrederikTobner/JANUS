@@ -113,10 +113,10 @@ replace: entire file
 #### Step 2: Add Multiboot2 Magic Numbers
 
 ```c-diff
-file: boot/include/boot/multiboot.h
-after: #include <stdint.h>
+file: kernel/boot/include/boot/multiboot.h
+after: #include "uapi/int-ll64.h"
 ---
- #include <stdint.h>
+ #include "uapi/int-ll64.h"
 +
 +// Multiboot2 magic value passed by bootloader in EAX
 +#define MULTIBOOT2_BOOTLOADER_MAGIC 0x36d76289
@@ -140,7 +140,7 @@ touch boot/multiboot.asm
 #### Step 1: Section and Alignment
 
 ```x86asm-diff
-file: boot/multiboot.asm
+file: kernel/boot/multiboot.asm
 replace: entire file
 ---
 +; Multiboot2 header - must be in first 32KB of kernel image
@@ -153,7 +153,7 @@ The `.multiboot` section gets its own VIP spot at the start of our kernel binary
 #### Step 2: Magic Number and Architecture
 
 ```x86asm-diff
-file: boot/multiboot.asm
+file: kernel/boot/multiboot.asm
 after: align 8
 ---
  align 8
@@ -173,7 +173,7 @@ The architecture field tells GRUB what CPU mode we expect: `0` means i386 protec
 #### Step 3: Header Length and Checksum
 
 ```x86asm-diff
-file: boot/multiboot.asm
+file: kernel/boot/multiboot.asm
 after: Architecture definition
 ---
      dd 0
@@ -197,7 +197,7 @@ Ask GRUB for memory information we'll need later:
 
 ```x86asm-diff
 file: boot/multiboot.asm
-after: Checksum definition
+after: kernel/boot definition
 ---
      dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
 +
@@ -219,7 +219,7 @@ after: Checksum definition
 Every Multiboot2 header must end with this tag:
 
 ```x86asm-diff
-file: boot/multiboot.asm
+file: kernel/boot/multiboot.asm
 after: info_request_end label
 ---
  info_request_end:

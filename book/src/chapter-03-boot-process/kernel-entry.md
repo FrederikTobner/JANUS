@@ -72,13 +72,14 @@ Windows uses a different ABI (RCX, RDX, R8, R9). We follow System V because it's
 Let's build the kernel entry point step by step. Create an empty file:
 
 ```bash
-touch kernel/main.c
+# From project root
+touch kernel/core/main.c
 ```
 
 First we need to include some of the headers we have created in the previous chapters:
 
 ```c-diff
-file: kernel/main.c
+file: kernel/core/main.c
 replace: entire file
 ---
 +#include <stdint.h>
@@ -89,12 +90,12 @@ replace: entire file
 Lets create the main entry point of our kernel:
 
 ```c-diff
-file: kernel/main.c
+file: kernel/core/main.c
 after: #include <boot/multiboot.h>
 ---
  #include <boot/multiboot.h>
 +
-+void kernel_main(uint32_t magic, void * info)
++void kernel_main(u32 magic, void * info)
 +{
 +}
 ```
@@ -102,12 +103,12 @@ after: #include <boot/multiboot.h>
 Our function takes:
 
 - `magic` - The Multiboot2 magic number from RDI (was EAX in 32-bit mode)
-- `info` - Pointer to Multiboot information structure from RSI (was EBX in 32-bit mode)
+- `info` - Pointer to Multiboot information from RSI (was EBX in 32-bit mode)
 
 For now we will just do an infinite loop.
 
 ```c-diff
-file: kernel/main.c
+file: kernel/core/main.c
 after: after function entry point
 ---
 void kernel_main(uint32_t magic, void * info)
@@ -140,7 +141,7 @@ Compilers are too smart for their own good sometimes. `volatile` is our way  of 
 
 ## Creating the Kernel Build File
 
-Create `kernel/CMakeLists.txt` to build the final executable:
+Create `kernel/core/CMakeLists.txt` to build the final executable:
 
 ```cmake-diff
 file: kernel/CMakeLists.txt

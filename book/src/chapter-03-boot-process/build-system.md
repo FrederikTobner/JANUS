@@ -238,30 +238,57 @@ replace: entire file
 +string(TIMESTAMP TINYOS_BUILD_DATE "%Y-%m-%d")
 +string(TIMESTAMP TINYOS_BUILD_TIME "%H:%M:%S")
 +
-+# Generate config.h from template
-+configure_file(
-+    "${CMAKE_SOURCE_DIR}/include/tinyos/config.h.in"
-+    "${CMAKE_BINARY_DIR}/include/tinyos/config.h"
-+    @ONLY
-+)
-+
-+# Include generated config directory
-+include_directories("${CMAKE_BINARY_DIR}/include")
-+
-+# Include directories
-+include_directories(
-+    ${CMAKE_SOURCE_DIR}/include
-+    ${CMAKE_SOURCE_DIR}/boot/include
-+)
-+
-+# Build subdirectories
-+add_subdirectory(boot)
 +add_subdirectory(kernel)
 ```
 
-> **Timestamp caveat:**
->
-> The timestamp is generated when you run `cmake -B build`, not when you run `ninja`. If you want per-build timestamps, you'd need a custom command that runs on every build. For kernels, knowing when the build system was configured is usually sufficient.
+Lets also print the build cnfiguration afterwards:
+
+```cmake-diff
+file: CMakeLists.txt
+after: project(TinyOS VERSION 0.1.0 LANGUAGES C ASM_NASM)
+---
+cmake_minimum_required(VERSION 3.20)
+project(TinyOS VERSION 0.1.0 LANGUAGES C ASM_NASM)
+
++message(STATUS "========================================")
++message(STATUS "TinyOS Build Configuration")
++message(STATUS "========================================")
++message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
++message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
++message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER}")
++message(STATUS "========================================")
+```
+
+After that we create the `CMakeLists.txt`  in the kernel folder:
+
+```cmake-diff
+file: kernel/CMakeLists.txt
+replace: entire file
+---
+configure_file(
+    "${CMAKE_SOURCE_DIR}/include/tinyos/config.h.in"
+    "${CMAKE_BINARY_DIR}/include/tinyos/config.h"
+    @ONLY
+)
+
+include_directories("${CMAKE_BINARY_DIR}/kernel/include")
+
+add_subdirectory(boot)
+add_subdirectory(core)
+
+# Generate grub.cfg from template
+configure_file(
+    ${CMAKE_SOURCE_DIR}/cmake/grub.cfg.in
+    ${CMAKE_BINARY_DIR}/kernel/grub.cfg
+    @ONLY
+)
+
+```
+
+[/side]
+The timestamp is generated when you run `cmake -B build`, not when you run `ninja`. If you want per-build timestamps, you'd need a custom command that runs on every build.
+For our small project, knowing when the build system was configured will be sufficient.
+[!/side]
 
 **Configure:**
 

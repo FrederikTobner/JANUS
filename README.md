@@ -21,17 +21,18 @@ qemu-system-x86_64 -kernel build/kernel.elf -serial stdio
 
 ```
 TinyOS/
-├── kernel/           # Core kernel functionality
-├── boot/             # Multiboot2 boot loader
-├── arch/             # Architecture-specific code (x86_64)
-├── lib/              # Kernel libraries (types, memory, buffer, fio)
-├── mm/               # Memory management
-├── drivers/          # Device drivers
-├── include/          # Global headers
-├── scripts/          # Build and utility scripts
-├── cmake/            # CMake build modules
-├── tools/            # Development tools
-└── Documentation/    # Technical documentation
+└── kernel/           # kernel functionality
+    ├── core/           # Core kernel functionality
+    ├── boot/             # Multiboot2 boot loader
+    ├── arch/             # Architecture-specific code (x86_64)
+    ├── lib/              # Kernel libraries (types, memory, buffer, fio)
+    ├── mm/               # Memory management
+    ├── drivers/          # Device drivers
+    ├── include/          # Global headers
+    ├── scripts/          # Build and utility scripts
+    ├── cmake/            # CMake build modules
+    ├── tools/            # Development tools
+    └── Documentation/    # Technical documentation
 ```
 
 ## Technology Stack

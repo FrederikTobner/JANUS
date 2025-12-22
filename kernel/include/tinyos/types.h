@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOS.                                              *
+ * This file is part of TinyOS                                              *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,17 +14,50 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef _STDBOOL_H
-#define _STDBOOL_H
+#ifndef TINYOS_TYPES_H
+#define TINYOS_TYPES_H
 
 /**
- * @file stdbool.h
- * @brief Boolean type (TinyOS freestanding implementation)
+ * @file types.h
+ * @brief Global kernel type definitions
+ *
+ * This header defines kernel-specific types used throughout TinyOS.
+ * These types provide semantic meaning beyond basic integer sizes.
  */
 
-#define bool _Bool
+#include <uapi/types.h>
+
+// Physical and virtual memory addresses
+typedef __u64 phys_addr_t; ///< Physical memory address
+typedef __u64 virt_addr_t; ///< Virtual memory address
+
+// Page frame number (physical page identifier)
+typedef __u64 pfn_t; ///< Page frame number
+
+// Process and thread identifiers
+typedef __s32 pid_t; ///< Process ID
+typedef __s32 tid_t; ///< Thread ID
+
+// Device number
+typedef __u32 dev_t; ///< Device number
+
+// Generic error type for kernel operations
+typedef __s32 error_t; ///< Error code (negative = error, 0 = success, positive = info)
+
+// Kernl shorthands for integers
+typedef __s8   s8;
+typedef __u8   u8;
+typedef __s16 s16;
+typedef __u16 u16;
+typedef __s32 s32;
+typedef __u32 u32;
+typedef __s64 s64;
+typedef __u64 u64;
+
+// Kenrnel shorthands for boolean
+#define bool __bool;
 #define true 1
 #define false 0
 #define __bool_true_false_are_defined 1
 
-#endif /* _STDBOOL_H */
+#endif /* TINYOS_TYPES_H */

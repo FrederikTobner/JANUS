@@ -1,7 +1,7 @@
 # Chapter 3: The Boot Process
 
-> *"There are two ways of constructing a software design: One way is to make it so simple that there are obviously no deficiencies, and the other way is to make it so complicated that there are no obvious deficiencies."*  
-> — C.A.R. Hoare
+> *"In the beginning there was nothing. And God said 'Let there be light'. And there was still nothing, but now you could see it."*  
+> — Terry Pratched
 
 We have our tools installed. Time to write some code that talks directly to hardware. No operating system beneath us. No safety net. Just us, some assembly, and blind faith that GRUB will cooperate.
 

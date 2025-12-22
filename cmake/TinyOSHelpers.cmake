@@ -302,20 +302,3 @@ function(tinyos_create_kernel)
     message(STATUS "    Libraries: ${ARG_LIBRARIES}")
 endfunction()
 
-#
-# Print TinyOS build configuration summary
-#
-function(tinyos_print_config)
-    message(STATUS "")
-    message(STATUS "═══════════════════════════════════════")
-    message(STATUS "    TinyOS Build Configuration")
-    message(STATUS "═══════════════════════════════════════")
-    message(STATUS "  Build type:    ${CMAKE_BUILD_TYPE}")
-    message(STATUS "  Host:          ${CMAKE_SYSTEM_NAME}")
-    message(STATUS "  Target:        ${TINYOS_TARGET_ARCH}-${TINYOS_TARGET_PLATFORM}")
-    message(STATUS "  C Compiler:    ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}")
-    message(STATUS "  Assembler:     nasm")
-    message(STATUS "  Build tests:   ${BUILD_TESTS}")
-    message(STATUS "═══════════════════════════════════════")
-    message(STATUS "")
-endfunction()
