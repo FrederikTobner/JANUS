@@ -105,7 +105,7 @@ function(tinyos_add_module NAME)
         target_include_directories(${NAME}
             INTERFACE
                 ${CMAKE_CURRENT_SOURCE_DIR}/include
-                ${CMAKE_SOURCE_DIR}/include
+                ${CMAKE_SOURCE_DIR}/kernel/include
         )
         
         # Link dependencies
@@ -123,7 +123,7 @@ function(tinyos_add_module NAME)
     target_include_directories(${NAME}
         PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}/include
-            ${CMAKE_SOURCE_DIR}/include
+            ${CMAKE_SOURCE_DIR}kernel/include
     )
 
     # Link dependencies
@@ -146,96 +146,6 @@ function(tinyos_add_module NAME)
     message(STATUS "  Added module: ${NAME}")
 endfunction()
 
-#
-# Add assembly sources to a target
-# 
-# Usage:
-#   tinyos_add_asm(target file1.asm file2.asm)
-#
-function(tinyos_add_asm TARGET)
-    foreach(ASM_FILE ${ARGN})
-        # Get absolute path
-        get_filename_component(ASM_ABS ${ASM_FILE} ABSOLUTE)
-        
-        # Get output object file name
-        get_filename_component(ASM_NAME ${ASM_FILE} NAME_WE)
-        set(ASM_OBJ ${CMAKE_CURRENT_BINARY_DIR}/${ASM_NAME}.o)
-
-        # Add custom command to assemble with NASM
-        add_custom_command(
-            OUTPUT ${ASM_OBJ}
-            COMMAND nasm -f elf64 -o ${ASM_OBJ} ${ASM_ABS}
-            DEPENDS ${ASM_ABS}
-            COMMENT "Assembling ${ASM_FILE}"
-        )
-
-        # Add object file to target
-        target_sources(${TARGET} PRIVATE ${ASM_OBJ})
-    endforeach()
-    
-    message(STATUS "  Added assembly sources to ${TARGET}: ${ARGN}")
-endfunction()
-
-#
-# Add BMUnit tests for a module
-# 
-# Usage:
-#   tinyos_add_tests(module_name
-#       SOURCES test1.c test2.c
-#       [DEPENDENCIES dep1 dep2]
-#   )
-#
-function(tinyos_add_tests MODULE_NAME)
-    if(NOT BUILD_TESTS)
-        return()
-    endif()
-
-    cmake_parse_arguments(
-        ARG
-        ""
-        ""
-        "SOURCES;DEPENDENCIES"
-        ${ARGN}
-    )
-
-    if(NOT ARG_SOURCES)
-        return()
-    endif()
-
-    foreach(TEST_FILE ${ARG_SOURCES})
-        # Get test name from filename
-        get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
-        set(TEST_TARGET "${MODULE_NAME}_${TEST_NAME}")
-
-        # Create test executable
-        add_executable(${TEST_TARGET} ${TEST_FILE})
-
-        # Link with module and dependencies
-        target_link_libraries(${TEST_TARGET}
-            PRIVATE
-                ${MODULE_NAME}
-                bmunit
-                ${ARG_DEPENDENCIES}
-        )
-
-        # Include directories
-        target_include_directories(${TEST_TARGET}
-            PRIVATE
-                ${CMAKE_CURRENT_SOURCE_DIR}/include
-                ${CMAKE_SOURCE_DIR}/include
-        )
-
-        # Compiler flags
-        target_compile_options(${TEST_TARGET} PRIVATE ${TINYOS_COMMON_FLAGS})
-        
-        # Register with CTest
-        add_test(NAME ${TEST_TARGET} COMMAND ${TEST_TARGET})
-        
-        message(STATUS "  Added test: ${TEST_TARGET}")
-    endforeach()
-endfunction()
-
-#
 # Print TinyOS build configuration summary
 #
 # Create the final kernel executable with custom linker script
@@ -276,7 +186,7 @@ function(tinyos_create_kernel)
     target_include_directories(kernel.elf
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/include
-            ${CMAKE_SOURCE_DIR}/include
+            ${CMAKE_SOURCE_DIR}/kernel/include
             ${CMAKE_BINARY_DIR}/include
     )
 

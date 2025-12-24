@@ -25,7 +25,6 @@ bt
 list
 
 # Step through a few instructions
-echo \n=== Stepping through kernel initialization ===\n
 n
 frame variable magic
 n
@@ -33,6 +32,5 @@ frame variable info
 n
 
 # Display final state
-echo \n=== Kernel State ===\n
 register read
 bt

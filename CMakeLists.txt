@@ -5,10 +5,9 @@ project(TinyOS VERSION 0.1.0 LANGUAGES C ASM_NASM)
 message(STATUS "========================================")
 message(STATUS "TinyOS Build Configuration")
 message(STATUS "========================================")
-message(STATUS "C Standard: C${CMAKE_C_STANDARD}")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
-message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER}")
+message(STATUS "Compiler: ${CMAKE_C_COMPILER} (version ${CMAKE_C_COMPILER_VERSION})")
+message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER})")
 message(STATUS "========================================")
 message(STATUS "Available targets:")
 message(STATUS "  ninja           - Build kernel.elf")
@@ -56,16 +55,22 @@ add_custom_target(iso
     COMMENT "Creating bootable ISO image"
 )
 
-# Run in QEMU target
+# Using i3 window manager we need to use the SDL display for QEMU to show the window
+if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3")
+    set(QEMU_DISPLAY_ARG -display sdl)
+else()
+    set(QEMU_DISPLAY_ARG)
+endif()
+
 add_custom_target(run
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU"
 )
 
-# Debug in QEMU target (waits for debugger on port 1234)
 add_custom_target(debug
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio -s -S
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
 )
+
