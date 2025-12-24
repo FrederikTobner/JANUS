@@ -13,12 +13,14 @@ cd TinyOS
 
 We'll build the project incrementally throughout the book. For now, just create the top-level directory. Each chapter adds new components as we need them.
 
+> TODO: This is probably outdated
+
 ```mermaid
 graph TD
-    CH2["<b>Chapter 2: Boot Process</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── cmake/<br/>└── CMakeLists.txt"]
-    CH3["<b>Chapter 3: I/O</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── cmake/<br/>└── CMakeLists.txt"]
-    CH4["<b>Chapter 4: Memory</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── mm/<br/>├── cmake/<br/>└── CMakeLists.txt"]
-    CH5["<b>Chapter 5+: Full Kernel</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── mm/<br/>├── lib/<br/>├── arch/<br/>├── include/<br/>├── cmake/<br/>└── CMakeLists.txt"]
+    CH2["<b>Chapter 3: Boot Process</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── cmake/<br/>└── CMakeLists.txt"]
+    CH3["<b>Chapter 4: I/O</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── cmake/<br/>└── CMakeLists.txt"]
+    CH4["<b>Chapter 5: Memory</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── mm/<br/>├── cmake/<br/>└── CMakeLists.txt"]
+    CH5["<b>Chapter 6+: Full Kernel</b><br/>TinyOS/<br/>├── boot/<br/>├── kernel/<br/>├── drivers/<br/>├── mm/<br/>├── lib/<br/>├── arch/<br/>├── include/<br/>├── cmake/<br/>└── CMakeLists.txt"]
     
     CH2 --> CH3
     CH3 --> CH4
@@ -27,10 +29,10 @@ graph TD
 
 **Chapter-by-chapter additions:**
 
-- **Chapter 2**: Boot code, build system, Multiboot header
-- **Chapter 3**: I/O drivers (serial, VGA, keyboard)
-- **Chapter 4**: Memory management (physical and virtual)
-- **Chapter 5**: Kernel features (interrupts, system calls)
+- **Chapter 3**: Boot code, build system, Multiboot header
+- **Chapter 4**: I/O drivers (serial, VGA, keyboard)
+- **Chapter 5**: Memory management (physical and virtual)
+- **Chapter 6**: Kernel features (interrupts, system calls)
 
 Don't create subdirectories yet—we'll build them piece by piece as we understand what we're building.
 

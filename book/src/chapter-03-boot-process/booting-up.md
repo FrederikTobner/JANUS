@@ -175,6 +175,16 @@ You should see your kernel_main entry code. Now step through the code
 
 ## Common Issues
 
+### The QEMU window is not visible
+
+Using a minimal window manager like i3wm, QEMU might default to using VNC output.
+To make the window visible you can either use a VNC viewer or setup SDL or GTK and specify it as the display type that is used:
+
+```bash
+qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display sdl
+qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display gtk
+```
+
 ### Black Screen Forever
 
 **Symptom:** QEMU shows black screen and hangs
@@ -202,15 +212,6 @@ You should see "waiting for debugger on :1234" in the output.
 ```bash
 file build/kernel.elf
 # Should show "with debug_info, not stripped"
-```
-
-## Quick Reference
-
-```bash
-ninja -C build         # Build kernel only
-ninja -C build iso     # Build kernel and create ISO
-ninja -C build run     # Build, create ISO, and boot in QEMU
-ninja -C build debug   # Build, create ISO, and boot with debugger
 ```
 
 ## What We've Accomplished

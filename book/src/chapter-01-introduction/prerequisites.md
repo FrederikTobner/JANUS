@@ -8,7 +8,9 @@ If you can write a linked list in C and understand what `mov eax, 5` does, you'r
 
 ## Required Knowledge
 
-### Programming Skills
+If any of these feel unfamiliar, get comfortable with them first. The OS development is challenging enough on its own.
+
+**Programming Skills:**
 
 - **C language**: Pointers, structs, memory management, function pointers, bitwise operations
 - **Assembly basics**: Registers, instruction execution, calling conventions, stack operations
@@ -17,26 +19,19 @@ If you can write a linked list in C and understand what `mov eax, 5` does, you'r
 OS development is where C truly shines. No garbage collection, direct memory access, inline assembly—this is C's home turf.
 [/!side]
 
-### Build Systems
+**Build Systems:**
 
 - **CMake**: Creating targets, linking libraries, setting compiler flags, subdirectories
-- **Make/Ninja**: Basic understanding of build automation
 - **Command line**: Shell navigation, basic unix commands
 
-If any of these feel unfamiliar, get comfortable with them first. The OS development is challenging enough without fighting your tools.
-
-## Computer Architecture Fundamentals
-
-You should understand:
+**Computer Architecture Fundamentals:**
 
 - **CPU operation**: How registers work, instruction execution, the fetch-decode-execute cycle
 - **Memory concepts**: RAM, addresses, the difference between virtual and physical memory
 - **Number systems**: Binary, hexadecimal, two's complement, bitwise operations
 - **The stack**: How function calls work, stack frames, return addresses
 
-## What You DON'T Need
-
-You don't need prior experience with:
+**You don't need to know:**
 
 - Operating system internals (that's what we're here to learn)
 - x86_64 architecture specifics (we'll cover what's needed)
@@ -77,7 +72,7 @@ If you need to brush up:
 
 ## Development Environment
 
-We develop on **Linux** (or WSL2 on Windows). TinyOS targets **x86_64** architecture.
+We develop on **Linux**. TinyOS targets **x86_64** architecture.
 
 **Why Linux?**
 
@@ -87,7 +82,7 @@ We develop on **Linux** (or WSL2 on Windows). TinyOS targets **x86_64** architec
 - Industry-standard OS development environment
 
 [!side]
-WSL2 on Windows works great for this. macOS also works but requires Homebrew for GRUB tools.
+WSL2 on Windows works as well, to build the iso we will boot. To run it you need to insall QEMU under Windows. macOS also works but requires Homebrew for GRUB tools.
 [/!side]
 
 **Why x86_64?**

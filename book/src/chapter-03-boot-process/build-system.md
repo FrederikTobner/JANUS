@@ -190,20 +190,11 @@ after: entire file
 +#define TINYOS_BUILD_DATE       "@TINYOS_BUILD_DATE@"
 +#define TINYOS_BUILD_TIME       "@TINYOS_BUILD_TIME@"
 +
-+/*
-+ * Target Architecture
-+ */
-+#define TINYOS_ARCH_X86_64      1
-+#define TINYOS_TARGET_ARCH      "x86_64"
 +
 +#endif /* TINYOS_CONFIG_H */
 ```
 
-This template uses CMake variables surrounded by `@` symbols. When you call `configure_file()`, CMake replaces them with actual values:
-
-- `@PROJECT_NAME@` → `"TinyOS"`
-- `@PROJECT_VERSION_MAJOR@` → `0`
-- `@TINYOS_BUILD_DATE@` → `"2025-01-15"` (current date)
+This template uses CMake variables surrounded by `@` symbols. When you call `configure_file()`, CMake replaces them with the actual value.
 
 The generated `config.h` lives in your build directory and gets included automatically.
 
@@ -223,9 +214,9 @@ replace: entire file
 +cmake_minimum_required(VERSION 3.20)
 +project(TinyOS VERSION 0.1.0 LANGUAGES ASM_NASM C)
 +
-+# Set C standard
-+set(CMAKE_C_STANDARD 11)
++set(CMAKE_C_STANDARD 17)
 +set(CMAKE_C_STANDARD_REQUIRED ON)
++set(CMAKE_C_EXTENSIONS ON)  # Allow GNU extensions
 +
 +# Add our CMake modules to the search path
 +list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -350,10 +341,6 @@ This produces `build/kernel.elf` - a bootable ELF executable.
 
 > **TODO: Hand-drawn illustration idea**
 > Draw a factory assembly line where source files (.asm, .c) are raw materials on a conveyor belt. NASM and Clang are workers at stations with hammers/tools transforming them into .o files (boxes). These boxes all funnel into a big "Linker" machine that looks like it's under pressure (steam coming out, gears turning), and out pops a shiny kernel.elf with a "Grade A Bootable" stamp and a smiley face.
-
-**Parallel builds:** Ninja automatically compiles modules in parallel. On a 4-core machine, this is 3-4× faster than sequential builds.
-
-**Incremental builds:** Change one `.c` file, only that file and the final link step re-run. No wasted rebuilds.
 
 ## Verification
 

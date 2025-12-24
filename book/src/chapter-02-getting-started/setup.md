@@ -1,8 +1,5 @@
 # Setting Up Your Environment
 
-> *"Give me six hours to chop down a tree and I will spend the first four sharpening the axe."*  
-> — Abraham Lincoln
-
 Operating system development requires a specialized toolchain. Unlike application development where you compile against an existing OS, we're building the OS itself. Unlike application development where you compile against an existing OS, we're building the OS itself—there's no standard library, no runtime, just bare metal.
 
 What we will cover in this chapter:

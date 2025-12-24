@@ -43,6 +43,6 @@ typedef __INT32_TYPE__   __s32;
 typedef __INT64_TYPE__   __s64;
 
 // Define boolean type
-#define __bool _Bool;
+#define __bool _Bool
 
 #endif /* UAPI_TYPES_H */

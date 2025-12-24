@@ -18,16 +18,6 @@ This is a pattern you'll see throughout kernel development: trust nothing, verif
 
 Right now, we're trusting that GRUB gave us good data in `magic` and `info`. That's... optimistic. What if GRUB didn't boot us? What if something went wrong? What if we're running on different hardware that uses a different bootloader?
 
-> **The Crux: Defense Against the Dark Arts of Bootloaders**
->
-> We need to verify:
->
-> * **Magic number** - Is this actually Multiboot2 info?
-> * **Total size** - Is the structure complete?
-> * **Tag integrity** - Can we safely parse the tag list?
->
-> Without these checks, we're one bad boot away from reading garbage memory and triple-faulting spectacularly.
-
 Let's add proper validation before the kernels entry point starts using this data.
 
 First we verify we were loaded by a Multiboot2-compliant bootloader. If not we will just halt the system for now since we can't print any error message at this point.
@@ -109,13 +99,17 @@ This is a valuable lesson in OS development:
 
 ### Retesting
 
-Open two terminals. In the first terminal, start QEMU with debugging enabled:
+Open two terminals. In the first terminal, start QEMU with debugging enabled after rebuilding the project:
 
-Rebuild the project then open the debugger, then instruct lldb to connect to QEMU's debbiging port to check the result again.
+```bash
+cmake --build build
+ninja -C build debug
+lldb build/kernel.elf
+(lldb) gdb-remote localhost:1234
+```
 
-### Setting a Breakpoint
-
-Tell LLDB to pause when we enter `kernel_main`:
+Open the debugger, then instruct lldb to connect to QEMU's debbiging port to check the result again.
+Next we tell LLDB to pause when we enter `kernel_main`:
 
 ```
 (lldb) b kernel_main
@@ -123,12 +117,10 @@ Breakpoint 1: where = kernel.elf`kernel_main + 15 at main.c:42:15
 ```
 
 [!side]
-Breakpoints work by replacing the instruction at that address with a special INT3 instruction that traps to the debugger.
+In most debuggers breakpoints work by replacing the instruction at that address with a special instruction (INT 3 on x86) that traps to the debugger.
 [/!side]
 
 **What this means:** LLDB found the `kernel_main` function in our kernel at line 42 of main.c. When execution reaches that address, LLDB will pause the CPU.
-
-### Running Until the Breakpoint
 
 Now let the kernel boot:
 
@@ -145,16 +137,12 @@ Process 1 stopped
    43           // Can't print error yet - just halt
 ```
 
-### Inspecting the Multiboot Magic Number
-
 Let's verify GRUB passed us the correct magic number. The `$rdi` register holds the first function argument (the `magic` parameter):
 
 ```
-(lldb) p/x variable magic
+(lldb) p/x magic
 (uint64_t) $0 = 0x0000000036d76289
 ```
-
-**What this shows:** `p/x` means "print in hexadecimal." `variable magic` is used to specify the the variable. The value `0x36d76289` is the Multiboot2 magic number! GRUB loaded us correctly.
 
 Let's check the multiboot info pointer in `info` (second argument):
 
@@ -165,7 +153,6 @@ Let's check the multiboot info pointer in `info` (second argument):
 
 That's a valid address pointing to the Multiboot information structure GRUB created for us.
 
-### Stepping Through the Code
 
 Let's watch the magic number check execute:
 
@@ -196,8 +183,6 @@ Process 1 stopped
 ```
 
 The null check passed too! Now we're at the infinite loop where the kernel halts.
-
-### Viewing All Registers
 
 Want to see the full CPU state?
 

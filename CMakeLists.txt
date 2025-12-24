@@ -31,8 +31,6 @@ include(TinyOSHelpers)
 string(TIMESTAMP TINYOS_BUILD_DATE "%Y-%m-%d")
 string(TIMESTAMP TINYOS_BUILD_TIME "%H:%M:%S")
 
-# Print build configuration
-tinyos_print_config()
 
 # Copy compile_commands.json to project root for clangd
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
