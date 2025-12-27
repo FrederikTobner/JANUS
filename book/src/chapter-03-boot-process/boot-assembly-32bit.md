@@ -118,4 +118,4 @@ ninja -C build iso
 
 ---
 
-**Next: [Understanding the 64-bit Transition](boot-assembly-64bit.md)**
+**Next: [The Linker Script](linker-script.md)** 

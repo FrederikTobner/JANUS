@@ -43,26 +43,39 @@ Let's implement each step.
 
 We'll build `kernel/boot/boot.asm` incrementally, adding each piece as we explain it.
 
-### Step 1: Declarations and BSS Section
 
-Start with the global declarations and stack/page table reservations:
+Start with the global declarations:
 
-```asm-diff
+```x86asm-diff
 file: kernel/boot/boot.asm
 replace: entire file
 ---
-+; Boot entry point - called by GRUB in 32-bit protected mode
 +global _start
 +extern kernel_main
 +
-+; Reserve stack space in BSS section
+```
+
+```x86asm-diff
+file: kernel/boot/boot.asm
+replace: entire file
+---
+global _start
+extern kernel_main
 +section .bss
 +align 16
 +stack_bottom:
 +    resb 16384              ; 16 KiB stack
 +stack_top:
-+
-+; Page tables for long mode (must be page-aligned)
+```
+
+We reserve space in the BSS (uninitialized data) section for our stack and page tables.
+
+```x86asm-diff
+file: kernel/boot/boot.asm
+replace: entire file
+---
+    resb 16384              ; 16 KiB stack
+stack_top:
 +align 4096
 +p4_table:
 +    resb 4096
@@ -72,15 +85,16 @@ replace: entire file
 +    resb 4096
 ```
 
-We reserve space in the BSS (uninitialized data) section for our stack and page tables. The page tables must be 4096-byte (4KB) aligned because that's the page size the CPU expects.
+ The page tables must be 4096-byte (4KB) aligned because that's the page size the CPU expects.
 
-### Step 2: 32-bit Entry Point
+Add the entry point where GRUB transfers control to us.
+When GRUB loads a 64-bit kernel, it puts us in 32-bit protected mode with paging disabled.
+The CPU register `EAX` contains the multiboot magic number (0x36d76289) and `EBX` contains a pointer to the multiboot info structure.
+The calling convention for System V AMD64 ABI expects the first two arguments in `RDI` and `RSI`, so we need to preserve these values across the mode switch.
 
-Add the entry point where GRUB transfers control to us:
+In 64-bit mode, EDI becomes RDI and ESI becomes RSI—exactly where the System V AMD64 ABI expects the first two function arguments.
 
-> TODO: Split in more sections
-
-```asm-diff
+```x86asm-diff
 file: kernel/boot/boot.asm
 after: resb 4096
 ---
@@ -88,39 +102,43 @@ after: resb 4096
      resb 4096
 +
 +section .text
-+bits 32                     ; GRUB puts us in 32-bit protected mode
++bits 32                     
 +
 +_start:
-+    ; At this point:
-+    ; - EAX = multiboot magic (0x36d76289)
-+    ; - EBX = physical address of multiboot info structure
-+    ; - CPU is in 32-bit protected mode
++    mov edi, eax            
++    mov esi, ebx           
+```
+
+[!side]
+**What is a global descriptor table (GDT)?**
+It defines memory segments for the CPU. In 64-bit mode, segmentation is mostly disabled, but we still need a GDT with at least a code segment to enter long mode.
+[/!side]
+
+Next we setup the stack pointer to point to the top of our stack. Then we call a subroutine to setup the page tables and enable long mode.
+
+Additionally we need to load the global descriptor table and perform a far jump to switch to the 64-bit code segment.
+
+```x86asm-diff
+file: kernel/boot/boot.asm
+after: resb 4096
+---
+_start:
+    mov edi, eax          
+    mov esi, ebx         
 +    
-+    ; Save multiboot info (we'll need them after switching to long mode)
-+    mov edi, eax            ; Save magic
-+    mov esi, ebx            ; Save multiboot info pointer
-+    
-+    ; Set up stack pointer
 +    mov esp, stack_top
 +    
-+    ; Set up page tables and enable long mode
 +    call setup_page_tables
 +    call enable_paging
 +    
-+    ; Load 64-bit GDT
 +    lgdt [gdt64.pointer]
 +    
-+    ; Jump to 64-bit code
 +    jmp gdt64.code:long_mode_start
 ```
 
-GRUB passes parameters in EAX (multiboot magic number) and EBX (pointer to multiboot info). We save them to EDI and ESI because these registers are preserved across the mode switch. In 64-bit mode, EDI becomes RDI and ESI becomes RSI—exactly where the System V AMD64 ABI expects the first two function arguments.
-
-### Step 3: Page Table Setup Function
-
 Now add the function that creates our page tables:
 
-```asm-diff
+```x86asm-diff
 file: kernel/boot/boot.asm
 after: jmp gdt64.code:long_mode_start
 ---
@@ -157,11 +175,9 @@ The flag value `0b11` equals \\(2^0 + 2^1 = 3\\) (present + writable), and `0b10
 
 We're using a 2MB **huge page** which skips the P1 (page table) level entirely. This maps the entire first 2MB in one entry instead of 512 individual 4KB pages. A standard 4KB page would require \\(512\\) entries (since \\(2\\text{MB} = 2^{21}\\) bytes and \\(4\\text{KB} = 2^{12}\\) bytes, so \\(2^{21} / 2^{12} = 2^9 = 512\\) pages).
 
-### Step 4: Enable Paging and Long Mode
-
 Add the critical function that transitions the CPU to 64-bit mode:
 
-```asm-diff
+```x86asm-diff
 file: kernel/boot/boot.asm
 after: setup_page_tables ret
 ---
@@ -199,11 +215,9 @@ This function performs the mode transition sequence:
 3. **EFER.LM** (Extended Feature Enable Register, Long Mode bit) tells the CPU we want 64-bit mode. EFER is a Model-Specific Register (MSR) accessed with `rdmsr`/`wrmsr` instructions instead of normal register operations. You specify which MSR using ECX (0xC0000080 for EFER).
 4. **CR0.PG** (Paging bit) activates paging. Once paging is enabled *and* LME is set in EFER, the CPU enters long mode!
 
-### Step 5: 64-bit Entry Point
-
 We're finally in long mode! Add the 64-bit entry point that calls our kernel:
 
-```asm-diff
+```x86asm-diff
 file: kernel/boot/boot.asm
 after: enable_paging ret
 ---
@@ -234,11 +248,9 @@ after: enable_paging ret
 
 In long mode, segment registers aren't used for addressing (flat memory model), but we zero them out for cleanliness. The EDI and ESI registers we saved in Step 2 are now RDI and RSI, perfectly positioned as the first two function arguments per the System V AMD64 calling convention.
 
-### Step 6: Global Descriptor Table
-
 Finally, add the GDT that defines our 64-bit code segment:
 
-```asm-diff
+```x86asm-diff
 file: boot/boot.asm
 after: .hang loop
 ---
@@ -254,8 +266,6 @@ after: .hang loop
 +    dw $ - gdt64 - 1                        ; GDT size
 +    dq gdt64                                ; GDT address
 ```
-
-The GDT (Global Descriptor Table) defines memory segments. In 64-bit long mode, segmentation is mostly disabled (flat memory model), but we still need a GDT with at least a code segment to tell the CPU we're in 64-bit mode.
 
 The code segment descriptor sets bits for: executable (bit 43), code/data segment (bit 44), present (bit 47), and 64-bit mode (bit 53). The value \\((1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)\\) creates a 64-bit value with these specific bits set.
 
@@ -281,7 +291,8 @@ graph LR
 
 > **Aside: System V AMD64 ABI**
 >
-> ABI stands for Application Binary Interface—the rules for how functions are called at the assembly level. The System V AMD64 ABI (used by Linux, BSD, and most Unix-like systems) specifies:
+> ABI stands for Application Binary Interface—the rules for how functions are called at the assembly level. It ensures that code that follows the ABI conventions can also be used under different architectures that implement the same ABI.
+The System V AMD64 ABI (used by Linux, BSD, and most Unix-like systems) specifies:
 >
 > - **First 6 integer arguments** go in registers: RDI, RSI, RDX, RCX, R8, R9
 > - **Return value** goes in RAX
@@ -301,8 +312,7 @@ graph LR
 >
 > We use the shorter P4/P3/P2 names for simplicity.
 
-## Testing the Fixed Boot Code
-
+Now lets validate that out boot assembly transition to 64-bit mode works properly.
 > TODO: Test registers and show variables
 
 Now rebuild and test:
@@ -316,7 +326,6 @@ ninja -C build run
 
 We can verify it's working with LLDB (covered in the "Booting Up" chapter).
 
-## What We've Accomplished
 
 Our boot assembly now:
 
@@ -328,3 +337,7 @@ Our boot assembly now:
 - Calls our 64-bit kernel successfully
 
 No more triple faults!
+
+---
+
+**Next:** [Summary](./summary.md)

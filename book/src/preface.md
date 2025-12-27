@@ -21,13 +21,14 @@ Every line of code in this book is real, tested, and part of a working system. I
 
 ## A Note on Scope
 
-TinyOS is intentionally minimal. We won't build a full-featured Unix clone or a Windows competitor. (My sanity thanks me.) Instead, we'll focus on the core concepts that make *any* operating system work:
+TinyOS is intentionally minimal. We won't build a full-featured Unix clone or a Windows competitor. Instead, we'll focus on the core concepts that make *any* operating system work:
 
 - **Booting**: Getting from power-on to running code
 - **Memory Management**: Controlling the most precious resource
 - **Process Scheduling**: Making one CPU appear as many
 - **Device Drivers**: Talking to the outside world
 - **File Systems**: Persisting data beyond power cycles
+- **Input/Output**: Interacting with users and hardware
 
 By the end, you'll have a small but complete operating system that boots on real hardware, manages memory, and runs user programs. More importantly, you'll understand *how* and *why* it works.
 
@@ -36,7 +37,7 @@ By the end, you'll have a small but complete operating system that boots on real
 This book assumes you:
 
 - Can read and write C code comfortably
-- Understand basic computer architecture (CPU, RAM, storage)
+- Understand basic computer architecture (CPU, RAM, storage) and assembly language concepts
 - Know how to use a Unix-like command line
 - Have patience for low-level debugging
 
@@ -44,13 +45,13 @@ You *don't* need to be an expert in systems programming, assembly language, or h
 
 ## How to Read This Book
 
-Each chapter builds on the previous one. The code evolves incrementally—we start with a bootloader that prints "Hello" and end with a multitasking kernel. I recommend following along in order, typing out (or copying) the code as you go.
+Each chapter builds on the previous one. The code evolves incrementally—we start with a bootloader that prints "Hello" and end with a multitasking kernel. I recommend following along in order, typing outthe code as you go.
 
 All code is available in the accompanying Git repository, with branches for each chapter. If you get stuck or want to skip ahead, you can check out the code for any chapter and keep going.
 
 ## A Personal Note
 
-Building an operating system is hard. You'll encounter obscure bugs, cryptic hardware manuals, and moments where nothing makes sense. That's normal. Every OS developer has stared at a blank screen wondering why their kernel won't boot, only to discover a typo in the linker script. (Ask me how I know.)
+Building an operating system is hard. You'll encounter obscure bugs, cryptic hardware manuals, and moments where nothing makes sense. That's normal. Every OS developer has stared at a blank screen wondering why their kernel won't boot, only to discover a typo in the linker script. 
 
 But the payoff is worth it. Few things in programming are as satisfying as seeing your own kernel boot for the first time, or watching your memory allocator successfully manage gigabytes of RAM. These victories feel earned because they *are* earned.
 
@@ -60,4 +61,3 @@ Let's build an operating system.
 
 ---
 
-*December 2025*

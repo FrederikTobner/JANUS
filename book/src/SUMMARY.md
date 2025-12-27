@@ -39,6 +39,7 @@
   - [Creating a Bootable ISO](chapter-03-boot-process/creating-bootable-iso.md)
   - [Boot info verification](chapter-03-boot-process/boot-info-verification.md)
   - [Booting Up](chapter-03-boot-process/booting-up.md)
+  - [Boot Entry Assembly: 64-bit](chapter-03-boot-process/boot-assembly-64bit.md)
   - [Summary](chapter-03-boot-process/summary.md)
 
 ---

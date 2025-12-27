@@ -9,8 +9,6 @@ Operating system development requires specialized tools. Unlike application deve
 Total install time: 5-10 minutes on most systems. The actual learning starts in Chapter 3.
 [/!side]
 
-## Required Tools
-
 We need:
 
 1. **Compiler** - Clang 17+ (or GCC 13+)
@@ -127,7 +125,7 @@ sudo pacman -S grub xorriso mtools
 - `xorriso` - ISO 9660 filesystem creator (required by grub-mkrescue)
 - `mtools` - FAT filesystem tools (required by grub-mkrescue)
 
-## Complete Installation
+To install all required tools in one go:
 
 **Ubuntu/Debian (One Command)**
 

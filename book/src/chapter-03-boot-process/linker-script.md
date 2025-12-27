@@ -49,7 +49,7 @@ The first 1MB is a minefield of BIOS tables, video memory, and historical baggag
 
 Our kernel has several sections, and their order matters:
 
-1. **`.multiboot`** — GRUB scans the first 32KB for this. Must be first!
+1. **`.multiboot`** — GRUB scans the first 32KB for this section. We need to insure it is placed in the very beginning of our binary. 
 2. **`.text`** — Executable code (read-only, executable)
 3. **`.rodata`** — Read-only data (string literals, const variables)
 4. **`.data`** — Initialized global/static variables

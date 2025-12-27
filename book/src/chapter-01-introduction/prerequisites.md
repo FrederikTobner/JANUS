@@ -2,10 +2,6 @@
 
 Before diving into OS development, you need a solid foundation in several areas. This isn't application programming where the OS handles the hard parts—we're building the OS itself.
 
-[!side]
-If you can write a linked list in C and understand what `mov eax, 5` does, you're ready.
-[/!side]
-
 ## Required Knowledge
 
 If any of these feel unfamiliar, get comfortable with them first. The OS development is challenging enough on its own.
@@ -42,7 +38,6 @@ OS development is where C truly shines. No garbage collection, direct memory acc
 
 Ask yourself:
 
-**Can you explain what this C code does?**
 
 **Can you read this assembly?**
 
@@ -58,6 +53,26 @@ struct node {
     int data;
     struct node *next;
 };
+void main() {
+    struct node *new_node = malloc(sizeof(struct node));
+    new_node->data = 42;
+    new_node->next = NULL;
+}
+```
+
+and do you know how static keyword behaves when used inside a function vs globally?
+
+```c
+static int counter_global = 0;
+void increment() {
+    counter_global++;
+    static int counter_local = conter_global;
+    counter_global++;
+}
+void main() {
+    increment();
+    increment();
+}
 ```
 
 If any of these feel confusing, spend time with foundational resources first. OS development is challenging enough without simultaneously learning prerequisite skills.
@@ -66,7 +81,7 @@ If any of these feel confusing, spend time with foundational resources first. OS
 
 If you need to brush up:
 
-- **C Programming**: "The C Programming Language" by Kernighan & Ritchie
+- **C Programming**: "Learn C Programming" by Jeff Szuhay, "C Programming Language" by Kernighan & Ritchie and "Extreme C" by Kamran Amini
 - **Assembly**: "Programming from the Ground Up" by Jonathan Bartlett
 - **Computer Architecture**: "Computer Systems: A Programmer's Perspective" by Bryant & O'Hallaron
 
@@ -82,18 +97,16 @@ We develop on **Linux**. TinyOS targets **x86_64** architecture.
 - Industry-standard OS development environment
 
 [!side]
-WSL2 on Windows works as well, to build the iso we will boot. To run it you need to insall QEMU under Windows. macOS also works but requires Homebrew for GRUB tools.
+WSL2 on Windows works as well, to build the iso we will boot. To run it will be easier to install QEMU under Windows directly.
+macOS also works but requires Homebrew for GRUB tools.
 [/!side]
 
 **Why x86_64?**
 
-- Widely documented architecture
-- QEMU has excellent x86_64 emulation
-- Most developers have access to x86_64 hardware
-- Rich ecosystem of tools and documentation
+The x86_64 architecture is ideal for learning OS development because it is widely used and well-documented. Additionally most developers have access to x86_64 hardware, making it easier to test and run the OS. The rich ecosystem of tools and documentation further supports development on this architecture. Finally QEMU provides excellent emulation for x86_64, allowing for easy testing and debugging.
 
 [!side]
-ARM is tempting but its documentation is scattered across vendor-specific implementations. x86_64 has the Intel and AMD manuals—everything you need.
+ARM would be tempting as well but its documentation is scattered across vendor-specific implementations. x86_64 has the Intel and AMD manuals—everything you need.
 [/!side]
 
 - **Your editor**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (autocomplete, go-to-definition, error highlighting) if you want it.
@@ -102,16 +115,6 @@ ARM is tempting but its documentation is scattered across vendor-specific implem
 Vim, Emacs, VS Code, CLion—whatever makes you productive. The code is the same regardless.
 [/!side]
 
-## Time Commitment
-
-OS development is not a weekend project. Expect:
-
-- **Chapter 2-3**: 2-4 hours (setup and first boot)
-- **Chapter 4**: 4-6 hours (memory management)
-- **Chapter 5**: 6-8 hours (I/O and drivers)
-- **Chapter 6+**: 8-12 hours each (kernel features)
-
-Take your time. Understanding is more valuable than speed.
 
 ---
 

@@ -1,7 +1,7 @@
 # Common Misconceptions
 
 **"I need to understand every x86_64 instruction"**  
-No. We cover what's needed. The Intel manual is 5,000 pages. Focus on concepts, not memorization.
+No. We cover what's needed. The Intel manual has over 5,000 pages. Focus on concepts, not memorization.
 
 **"If my code doesn't work, I'm not cut out for this"**  
 Triple faults, cryptic build errors, and mysterious crashes are *normal*. Every OS developer has stared at a blank screen for hours. Debugging skills matter more than getting it right the first time.
@@ -12,7 +12,7 @@ Triple faults, cryptic build errors, and mysterious crashes are *normal*. Every 
 QEMU lets you test on a virtual machine. Your laptop is fine. Real hardware testing comes later, if at all.
 
 **"OS development requires assembly everywhere"**  
-We write assembly only where necessary: boot code and a few low-level primitives. 90% of the kernel is C.
+We write assembly only where necessary: boot code and a few low-level primitives. Most of the kernel will be written in C.
 
 **"I need to read the entire Intel manual first"**  
 The Intel Software Developer's Manual is a reference, not a textbook. We'll tell you which sections matter when they matter.
