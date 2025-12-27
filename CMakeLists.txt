@@ -7,7 +7,7 @@ message(STATUS "TinyOS Build Configuration")
 message(STATUS "========================================")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Compiler: ${CMAKE_C_COMPILER} (version ${CMAKE_C_COMPILER_VERSION})")
-message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER})")
+message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER}")
 message(STATUS "========================================")
 message(STATUS "Available targets:")
 message(STATUS "  ninja           - Build kernel.elf")
@@ -57,17 +57,36 @@ add_custom_target(iso
 
 # Using i3 window manager we need to use the SDL display for QEMU to show the window
 if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3")
-    set(QEMU_DISPLAY_ARG -display sdl)
+    find_program(SDL2_CONFIG_EXECUTABLE sdl2-config)
+    find_program(PKG_CONFIG_EXECUTABLE pkg-config)
+    set(QEMU_DISPLAY_ARG)
+    if(SDL2_CONFIG_EXECUTABLE)
+        set(QEMU_DISPLAY_ARG -display sdl)
+    elseif(PKG_CONFIG_EXECUTABLE)
+        execute_process(
+            COMMAND ${PKG_CONFIG_EXECUTABLE} --exists gtk+-3.0
+            RESULT_VARIABLE GTK3_FOUND
+        )
+        if(GTK3_FOUND EQUAL 0)
+            set(QEMU_DISPLAY_ARG -display gtk)
+        else()
+            message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may not show a window under i3.")
+        endif()
+    else()
+        message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may not show a window under i3.")
+    endif()
 else()
     set(QEMU_DISPLAY_ARG)
 endif()
 
+# Custom target to run TinyOS in QEMU
 add_custom_target(run
     COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU"
 )
 
+# Custom target to run TinyOS in QEMU with GDB stub
 add_custom_target(debug
     COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
     DEPENDS iso

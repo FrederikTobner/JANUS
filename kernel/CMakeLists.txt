@@ -14,7 +14,7 @@ configure_file(
 )
 
 # Add generated config.h to include path
-include_directories("${CMAKE_BINARY_DIR}/kernel/include", "${CMAKE_CURRENT_SOURCE_DIR}/include")
+include_directories("${CMAKE_BINARY_DIR}/kernel/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # Boot module
 add_subdirectory(boot)
