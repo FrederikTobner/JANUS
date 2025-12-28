@@ -161,7 +161,7 @@ static inline struct multiboot_tag * multiboot_first_tag(struct multiboot_info *
 static inline struct multiboot_tag * multiboot_next_tag(struct multiboot_tag * tag)
 {
     // Tags are 8-byte aligned
-    u32 size = (tag->size + 7) & ~7;
+    u32 size = (tag->size + 7) & ~7u;
     return (struct multiboot_tag *) ((u8 *) tag + size);
 }
 

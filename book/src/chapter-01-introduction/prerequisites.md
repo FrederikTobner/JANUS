@@ -4,7 +4,7 @@ Before diving into OS development, you need a solid foundation in several areas.
 
 ## Required Knowledge
 
-If any of these feel unfamiliar, get comfortable with them first. The OS development is challenging enough on its own.
+If any of these feel unfamiliar, get comfortable with them first. Writing your own Operating system is usually considered to be the most challenging programming task there is,therfore it is crucial that you have already a solid understanding of  
 
 **Programming Skills:**
 
@@ -85,30 +85,26 @@ For learning **Assembly** "Programming boot sector games" by Oscar Toledo G. is 
 
 > TODO: Find resources for basic computer architecture and cmake
 
-We develop on **Linux**. TinyOS targets **x86_64** architecture.
-
-**Why Linux?**
-
-- Native toolchain support
-- Direct access to development tools
-- No virtualization overhead for testing
-- Industry-standard OS development environment
-
-[!side]
-WSL2 on Windows works as well, to build the iso. To run it will be easier to install QEMU under Windows directly.
-macOS also works but requires Homebrew for GRUB tools.
-[/!side]
-
-**Why x86_64?**
-
-The x86_64 architecture is ideal for learning OS development because it is widely used and well-documented. Additionally most developers have access to x86_64 hardware, making it easier to test and run the OS. The rich ecosystem of tools and documentation further supports development on this architecture. Finally QEMU provides excellent emulation for x86_64, allowing for easy testing and debugging.
+We develop on **Linux**, because it provides native toolchain support and direct access to development tools.
 
 [!side]
 ARM would be tempting as well but its not as common on desktops, making it less likely that readers have access to hardware to test on.
 [/!side]
 
-**Your editor**: Use whatever you prefer. Vim, Emacs, VS Code, CLion, Notepadwhatever makes you productive. The code we will write will be the same regardless.
+
+TinyOS targets **x86_64** architecture. It is ideal for learning OS development because it is widely used and well-documented. Additionally most developers have access to x86_64 hardware, which is crucial to being able to test our operating system on real hardware.
+The rich ecosystem of tools and documentation further supports development on this architecture. Finally QEMU provides excellent emulation for x86_64, allowing for easy testing and debugging.
+
+[!side]
+The “editor wars” refer to the long-running rivalry between users of the console based editors Vi and Emacs. Since 1985 there have been 
+numerous debates have occured between the communities of both editors, each claiming that their choice is the paragon of editing perfection.
+[/!side]
+
+As your editor you should use whatever you prefer. 
+The code we will write will be the same regardless. We won't participate in the editor wars here.
+
 
 ---
 
-**Next: [Common Misconceptions](misconceptions.md)**
+**Next: [Development Environment](development-environment.md)**
+

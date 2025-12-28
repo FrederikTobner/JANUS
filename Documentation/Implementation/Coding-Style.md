@@ -4,27 +4,11 @@
 
 TinyOS uses `clang-format` to enforce consistent style. If you're coming from C++, Rust, or Zig, most of this will be familiar. We only document the non-obvious parts here - things that might surprise you or are specific to kernel development.
 
-## Basic Formatting (Quick Reference)
-
-**Don't waste time reading this if you know C:**
-
-- 4 spaces, no tabs
-- 120 column limit
-- Linux kernel brace style
-- Pointer alignment middle: `uint8_t * ptr`
-- Qualifiers right: `uint32_t const value`
-- Space after casts: `(uint32_t) value`
-- Always use braces, even for single statements
-
-Run `clang-format -i <file>` and move on.
-
 ## Multi-Dimensional Memory Access
 
 ### Pointer Arithmetic for Multi-Dimensional Data
 
 TinyOS prefers **explicit pointer arithmetic** over array indexing for multi-dimensional data structures to make memory layout and performance characteristics visible.
-
-#### Framebuffer and Pixel Data
 
 ```c
 // Preferred: Explicit pointer arithmetic
@@ -41,8 +25,6 @@ uint8_t a = *(pixel_base + 3);
 // Avoid: Hidden memory layout
 uint32_t color = framebuffer[y][x];  // Where's the pitch? Is this cache-friendly?
 ```
-
-#### Matrix Operations
 
 ```c
 // Preferred: Cache behavior visible
@@ -62,56 +44,6 @@ void matrix_multiply(float * result, float const * a, float const * b, size_t n)
 
 // Avoid: Hidden memory access patterns
 result[i][j] += a[i][k] * b[k][j];  // How far apart are these elements?
-```
-
-#### Page Tables and Nested Structures
-
-```c
-// Preferred: Shows multi-level pointer traversal
-uint64_t * pml4 = (uint64_t *) read_cr3();
-uint64_t pml4_entry = *(pml4 + pml4_index);
-
-if (pml4_entry & PAGE_PRESENT) {
-    uint64_t * pdpt = (uint64_t *) (pml4_entry & PAGE_ADDR_MASK);
-    uint64_t pdpt_entry = *(pdpt + pdpt_index);
-    // ...
-}
-
-// Shows exactly what memory is being accessed at each level
-```
-
-#### Helper Macros for Common Patterns
-
-When pointer arithmetic becomes repetitive, use macros:
-
-```c
-// Define access pattern once
-#define PIXEL_AT(fb, pitch, x, y) ((fb) + ((y) * (pitch)) + (x))
-
-// Use consistently
-uint32_t * pixel = PIXEL_AT(framebuffer, pitch, x, y);
-*pixel = color;
-
-// Or for 2D matrices
-#define MATRIX_ELEM(matrix, cols, row, col) ((matrix) + ((row) * (cols)) + (col))
-
-float * element = MATRIX_ELEM(matrix, num_cols, i, j);
-*element = value;
-```
-
-#### When to Comment the Layout
-
-```c
-/*
- * Framebuffer layout:
- * - Width: 1024 pixels
- * - Height: 768 pixels  
- * - Pitch: 1024 pixels (may differ if aligned)
- * - Format: 32-bit RGBA
- * - Memory: width * height * 4 bytes
- * - Row N starts at: base + (N * pitch * 4)
- */
-uint32_t * pixel = framebuffer + (y * pitch) + x;
 ```
 
 #### One-Dimensional Arrays: Array Syntax OK
@@ -221,64 +153,6 @@ static inline size_t buf_length(buffer_t const * buf) {
 void buf_init(buffer_t * buf, size_t initial_capacity);
 int buf_append(buffer_t * buf, uint8_t const * data, size_t len);
 void buf_destroy(buffer_t * buf);
-```
-
-### Why This is Better
-
-**Performance:**
-
-```c
-buffer_t buffer;  // Stack allocation - zero malloc overhead
-buf_init(&buffer, 256);
-
-if (buffer.length > 0) {  // Direct access - zero function call overhead
-    process(buffer.data);
-}
-```
-
-**Debugging:**
-
-```bash
-# Public structure - full visibility
-(lldb) print buffer
-(buffer_t) $0 = {
-  data = 0x00007ffff7fb0000 "actual data you can see"
-  length = 23
-  capacity = 256
-}
-
-# Opaque handle - limited information
-(lldb) print handle
-(void *) $0 = 0x00007ffff7fb0000
-```
-
-**Memory layout:**
-
-```c
-typedef struct parser {
-    buffer_t input;   // Embedded - one allocation for entire struct
-    buffer_t output;  // Not a pointer - better cache locality
-    size_t pos;
-} parser_t;
-```
-
-### When Direct Access is Expected
-
-Direct field access is **normal and encouraged**:
-
-```c
-// Hot loop? Access fields directly.
-for (size_t i = 0; i < buffer.length; i++) {
-    process(buffer.data[i]);
-}
-
-// Need to check something? Just check it.
-if (buffer.capacity < required) {
-    buf_resize(&buffer, required);
-}
-
-// Setting up a structure? Initialize the fields.
-packet.payload.length = new_size;
 ```
 
 ### Opaque Handles: The Rare Exception

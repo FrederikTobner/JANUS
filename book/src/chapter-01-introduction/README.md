@@ -19,10 +19,9 @@ This chapter provides the foundation for your OS development journey: understand
 2. [Why Build One?](why-build-one.md)
 3. [What We'll Build](what-well-build.md)
 4. [Prerequisites](prerequisites.md)
-5. [Common Misconceptions](misconceptions.md)
-6. [Development Environment](development-environment.md)
-7. [How to Use This Book](how-to-use.md)
-8. [Getting Started](getting-started.md)
+5. [Development Environment](development-environment.md)
+6. [How to Use This Book](how-to-use.md)
+7. [Getting Started](getting-started.md)
 
 ---
 
