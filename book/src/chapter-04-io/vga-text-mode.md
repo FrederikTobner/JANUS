@@ -16,6 +16,7 @@ VGA text mode provides an 80x25 grid of colored characters. It's the classic way
 
 ## Topics to Cover
 
+- Setup VGA text mode using the INT 10h BIOS call
 - VGA text buffer memory layout (0xB8000)
 - Character attributes (color, blinking)
 - Cursor management (hardware cursor via I/O ports)
@@ -24,12 +25,13 @@ VGA text mode provides an 80x25 grid of colored characters. It's the classic way
 
 ## Implementation Plan
 
-1. Map VGA buffer at 0xB8000
-2. Implement `vga_putchar()` with color support
-3. Add cursor positioning and movement
-4. Implement scrolling when buffer fills
-5. Create screen clearing and formatting functions
-6. Integrate with `kprintf()`
+1. Make sure VGA is in text mode (80x25)
+2. Map VGA buffer at 0xB8000
+3. Implement `vga_putchar()` with color support
+4. Add cursor positioning and movement
+5. Implement scrolling when buffer fills
+6. Create screen clearing and formatting functions
+7. Integrate with `kprintf()`
 
 ---
 

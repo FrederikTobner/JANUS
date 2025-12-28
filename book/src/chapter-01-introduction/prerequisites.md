@@ -4,40 +4,22 @@ Before diving into OS development, you need a solid foundation in several areas.
 
 ## Required Knowledge
 
-If any of these feel unfamiliar, get comfortable with them first. Writing your own Operating system is usually considered to be the most challenging programming task there is,therfore it is crucial that you have already a solid understanding of  
+If any of these feel unfamiliar, get comfortable with them first. Writing your own Operating system is usually considered one of the most challenging programming task there is, therfore it is crucial that you have already a solid foundation that we can build upon:
 
-**Programming Skills:**
-
-- **C language**: Pointers, structs, memory management, function pointers, bitwise operations
-- **Assembly basics**: Registers, instruction execution, calling conventions, stack operations
+On the programming side, you should be very comfortable with C programming and have a basic understanding of assembly language. You don't need to be an expert assembler programmer, but you should understand how high-level constructs translate to low-level operations.
 
 [!side]
 Operating system development is where C truly shines. No garbage collection, direct memory access and a lot of inline assembly. For better or worse this is C's home turf.
 [/!side]
 
-**Build Systems:**
+As our build system we will use CMake. Since explaining CMake from scratch would extend the scope of the book quite a bit, you should be familiar with the basics of CMake and command line usage.
 
-- **CMake**: Creating targets, linking libraries, setting compiler flags, subdirectories
-- **Command line**: Shell navigation, basic unix commands
+Finally a basic understanding of computer architecture is necessary. You don't need to know all the ins and outs of CPU design, but you should understand how a CPU executes instructions, how memory works, and how function calls are handled at a low level.
 
-**Computer Architecture Fundamentals:**
+There is no need to have any prior knowledge about operating system internals and design, as that is what we will be learning together in this book.
+The x86_64 architecture is the target architecture for our OS, but you don't need to know its specifics beforehand. We will cover everything necessary as we go along. Additionally any prior knowledge about bootloaders, or LLVM/Clang internals is not required.
 
-- **CPU operation**: How registers work, instruction execution, the fetch-decode-execute cycle
-- **Memory concepts**: RAM, addresses, the difference between virtual and physical memory
-- **Number systems**: Binary, hexadecimal, two's complement, bitwise operations
-- **The stack**: How function calls work, stack frames, return addresses
-
-**You don't need to know:**
-
-- Operating system internals (that's what we're here to learn)
-- x86_64 architecture specifics (we'll cover what's needed)
-- Bootloaders or low-level hardware (we build from scratch)
-- LLVM/Clang internals (basic usage is sufficient)
-
-## Self-Assessment
-
-Ask yourself:
-
+So ask yourself:
 
 **Can you read this assembly?**
 
@@ -77,9 +59,11 @@ void main() {
 
 If any of these feel confusing, spend time with foundational resources first. OS development is challenging enough without simultaneously learning prerequisite skills.
 
-If you need to get familiar with these topics, here are resources that can
+If you need to get familiar with these topics, here are resources that can be used to provide the necessary background knowledge.
+These may not be the absolute best resources out there, but they are what I have found useful in the past.
 
-For **C Programming**  both "Learn C Programming" by Jeff Szuhay and "C Programming Language" by Kernighan & Ritchie can act as a good starting point if you have never programmed in C. If you are already familiar with the basics "Extreme C" by Kamran Amini, can help deepen your understanding.
+For **C Programming**  both "Learn C Programming" by Jeff Szuhay and "C Programming Language" by Kernighan & Ritchie can act as a good starting point if you have never programmed in C.
+If you are already familiar with the basics "Extreme C" by Kamran Amini or "Pointers in C Programming" from Thomas Mailund, can help deepen your understanding.
 
 For learning **Assembly** "Programming boot sector games" by Oscar Toledo G. is a good start, but it only covers 8086/8088 assembly.
 
@@ -91,7 +75,6 @@ We develop on **Linux**, because it provides native toolchain support and direct
 ARM would be tempting as well but its not as common on desktops, making it less likely that readers have access to hardware to test on.
 [/!side]
 
-
 TinyOS targets **x86_64** architecture. It is ideal for learning OS development because it is widely used and well-documented. Additionally most developers have access to x86_64 hardware, which is crucial to being able to test our operating system on real hardware.
 The rich ecosystem of tools and documentation further supports development on this architecture. Finally QEMU provides excellent emulation for x86_64, allowing for easy testing and debugging.
 
@@ -101,8 +84,7 @@ numerous debates have occured between the communities of both editors, each clai
 [/!side]
 
 As your editor you should use whatever you prefer. 
-The code we will write will be the same regardless. We won't participate in the editor wars here.
-
+The code we will write will be the same regardless. I won't participate in the editor wars here.
 
 ---
 

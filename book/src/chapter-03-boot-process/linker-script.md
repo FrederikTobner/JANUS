@@ -17,9 +17,8 @@ Linker script syntax is arcane. Don't try to memorize it. Copy, modify, and refe
 > - Alignment (page boundaries matter for memory management)
 > - Section permissions (read-only vs. read-write)
 
-## Memory Layout Strategy
+Our **memory layout** will look like this:
 
-Our kernel loads at **1MB** (physical address `0x100000`). Why?
 
 ```
 Physical Memory Map:
@@ -39,15 +38,15 @@ Physical Memory Map:
 IVT = Interrupt Vector Table from Real Mode (16-bit). The BIOS uses it, we don't, but we can't overwrite it.
 [/!side]
 
-The first 1MB is a minefield of BIOS tables, video memory, and historical baggage. Loading at 1MB gives us a clean slate.
+As you may have spotted from the diagram, we load our kernel at **1MB**. This is a traditional location for kernels on x86 architecture.
+
+The reason for this is that the first 1MB is a minefield of BIOS tables, video memory, and historical baggage. Loading at 1MB gives us a clean slate.
 
 [!side]
 1MB was "high memory" in 1981. Now it's the standard kernel load address for x86.
 [/!side]
 
-## Section Organization
-
-Our kernel has several sections, and their order matters:
+Our linker script will define these sections in order:
 
 1. **`.multiboot`** — GRUB scans the first 32KB for this section. We need to insure it is placed in the very beginning of our binary. 
 2. **`.text`** — Executable code (read-only, executable)
