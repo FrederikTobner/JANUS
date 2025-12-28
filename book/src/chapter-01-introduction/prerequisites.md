@@ -12,7 +12,7 @@ If any of these feel unfamiliar, get comfortable with them first. The OS develop
 - **Assembly basics**: Registers, instruction execution, calling conventions, stack operations
 
 [!side]
-OS development is where C truly shines. No garbage collection, direct memory access, inline assembly—this is C's home turf.
+Operating system development is where C truly shines. No garbage collection, direct memory access and a lot of inline assembly. For better or worse this is C's home turf.
 [/!side]
 
 **Build Systems:**
@@ -77,15 +77,13 @@ void main() {
 
 If any of these feel confusing, spend time with foundational resources first. OS development is challenging enough without simultaneously learning prerequisite skills.
 
-## Recommended Background Reading
+If you need to get familiar with these topics, here are resources that can
 
-If you need to brush up:
+For **C Programming**  both "Learn C Programming" by Jeff Szuhay and "C Programming Language" by Kernighan & Ritchie can act as a good starting point if you have never programmed in C. If you are already familiar with the basics "Extreme C" by Kamran Amini, can help deepen your understanding.
 
-- **C Programming**: "Learn C Programming" by Jeff Szuhay, "C Programming Language" by Kernighan & Ritchie and "Extreme C" by Kamran Amini
-- **Assembly**: "Programming from the Ground Up" by Jonathan Bartlett
-- **Computer Architecture**: "Computer Systems: A Programmer's Perspective" by Bryant & O'Hallaron
+For learning **Assembly** "Programming boot sector games" by Oscar Toledo G. is a good start, but it only covers 8086/8088 assembly.
 
-## Development Environment
+> TODO: Find resources for basic computer architecture and cmake
 
 We develop on **Linux**. TinyOS targets **x86_64** architecture.
 
@@ -97,7 +95,7 @@ We develop on **Linux**. TinyOS targets **x86_64** architecture.
 - Industry-standard OS development environment
 
 [!side]
-WSL2 on Windows works as well, to build the iso we will boot. To run it will be easier to install QEMU under Windows directly.
+WSL2 on Windows works as well, to build the iso. To run it will be easier to install QEMU under Windows directly.
 macOS also works but requires Homebrew for GRUB tools.
 [/!side]
 
@@ -106,15 +104,10 @@ macOS also works but requires Homebrew for GRUB tools.
 The x86_64 architecture is ideal for learning OS development because it is widely used and well-documented. Additionally most developers have access to x86_64 hardware, making it easier to test and run the OS. The rich ecosystem of tools and documentation further supports development on this architecture. Finally QEMU provides excellent emulation for x86_64, allowing for easy testing and debugging.
 
 [!side]
-ARM would be tempting as well but its documentation is scattered across vendor-specific implementations. x86_64 has the Intel and AMD manuals—everything you need.
+ARM would be tempting as well but its not as common on desktops, making it less likely that readers have access to hardware to test on.
 [/!side]
 
-- **Your editor**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (autocomplete, go-to-definition, error highlighting) if you want it.
-
-[!side]
-Vim, Emacs, VS Code, CLion—whatever makes you productive. The code is the same regardless.
-[/!side]
-
+**Your editor**: Use whatever you prefer. Vim, Emacs, VS Code, CLion, Notepadwhatever makes you productive. The code we will write will be the same regardless.
 
 ---
 

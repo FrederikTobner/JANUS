@@ -30,7 +30,7 @@ build system/
 
 ## Platform Detection
 
-**File:** `cmake/TinyOSPlatform.cmake`
+Fist we will create a seperate CMake module for platform detection and compiler setup.
 
 This module detects your environment and sets up cross-compilation:
 
@@ -46,18 +46,19 @@ This module detects your environment and sets up cross-compilation:
 -nostdlib               # No standard library
 -ffreestanding          # Freestanding environment
 -mno-red-zone           # Disable red zone (x86-64 ABI quirk)
--fno-stack-protector    # No stack canaries (we're the OS!)
+-fno-stack-protector    # Dont setup a stack protector
 ```
 
 [!side]
-Stack protectors insert canary values to detect buffer overflows. Requires runtime support we don't have yet.
+Stack protectors insert canary values in order to detect buffer overflows.
+Which is neat, but they requires runtime support which we don't have in a freestanding environment.
 [/!side]
 
 > **Implementation detail:**
 >
 > TinyOSPlatform.cmake sets these flags in variables like `TINYOS_COMMON_FLAGS`, `TINYOS_DEBUG_FLAGS`, etc. The helper functions in TinyOSHelpers.cmake apply them to targets automatically. This keeps platform-specific logic centralized—if you port to ARM later, you only change one file.
 >
-> For Chapter 3, you can create a minimal `TinyOSPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
+> For , you can create a minimal `TinyOSPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
 
 Here's a minimal platform module to get started:
 
@@ -293,20 +294,12 @@ cmake -B build -G Ninja
 ninja -C build
 ```
 
-You'll see the build progress:
+This will produce the `build/kernel.elf` - a bootable ELF executable.
+But in order to actually boot it, we need to package it into a ISO image.
 
-```
-ninja: Entering directory `build'
-[1/7] Building ASM_NASM object boot/CMakeFiles/boot.dir/multiboot.asm.o
-[2/7] Building ASM_NASM object boot/CMakeFiles/boot.dir/boot.asm.o
-[3/7] Building C object lib/types/CMakeFiles/types.dir/types.c.o
-[4/7] Linking C static library lib/types/libtypes.a
-[5/7] Building C object lib/memory/CMakeFiles/memory.dir/memory.c.o
-[6/7] Linking C static library lib/memory/libmemory.a
-[7/7] Linking C executable kernel.elf
-```
-
-This produces `build/kernel.elf` - a bootable ELF executable.
+[!side]
+ISO images are named after the ISO 9660 standard that specifies the file system for CD-ROMs.
+[/!side]
 
 ## Build Flow
 
@@ -362,7 +355,9 @@ statically linked, with debug_info, not stripped
 
 > **New to ELF?**
 >
-> ELF (Executable and Linkable Format) is the standard executable format on Unix-like systems (Linux, BSD, etc.). It's a container that holds:
+> ELF (Executable and Linkable Format) is the standard object file format on Unix-like systems (Linux, BSD, etc.).
+> Like PE on Windows or Mach-O on macOs it has evolved from the assembler output format (.out) and later the common object file format (.coff).
+>It's a container that holds:
 >
 > - **Machine code** (your compiled program)
 > - **Section headers** (where different parts of code/data live)

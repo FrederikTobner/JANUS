@@ -10,6 +10,7 @@ Install mdBook and custom preprocessors:
 
 ```bash
 cargo install mdbook
+cargo install mdbook-mermaid
 cargo install --path preprocessors/mdbook-side-notes
 cargo install --path preprocessors/mdbook-code-diff
 ```

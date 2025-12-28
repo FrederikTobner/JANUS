@@ -9,11 +9,9 @@ This chapter provides the foundation for your OS development journey: understand
 
 ## What You'll Learn
 
-- What an operating system actually does (beyond "running programs")
-- Why building your own OS is worth the effort
-- What TinyOS will and won't do
-- Prerequisites and self-assessment
-- How to approach this book effectively
+> TODO: Update this list as we finish more chapters
+
+- How your personal computer boots up from power-on to running code from the operating system 
 
 ## Sections
 
