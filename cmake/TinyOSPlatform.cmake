@@ -6,13 +6,10 @@ include_guard(GLOBAL)
 # Detect host platform
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(TINYOS_HOST_LINUX TRUE)
-    message(STATUS "Host platform: Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(TINYOS_HOST_WINDOWS TRUE)
-    message(STATUS "Host platform: Windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(TINYOS_HOST_MACOS TRUE)
-    message(STATUS "Host platform: macOS")
 else()
     message(WARNING "Unknown host platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -25,11 +22,9 @@ set(TINYOS_TARGET_PLATFORM "elf")
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(TINYOS_COMPILER_CLANG TRUE)
     set(TINYOS_TARGET_FLAG "-target")
-    message(STATUS "Compiler: Clang ${CMAKE_C_COMPILER_VERSION}")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(TINYOS_COMPILER_GCC TRUE)
     set(TINYOS_TARGET_FLAG "--target=")
-    message(STATUS "Compiler: GCC ${CMAKE_C_COMPILER_VERSION}")
 else()
     message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}. TinyOS requires Clang or GCC.")
 endif()
@@ -37,7 +32,6 @@ endif()
 # Build type detection
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (Debug, Release, MinSizeRel)" FORCE)
-    message(STATUS "Build type not specified, defaulting to Debug")
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
@@ -58,6 +52,11 @@ if(TINYOS_COMPILER_CLANG)
         -Wall
         -Wextra
         -Werror
+        # Additional warnings for stricter code quality
+        -Wconversion
+        -Wimplicit
+        -Wcast-qual
+        -Wpointer-arith
     )
 else()
     # GCC
@@ -70,6 +69,11 @@ else()
         -Wall
         -Wextra
         -Werror
+        #Additional warnings for stricter code quality
+        -Wconversion
+        -Wimplicit
+        -Wcast-qual
+        -Wpointer-arith
     )
 endif()
 
@@ -79,6 +83,7 @@ set(TINYOS_DEBUG_FLAGS
     -gdwarf-4
     -O0
     -DDEBUG
+
 )
 
 # Release-specific flags

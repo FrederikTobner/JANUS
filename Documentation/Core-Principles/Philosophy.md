@@ -26,36 +26,6 @@ Following Linux kernel and LLVM design patterns, TinyOS is built as a collection
 
 If a developer has to guess what your function does, what your type represents, or what your variable contains, you named it wrong.
 
-## Design Principles
-
-### Explicitness
-
-- Explicit error handling (no hidden failure modes)
-- Explicit memory management (no garbage collection)
-- Explicit hardware interaction (no magic abstractions)
-- Explicit dependencies between modules
-
-### Minimalism
-
-- Minimal abstraction layers
-- Minimal code in critical paths
-- Minimal external dependencies
-- Minimal boot-time initialization
-
-### Testability
-
-- Each module can be built independently
-- Clear interfaces enable unit testing
-- Hardware abstractions allow testing without real hardware
-- Debug infrastructure built-in from day one
-
-### Performance Awareness
-
-- Understand performance characteristics of every operation
-- Document time complexity and hardware constraints
-- Profile and measure rather than guess
-- Optimize where it matters, keep simple where it doesn't
-
 ### Memory Access Explicitness
 
 **Prefer explicit pointer arithmetic over array indexing for multi-dimensional data structures.**

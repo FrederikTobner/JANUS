@@ -2,52 +2,24 @@
 
 Before diving into OS development, you need a solid foundation in several areas. This isn't application programming where the OS handles the hard parts—we're building the OS itself.
 
-[!side]
-If you can write a linked list in C and understand what `mov eax, 5` does, you're ready.
-[/!side]
-
 ## Required Knowledge
 
-### Programming Skills
+If any of these feel unfamiliar, get comfortable with them first. Writing your own Operating system is usually considered one of the most challenging programming task there is, therfore it is crucial that you have already a solid foundation that we can build upon:
 
-- **C language**: Pointers, structs, memory management, function pointers, bitwise operations
-- **Assembly basics**: Registers, instruction execution, calling conventions, stack operations
+On the programming side, you should be very comfortable with C programming and have a basic understanding of assembly language. You don't need to be an expert assembler programmer, but you should understand how high-level constructs translate to low-level operations.
 
 [!side]
-OS development is where C truly shines. No garbage collection, direct memory access, inline assembly—this is C's home turf.
+Operating system development is where C truly shines. No garbage collection, direct memory access and a lot of inline assembly. For better or worse this is C's home turf.
 [/!side]
 
-### Build Systems
+As our build system we will use CMake. Since explaining CMake from scratch would extend the scope of the book quite a bit, you should be familiar with the basics of CMake and command line usage.
 
-- **CMake**: Creating targets, linking libraries, setting compiler flags, subdirectories
-- **Make/Ninja**: Basic understanding of build automation
-- **Command line**: Shell navigation, basic unix commands
+Finally a basic understanding of computer architecture is necessary. You don't need to know all the ins and outs of CPU design, but you should understand how a CPU executes instructions, how memory works, and how function calls are handled at a low level.
 
-If any of these feel unfamiliar, get comfortable with them first. The OS development is challenging enough without fighting your tools.
+There is no need to have any prior knowledge about operating system internals and design, as that is what we will be learning together in this book.
+The x86_64 architecture is the target architecture for our OS, but you don't need to know its specifics beforehand. We will cover everything necessary as we go along. Additionally any prior knowledge about bootloaders, or LLVM/Clang internals is not required.
 
-## Computer Architecture Fundamentals
-
-You should understand:
-
-- **CPU operation**: How registers work, instruction execution, the fetch-decode-execute cycle
-- **Memory concepts**: RAM, addresses, the difference between virtual and physical memory
-- **Number systems**: Binary, hexadecimal, two's complement, bitwise operations
-- **The stack**: How function calls work, stack frames, return addresses
-
-## What You DON'T Need
-
-You don't need prior experience with:
-
-- Operating system internals (that's what we're here to learn)
-- x86_64 architecture specifics (we'll cover what's needed)
-- Bootloaders or low-level hardware (we build from scratch)
-- LLVM/Clang internals (basic usage is sufficient)
-
-## Self-Assessment
-
-Ask yourself:
-
-**Can you explain what this C code does?**
+So ask yourself:
 
 **Can you read this assembly?**
 
@@ -63,61 +35,59 @@ struct node {
     int data;
     struct node *next;
 };
+void main() {
+    struct node *new_node = malloc(sizeof(struct node));
+    new_node->data = 42;
+    new_node->next = NULL;
+}
+```
+
+and do you know how static keyword behaves when used inside a function vs globally?
+
+```c
+static int counter_global = 0;
+void increment() {
+    counter_global++;
+    static int counter_local = conter_global;
+    counter_global++;
+}
+void main() {
+    increment();
+    increment();
+}
 ```
 
 If any of these feel confusing, spend time with foundational resources first. OS development is challenging enough without simultaneously learning prerequisite skills.
 
-## Recommended Background Reading
+If you need to get familiar with these topics, here are resources that can be used to provide the necessary background knowledge.
+These may not be the absolute best resources out there, but they are what I have found useful in the past.
 
-If you need to brush up:
+For **C Programming**  both "Learn C Programming" by Jeff Szuhay and "C Programming Language" by Kernighan & Ritchie can act as a good starting point if you have never programmed in C.
+If you are already familiar with the basics "Extreme C" by Kamran Amini or "Pointers in C Programming" from Thomas Mailund, can help deepen your understanding.
 
-- **C Programming**: "The C Programming Language" by Kernighan & Ritchie
-- **Assembly**: "Programming from the Ground Up" by Jonathan Bartlett
-- **Computer Architecture**: "Computer Systems: A Programmer's Perspective" by Bryant & O'Hallaron
+For learning **Assembly** "Programming boot sector games" by Oscar Toledo G. is a good start, but it only covers 8086/8088 assembly.
 
-## Development Environment
+> TODO: Find resources for basic computer architecture and cmake
 
-We develop on **Linux** (or WSL2 on Windows). TinyOS targets **x86_64** architecture.
-
-**Why Linux?**
-
-- Native toolchain support
-- Direct access to development tools
-- No virtualization overhead for testing
-- Industry-standard OS development environment
+We develop on **Linux** becuase it provides the best environment for OS development without much tinkering.
+If you want you can also try to use Windows or MacOs, but since we are using GNU tools and parts of the LLVM toolchain, Linux is the path of least resistance.
 
 [!side]
-WSL2 on Windows works great for this. macOS also works but requires Homebrew for GRUB tools.
+ARM would be tempting as well but its not as common on desktops, making it less likely that readers have access to hardware to test on.
 [/!side]
 
-**Why x86_64?**
-
-- Widely documented architecture
-- QEMU has excellent x86_64 emulation
-- Most developers have access to x86_64 hardware
-- Rich ecosystem of tools and documentation
+TinyOS targets **x86_64** architecture. It is ideal for learning OS development because it is widely used and well-documented. Additionally most developers have access to x86_64 hardware, which is crucial to being able to test our operating system on real hardware.
+The rich ecosystem of tools and documentation further supports development on this architecture. Finally QEMU provides excellent emulation for x86_64, allowing for easy testing and debugging.
 
 [!side]
-ARM is tempting but its documentation is scattered across vendor-specific implementations. x86_64 has the Intel and AMD manuals—everything you need.
+The “editor wars” refer to the long-running rivalry between users of the console based editors Vi and Emacs. Since 1985 there have been 
+numerous debates have occured between the communities of both editors, each claiming that their choice is the paragon of editing perfection.
 [/!side]
 
-- **Your editor**: Use whatever you prefer. The project includes `.clangd` for LSP-compatible editors (autocomplete, go-to-definition, error highlighting) if you want it.
-
-[!side]
-Vim, Emacs, VS Code, CLion—whatever makes you productive. The code is the same regardless.
-[/!side]
-
-## Time Commitment
-
-OS development is not a weekend project. Expect:
-
-- **Chapter 2-3**: 2-4 hours (setup and first boot)
-- **Chapter 4**: 4-6 hours (memory management)
-- **Chapter 5**: 6-8 hours (I/O and drivers)
-- **Chapter 6+**: 8-12 hours each (kernel features)
-
-Take your time. Understanding is more valuable than speed.
+As your editor you should use whatever you prefer. 
+The code we will write will be the same regardless. I won't participate in the editor wars here.
 
 ---
 
-**Next: [Common Misconceptions](misconceptions.md)**
+**Next: [Development Environment](development-environment.md)**
+

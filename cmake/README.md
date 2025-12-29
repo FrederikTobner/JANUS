@@ -9,18 +9,18 @@ Provides platform detection, cross-compilation setup, and build helper functions
 ## Contents
 
 ### TinyOSPlatform.cmake
+
 - Platform and compiler detection
 - Cross-compilation toolchain setup for x86_64-elf
 - Compiler flags configuration (freestanding, no-stdlib, etc.)
 - Build type configuration (Debug, Release)
-- Build information printing
 
 ### TinyOSHelpers.cmake
+
 - `tinyos_add_library()` - Add a library module with automatic configuration
 - `tinyos_add_module()` - Add a kernel module with dependencies
 - `tinyos_add_test()` - Add BMUnit test suite
 - `tinyos_add_tests()` - Batch test registration
-- `tinyos_print_config()` - Display build configuration
 
 ## Key Features
 
@@ -46,7 +46,3 @@ tinyos_add_test(buffer_test
     DEPENDS buffer
 )
 ```
-
-## Status
-
-✅ **Active** - Core build system complete and stable.

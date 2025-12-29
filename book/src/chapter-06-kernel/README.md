@@ -1,4 +1,4 @@
-# Chapter 5: Kernel Basics
+# Chapter 6: Kernel Basics
 
 > *"UNIX is very simple, it just needs a genius to understand its simplicity."
 > — Dennis Ritchie

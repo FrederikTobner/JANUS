@@ -58,7 +58,7 @@ replace: entire file
 +}
 ```
 
-Now open the root `CMakeLists.txt` and add these sections after the `add_subdirectory()` commands:
+Now open the root `CMakeLists.txt` and add this command to add the grub.cfg.in to the build directory after being processed by Cmake.
 
 ```cmake-diff
 file: CMakeLists.txt
@@ -73,7 +73,22 @@ after: add_subdirectory(kernel)
 +    @ONLY
 +)
 +
-+# ISO creation target
+ message(STATUS "========================================")
+```
+
+Then we setup a custom ninja command to create the iso.
+
+```cmake-diff
+file: CMakeLists.txt
+after: configure_file using grub.cfg.in
+---
+configure_file(
+    ${CMAKE_SOURCE_DIR}/cmake/grub.cfg.in
+    ${CMAKE_BINARY_DIR}/grub.cfg
+    @ONLY
+)
+
+# ISO creation target
 +add_custom_target(iso
 +    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
 +    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
@@ -83,31 +98,71 @@ after: add_subdirectory(kernel)
 +    COMMENT "Creating bootable ISO image"
 +)
 +
-+# Run in QEMU target
+ 
+ # Print build configuration
+ message(STATUS "========================================")
+```
+
+This command does a couple of things. It creates the ISO directory structure, copies kernel, generates grub.cfg, and finally creates the tinyos.iso image.
+
+Now lets add another custom command to boot the iso in QEMU. This command depends in iso.
+
+```cmake-diff
+file: CMakeLists.txt
+after: add_custom_target(iso)
+---
+    COMMENT "Creating bootable ISO image"
+)
++
 +add_custom_target(run
 +    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio
 +    DEPENDS iso
 +    COMMENT "Running TinyOS in QEMU"
 +)
 +
-+# Debug in QEMU target
+ 
+ message(STATUS "========================================")
+```
+
+And another command to debug our application using a GDB stub enabled on port 1234. This command depends on iso as well.
+
+```cmake-diff
+file: CMakeLists.txt
+after: add_custom_target(run)
+---
+    COMMENT "Running TinyOS in QEMU"
+)
++
 +add_custom_target(debug
 +    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio -s -S
 +    DEPENDS iso
 +    COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
 +)
  
- # Print build configuration
  message(STATUS "========================================")
 ```
 
-```
-
-**What these targets do:**
+**Overview:**
 
 - **`iso`** - Creates the ISO directory structure, copies kernel, generates grub.cfg, and creates tinyos.iso
 - **`run`** - Depends on `iso`, then boots the ISO in QEMU
 - **`debug`** - Same as `run` but with GDB stub enabled on port 1234
+
+Lets update the printed build configuration to show this:
+
+
+```cmake-diff
+file: CMakeLists.txt
+after: printing build info
+---
+message(STATUS "========================================")
++message(STATUS "Available targets:")
++message(STATUS "  ninja           - Build kernel.elf")
++message(STATUS "  ninja iso       - Create bootable ISO")
++message(STATUS "  ninja run       - Build and run in QEMU")
++message(STATUS "  ninja debug     - Build and run with debugger")
++message(STATUS "========================================")
+```
 
 Reconfigure CMake to pick up the new targets:
 
@@ -169,7 +224,7 @@ xorriso : UPDATE :     591 files added in 1 seconds
 xorriso : NOTE : Copying to System Area: 512 bytes from file '/usr/lib/grub/i386-pc/boot_hybrid.img'
 ISO image produced: 5747 sectors
 Written to medium : 5747 sectors at LBA 0
-Writing to 'stdio:/home/user/TinyOS/build/tinyos.iso' completed successfully.
+Writing to 'stdio: TinyOS/build/tinyos.iso' completed successfully.
 ```
 
 **What just happened?**

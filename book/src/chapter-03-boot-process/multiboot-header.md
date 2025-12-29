@@ -1,12 +1,26 @@
 # The Multiboot2 Header
 
-When you power on a PC, the BIOS loads GRUB from disk. GRUB then scans the first 32KB of our kernel binary looking for a magic number—a secret handshake that says "hey, I'm a bootable kernel, load me!"
+Before we dive deeper, let’s clear up some boot-time jargon. When your PC springs to life, a whole relay race of software layers gets your kernel running. Each has a job to do—let’s meet the team.
+
+**Firmware**
+Firmware is the code burned into your motherboard. It’s the first thing that runs when you hit the power button. There are two main types: the classic BIOS and the more modern UEFI.
+
+**Boot Loader**
+A boot loader is a small program loaded by the firmware. Its job? Find your kernel and hand over control. We will be using GRUB which handles Linux, BSD, and more.
+
+**Boot Protocols**
+Boot protocols on the other hands define the machine-state when the kernel is given control by the bootloader
 
 [!side]
-The magic number 0xe85250d6 was chosen randomly. It's unlikely to appear by accident in executable code.
+**Aside: Why "Multiboot"?**
+Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? Use LILO. Want FreeBSD? Different loader. GRUB said "enough of this nonsense" and created Multiboot—a universal protocol. Now any OS that implements it can boot from GRUB.
 [/!side]
 
-No magic number? GRUB ignores you. Your kernel sits there on disk, lifeless.
+We will be using the Multiboot2 standard in this book.
+
+When you power on a PC using UEFI and GRUB, the UEFI will load GRUB from disk. GRUB then scans the first 32KB of our kernel binary looking for a magic number—a secret handshake that says "hey, I'm a bootable kernel, load me!"
+
+If you do not provide this magic number GRUB will ignore your kernel.
 
 ```
 Boot Sequence:
@@ -20,19 +34,14 @@ Boot Sequence:
                                     Header
 ```
 
-[!side]
-**Aside: Why "Multiboot"?**
-Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? Use LILO. Want FreeBSD? Different loader. GRUB said "enough of this nonsense" and created Multiboot—a universal protocol. Now any OS that implements it can boot from GRUB.
-[/!side]
-
 > **Design Note: Boot Protocol Choices**
 >
 > There are several ways to boot an operating system:
 >
-> - **BIOS + Multiboot2** (what we're using) - Industry standard, well-documented, works everywhere
-> - **UEFI** - Modern standard, boots directly into 64-bit mode, more complex setup
-> - **Limine Protocol** - Modern hobby OS-friendly bootloader with cleaner protocol
-> - **Custom bootloader** - Maximum control, maximum work
+> * **BIOS + Multiboot2** (what we're using) - Industry standard, well-documented, works everywhere
+> * **UEFI** - Modern standard, boots directly into 64-bit mode, more complex setup
+> * **Limine Protocol** - Modern hobby OS-friendly bootloader with cleaner protocol
+> * **Custom bootloader** - Maximum control, maximum work
 >
 > We're using Multiboot2 for this book because:
 >
@@ -45,13 +54,15 @@ Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? U
 >
 > For now, focus on understanding the fundamentals. Boot protocol abstraction can come later once you have a working kernel.
 
-## The Multiboot2 Contract
+## The Multiboot2 Standard
 
 Multiboot2 defines:
 
 1. **Header format**: Magic number, architecture, checksum
 2. **Boot state**: CPU mode, registers, memory state when we're loaded
-3. **Information tags**: What data the bootloader provides (memory map, etc.)
+3. **Information tags**: What data the bootloader provides
+
+We will cover the exact contents of the information later when we actually start using it.
 
 ### Multiboot2 Header Structure
 
@@ -102,10 +113,10 @@ replace: entire file
 #### Step 2: Add Multiboot2 Magic Numbers
 
 ```c-diff
-file: boot/include/boot/multiboot.h
-after: #include <stdint.h>
+file: kernel/boot/include/boot/multiboot.h
+after: #include "uapi/int-ll64.h"
 ---
- #include <stdint.h>
+ #include "uapi/int-ll64.h"
 +
 +// Multiboot2 magic value passed by bootloader in EAX
 +#define MULTIBOOT2_BOOTLOADER_MAGIC 0x36d76289
@@ -118,38 +129,6 @@ after: #include <stdint.h>
 
 Two magic numbers, two different jobs. The header magic (`0xe85250d6`) goes in our assembly—GRUB scans for it to find our kernel. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register as proof it loaded us correctly. Think of them as matching halves of a secret handshake.
 
-#### Step 3: Add Architecture Constants
-
-```c-diff
-file: boot/include/boot/multiboot.h
-after: MULTIBOOT2_HEADER_MAGIC definition
----
- #define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
-+
-+// Architecture types
-+#define MULTIBOOT2_ARCHITECTURE_I386 0
- 
- #endif // BOOT_MULTIBOOT_H
-```
-
-Tells GRUB we want to start in 32-bit protected mode. Yes, we're building a 64-bit kernel, but we'll handle the upgrade ourselves in assembly. GRUB gives us a solid 32-bit foundation and we take it from there.
-
-#### Step 4: Forward Declaration for Future Use
-
-```c-diff
-file: boot/include/boot/multiboot.h
-after: MULTIBOOT2_ARCHITECTURE_I386 definition
----
- #define MULTIBOOT2_ARCHITECTURE_I386 0
-+
-+// Forward declaration - full definition later
-+struct multiboot_info;
- 
- #endif // BOOT_MULTIBOOT_H
-```
-
-A promise to the compiler: "Trust me, this struct exists, I'll show you the details later." Forward declarations let us use `struct multiboot_info*` in function signatures without defining the entire structure yet. We'll fill in the real definition once we need to actually parse the multiboot data.
-
 ### Create the Assembly Header
 
 Now let's build the Multiboot2 header in assembly. Create an empty file:
@@ -160,8 +139,8 @@ touch boot/multiboot.asm
 
 #### Step 1: Section and Alignment
 
-```asm-diff
-file: boot/multiboot.asm
+```x86asm-diff
+file: kernel/boot/multiboot.asm
 replace: entire file
 ---
 +; Multiboot2 header - must be in first 32KB of kernel image
@@ -173,8 +152,8 @@ The `.multiboot` section gets its own VIP spot at the start of our kernel binary
 
 #### Step 2: Magic Number and Architecture
 
-```asm-diff
-file: boot/multiboot.asm
+```x86asm-diff
+file: kernel/boot/multiboot.asm
 after: align 8
 ---
  align 8
@@ -193,8 +172,8 @@ The architecture field tells GRUB what CPU mode we expect: `0` means i386 protec
 
 #### Step 3: Header Length and Checksum
 
-```asm-diff
-file: boot/multiboot.asm
+```x86asm-diff
+file: kernel/boot/multiboot.asm
 after: Architecture definition
 ---
      dd 0
@@ -216,9 +195,9 @@ The checksum is like a parity bit for the entire header. It catches corruption f
 
 Ask GRUB for memory information we'll need later:
 
-```asm-diff
+```x86asm-diff
 file: boot/multiboot.asm
-after: Checksum definition
+after: kernel/boot definition
 ---
      dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
 +
@@ -239,8 +218,8 @@ after: Checksum definition
 
 Every Multiboot2 header must end with this tag:
 
-```asm-diff
-file: boot/multiboot.asm
+```x86asm-diff
+file: kernel/boot/multiboot.asm
 after: info_request_end label
 ---
  info_request_end:
@@ -255,10 +234,10 @@ after: info_request_end label
 
 **What this does:**
 
-- Magic `0xe85250d6` identifies us as Multiboot2
-- Checksum validates the header structure  
-- Information request asks GRUB for memory details
-- End tag terminates the header
+* Magic `0xe85250d6` identifies us as Multiboot2
+* Checksum validates the header structure  
+* Information request asks GRUB for memory details
+* End tag terminates the header
 
 GRUB validates the checksum by ensuring `magic + architecture + length + checksum = 0`.
 

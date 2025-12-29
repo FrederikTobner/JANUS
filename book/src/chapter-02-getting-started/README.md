@@ -1,4 +1,4 @@
-# Chapter 1: Getting Started
+# Chapter 2: Getting Started
 
 > *"Give me six hours to chop down a tree and I will spend the first four sharpening the axe."*  
 > — Abraham Lincoln

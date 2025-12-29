@@ -1,4 +1,4 @@
-# Chapter 3: Input/Output
+# Chapter 4: Input/Output
 
 > *"Write programs to handle text streams, because that is a universal interface."
 > — Doug McIlroy

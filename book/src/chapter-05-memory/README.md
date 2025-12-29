@@ -1,4 +1,4 @@
-# Chapter 4: Memory Management
+# Chapter 5: Memory Management
 
 > *"Controlling complexity is the essence of computer programming."
 > — Brian Kernighan

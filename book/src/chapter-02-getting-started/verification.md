@@ -23,17 +23,6 @@ All tools should be found and display version information.
 
 ## Test: Compile Freestanding Code
 
-> **The Crux: What is "Freestanding"?**
->
-> Normal C programs are "hosted"—they run under an OS that provides `malloc()`, `printf()`, file I/O, etc. Our kernel is "freestanding"—no OS beneath us. We ARE the OS. This means:
->
-> - No standard library (no `printf`, `malloc`, `strlen`)
-> - No assumptions about the environment
-> - We implement everything ourselves
->
-> It's liberating and terrifying in equal measure.
-
-Let's verify Clang can compile freestanding code for x86_64:
 
 [!side]
 The `_start` symbol is the entry point for freestanding programs. The OS doesn't set this up—we do.
@@ -66,7 +55,17 @@ test.o: ELF 64-bit LSB relocatable, x86-64
 
 If this works, your compiler is correctly configured for OS development.
 
-### The No Standard Library Test
+> **The Crux: What is "Freestanding"?**
+>
+> Normal C programs are "hosted"—they run under an OS that provides `malloc()`, `printf()`, file I/O, etc. Our kernel is "freestanding"—no OS beneath us. We ARE the OS. This means:
+>
+> - No standard library (no `printf`, `malloc`, `strlen`)
+> - No assumptions about the environment
+> - We implement everything ourselves
+>
+> It's liberating and terrifying in equal measure.
+
+Let's verify Clang can compile freestanding code for x86_64:
 
 Try adding `printf("hello\n");` to the code above and recompile. Clang will complain that `printf` is undefined. There's no C standard library here. We're on our own.
 

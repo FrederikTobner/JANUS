@@ -72,13 +72,14 @@ Windows uses a different ABI (RCX, RDX, R8, R9). We follow System V because it's
 Let's build the kernel entry point step by step. Create an empty file:
 
 ```bash
-touch kernel/main.c
+# From project root
+touch kernel/core/main.c
 ```
 
 First we need to include some of the headers we have created in the previous chapters:
 
 ```c-diff
-file: kernel/main.c
+file: kernel/core/main.c
 replace: entire file
 ---
 +#include <stdint.h>
@@ -89,12 +90,12 @@ replace: entire file
 Lets create the main entry point of our kernel:
 
 ```c-diff
-file: kernel/main.c
+file: kernel/core/main.c
 after: #include <boot/multiboot.h>
 ---
  #include <boot/multiboot.h>
 +
-+void kernel_main(uint32_t magic, multiboot_info * info)
++void kernel_main(u32 magic, void * info)
 +{
 +}
 ```
@@ -102,52 +103,16 @@ after: #include <boot/multiboot.h>
 Our function takes:
 
 - `magic` - The Multiboot2 magic number from RDI (was EAX in 32-bit mode)
-- `info` - Pointer to Multiboot information structure from RSI (was EBX in 32-bit mode)
+- `info` - Pointer to Multiboot information from RSI (was EBX in 32-bit mode)
 
-First we need to verify we were loaded by a Multiboot2-compliant bootloader
-
-```c-diff
-file: kernel/main.c
-after: void kernel_main(uint32_t magic, multiboot_info * info)
----
- void kernel_main(uint32_t magic, multiboot_info * info)
- {
-+    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-+        // Magic number mismatch - halt
-+        for (;;) {
-+            __asm__ volatile("cli; hlt");
-+        }
-+    }
- }
-```
-
-Now we verify that the multiboot info pointer is valid.
+For now we will just do an infinite loop.
 
 ```c-diff
-file: kernel/main.c
-after: magic check closing brace
+file: kernel/core/main.c
+after: after function entry point
 ---
-         }
-     }
-+
-+    if (info == NULL) {
-+        // Null pointer - halt
-+        for (;;) {
-+            __asm__ volatile("cli; hlt");
-+        }
-+    }
- }
-```
-
-If we reach this point, the kernel was loaded successfully. For now we will just do an infinite loop.
-
-```c-diff
-file: kernel/main.c
-after: info NULL check closing brace
----
-         }
-     }
-+    
+void kernel_main(uint32_t magic, void * info)
+{  
 +    for (;;) {
 +        __asm__ volatile("hlt");
 +    }
@@ -155,10 +120,6 @@ after: info NULL check closing brace
 ```
 
 ## What This Does
-
-**Magic number check:** If GRUB didn't load us, `magic` will be garbage. We halt immediately rather than continuing with corrupted state.
-
-**Null pointer check:** Defense against bootloader bugs. The Multiboot spec says `EBX` contains a valid pointer, but we verify anyway.
 
 **The halt loops:** `cli` disables interrupts (redundant, but explicit). `hlt` puts the CPU to sleep until the next interrupt. Since interrupts are disabled, this halts the CPU permanently.
 
@@ -180,17 +141,18 @@ Compilers are too smart for their own good sometimes. `volatile` is our way  of 
 
 ## Creating the Kernel Build File
 
-Create `kernel/CMakeLists.txt` to build the final executable:
+Create `kernel/core/CMakeLists.txt` to build the final executable:
 
-```cmake
-# kernel/CMakeLists.txt
-
-# Create kernel executable with linker script
-tinyos_create_kernel(
-    SOURCES main.c
-    LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
-    LIBRARIES ${BOOT_OBJECTS}
-)
+```cmake-diff
+file: kernel/CMakeLists.txt
+after: entire file
+---
++# Create kernel executable with linker script
++tinyos_create_kernel(
++    SOURCES main.c
++    LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
++    LIBRARIES ${BOOT_OBJECTS}
++)
 ```
 
 This uses the `tinyos_create_kernel()` helper function (defined in `cmake/TinyOSHelpers.cmake`) to:

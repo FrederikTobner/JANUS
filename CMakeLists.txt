@@ -1,6 +1,21 @@
 cmake_minimum_required(VERSION 3.20)
 project(TinyOS VERSION 0.1.0 LANGUAGES C ASM_NASM)
 
+# Print build configuration
+message(STATUS "========================================")
+message(STATUS "TinyOS Build Configuration")
+message(STATUS "========================================")
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Compiler: ${CMAKE_C_COMPILER} (version ${CMAKE_C_COMPILER_VERSION})")
+message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER}")
+message(STATUS "========================================")
+message(STATUS "Available targets:")
+message(STATUS "  ninja           - Build kernel.elf")
+message(STATUS "  ninja iso       - Create bootable ISO")
+message(STATUS "  ninja run       - Build and run in QEMU")
+message(STATUS "  ninja debug     - Build and run with debugger")
+message(STATUS "========================================")
+
 # Set C standard
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -15,21 +30,6 @@ include(TinyOSHelpers)
 string(TIMESTAMP TINYOS_BUILD_DATE "%Y-%m-%d")
 string(TIMESTAMP TINYOS_BUILD_TIME "%H:%M:%S")
 
-# Configure config.h from config.h.in
-configure_file(
-    "${CMAKE_SOURCE_DIR}/include/tinyos/config.h.in"
-    "${CMAKE_BINARY_DIR}/include/tinyos/config.h"
-    @ONLY
-)
-
-# Add generated config.h to include path
-include_directories("${CMAKE_BINARY_DIR}/include")
-
-# Options
-option(BUILD_TESTS "Build BMUnit tests" OFF)
-
-# Print build configuration
-tinyos_print_config()
 
 # Copy compile_commands.json to project root for clangd
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
@@ -43,36 +43,7 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
     )
 endif()
 
-# Testing framework
-if(BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(bmunit)
-endif()
-
-# Library modules
-add_subdirectory(lib)
-
-# Architecture layer
-add_subdirectory(arch)
-
-# Boot module
-add_subdirectory(boot)
-
-# Core kernel modules
 add_subdirectory(kernel)
-
-# Memory management
-add_subdirectory(mm)
-
-# Device drivers (future)
-# add_subdirectory(drivers)
-
-# Generate grub.cfg from template
-configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/grub.cfg.in
-    ${CMAKE_BINARY_DIR}/grub.cfg
-    @ONLY
-)
 
 # ISO creation target
 add_custom_target(iso
@@ -84,32 +55,41 @@ add_custom_target(iso
     COMMENT "Creating bootable ISO image"
 )
 
-# Run in QEMU target
+# Using i3 window manager we need to use the SDL display for QEMU to show the window
+if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3")
+    find_program(SDL2_CONFIG_EXECUTABLE sdl2-config)
+    find_program(PKG_CONFIG_EXECUTABLE pkg-config)
+    set(QEMU_DISPLAY_ARG)
+    if(SDL2_CONFIG_EXECUTABLE)
+        set(QEMU_DISPLAY_ARG -display sdl)
+    elseif(PKG_CONFIG_EXECUTABLE)
+        execute_process(
+            COMMAND ${PKG_CONFIG_EXECUTABLE} --exists gtk+-3.0
+            RESULT_VARIABLE GTK3_FOUND
+        )
+        if(GTK3_FOUND EQUAL 0)
+            set(QEMU_DISPLAY_ARG -display gtk)
+        else()
+            message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may not show a window under i3.")
+        endif()
+    else()
+        message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may not show a window under i3.")
+    endif()
+else()
+    set(QEMU_DISPLAY_ARG)
+endif()
+
+# Custom target to run TinyOS in QEMU
 add_custom_target(run
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU"
 )
 
-# Debug in QEMU target (waits for debugger on port 1234)
+# Custom target to run TinyOS in QEMU with GDB stub
 add_custom_target(debug
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio -s -S
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
 )
 
-# Print build configuration
-message(STATUS "========================================")
-message(STATUS "TinyOS Build Configuration")
-message(STATUS "========================================")
-message(STATUS "C Standard: C${CMAKE_C_STANDARD}")
-message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
-message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER}")
-message(STATUS "========================================")
-message(STATUS "Available targets:")
-message(STATUS "  ninja           - Build kernel.elf")
-message(STATUS "  ninja iso       - Create bootable ISO")
-message(STATUS "  ninja run       - Build and run in QEMU")
-message(STATUS "  ninja debug     - Build and run with debugger")
-message(STATUS "========================================")
