@@ -40,16 +40,13 @@ void kernel_main(u32 magic, struct multiboot_info * info)
 {
     // Verify we were loaded by a Multiboot2-compliant bootloader
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        // Can't print error yet - just halt
-        // Invalid bootloader, hang the system
         for (;;) {
             __asm__ volatile("cli; hlt");
         }
     }
 
-    // Verify multiboot info pointer is valid
+    // Verify multiboot information structure is present
     if (info == 0) {
-        // Invalid multiboot info, hang
         for (;;) {
             __asm__ volatile("cli; hlt");
         }
@@ -61,8 +58,6 @@ void kernel_main(u32 magic, struct multiboot_info * info)
     // TODO: Initialize memory management
     // TODO: Set up interrupt handling
 
-    // Kernel initialization complete - infinite loop for now
-    // In the future, this will hand off to the scheduler
     for (;;) {
         __asm__ volatile("hlt");
     }

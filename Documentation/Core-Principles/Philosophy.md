@@ -22,10 +22,6 @@ Every design decision should be understandable and well-documented. Code serves 
 
 Following Linux kernel and LLVM design patterns, TinyOS is built as a collection of independent, well-defined modules. Each module has clear boundaries, explicit dependencies, and can be understood in isolation.
 
-### 5. **Zero-Tolerance for Ambiguity**
-
-If a developer has to guess what your function does, what your type represents, or what your variable contains, you named it wrong.
-
 ### Memory Access Explicitness
 
 **Prefer explicit pointer arithmetic over array indexing for multi-dimensional data structures.**
@@ -42,37 +38,3 @@ If a developer has to guess what your function does, what your type represents, 
 
 5. **Common Practice**: Linux kernel, embedded systems, and graphics drivers routinely use explicit pointer arithmetic for performance-critical memory access.
 
-**When to Use Pointer Arithmetic:**
-
-- Multi-dimensional arrays (2D/3D structures)
-- Memory regions with padding/alignment (framebuffers with pitch)
-- Performance-critical tight loops
-- Hardware-mapped memory with specific layout requirements
-- Code where memory access patterns matter for optimization
-
-**When Array Syntax is Acceptable:**
-
-- Simple one-dimensional arrays where layout is obvious
-- Non-performance-critical code
-- Public APIs where external clarity matters more than internal efficiency
-
-**Example:**
-
-```c
-// Preferred: Explicit memory layout visible
-uint32_t * pixel = framebuffer + (y * pitch) + x;
-*pixel = color;
-
-// Shows cache implications clearly
-for (size_t i = 0; i < height; i++) {
-    for (size_t j = 0; j < width; j++) {
-        uint32_t * pixel = framebuffer + (i * pitch) + j;  // Sequential access visible
-        process_pixel(pixel);
-    }
-}
-
-// Avoid: Hidden memory operations
-uint32_t color = framebuffer[y][x];  // How much memory are we jumping?
-```
-
-This approach trades convenient syntax for explicit understanding of memory behavior, aligning with our hardware-first philosophy.

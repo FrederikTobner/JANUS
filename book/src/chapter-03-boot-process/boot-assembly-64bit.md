@@ -18,9 +18,14 @@ Each entry has a very complex structure, having non-contiguos memory sections fo
 These properties are the base address, the segment limit, access rights, and other flags.
 The memory layout of the full descriptor looks like this:
 
-| 0x3F&nbsp;–&nbsp;0x38 | 0x37&nbsp;–&nbsp;0x34 | 0x33&nbsp;–&nbsp;0x30 | 0x2F&nbsp;–&nbsp;0x28 | 0x27&nbsp;–&nbsp;0x10 | 0x0F&nbsp;–&nbsp;0x0 (Limit) |
+| 0x3F&nbsp;–&nbsp;0x38 | 0x37&nbsp;–&nbsp;0x34 | 0x33&nbsp;–&nbsp;0x30 | 0x2F&nbsp;–&nbsp;0x28 | 0x27&nbsp;–&nbsp;0x10 | 0x0F&nbsp;–&nbsp;0x00 (Limit) |
 |:------------------|:------------------|:------------------|:------------------|:------------------|:-------------------------|
 | **Base**<br>8 MSB | **Flags**  | **Limit**<br> 4 MSB | **Access Byte** | **Base**<br> 24 LSB | **Limit**<br> 16 LSB      |
+
+[!side]  
+Ever notice how the x86 segment descriptor layout feels like a memory scavenger hunt? The fields are scattered all over: first you get a the 8 most signifiant bits from 0x3F, then the 24 least significant bits are stored from 0x27 to 0x10. The limit is split too, with 4 bits at 0x33-0x30 and 16 bits at 0x0F-0x00. And don't get me started on the access byte and flags in between, they are as mysterious as a `Sys Req` key on a keyboard.
+You practically need a treasure map and a decoder ring just to specify the base address of the segment.
+[/!side]
 
 These concepts are essential for memory management (Chapter 5), context switching, and system calls.
 Additionally if you would like to support Bootloaders that leave you in 32-bit mode like GRUB you need to do this all manually.

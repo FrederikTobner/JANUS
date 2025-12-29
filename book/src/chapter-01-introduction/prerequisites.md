@@ -65,9 +65,11 @@ These may not be the absolute best resources out there, but they are what I have
 For **C Programming**  both "Learn C Programming" by Jeff Szuhay and "C Programming Language" by Kernighan & Ritchie can act as a good starting point if you have never programmed in C.
 If you are already familiar with the basics "Extreme C" by Kamran Amini or "Pointers in C Programming" from Thomas Mailund, can help deepen your understanding.
 
-For learning **Assembly** "Programming boot sector games" by Oscar Toledo G. is a good start, but it only covers 8086/8088 assembly.
+For learning **Assembly** "Programming boot sector games" by Oscar Toledo G. is a good start to learning assemlby programming, but it only covers 8086/8088 assembly.
 
-> TODO: Find resources for basic computer architecture and cmake
+> TODO: Find and read more resources for assembly programming, preferably x86_64 assembly, so we can vouch for them 
+
+> TODO: Find and read more resources for basic computer architecture and cmake, so we can vouch for them 
 
 We develop on **Linux** becuase it provides the best environment for OS development without much tinkering.
 If you want you can also try to use Windows or MacOs, but since we are using GNU tools and parts of the LLVM toolchain, Linux is the path of least resistance.
@@ -76,8 +78,8 @@ If you want you can also try to use Windows or MacOs, but since we are using GNU
 ARM would be tempting as well but its not as common on desktops, making it less likely that readers have access to hardware to test on.
 [/!side]
 
-TinyOS targets **x86_64** architecture. It is ideal for learning OS development because it is widely used and well-documented. Additionally most developers have access to x86_64 hardware, which is crucial to being able to test our operating system on real hardware.
-The rich ecosystem of tools and documentation further supports development on this architecture. Finally QEMU provides excellent emulation for x86_64, allowing for easy testing and debugging.
+TinyOS targets **x86_64** architecture. It is ideal for learning OS development because it is widely used and well-documented. Additionally most developers have access to x86_64 hardware, which is crucial to testing and running our operating system on real hardware.
+The rich ecosystem of tools and documentation further supports development on this architecture. 
 
 [!side]
 The “editor wars” refer to the long-running rivalry between users of the console based editors Vi and Emacs. Since 1985 there have been 

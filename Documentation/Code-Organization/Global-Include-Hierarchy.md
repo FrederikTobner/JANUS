@@ -4,7 +4,7 @@
 
 The [`include/tinyos/`](../../include/tinyos/) directory contains **truly global** headers that are used across many modules and don't belong to any single module.
 
-> **Rule**: If a header is only used by a couple of modules, keep it in the module. Only promote to global if it's genuinely cross-cutting.
+> **Rule**: If a header is only used by a couple of kernel modules, keep it in a kernel library. Only promote to global if it's genuinely cross-cutting.
 
 ## What Goes in `kernel/include/tinyos/`
 

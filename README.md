@@ -21,18 +21,20 @@ qemu-system-x86_64 -kernel build/kernel.elf -serial stdio
 
 ```
 TinyOS/
+
+├── scripts/          # Build and utility scripts
+├── cmake/            # CMake build modules
+├── tools/            # Development tools
+├── book/             # Book / tutorial of the project
+├── Documentation/    # Technical documentation
 └── kernel/           # kernel functionality
-    ├── core/           # Core kernel functionality
-    ├── boot/             # Multiboot2 boot loader
-    ├── arch/             # Architecture-specific code (x86_64)
-    ├── lib/              # Kernel libraries (types, memory, buffer, fio)
-    ├── mm/               # Memory management
-    ├── drivers/          # Device drivers
-    ├── include/          # Global headers
-    ├── scripts/          # Build and utility scripts
-    ├── cmake/            # CMake build modules
-    ├── tools/            # Development tools
-    └── Documentation/    # Technical documentation
+       ├── core/           # Core kernel functionality
+       ├── boot/             # Multiboot2 boot loader
+       ├── arch/             # Architecture-specific code (x86_64)
+       ├── lib/              # Kernel libraries (types, memory, buffer, fio)
+       ├── mm/               # Memory management
+       ├── drivers/          # Device drivers
+       └── include/          # Global headers
 ```
 
 ## Technology Stack
@@ -48,21 +50,6 @@ TinyOS/
 ## Documentation
 
 Comprehensive documentation is in the [`Documentation/`](Documentation/) folder:
-
-## Testing
-
-**Planned:** TinyOS will use **BMUnit** (Bare Metal Unit), a testing framework inspired by Linux kernel's KUnit but adapted for our needs.
-
-The planned approach will embed tests within modules (not in a separate `tests/` folder):
-
-```
-lib/buffer/
-├── buffer.c              # Implementation
-├── buffer_test.c         # Tests (planned)
-└── include/lib/buffer.h
-```
-
-See [BMUnit-Testing.md](Documentation/Implementation/BMUnit-Testing.md) for the planned testing framework design.
 
 ## Building
 
@@ -110,45 +97,6 @@ ninja -C build run
 
 # Build and run with debugger
 ninja -C build debug
-```
-
-Alternative build types:
-
-```bash
-# Debug build (default)
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-
-# Release build
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-```
-
-## Running
-
-```bash
-# Run bootable ISO in QEMU
-ninja -C build run
-
-# Or manually:
-qemu-system-x86_64 -cdrom build/tinyos.iso -boot d -serial stdio
-```
-
-### Debugging with LLDB
-
-```bash
-# Terminal 1: Start QEMU with debugger waiting
-ninja -C build debug
-
-# Terminal 2: Connect LLDB
-lldb build/kernel.elf
-(lldb) gdb-remote localhost:1234
-(lldb) b kernel_main
-(lldb) c
-(lldb) register read
-(lldb) n  # step to next line
-(lldb) bt # show backtrace
-```
-
-See the [book](book/src/part-02-boot-process/creating-bootable-iso.md#proving-the-kernel-works-with-lldb) for detailed LLDB usage and debugging examples.
 
 ## License
 

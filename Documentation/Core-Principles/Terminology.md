@@ -15,7 +15,7 @@ If you call a hashtable a "map," you're hiding the implementation. If you call a
 | Instead of... | We use... | Why |
 |---------------|-----------|-----|
 | String | **Character Buffer** | It's a buffer of characters in memory, not some magical string object |
-| Map | **Hashtable** | We're using a hashtable. Say so. |
+| Map | **Hashtable** | We're using a hashtable.  |
 | Queue | **Ring Buffer** | It's a circular buffer with head/tail pointers |
 | List | **Linked List** | Pointer-based structure with explicit traversal cost |
 | Binary Tree | **Red-black Tree** | Be specific about the tree type |
@@ -187,24 +187,6 @@ void buf_append(char_buffer_t* buf, const char* data); // Modifies buffer
 char_buffer_view_t buf_readonly_view(const char_buffer_t* buf); // Read-only view
 ```
 
-### Variable Naming
-
-#### Local Variables
-
-Use descriptive names, avoid abbreviations unless common:
-```c
-// Good
-page_frame_t* frame;
-size_t buffer_size;
-uint64_t physical_address;
-
-// Acceptable abbreviations
-int i, j, k;           // Loop counters
-char* ptr;             // Pointer
-size_t len;            // Length
-uint64_t addr;         // Address
-```
-
 #### Global Variables
 
 Prefix with module name or `g_`:
@@ -216,53 +198,6 @@ static size_t mm_total_frames;
 
 // Or g_ prefix for truly global
 volatile uint64_t g_system_tick_count;
-```
-
-#### Constants and Macros
-
-Use UPPER_CASE with underscores:
-
-```c
-#define KERNEL_VIRTUAL_BASE    0xFFFFFFFF80000000
-#define PAGE_SIZE              4096
-#define MAX_IRQ_HANDLERS       256
-
-// Processor-specific constants from manuals
-#define X86_64_CR0_PE          (1 << 0)    // Protection Enable
-#define X86_64_CR0_PG          (1 << 31)   // Paging
-```
-
-### File Naming
-
-#### Source Files
-
-Use lowercase with underscores:
-
-```
-buffer.c
-hashtable.c
-page_frame.c
-interrupt_vector.c
-```
-
-#### Header Files
-
-Match corresponding source file:
-```
-buffer.h
-hashtable.h
-page_frame.h
-interrupt_vector.h
-```
-
-#### Architecture-Specific Files
-
-Include architecture in name:
-
-```
-arch/x86_64/cpu.c
-arch/x86_64/io.c
-arch/x86_64/interrupt.c
 ```
 
 ## Terminology Consistency
@@ -283,14 +218,5 @@ When referring to hardware features, use the **exact** terminology from processo
 - Translation Table Entry (TTE)
 - Exception Vector Table (EVT)
 - System Control Register (SCTLR)
-
-### Avoid High-Level Abstractions
-
-Prefer technical terms that expose implementation:
-
-- **Hashtable** over "Map" or "Dictionary"
-- **Character Buffer** over "String"
-- **Ring Buffer** over "Queue" (when circular)
-- **Linked List** over "List"
-- **Page Frame** over "Page" (for physical memory)
-- **Address Space** over "Memory Space"
+ 
+ NOTE: This of course only applies to the types used in arch/.

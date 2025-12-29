@@ -1,6 +1,6 @@
 # Project Structure
 
-Before we write a single line of assembly, let's talk organization. A well-structured OS project is the difference between "I know exactly where that code lives" and "I wrote this three weeks ago and now I can't find anything."
+Before we write a single line of code, let's talk organization. A well-structured OS project is the difference between "I know exactly where that code lives" and "I wrote this three weeks ago and now I can't find anything."
 
 [!side]
 Good structure pays dividends. You'll reference this code constantly as the project grows.
@@ -17,12 +17,12 @@ First, let's create the project skeleton. Run these commands:
 mkdir -p TinyOS
 cd TinyOS
 
-# Create kernel root
-mkdir -p kernel
+# Create kernel root and cmake directories
+mkdir -p kernel cmake
 cd kernel
 
 # Create module directories
-mkdir -p boot kernel include/tinyos cmake
+mkdir -p boot kernel include/tinyos include/uapi 
 
 # Create placeholder CMakeLists.txt files
 touch boot/CMakeLists.txt
@@ -34,16 +34,19 @@ Your structure should now look like this:
 
 ```
 TinyOS/
-├── boot/                   # Boot module
-│   └── CMakeLists.txt     # Boot build config
-├── kernel/                 # Core kernel module
-│   └── CMakeLists.txt     # Kernel build config
-├── include/                # Standard library headers (freestanding)
-│   └── tinyos/            # TinyOS-specific kernel headers
-├── cmake/                  # Build system modules
-│   ├── TinyOSPlatform.cmake
+├── cmake/                        # Build system modules
+│   ├── TinyOSPlatform.cmake 
 │   └── TinyOSHelpers.cmake
-└── CMakeLists.txt          # Root build config
+├── CMakeLists.txt                # Root build config
+└── kernel
+    ├── boot/                     # Boot module
+    │   └── CMakeLists.txt        # Boot build config
+    ├── core/                     # Core kernel module
+    │   └── CMakeLists.txt        # Kernel build config
+    └── include/                  # Global headers of our kernel
+        ├── uapi/                 # User API headers
+        │   └── types.h           # Type definitions for user space
+        └── tinyos/                # TinyOS-specific kernel headers
 ```
 
 We will organize our code in different modules
@@ -78,20 +81,6 @@ typedef __INT16_TYPE__   __s16;
 typedef __INT32_TYPE__   __s32;
 typedef __INT64_TYPE__   __s64;
 
-#define UINT8_MAX   0xFF
-#define UINT16_MAX  0xFFFF
-#define UINT32_MAX  0xFFFFFFFFU
-#define UINT64_MAX  0xFFFFFFFFFFFFFFFFULL
-
-#define INT8_MIN    (-128)
-#define INT8_MAX    127
-#define INT16_MIN   (-32768)
-#define INT16_MAX   32767
-#define INT32_MIN   (-2147483648)
-#define INT32_MAX   2147483647
-#define INT64_MIN   (-9223372036854775807LL - 1)
-#define INT64_MAX   9223372036854775807LL
-
 #endif
 
 ```
@@ -108,7 +97,7 @@ replace: entire file
 +#ifndef TINYOS_TYPES_H
 +#define TINYOS_TYPES_H
 +
-+#include "../uapi/typesh"
++#include "../uapi/types.h"
 +
 +typedef __s8   s8;
 +typedef __u8   u8;
@@ -122,8 +111,9 @@ replace: entire file
 +#endif // TINYOS_TYPES_H
 ```
 
-**Why not using standard names?**
+**Why not using standard names or include `stdint.h`?**
 We want to make the seperation of the kernel layer and the user space easily visible.
+Using the fixed-integer types from stdint.h in the kernel code would blur this line.
 
 ---
 

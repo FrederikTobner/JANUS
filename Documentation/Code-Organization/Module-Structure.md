@@ -41,31 +41,32 @@ Dependencies flow in **one direction**:
        │                │
        └────────┬───────┘
                 ▼
-          ┌──────────┐
-          │  lib/X   │
-          └────┬─────┘
-               │
-               ▼
-      ┌──────────────────┐
-      │  include/tinyos  │
-      └──────────────────┘
+         ┌─────────────┐
+         │  arch/x86   │
+         └──────┬──────┘
+                │
+                ▼
+           ┌──────────┐
+           │  lib/X   │
+           └────┬─────┘
+                │
+                ▼
+       ┌──────────────────┐
+       │  include/tinyos  │
+       └──────────────────┘
 ```
-
-If `buffer` needs something from `kernel`, you've layered it wrong. Move the functionality or redesign the interface.
-
-### 3. Clear Layering
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  Kernel Layer (kernel/core)                                          │
+│  Core Layer (kernel/core)                                            │
 ├──────────────────────────────────────────────────────────────────────┤
 │  Subsystem Layer (kernel/mm/, kernel/drivers/, kernel/boot)          │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Library Layer (lib/*)                                               │
+│ Support Library Layer (lib/*)                                        │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Architecture Layer (arch/x86_64/)                                   │
+│  Platform/Architecture Layer (arch/x86_64/)                          │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Boot Layer (boot/)                                                  │
+│  Global interface layer (include)                                    │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -82,7 +83,7 @@ Main kernel functionality and entry point.
 - Panic and error handling
 - Global kernel state
 
-### `boot/` - Boot Module
+### `kernel/boot/` - Boot Module
 
 Boot loader interface and early initialization.
 
@@ -92,7 +93,7 @@ Boot loader interface and early initialization.
 - Initial CPU state setup (stack, registers)
 - Transition from boot loader to kernel
 
-### `arch/` - Architecture Abstraction
+### `kernel/arch/` - Architecture Abstraction
 
 Architecture-specific code with generic interfaces.
 
@@ -103,6 +104,8 @@ Architecture-specific code with generic interfaces.
 - Platform initialization
 - Hardware abstraction interfaces
 
-## Library Modules
+## Support Library Layer
+
+Contains libraries that only depend on the core definitions and are able to work without any specific architecture layer. E.g. FNV-1a hash or other hash implementations.
 
 > Not fully defined yet.

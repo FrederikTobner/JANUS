@@ -43,4 +43,4 @@ Don't worry about memorizing these. We'll explain each flag when we use it.
 
 ---
 
-**Next: [Chapter 2: The Boot Process](../chapter-03-boot-process/README.md)**
+**Next: [Chapter 3: The Boot Process](../chapter-03-boot-process/README.md)**
