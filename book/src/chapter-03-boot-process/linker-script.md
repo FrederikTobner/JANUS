@@ -22,29 +22,29 @@ Our **memory layout** will look like this:
 
 ```
 Physical Memory Map:
-┌─────────────────────────────────────┐
+┌─────────────────────────────────────────────────┐
 │ 0x00000000 - 0x000003FF │ Real Mode IVT         │ BIOS territory
 │ 0x00000400 - 0x000004FF │ BIOS Data Area        │ Don't touch!
 │ 0x00000500 - 0x00007BFF │ Usable                │ Too small for kernel
 │ 0x00007C00 - 0x00007DFF │ Bootloader            │ GRUB lives here
 │ 0x00007E00 - 0x0009FFFF │ Usable                │ Fragmented, messy
 │ 0x000A0000 - 0x000FFFFF │ Video/BIOS            │ Hardware mapped
-├─────────────────────────────────────┤
+├─────────────────────────────────────────────────┤
 │ 0x00100000 - ...        │ KERNEL LOADS HERE     │ ← Clean, contiguous
-└─────────────────────────────────────┘
+└─────────────────────────────────────────────────┘
 ```
 
+> TODO: Make sure we do this in chapter 4 otherwise remove
+
 [!side]
-IVT = Interrupt Vector Table from Real Mode (16-bit). The BIOS uses it, we don't, but we can't overwrite it.
+IVT = Interrupt Vector Table from Real Mode (16-bit). The BIOS uses this, to configure hardware interrupts.
+We will touch on this later in chapter 4 when we will implement the handling of input and output.
 [/!side]
 
 As you may have spotted from the diagram, we load our kernel at **1MB**. This is a traditional location for kernels on x86 architecture.
 
-The reason for this is that the first 1MB is a minefield of BIOS tables, video memory, and historical baggage. Loading at 1MB gives us a clean slate.
-
-[!side]
-1MB was "high memory" in 1981. Now it's the standard kernel load address for x86.
-[/!side]
+The reason for this is that the first 1MB is a minefield of BIOS tables, video memory, and historical baggage. 
+Loading at 1MB and ignoring the other regions that would in theory also be usable makes our life much simpler.
 
 Our linker script will define these sections in order:
 
@@ -62,7 +62,6 @@ BSS = Block Started by Symbol (historical IBM assembler term). Saves disk space�
 
 Let's build our linker script incrementally. Create `kernel/core/linker.ld` and we'll add to it step by step.
 
-### Step 1: Entry Point and Load Address
 
 Start with the skeleton—where execution begins and where the kernel loads:
 
@@ -76,16 +75,10 @@ after: entire file
 +    . = 0x100000;
 +}
 ```
+Fist of all we state that the execution starts at our `_start` label from boot.asm 
+by using the `ENTRY` directive. Next we define the `SECTIONS` block, which contains all our memory layout.
+Then we set the location counter `.` to `0x100000` (1MB)—our load address.
 
-**What this does:**
-
-- `ENTRY(_start)` — Execution starts at our `_start` label from boot.asm
-- `SECTIONS { }` — Container for all our memory layout
-- `. = 0x100000` — Load address (the **location counter** `.` tracks our position)
-
-The location counter is like a cursor. As we add sections, it moves forward automatically.
-
-### Step 2: Multiboot Header Section
 
 GRUB scans the first 32KB for the Multiboot header. Add it right after the load address:
 
@@ -109,8 +102,6 @@ after: . = 0x100000;
 
 This must come first or GRUB won't find it.
 
-### Step 3: Code Section
-
 Add the executable code section after `.multiboot`:
 
 ```ld-diff
@@ -128,15 +119,9 @@ after: .multiboot section
  }
 ```
 
-**What this does:**
-
-- `.text` — Executable instructions
-- `ALIGN(4K)` — Page-aligned (4096 bytes, x86-64 page size)
-- `*(.text.*)` — Catches compiler subsections (`.text.startup`, `.text.hot`, etc.)
+In order to allign to page boundaries, we use `ALIGN(4K)` (4096 bytes).
 
 Page alignment lets us set memory permissions cleanly (executable vs. non-executable).
-
-### Step 4: Read-Only Data
 
 Add the read-only data section after `.text`:
 
@@ -156,15 +141,9 @@ after: .text section
  }
 ```
 
-**What this does:**
+The `.rodata` section holds read-only data like string literals and `const` globals.
 
-- `.rodata` — Read-only data (strings, const globals)
-- Separate from `.text` so we can mark it non-executable (prevents code injection)
-
-### Step 5: Initialized Data
-
-Add the initialized data section after `.rodata`:
-
+Next we will add the data section for initialized variables.
 ```ld-diff
 file: kernel/core/linker.ld
 after: .rodata section
@@ -181,12 +160,7 @@ after: .rodata section
  }
 ```
 
-**What this does:**
-
-- `.data` — Initialized variables (values stored in ELF, loaded into memory)
-- Read-write permissions
-
-### Step 6: Uninitialized Data (BSS)
+The vakues stored in `.data` are loaded from the ELF file into memory at boot.
 
 Add the BSS section after `.data`:
 
@@ -207,13 +181,7 @@ after: .data section
  }
 ```
 
-**What this does:**
-
-- `.bss` — Uninitialized data (zeroed by bootloader)
-- `*(COMMON)` — Tentative definitions (old C feature for globals declared in multiple files)
-- Not stored in ELF—saves disk space
-
-### Step 7: Kernel Boundary Symbols
+The `.bss` holds uninitialized data, that the bootloader zeroes out for us.
 
 Finally, add these symbols at the end of the `SECTIONS` block (after `.bss`):
 
@@ -233,11 +201,9 @@ after: .bss section
  }
 ```
 
-**What this does:**
-
-- `kernel_start` — Address where kernel begins
-- `kernel_end = .;` — Current location (end of all sections)
-- `kernel_size` — Total size
+First we set the `kernel_start` symbol to `0x100000` (our load address). 
+Then we set `kernel_end` to the current location counter `.` (the end of all sections). 
+Finally, we compute `kernel_size` as the difference between `kernel_end` and `kernel_start`.
 
 These become usable in C:
 

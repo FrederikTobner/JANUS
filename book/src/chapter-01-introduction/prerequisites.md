@@ -69,7 +69,8 @@ For learning **Assembly** "Programming boot sector games" by Oscar Toledo G. is 
 
 > TODO: Find resources for basic computer architecture and cmake
 
-We develop on **Linux**, because it provides native toolchain support and direct access to development tools.
+We develop on **Linux** becuase it provides the best environment for OS development without much tinkering.
+If you want you can also try to use Windows or MacOs, but since we are using GNU tools and parts of the LLVM toolchain, Linux is the path of least resistance.
 
 [!side]
 ARM would be tempting as well but its not as common on desktops, making it less likely that readers have access to hardware to test on.

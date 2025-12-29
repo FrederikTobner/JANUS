@@ -11,25 +11,33 @@ Because understanding the transition teaches you **fundamental OS concepts** you
 - **The relationship between paging and long mode**
 - **GDT structure** and segment selectors
 
-These concepts are essential for memory management (Chapter 5), context switching, and system calls. GRUB's convenience hides them, but you need to understand the machinery to build a real kernel.
+GDT stands for Global Descriptor Table. It is a binary data structure that defines memory segments and their properties.
+In is only relevant for to the IA-32 and x86-64 architectures.
+The memory segments are descripted by seperate segment descriptors, that are defined in the GDT.
+Each entry has a very complex structure, having non-contiguos memory sections for the various properties.
+These properties are the base address, the segment limit, access rights, and other flags.
+The memory layout of the full descriptor looks like this:
 
-Think of it like learning to drive a manual transmission—even if you'll mostly drive automatic cars, understanding how the clutch and gears work makes you a better driver.
+| 0x3F&nbsp;–&nbsp;0x38 | 0x37&nbsp;–&nbsp;0x34 | 0x33&nbsp;–&nbsp;0x30 | 0x2F&nbsp;–&nbsp;0x28 | 0x27&nbsp;–&nbsp;0x10 | 0x0F&nbsp;–&nbsp;0x0 (Limit) |
+|:------------------|:------------------|:------------------|:------------------|:------------------|:-------------------------|
+| **Base**<br>8 MSB | **Flags**  | **Limit**<br> 4 MSB | **Access Byte** | **Base**<br> 24 LSB | **Limit**<br> 16 LSB      |
 
+These concepts are essential for memory management (Chapter 5), context switching, and system calls.
 Additionally if you would like to support Bootloaders that leave you in 32-bit mode like GRUB you need to do this all manually.
 
 ## The Complete Boot Sequence
 
-We'll implement what other bootloaders do behind the scenes. The transition requires:
+Therfor we will implement what other bootloaders do behind the scenes. The transition requires:
 
 ```mermaid
 flowchart TD
     step1["Save multiboot parameters"]
     step2["Set up page tables (identity mapping)"]
-    step3["Enable PAE (Physical Address Extension)"]
+    step3["Enable Physical Address Extension"]
     step4["Set long mode bit in EFER MSR"]
-    step5["Enable paging (activate long mode)"]
-    step6["Load 64-bit GDT (code segment)"]
-    step7["Jump to 64-bit code (far jump)"]
+    step5["Enable paging and activate long mode"]
+    step6["Load 64-bit Global descriptor Table (GDT)"]
+    step7["Jump to 64-bit code"]
     step8["Restore parameters & call kernel_main"]
     step1 --> step2
     step2 --> step3
@@ -39,10 +47,6 @@ flowchart TD
     step6 --> step7
     step7 --> step8
 ```
-
-[!side]
-GDT stands for Global Descriptor Table. It defines memory segments and their properties.
-[/!side]
 
 Let's implement each step.
 
@@ -297,7 +301,7 @@ after: .hang loop
 +    dq gdt64                                ; GDT address
 ```
 
-The code segment descriptor sets bits for: executable (bit 43), code/data segment (bit 44), present (bit 47), and 64-bit mode (bit 53). The value \\((1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)\\) creates a 64-bit value with these specific bits set.
+The code segment descriptor sets bits for: executable (bit 43), code/data segment (bit 44), present (bit 47), and 64-bit mode (bit 53). The value \\((1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)\\) creates a 64-bit value with these specific bits set. 
 
 
 ```mermaid
