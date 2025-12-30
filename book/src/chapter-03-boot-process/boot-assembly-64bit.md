@@ -1,9 +1,9 @@
 # Understanding the 64-bit Transition
 
-In the previous section, we discovered that GRUB2 already puts us in 32-bit protected mode when loading a 64-bit kernel. Therefor we will need to handle the transition ourself.
+In the previous section, we discovered that GRUB2 only puts us in 32-bit protected mode when loading a 64-bit kernel. Therefor we will need to handle the transition ourself.
 Some other bootloaders already handle the transition like Limine. So why are we doing this?
 
-Because understanding the transition teaches you **fundamental OS concepts** you'll need later:
+Because understanding the transition teaches you a couple of **fundamental OS concepts** you'll need later:
 
 - **CPU operating modes** and their constraints  
 - **Page table structure** and virtual memory setup
@@ -24,11 +24,11 @@ The memory layout of the full descriptor looks like this:
 
 [!side]  
 Ever notice how the x86 segment descriptor layout feels like a memory scavenger hunt? The fields are scattered all over: first you get a the 8 most signifiant bits from 0x3F, then the 24 least significant bits are stored from 0x27 to 0x10. The limit is split too, with 4 bits at 0x33-0x30 and 16 bits at 0x0F-0x00. And don't get me started on the access byte and flags in between, they are as mysterious as a `Sys Req` key on a keyboard.
-You practically need a treasure map and a decoder ring just to specify the base address of the segment.
+You practically need a treasure map and and a compass to piece together a single segment descriptor! 
 [/!side]
 
-These concepts are essential for memory management (Chapter 5), context switching, and system calls.
-Additionally if you would like to support Bootloaders that leave you in 32-bit mode like GRUB you need to do this all manually.
+These concepts are essential for fully understanding the later chapters. 
+Additionally if you would like to support Bootloaders that leave you in 32-bit mode like GRUB you need to do this manually.
 
 ## The Complete Boot Sequence
 
@@ -194,7 +194,7 @@ after: setup_page_tables ret
 +    ret
 ```
 
-This function performs the mode transition sequence.
+This subroutine performs the mode transition sequence.
 Fist we load the P4 table address into control register CR3, which tells the CPU where our page tables are located in memory.
 
 Next we enable the Physical Address Extension (PAE) by setting bit 5 in control register CR4. PAE allows the CPU to access more than 4GB of physical memory and is a prerequisite for entering long mode.

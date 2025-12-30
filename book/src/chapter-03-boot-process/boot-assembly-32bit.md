@@ -1,62 +1,25 @@
 # Boot Entry Assembly
 
-GRUB finds our Multiboot header, validates it, and jumps to our entry point. But what state does GRUB leave the CPU in? The answer might surprise you.
+GRUB finds our Multiboot header, validates it, and jumps to our entry point. 
+To transfer control from GRUB to our C code we need a small assembly stub that sets up the stack and calls our C entry point.
 
-## What Does GRUB Give Us?
-
-With Multiboot2 and a 64-bit ELF kernel, GRUB2 is surprisingly helpful. When it detects we're loading a 64-bit kernel, it:
-
-- **Already transitions to 64-bit long mode** for us
-- Sets up basic identity-mapped page tables
-- Loads a 64-bit GDT
-- Puts the CPU in 64-bit long mode
-
-When control reaches our entry point:
-
-- **EAX** = Multiboot2 magic number (0x36d76289)
-- **EBX** = Physical address of Multiboot information structure
-- **EIP** = Our entry point (but we're in 64-bit mode, so it's really RIP!)
-- CPU is **already in 64-bit long mode**
-- Everything else is undefined (stack, other registers, interrupts)
-
-[!side]
-**Wait, GRUB does all that for us?**
-
-Yes! Modern GRUB2 with Multiboot2 detects 64-bit ELF kernels and handles the mode transition automatically. Older GRUB (pre-2.0) or Multiboot1 started in 32-bit mode and required manual transition. We'll learn the manual transition in the next chapter because understanding it teaches you how the CPU actually works—but for now, GRUB's doing the heavy lifting.
-[!side]
-
-## The Naive Approach
-
-Let's try the simplest possible boot code:
-
-Our plan:
-
-1. Set up a stack
-2. Preserve the Multiboot parameters
-3. Call `kernel_main`
-
-Since GRUB already put us in 64-bit mode, let's write simple 64-bit boot code:
-
-1. Set up a stack
-2. Call `kernel_main`
 
 Create `kernel/boot/boot.asm`:
 
 ```x86asm-diff
 file: kernel/boot/boot.asm
 ---
-+; Boot entry point - GRUB puts us in 64-bit long mode
 +global _start
 +extern kernel_main
 +
 +section .bss
 +align 16
 +stack_bottom:
-+    resb 16384              ; 16 KiB stack
++    resb 16384              
 +stack_top:
 +
 +section .text
-+bits 64                     ; We're already in 64-bit mode!
++bits 64                     
 +
 +_start:
 +    call kernel_main
@@ -67,15 +30,15 @@ file: kernel/boot/boot.asm
 +    jmp .hang
 ```
 
-**What this code does:**
+Fist we declare the global `_start` label, which is where GRUB will jump to after loading our kernel. We also declare an external symbol `kernel_main`, which will be the main entry point of our kernel code hat has been written in C. Later we setup the stack in the `.bss` section, reserving 16 KiB for it. In the `.text` section, we define the `_start` label, which simply calls `kernel_main`. After `kernel_main` returns (which it shouldn't), we enter an infinite loop that halts the CPU. This is only a defensive measure to ensure the CPU doesn't execute random instructions if `kernel_main` were to return.
 
-1. **Stack setup**: Point `RSP` to our 16 KiB stack (\\(16384 = 2^{14}\\) bytes)
-2. **Call kernel**: Jump to our C code (but with wrong calling convention!)
-3. **Halt loop**: If `kernel_main` returns, halt the CPU
+[!side]
+When working on a kernel, it is crucial to be very defensive, you could even say almost paranoid. 
+Like what happens if my kernel, has a broken BIOS, or a cosmic ray flips a bit in your boot info? 
+Always expect the unexpected!
+[/side]
 
-Looks reasonable. Let's add it to our CMake build and try it.
-
-## Building the Kernel
+## Building the Kernelqemu x86 virtualization
 
 Update `kernel/boot/CMakeLists.txt`:
 

@@ -50,7 +50,7 @@ add_custom_target(iso
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/grub.cfg ${CMAKE_BINARY_DIR}/iso/boot/grub/grub.cfg
-    COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/tinyos.iso ${CMAKE_BINARY_DIR}/iso/
+    COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso ${CMAKE_BINARY_DIR}/iso/
     DEPENDS kernel.elf ${CMAKE_BINARY_DIR}/grub.cfg
     COMMENT "Creating bootable ISO image"
 )
@@ -81,14 +81,14 @@ endif()
 
 # Custom target to run TinyOS in QEMU
 add_custom_target(run
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU"
 )
 
 # Custom target to run TinyOS in QEMU with GDB stub
 add_custom_target(debug
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
 )

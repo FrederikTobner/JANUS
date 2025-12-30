@@ -21,7 +21,6 @@
 - [Chapter 2 Overview](chapter-02-getting-started/README.md)
   - [Installing Tools](chapter-02-getting-started/installing-tools.md)
   - [Verification](chapter-02-getting-started/verification.md)
-  - [Project Setup](chapter-02-getting-started/project-setup.md)
   - [Summary](chapter-02-getting-started/summary.md)
 
 ---

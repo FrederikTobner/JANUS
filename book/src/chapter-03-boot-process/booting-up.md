@@ -48,16 +48,12 @@ The GDB stub speaks the GDB Remote Serial Protocol. LLDB understands this protoc
 
 > **New to LLDB? Don't panic.**
 >
-> Yes, it's a command-line debugger. No, you don't need to memorize 47 arcane incantations. If you've used VS Code's debugger or CLion's, you already know the concepts—breakpoints, stepping, inspecting variables. LLDB just does it via text instead of clicking pretty buttons. Think of it as your GUI debugger's grumpy but efficient terminal-dwelling cousin.
+> Yes, it's a command-line debugger. If you've used a debugger in an IDE you already know the concepts—breakpoints, stepping, inspecting variables. 
+> LLDB just does it via text instead of clicking some buttons. Think of it as your GUI debugger's grumpy but efficient terminal-dwelling relative.
 >
 > Another key difference also comes from using QEMU: we need to debug *remotely* over a network connection to QEMU's virtual CPU.
 >
-> **Kernel debugging quirks you need to know:**
->
-> - **Registers are your best friends now.** Variables? Sure, they exist. But when debugging at this level, you'll spend more time looking at `$rdi` (first function argument) and `$rsi` (second argument) than at named variables. The x86-64 calling convention puts the first 6 arguments in RDI, RSI, RDX, RCX, R8, R9. Your kernel lives in these registers before it lives anywhere else.
-> - **No printf debugging.** Seriously. You have no console output yet. Want to check if a value is 0x36d76289? Use `p/x variable` and squint at hex numbers like it's 1975. (We'll fix this eventually with serial output in chapter 4, but for now, embrace the old ways.)
-> - **Your call stack is adorably tiny.** Run `bt` and you'll see exactly two frames: `kernel_main` ← `long_mode_start`. That's it. That's your entire kernel so far.
-> - **Format specifiers are your friends:** `p/x` for hex (addresses, magic numbers), `p/t` for binary (flags, bitmasks), `p/d` for decimal (counts).
+> Additionally when debuggin our kernel the values in our CPU registers will become important. Variables? Sure, they exist. But when debugging at this level, you'll spend a lot of time looking at registers directly, rater than at named variables. Especially when we are debugging assembly this will become vital. 
 >
 > **Essential commands (the cheat sheet):**
 >
@@ -94,19 +90,6 @@ sequenceDiagram
     T2->>T2: lldb kernel.elf
     T2->>QEMU: gdb-remote :1234
     QEMU-->>T2: Connected!
-    
-    Note over T2: Set breakpoint
-    T2->>QEMU: b kernel_main
-    QEMU-->>T2: Breakpoint set
-    
-    Note over T2: Continue execution
-    T2->>QEMU: continue
-    QEMU->>QEMU: GRUB → Boot → kernel_main
-    QEMU-->>T2: Hit breakpoint!
-    
-    Note over T2: Inspect registers
-    T2->>QEMU: p/x $rdi
-    QEMU-->>T2: 0x36d76289<br/>(Multiboot magic!)
     
     Note over QEMU,T2: Full control over CPU<br/>from debugger
 ```
@@ -184,12 +167,6 @@ To make the window visible you can either use a VNC viewer or setup SDL or GTK a
 qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display sdl
 qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display gtk
 ```
-
-### Black Screen Forever
-
-**Symptom:** QEMU shows black screen and hangs
-
-**This is normal!** Your kernel is working correctly. It's sitting in the `hlt` loop. Press Ctrl+C to exit.
 
 ### Debugger Won't Connect
 
