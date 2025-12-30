@@ -50,7 +50,8 @@ The only outlier here is the include directory that includes our header files.
 
 ## Type definitions
 
-Since we're in freestanding mode, meaning there is no host OS, we can't use the system's C standard library. We provide our own with type definitions for commonly used types.
+Since we're in freestanding mode, meaning there is no host OS, we can't use everyhing from the system's C standard library. 
+We provide our own with type definitions for commonly used types.
 
 ### Create `include/uapi/types.h`
 
@@ -99,8 +100,8 @@ replace: entire file
 +#endif // TINYOS_TYPES_H
 ```
 
-If you are asking youself why we are not using standard names or include `stdint.h`, here is the answer:
-We want to make the seperation of the kernel layer and the user space easily visible.
+If you are asking youself why we are not using standard names or include `stdint.h`, since it is a freestanding header, here is the answer:
+We want to make the seperation of the kernel layer and the user space clearly visible.
 Using the fixed-integer types from stdint.h in the kernel code would blur this line.
 
 ---

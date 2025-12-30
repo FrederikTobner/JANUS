@@ -11,7 +11,9 @@
 We're building a **teaching OS**—clarity over performance. Linux took 30 years and thousands of contributors to reach its current state. We're not competing with that.
 [/!side]
 
-What it *won't* do: network stack, advanced scheduling, POSIX compliance, or graphics. Text mode is enough to learn OS concepts.
+> TODO: Make sure other stuff that we haven't implemented is mentioned here as well, after we finished the book 
+
+What it *won't* do: network stack, advanced scheduling, POSIX compliance.
 
 > TODO: Consider modeling OS after DOS to some extend (simple, single-user, single-task, and direct hardware access) in the first chapters and then transition to UNIX. First we ignore multitasking, user-space, memory protection, etc.
 

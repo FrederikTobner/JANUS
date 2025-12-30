@@ -1,11 +1,11 @@
 # Chapter 1: Introduction
 
 > *"The programmer, like the poet, works only slightly removed from pure thought-stuff. He builds castles in the air, from air, creating by exertion of the imagination."*  
-> — Frederick Brooks, *The Mythical Man-Month*
+> — Frederick P. Brooks Jr., *The Mythical Man-Month*
 
 Welcome to the world of operating system development! Before we write our first line of assembly code or configure our first page table, let's answer some fundamental questions about what we're building and why.
 
-This chapter provides the foundation for your OS development journey: understanding what an operating system is, why building one is valuable, what TinyOS will accomplish, and whether you're ready to start.
+This chapter provides the foundation for your OS development journey: understanding what an operating system is, why building one is valuable experience, what exactly we set out to accomplish.
 
 ## What You'll Learn
 

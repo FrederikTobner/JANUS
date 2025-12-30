@@ -2,7 +2,7 @@
 
 Ask a programmer what an OS does and you'll get: "It... runs programs?" Which is true but unhelpful, like saying a car "moves you places."
 
-At its core, an operating system is a **resource manager**—a bossy middle manager between your programs and the hardware, coordinating access to CPU time, memory, I/O devices, and storage.
+At its core, an operating system is a **resource manager**—a bossy middle man between your programs and the hardware resources available on the current system, coordinating access to CPU time, memory, I/O devices, storage devices, etc. 
 
 [!side]Modern operating systems manage thousands of processes, gigabytes of memory, and dozens of devices simultaneously. All while maintaining the illusion that each program has the machine to itself.[/!side]
 

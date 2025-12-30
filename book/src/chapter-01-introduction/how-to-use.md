@@ -2,35 +2,22 @@
 
 [!side]Typing code yourself is like the difference between watching someone cook and actually cooking. You notice details you'd otherwise miss.[/!side]
 
-I strongly recommend **typing the code yourself** rather than copy-pasting. Muscle memory helps understanding.
+I strongly recommend **typing the code yourself** rather than copy-pasting. 
 
 That said, if you get stuck or want to skip ahead, the chapter branches are there. No judgment.
 
-The code in this book prioritizes **clarity** over cleverness. We use explicit variable names, comments explaining "why" not "what", consistent formatting, and assertions.
-
+The code in this book prioritizes **simplicity** over clarity and cleverness. We are building an educational OS, not a production-ready one.
 Performance matters in OS development, but premature optimization obscures concepts. We'll optimize only when needed and explain the trade-offs.
 
 [!side]The challenges marked "Advanced" can take hours. They're optional, but that's where the deep learning happens.[/!side]
 
-Most chapters include optional experiments—ways to push the code further or explore alternatives. These aren't required, but breaking things teaches you how they work.
+Most chapters include challanges and the end of each chapter that contain optional experiments that challenge you to extend or modify the code you've written.
 
-## When Things Go Wrong (And They Will)
+Sometimes when developing an OS, things will go wrong in mysterious ways.
 
-Your bootloader won't boot. Your kernel will triple-fault. You'll spend an hour hunting a typo in assembly code. This is *normal*.
+Your bootloader won't boot. Your kernel will triple-fault. You'll spend an hour hunting a typo in assembly code. This is *normal* and should be expected.
 
-Each chapter includes common issues and debugging strategies. When you're truly stuck:
-
-**Take a break.** Walk away. Sleep on it. Fresh eyes catch obvious mistakes.
-
-**Verify your tools.** Tool version mismatches cause strange errors.
-
-**Check the companion code.** Compare against the chapter branch.
-
-**Use the debugger.** LLDB/GDB are essential. We teach debugging in Chapter 3.
-
-**Ask for help.** OSDev forums, Reddit's r/osdev, Discord communities.
-
-Remember: bugs you fix teach you more than code that works on the first try.
+Fixing the bugs yourself is the best way to learn. Resist the urge to look up solutions online until you've tried everything you can think of.
 
 ---
 

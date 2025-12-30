@@ -2,8 +2,6 @@
 
 Before diving into OS development, you need a solid foundation in several areas. This isn't application programming where the OS handles the hard parts—we're building the OS itself.
 
-## Required Knowledge
-
 If any of these feel unfamiliar, get comfortable with them first. Writing your own Operating system is usually considered one of the most challenging programming task there is, therfore it is crucial that you have already a solid foundation that we can build upon:
 
 On the programming side, you should be very comfortable with C programming and have a basic understanding of assembly language. You don't need to be an expert assembler programmer, but you should understand how high-level constructs translate to low-level operations.
