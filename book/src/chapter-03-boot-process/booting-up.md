@@ -2,23 +2,17 @@
 
 We have a bootable ISO image containing our kernel and GRUB. Now it's time to actually boot it and prove everything works.
 
-## Testing in QEMU
-
-Time for the moment of truth. Boot the ISO:
+Time for the moment of truth. Boot the ISO in QEMU:
 
 ```bash
 ninja -C build run
 ```
 
-QEMU should open with... a blank screen. Just black. Nothing.
+QEMU should open with and tell us it is booting TinyOS. After that there will be no other visible output—just a black screen.
 
 **Don't panic. This is success.**
 
-[!side]
-Every OS developer's first kernel: a beautifully crafted black rectangle. Embrace it!
-[/!side]
-
-I know, I know—a black screen doesn't *feel* like success. But think about what's actually happening behind that void:
+I know, I know—a black screen doesn't *feel* like success. But think about what should now have happened behind that void:
 
 1. GRUB boots and scans the first 32KB of your kernel
 2. Finds the Multiboot2 magic number (0xe85250d6)
@@ -30,23 +24,18 @@ I know, I know—a black screen doesn't *feel* like success. But think about wha
 8. `kernel_main()` checks the Multiboot magic (0x36d76289)
 9. Enters the infinite `hlt` loop
 
-**Your code is running on bare metal.** (Well, virtualized bare metal, but still!)
-
 The black screen is expected. We haven't written any code to output text yet. No VGA driver, no serial console—nothing. The kernel is sitting in that `while(1) __asm__("hlt")` loop exactly as designed, waiting patiently for instructions we haven't given it yet.
 
 Press Ctrl+C to exit QEMU. But how do we know it's actually working?
-
-## Proving the Kernel Works with LLDB
-
-A blank screen doesn't feel like success. Let's use LLDB to prove the kernel is actually running our code.
+Let's use LLDB to prove the kernel is actually running our code.
 
 [!side]
-The GDB stub speaks the GDB Remote Serial Protocol. LLDB understands this protocol too.
+The GDB stub supports the GDB Remote Serial Protocol and can therefor be used with GDB as well as LLDB. If you are better acquinted to GDB, feel free to use it instead of LLDB for this section.
 [/!side]
 
-**What is LLDB?** LLDB is a debugger (like GDB) that lets you pause a running program, inspect memory and registers, and step through code line by line. QEMU has a "GDB stub" that lets debuggers connect to the virtual machine and control the CPU.
+LLDB is a debugger (like GDB) that lets you pause a running program, inspect memory and registers, and step through code line by line. QEMU has a "GDB stub" that lets debuggers connect to the virtual machine and control the CPU.
 
-> **New to LLDB? Don't panic.**
+> **New to LLDB?**
 >
 > Yes, it's a command-line debugger. If you've used a debugger in an IDE you already know the concepts—breakpoints, stepping, inspecting variables. 
 > LLDB just does it via text instead of clicking some buttons. Think of it as your GUI debugger's grumpy but efficient terminal-dwelling relative.

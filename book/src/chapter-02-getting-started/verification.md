@@ -1,14 +1,12 @@
 # Verifying Your Setup
 
-Let's make sure everything actually works before we get three chapters in and discover your assembler is from 2003.
+Let's make sure everything actually works before we get three chapters in and discover your assembler is from the 90s.
 
 [!side]
 This section takes 2 minutes. Do it. Future you will thank present you.
 [/!side]
 
-## Version Check
-
-Run these commands and verify the versions:
+First lets verify the versions of the tools we have installed by running these commands:
 
 ```bash
 clang --version      # ≥ 17.0
@@ -21,8 +19,7 @@ lldb --version       # Any recent version
 
 All tools should be found and display version information.
 
-## Test: Compile Freestanding Code
-
+Now that we have made sure the tools are installed, let's verify they work correctly for OS development.
 
 [!side]
 The `_start` symbol is the entry point for freestanding programs. The OS doesn't set this up—we do.

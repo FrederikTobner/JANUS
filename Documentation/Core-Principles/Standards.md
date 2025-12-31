@@ -38,8 +38,8 @@ In userspace applications, undefined behavior typically crashes the process. The
 
 **In userspace vs kernel space:**
 
-- **Userspace**: Process terminates, OS recovers, system continues
-- **Kernel**: System crash, all processes terminate, unsaved work lost, potential data corruption
+- **Userspace**: Process terminates, OS recovers, system continues, not the end of the world
+- **Kernel**: System crash, all processes terminate, unsaved work lost, potential data corruption, maybe your disk will get damaged, the firmware might get corrupted, bricking the machine, until you fix the corruption, which might be like looking for a needle in a haystack. In the worst case, you might even permanently damage hardware components. So better be very careful
 
 There is no recovery mechanism. There is no debugger popup. The system freezes or reboots.
 
@@ -47,9 +47,8 @@ There is no recovery mechanism. There is no debugger popup. The system freezes o
 
 - Uninitialized variables → Always initialize variables
 - Buffer overflows → Check array bounds (even one byte overflow causes system crash)
-- Null pointer dereferences → Validate pointers before dereferencing
-- Signed integer overflow → Use unsigned types or validate ranges
-- Precision-losing conversions → Cast explicitly and understand truncation behavior
+- Wild, dangling and null pointers
+- Integer overflow → Use unsigned types or validate ranges
 
 **This is not theoretical.** Every item in this list can and will crash the entire system if it occurs in kernel code.
 

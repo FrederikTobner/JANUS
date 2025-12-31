@@ -58,7 +58,9 @@ Which is neat, but they requires runtime support which we don't have in a freest
 >
 > TinyOSPlatform.cmake sets these flags in variables like `TINYOS_COMMON_FLAGS`, `TINYOS_DEBUG_FLAGS`, etc. The helper functions in TinyOSHelpers.cmake apply them to targets automatically. This keeps platform-specific logic centralized—if you port to ARM later, you only change one file.
 >
-> For , you can create a minimal `TinyOSPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
+> For now, lets create a minimal `TinyOSPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
+
+> TODO: Make a little bit less minimal, but without adding all the complexity from the real repo.
 
 Here's a minimal platform module to get started:
 
@@ -66,26 +68,92 @@ Here's a minimal platform module to get started:
 file: cmake/TinyOSPlatform.cmake
 after: entire file
 ---
-+# cmake/TinyOSPlatform.cmake
-+# Minimal platform detection and compiler setup for Chapter 3
-+
-+# Kernel compile flags (apply to all targets)
-+add_compile_options(
-+    -target x86_64-elf
-+    -ffreestanding
-+    -nostdlib
-+    -mno-red-zone
-+    -fno-stack-protector
-+    -Wall -Wextra
-+)
-+
-+# Debug vs Release
-+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-+    add_compile_options(-g3 -O0)
-+else()
-+    add_compile_options(-O2)
-+endif()
-```
+> include_guard(GLOBAL)
+> 
+> if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+>     set(TINYOS_HOST_LINUX TRUE)
+> elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+>     set(TINYOS_HOST_WINDOWS TRUE)
+> elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+>     set(TINYOS_HOST_MACOS TRUE)
+> else()
+>     message(WARNING "Unknown host platform: ${CMAKE_SYSTEM_NAME}")
+> endif()
+> 
+> set(TINYOS_TARGET_ARCH "x86_64" CACHE STRING "Target architecture")
+> set(TINYOS_TARGET_PLATFORM "elf")
+> 
+> if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+>     set(TINYOS_COMPILER_CLANG TRUE)
+>     set(TINYOS_TARGET_FLAG "-target")
+> elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+>     set(TINYOS_COMPILER_GCC TRUE)
+>     set(TINYOS_TARGET_FLAG "--target=")
+> else()
+>     message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}. TinyOS requires Clang or GCC.")
+> endif()
+> 
+> if(NOT CMAKE_BUILD_TYPE)
+>     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (Debug, Release, MinSizeRel)" FORCE)
+> endif()
+> 
+> message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+> message(STATUS "Target: ${TINYOS_TARGET_ARCH}-${TINYOS_TARGET_PLATFORM}")
+> 
+> set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
+> 
+> if(TINYOS_COMPILER_CLANG)
+>     set(TINYOS_COMMON_FLAGS
+>         -target x86_64-elf
+>         -nostdlib
+>         -ffreestanding
+>         -fno-builtin
+>         -fno-stack-protector
+>         -mno-red-zone
+>         -Wall
+>         -Wextra
+>         -Werror
+>         -Wconversion
+>         -Wimplicit
+>         -Wcast-qual
+>         -Wpointer-arith
+>     )
+> else()
+>     set(TINYOS_COMMON_FLAGS
+>         -nostdlib
+>         -ffreestanding
+>         -fno-builtin
+>         -fno-stack-protector
+>         -mno-red-zone
+>         -Wall
+>         -Wextra
+>         -Werror
+>         -Wconversion
+>         -Wimplicit
+>         -Wcast-qual
+>         -Wpointer-arith
+>     )
+> endif()
+> 
+> set(TINYOS_DEBUG_FLAGS
+>     -g3
+>     -gdwarf-4
+>     -O0
+>     -DDEBUG
+> 
+> )
+> 
+> set(TINYOS_RELEASE_FLAGS
+>     -O2
+>     -DNDEBUG
+> )
+> 
+> set(TINYOS_MINSIZEREL_FLAGS
+>     -Os
+>     -DNDEBUG
+> )
+> 
+> set(TINYOS_PLATFORM_LOADED TRUE)```
 
 This applies kernel flags to everything. As the project grows, you'll refactor this into finer-grained control (some libraries might not need `-ffreestanding`, for example).
 
@@ -97,53 +165,203 @@ Create `cmake/TinyOSHelpers.cmake` with helper functions for kernel development:
 file: cmake/TinyOSHelpers.cmake
 replace: entire file
 ---
-+# cmake/TinyOSHelpers.cmake
-+
-+# Create kernel executable with custom linker script
-+function(tinyos_create_kernel)
-+    cmake_parse_arguments(
-+        ARG
-+        ""
-+        "LINKER_SCRIPT"
-+        "SOURCES;LIBRARIES"
-+        ${ARGN}
-+    )
-+    
-+    # Create the kernel executable
-+    add_executable(kernel.elf ${ARG_SOURCES})
-+    
-+    # Link with provided libraries and objects
-+    if(ARG_LIBRARIES)
-+        target_link_libraries(kernel.elf PRIVATE ${ARG_LIBRARIES})
-+    endif()
-+    
-+    # Apply linker script
-+    if(ARG_LINKER_SCRIPT)
-+        target_link_options(kernel.elf PRIVATE
-+            -T ${ARG_LINKER_SCRIPT}
-+            -nostdlib
-+            -static
-+        )
-+        # Ensure rebuild when linker script changes
-+        set_target_properties(kernel.elf PROPERTIES
-+            LINK_DEPENDS ${ARG_LINKER_SCRIPT}
-+        )
-+    endif()
-+    
-+    # Set kernel-specific flags
-+    target_compile_options(kernel.elf PRIVATE
-+        -ffreestanding
-+        -fno-stack-protector
-+        -mno-red-zone
-+    )
-+    
-+    # Include directories
-+    target_include_directories(kernel.elf PRIVATE
-+        ${CMAKE_SOURCE_DIR}/include
-+        ${CMAKE_SOURCE_DIR}/boot/include
-+    )
-+endfunction()
+> include_guard(GLOBAL)
+> 
+> if(NOT TINYOS_PLATFORM_LOADED)
+>     message(FATAL_ERROR "TinyOSPlatform.cmake must be included before TinyOSHelpers.cmake")
+> endif()
+> 
+> #
+> # Add a kernel library with standard configuration
+> # 
+> # Usage:
+> #   tinyos_add_library(name
+> #       SOURCES file1.c file2.c
+> #       [DEPENDENCIES dep1 dep2]
+> #   )
+> #
+> function(tinyos_add_library NAME)
+>     cmake_parse_arguments(
+>         ARG                    # Prefix for parsed arguments
+>         ""                     # Options (boolean flags)
+>         ""                     # Single-value arguments
+>         "SOURCES;DEPENDENCIES" # Multi-value arguments
+>         ${ARGN}
+>     )
+> 
+>     if(NOT ARG_SOURCES)
+>         message(STATUS "  Added library: ${NAME} (placeholder, no sources yet)")
+>         add_library(${NAME} INTERFACE)
+>         
+>         target_include_directories(${NAME}
+>             INTERFACE
+>                 ${CMAKE_CURRENT_SOURCE_DIR}/include
+>                 ${CMAKE_SOURCE_DIR}/include
+>         )
+>         
+>         if(ARG_DEPENDENCIES)
+>             target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
+>         endif()
+>         
+>         return()
+>     endif()
+> 
+>     add_library(${NAME} STATIC ${ARG_SOURCES})
+> 
+>     target_include_directories(${NAME}
+>         PUBLIC
+>             ${CMAKE_CURRENT_SOURCE_DIR}/include
+>             ${CMAKE_SOURCE_DIR}/include
+>     )
+> 
+>     if(ARG_DEPENDENCIES)
+>         target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
+>     endif()
+> 
+>     target_compile_options(${NAME} PRIVATE ${TINYOS_COMMON_FLAGS})
+>     
+>     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+>         target_compile_options(${NAME} PRIVATE ${TINYOS_DEBUG_FLAGS})
+>     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+>         target_compile_options(${NAME} PRIVATE ${TINYOS_RELEASE_FLAGS})
+>     elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+>         target_compile_options(${NAME} PRIVATE ${TINYOS_MINSIZEREL_FLAGS})
+>     endif()
+> 
+>     message(STATUS "  Added library: ${NAME}")
+> endfunction()
+> 
+> #
+> # Add a kernel module (like kernel, boot, arch, mm)
+> # 
+> # Usage:
+> #   tinyos_add_module(name
+> #       SOURCES file1.c file2.c
+> #       [DEPENDENCIES dep1 dep2]
+> #   )
+> #
+> function(tinyos_add_module NAME)
+>     cmake_parse_arguments(
+>         ARG
+>         ""
+>         ""
+>         "SOURCES;DEPENDENCIES"
+>         ${ARGN}
+>     )
+> 
+>     # Validate required arguments
+>     if(NOT ARG_SOURCES)
+>         # Allow empty SOURCES for placeholder modules
+>         message(STATUS "  Added module: ${NAME} (placeholder, no sources yet)")
+>         add_library(${NAME} INTERFACE)
+>         
+>         # Include directories for INTERFACE library
+>         target_include_directories(${NAME}
+>             INTERFACE
+>                 ${CMAKE_CURRENT_SOURCE_DIR}/include
+>                 ${CMAKE_SOURCE_DIR}/kernel/include
+>         )
+>         
+>         # Link dependencies
+>         if(ARG_DEPENDENCIES)
+>             target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
+>         endif()
+>         
+>         return()
+>     endif()
+> 
+>     # Create static library (modules are libraries)
+>     add_library(${NAME} STATIC ${ARG_SOURCES})
+> 
+>     # Standard include directories
+>     target_include_directories(${NAME}
+>         PUBLIC
+>             ${CMAKE_CURRENT_SOURCE_DIR}/include
+>             ${CMAKE_SOURCE_DIR}kernel/include
+>     )
+> 
+>     # Link dependencies
+>     if(ARG_DEPENDENCIES)
+>         target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
+>     endif()
+> 
+>     # Apply common compiler flags
+>     target_compile_options(${NAME} PRIVATE ${TINYOS_COMMON_FLAGS})
+>     
+>     # Apply build-type specific flags
+>     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+>         target_compile_options(${NAME} PRIVATE ${TINYOS_DEBUG_FLAGS})
+>     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+>         target_compile_options(${NAME} PRIVATE ${TINYOS_RELEASE_FLAGS})
+>     elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+>         target_compile_options(${NAME} PRIVATE ${TINYOS_MINSIZEREL_FLAGS})
+>     endif()
+> 
+>     message(STATUS "  Added module: ${NAME}")
+> endfunction()
+> 
+> # Print TinyOS build configuration summary
+> #
+> # Create the final kernel executable with custom linker script
+> # 
+> # Usage:
+> #   tinyos_create_kernel(
+> #       SOURCES main.c init.c
+> #       LIBRARIES lib1 lib2
+> #       LINKER_SCRIPT path/to/linker.ld
+> #   )
+> #
+> function(tinyos_create_kernel)
+>     cmake_parse_arguments(
+>         ARG
+>         ""
+>         "LINKER_SCRIPT"
+>         "SOURCES;LIBRARIES"
+>         ${ARGN}
+>     )
+> 
+>     if(NOT ARG_SOURCES)
+>         message(FATAL_ERROR "tinyos_create_kernel: SOURCES required")
+>     endif()
+>     if(NOT ARG_LINKER_SCRIPT)
+>         message(FATAL_ERROR "tinyos_create_kernel: LINKER_SCRIPT required")
+>     endif()
+> 
+>     add_executable(kernel.elf ${ARG_SOURCES})
+> 
+>     if(ARG_LIBRARIES)
+>         target_link_libraries(kernel.elf PRIVATE ${ARG_LIBRARIES})
+>     endif()
+> 
+>     target_include_directories(kernel.elf
+>         PRIVATE
+>             ${CMAKE_CURRENT_SOURCE_DIR}/include
+>             ${CMAKE_SOURCE_DIR}/kernel/include
+>             ${CMAKE_BINARY_DIR}/include
+>     )
+> 
+>     target_compile_options(kernel.elf PRIVATE ${TINYOS_COMMON_FLAGS})
+>     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+>         target_compile_options(kernel.elf PRIVATE ${TINYOS_DEBUG_FLAGS})
+>     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+>         target_compile_options(kernel.elf PRIVATE ${TINYOS_RELEASE_FLAGS})
+>     elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+>         target_compile_options(kernel.elf PRIVATE ${TINYOS_MINSIZEREL_FLAGS})
+>     endif()
+> 
+>     set_target_properties(kernel.elf PROPERTIES
+>         LINK_FLAGS "-T ${ARG_LINKER_SCRIPT} -nostdlib -static"
+>         LINK_DEPENDS "${ARG_LINKER_SCRIPT}"
+>         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+>     )
+> 
+>     message(STATUS "  Created kernel executable: kernel.elf")
+>     message(STATUS "    Linker script: ${ARG_LINKER_SCRIPT}")
+>     message(STATUS "    Libraries: ${ARG_LIBRARIES}")
+> endfunction()
 ```
+
+> TODO: Consider adding the create_lib  and create_module later, since they are currently not needed.
 
 Key functions:
 
@@ -309,7 +527,7 @@ ISO images are named after the ISO 9660 standard that specifies the file system 
         ┌───────────────┼───────────────┐
         │               │               │
         ▼               ▼               ▼
-   multiboot.asm   boot.asm        main.c, lib/*.c
+   multiboot.asm   boot.asm        main.c
         │               │               │
         ▼               ▼               ▼
      [NASM]          [NASM]         [Clang]

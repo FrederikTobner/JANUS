@@ -20,8 +20,7 @@ This chapter provides the foundation for your OS development journey: understand
 3. [What We'll Build](what-well-build.md)
 4. [Prerequisites](prerequisites.md)
 5. [How to Use This Book](how-to-use.md)
-6. [Getting Started](getting-started.md)
-
+6. [Summary](./summary.md)
 ---
 
 **Next: [What is an Operating System?](what-is-an-os.md)**
