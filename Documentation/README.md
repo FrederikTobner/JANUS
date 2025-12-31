@@ -41,7 +41,7 @@ Documents describing the architecture and structure of the codebase.
   - Library structure
 
 
-- **[Include-Hierarchy.md](Code-Organization/Include-Hierarchy.md)**
+- **[Include-Hierarchy.md](Code-Organization/Global-Include-Hierarchy.md)**
   - Header file organization (public vs internal)
   - Include path structure
   - Forward declarations and reducing dependencies

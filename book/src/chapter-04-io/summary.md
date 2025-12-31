@@ -83,4 +83,4 @@ In the next chapter, we'll tackle memory management—the foundation for everyth
 
 ---
 
-**Next: [Chapter 4: Memory Management](../chapter-04-memory/README.md)**
+**Next: [Chapter 5: Memory Management](../chapter-05-memory/README.md)**

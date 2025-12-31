@@ -15,13 +15,5 @@ By the end of this chapter, our kernel will be able to print "Hello, TinyOS!" an
 
 ---
 
-## Sections
-
-1. [Serial Output](serial-output.md)
-2. [VGA Text Mode](vga-text-mode.md)
-3. [Keyboard Input](keyboard-input.md)
-4. [Summary](summary.md)
-
----
 
 **Next: [Serial Output](serial-output.md)**

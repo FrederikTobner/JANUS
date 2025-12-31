@@ -185,6 +185,8 @@ The `.bss` holds uninitialized data, that the bootloader zeroes out for us.
 
 Finally, add these symbols at the end of the `SECTIONS` block (after `.bss`):
 
+> TODO: Consider doing this later when we need it
+
 ```ld-diff
 file: kernel/core/linker.ld
 after: .bss section
@@ -211,80 +213,17 @@ These become usable in C:
 extern char kernel_end;
 void *end = &kernel_end;  // Get the address
 ```
+Before moving on, lets clarify a few things.
+You might be wondering why we need exact control over the memory layout and why 1MB is our starting address.
+This is needed because the BIOS and GRUB own most of the first 1MB of memory, and we need to avoid conflicts with it.
 
-That's the complete linker script! Save it as `kernel/linker.ld`.
-
-## Complete Reference
-
-Here's the final linker script for reference:
-
-```ld
-ENTRY(_start)
-
-SECTIONS {
-    . = 0x100000;
-    
-    .multiboot ALIGN(8) : {
-        *(.multiboot)
-    }
-    
-    .text ALIGN(4K) : {
-        *(.text)
-        *(.text.*)
-    }
-    
-    .rodata ALIGN(4K) : {
-        *(.rodata)
-        *(.rodata.*)
-    }
-    
-    .data ALIGN(4K) : {
-        *(.data)
-        *(.data.*)
-    }
-    
-    .bss ALIGN(4K) : {
-        *(COMMON)
-        *(.bss)
-        *(.bss.*)
-    }
-    
-    kernel_start = 0x100000;
-    kernel_end = .;
-    kernel_size = kernel_end - kernel_start;
-}
-```
-
-## Checkpoint: Understanding the Linker Script
-
-Before moving on, make sure you understand:
-
-**The Big Picture:**
-
-- Why we need exact memory control (we are the OS, no loader to help us)
-- Why 1MB is our starting address (BIOS owns the first 1MB)
-- Why section order matters (Multiboot header must be first for GRUB to find it)
-
-**Key Concepts:**
-
-- **Location counter (`.`)**: Tracks where we're placing things in memory
-- **ALIGN(4K)**: Aligns sections to page boundaries (4096 bytes)
-- **Wildcards (`*`)**: Pulls in sections from all object files
-- **Section permissions**: .text is executable, .rodata is read-only, .data/.bss are writable
-
-**Test Your Understanding:**
-
-- What would happen if `.multiboot` wasn't first? (GRUB wouldn't find it, boot fails)
-- Why align to 4KB? (Page size on x86-64, needed for memory protection)
-- Why is `.bss` separate from `.data`? (Saves disk space—uninitialized = no zeros stored)
 
 [!side]
 If any of these feel unclear, re-read the sections above. The linker script controls your entire memory layout—worth understanding deeply.
 [/!side]
 
-## Verification
 
-After building, verify the layout:
+After building, cou can verify the layout using the readelf tool. We use the option `-l` to display the program headers:
 
 ```bash
 readelf -l build/kernel.elf
@@ -293,20 +232,36 @@ readelf -l build/kernel.elf
 Output:
 
 ```
+Elf file type is EXEC (Executable file)
+Entry point 0x101000
+There are 6 program headers, starting at offset 64
+
 Program Headers:
   Type           Offset             VirtAddr           PhysAddr
                  FileSiz            MemSiz              Flags  Align
   LOAD           0x0000000000001000 0x0000000000100000 0x0000000000100000
                  0x0000000000000030 0x0000000000000030  R      0x1000
   LOAD           0x0000000000002000 0x0000000000101000 0x0000000000101000
-                 0x00000000000000da 0x00000000000000da  R E    0x1000
+                 0x00000000000000c0 0x00000000000000c0  R E    0x1000
   LOAD           0x0000000000003000 0x0000000000102000 0x0000000000102000
-                 0x000000000000001a 0x000000000000001a  R      0x1000
-  LOAD           0x0000000000000000 0x0000000000103000 0x0000000000103000
+                 0x0000000000000040 0x0000000000000040  R      0x1000
+  LOAD           0x0000000000001000 0x0000000000103000 0x0000000000103000
                  0x0000000000000000 0x0000000000007000  RW     0x1000
+  NOTE           0x000000000000301c 0x000000000010201c 0x000000000010201c
+                 0x0000000000000024 0x0000000000000024  R      0x4
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     0x10
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .multiboot 
+   01     .text 
+   02     .rodata .note.gnu.build-id 
+   03     .bss 
+   04     .note.gnu.build-id 
+   05     
 ```
 
-All sections start at 0x100000 (1MB) with 4KB alignment.
 
 ---
 

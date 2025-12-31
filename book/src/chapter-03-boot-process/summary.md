@@ -72,4 +72,4 @@ You now understand more about x86_64 booting than most programmers ever will. Ni
 
 ---
 
-**Next: [Chapter 3: Input/Output](../chapter-03-io/README.md)**
+**Next: [Chapter 4: Input/Output](../chapter-04-io/README.md)**

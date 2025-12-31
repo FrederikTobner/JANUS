@@ -76,4 +76,4 @@ A working kernel that produces no output is like a tree falling in the forest. B
 8. [Booting up](booting-up.md)
 9. [Boot info verification](boot-info-verification.md)
 10. [Boot Entry Assembly 64bit](boot-assembly-64bit.md)
-11. [Summary: What We've Built](summary.md)
+11. [Summary: What We've Built](./summary.md)

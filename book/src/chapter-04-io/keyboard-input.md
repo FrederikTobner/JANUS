@@ -41,4 +41,4 @@ Reading keyboard input requires handling interrupts from the PS/2 keyboard contr
 
 ---
 
-**Next: [Summary](summary.md)**
+**Next: [Summary](./summary.md)**

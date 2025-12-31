@@ -152,4 +152,4 @@ If all tests succeeded, you have a working TinyOS development environment. If an
 
 ---
 
-**Next: [Project Setup](project-setup.md)**
+**Next: [Summary](./summary.md)**

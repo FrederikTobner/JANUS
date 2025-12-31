@@ -1,8 +1,7 @@
 # Boot Entry Assembly
 
-GRUB finds our Multiboot header, validates it, and jumps to our entry point. 
+GRUB looks for our Multiboot header, and when it is available jumps to our entry point. 
 To transfer control from GRUB to our C code we need a small assembly stub that sets up the stack and calls our C entry point.
-
 
 Create `kernel/boot/boot.asm`:
 

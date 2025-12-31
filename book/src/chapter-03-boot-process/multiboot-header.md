@@ -247,4 +247,4 @@ Without this header, GRUB won't recognize our kernel. The header is a contract: 
 
 ---
 
-**Next: [Boot Entry Assembly →](boot-assembly.md)**
+**Next: [Boot Entry Assembly →](boot-assembly-32bit.md)**

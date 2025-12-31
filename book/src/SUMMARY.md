@@ -10,7 +10,6 @@
   - [Why Build One?](chapter-01-introduction/why-build-one.md)
   - [What We'll Build](chapter-01-introduction/what-well-build.md)
   - [Prerequisites](chapter-01-introduction/prerequisites.md)
-  - [Development Environment](chapter-01-introduction/development-environment.md)
   - [How to Use This Book](chapter-01-introduction/how-to-use.md)
   - [Getting Started](chapter-01-introduction/getting-started.md)
 

@@ -4,12 +4,7 @@ In the previous section, we discovered that GRUB2 only puts us in 32-bit protect
 Some other bootloaders already handle the transition like Limine. So why are we doing this?
 
 Because understanding the transition teaches you a couple of **fundamental OS concepts** you'll need later:
-
-- **CPU operating modes** and their constraints  
-- **Page table structure** and virtual memory setup
-- **Control registers** (CR0, CR3, CR4) and MSRs
-- **The relationship between paging and long mode**
-- **GDT structure** and segment selectors
+These are cpu operating modes, page table structure, control registers, the relationship between paging and long mode, and the GDT structure.
 
 GDT stands for Global Descriptor Table. It is a binary data structure that defines memory segments and their properties.
 In is only relevant for to the IA-32 and x86-64 architectures.
@@ -23,7 +18,7 @@ The memory layout of the full descriptor looks like this:
 | **Base**<br>8 MSB | **Flags**  | **Limit**<br> 4 MSB | **Access Byte** | **Base**<br> 24 LSB | **Limit**<br> 16 LSB      |
 
 [!side]  
-Ever notice how the x86 segment descriptor layout feels like a memory scavenger hunt? The fields are scattered all over: first you get a the 8 most signifiant bits from 0x3F, then the 24 least significant bits are stored from 0x27 to 0x10. The limit is split too, with 4 bits at 0x33-0x30 and 16 bits at 0x0F-0x00. And don't get me started on the access byte and flags in between, they are as mysterious as a `Sys Req` key on a keyboard.
+Ever notice how the x86 segment descriptor layout feels like a memory scavenger hunt? The fields are scattered all over to place: first you get a the 8 most signifiant bits from 0x3F, then the 24 least significant bits are stored from 0x27 to 0x10. The limit is split too, with 4 bits at 0x33-0x30 and 16 bits at 0x0F-0x00. And don't get me started on the access byte and flags in between, they are as mysterious as a `Sys Req` key on a keyboard.
 You practically need a treasure map and and a compass to piece together a single segment descriptor! 
 [/!side]
 
@@ -53,8 +48,7 @@ flowchart TD
     step7 --> step8
 ```
 
-Let's implement each step.
-
+Let's implement this step-by-step. 
 We'll build `kernel/boot/boot.asm` incrementally, adding each piece as we explain it.
 
 
@@ -99,7 +93,7 @@ stack_top:
 +    resb 4096
 ```
 
- The page tables must be 4096-byte (4KiB) aligned because that's the page size the CPU expects.
+The page tables must be 4096-byte (4KiB) aligned because that's the page size the CPU expects.
 
 Add the entry point where GRUB transfers control to us.
 When GRUB loads a 64-bit kernel, it puts us in 32-bit protected mode with paging disabled.
@@ -323,21 +317,16 @@ graph LR
 > **TODO: Hand-drawn illustration idea**
 > Draw the CPU as a character going through a transformation sequence like a video game power-up. Panel 1: "32-bit CPU" looking small and limited. Panel 2: runnung into a "PAE mushroom" and "EFER star". Panel 3: Powered up"
 
-> **Aside: System V AMD64 ABI**
+> **New to the System V AMD64 ABI?**
 >
-> ABI stands for Application Binary Interface—the rules for how functions are called at the assembly level. It ensures that code that follows the ABI conventions can also be used under different architectures that implement the same ABI.
-The System V AMD64 ABI (used by Linux, BSD, and most Unix-like systems) specifies:
->
-> - **First 6 integer arguments** go in registers: RDI, RSI, RDX, RCX, R8, R9
-> - **Return value** goes in RAX
-> - **Stack must be 16-byte aligned** before a call instruction
-> - **Certain registers are callee-saved** (RBX, RBP, R12-R15)
+> ABI stands for Application Binary Interface. 
+> It defines the rules for how functions are called at the assembly level and ensures that code that follows the ABI conventions can also be used under different architectures that implement the same ABI.
+> The System V AMD64 ABI (used by Linux, BSD, and most Unix-like systems) specifies the first six integer or pointer arguments are passed in registers, and the return value is also passed in a register. Additionally it defines that the stack must be 16-byte aligned before a call instruction. Lastly, it specifies which registers are caller-saved and which are callee-saved.
 >
 > So when we call `kernel_main(uint32_t magic, void *info)`, the magic number goes in RDI and the info pointer goes in RSI.
 
-
-
 Now lets validate that out boot assembly transition to 64-bit mode works properly.
+
 > TODO: Test registers and show variables
 
 Now rebuild and test:

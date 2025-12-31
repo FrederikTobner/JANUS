@@ -89,5 +89,5 @@ The code we will write will be the same regardless. I won't participate in the e
 
 ---
 
-**Next: [Development Environment](development-environment.md)**
+**Next: [How to use this book](how-to-use.md)**
 

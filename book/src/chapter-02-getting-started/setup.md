@@ -354,4 +354,4 @@ You now have a complete TinyOS development environment. In the next chapter, we'
 
 ---
 
-**Next: [Chapter 1: First Boot →](chapter-02-first-boot.md)**
+**Next: [Summary](./summary.md)**
