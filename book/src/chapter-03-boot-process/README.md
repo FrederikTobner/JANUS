@@ -60,7 +60,7 @@ A working kernel that produces no output is like a tree falling in the forest. B
 > - Add complexity without educational value
 > - Solve problems we don't have yet
 >
-> Real-world OS projects start concrete: Linux was x86-only for years, MINIX started on x86, xv6 teaches with RISC-V or x86 separately (not abstracted). Build one well first, then generalize.
+> Real-world OS projects start concrete: Linux and Minix were x86-only for years. Implement one architecture first, then generalize.
 
 ---
 
@@ -68,12 +68,11 @@ A working kernel that produces no output is like a tree falling in the forest. B
 
 1. [Project Structure](project-structure.md)
 2. [The Multiboot2 Header](multiboot-header.md)
-3. [Boot Entry Assembly 32bit](boot-assembly-32bit.md)
+3. [Boot Entry Assembly](boot-assembly-64bit.md)
 4. [The Linker Script](linker-script.md)
 5. [The CMake Build System](build-system.md)
 6. [The Kernel Entry Point](kernel-entry.md)
-7. [Creating a Bootable ISO](creating-bootable-iso.md)
-8. [Booting up](booting-up.md)
-9. [Boot info verification](boot-info-verification.md)
-10. [Boot Entry Assembly 64bit](boot-assembly-64bit.md)
-11. [Summary: What We've Built](./summary.md)
+7. [Boot info verification](boot-info-verification.md)
+8. [Creating a Bootable ISO](creating-bootable-iso.md)
+9. [Booting up](booting-up.md)
+10. [Summary: What We've Built](./summary.md)

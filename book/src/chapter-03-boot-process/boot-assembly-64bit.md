@@ -1,9 +1,10 @@
 # Understanding the 64-bit Transition
 
-In the previous section, we discovered that GRUB2 only puts us in 32-bit protected mode when loading a 64-bit kernel. Therefor we will need to handle the transition ourself.
+In the previous section, we stated that when boot our kernel using GRUB, we will start in 32-bit protected mode with paging disabled.
+Therefor we will need to handle the transition ourself.
 Some other bootloaders already handle the transition like Limine. So why are we doing this?
 
-Because understanding the transition teaches you a couple of **fundamental OS concepts** you'll need later:
+Because understanding the transition teaches a couple of **fundamental OS concepts** that we will need later.
 These are cpu operating modes, page table structure, control registers, the relationship between paging and long mode, and the GDT structure.
 
 GDT stands for Global Descriptor Table. It is a binary data structure that defines memory segments and their properties.
@@ -18,14 +19,13 @@ The memory layout of the full descriptor looks like this:
 | **Base**<br>8 MSB | **Flags**  | **Limit**<br> 4 MSB | **Access Byte** | **Base**<br> 24 LSB | **Limit**<br> 16 LSB      |
 
 [!side]  
-Ever notice how the x86 segment descriptor layout feels like a memory scavenger hunt? The fields are scattered all over to place: first you get a the 8 most signifiant bits from 0x3F, then the 24 least significant bits are stored from 0x27 to 0x10. The limit is split too, with 4 bits at 0x33-0x30 and 16 bits at 0x0F-0x00. And don't get me started on the access byte and flags in between, they are as mysterious as a `Sys Req` key on a keyboard.
+Ever notice how the x86 segment descriptor layout feels like a memory scavenger hunt? The fields are scattered all over to place. 
+The 8 most signifiant bits of the base are stored from 0x3F - 0x38, then the 24 least significant bits are stored from 0x27 to 0x10. The limit is split too, with 4 bits at 0x33-0x30 and 16 bits at 0x0F-0x00. And don't get me started on the access byte and flags in between, some of their individual bits are as mysterious as a `Sys Req` key on a keyboard.
 You practically need a treasure map and and a compass to piece together a single segment descriptor! 
 [/!side]
 
 These concepts are essential for fully understanding the later chapters. 
 Additionally if you would like to support Bootloaders that leave you in 32-bit mode like GRUB you need to do this manually.
-
-## The Complete Boot Sequence
 
 Therfor we will implement what other bootloaders do behind the scenes. The transition requires:
 
@@ -101,6 +101,14 @@ The CPU register `EAX` contains the multiboot magic number (0x36d76289) and `EBX
 These registers are used under x86 calling conventions to pass the first two function arguments.
 
 But the calling convention for System V AMD64 ABI expects the first two arguments in `RDI` and `RSI`, so we need to transfer the values from `EAX` to `EDI` and from `EBX` to `ESI`.
+So when we call `kernel_main(uint32_t magic, void *info)`, the magic number needs to be placed in RDI and the info pointer in RSI.
+
+> **New to the System V AMD64 ABI?**
+>
+> ABI stands for Application Binary Interface. 
+> It defines the rules for how functions are called at the assembly level and ensures that code that follows the ABI conventions can also be used under different architectures that implement the same ABI.
+> The System V AMD64 ABI, that is used by Linux, BSD, and most Unix-like systems, specifies the first six integer or pointer arguments are passed in registers, and the return value is also passed in a register. 
+> Additionally it defines that the stack must be 16-byte aligned before a call instruction. Lastly, it specifies which registers are caller-saved and which are callee-saved.
 
 ```x86asm-diff
 file: kernel/boot/boot.asm
@@ -117,7 +125,9 @@ after: resb 4096
 +    mov esi, ebx           
 ```
 
-Next we setup the stack pointer `RSP` to point to the top of our stack. Then we call a subroutine to setup the page tables and enable long mode.
+Next we setup the stack pointer register `ESP` to point to the top of our stack. 
+Under x64 the stack is commonly called `RSP`, but in 32-bit mode it is still `ESP`, even though they are referencing the same physical register.
+Then we call a subroutine to setup the page tables and enable long mode.
 
 Additionally we need to load the global descriptor table and perform a far jump to switch to the 64-bit code segment.
 
@@ -173,7 +183,7 @@ The flag value `0b11` equals \\(2^0 + 2^1 = 3\\) (present + writable), and `0b10
 
 We're using a 2MB **huge page** which skips the P1 (page table) level entirely. This maps the entire first 2MB in one entry instead of 512 individual 4KB pages. A standard 4KB page would require \\(512\\) entries (since \\(2\\text{MB} = 2^{21}\\) bytes and \\(4\\text{KB} = 2^{12}\\) bytes, so \\(2^{21} / 2^{12} = 2^9 = 512\\) pages).
 
-Add this subroutine that transitions the CPU to 64-bit mode:
+Add this subroutine to enable paging.
 
 ```x86asm-diff
 file: kernel/boot/boot.asm
@@ -188,7 +198,6 @@ after: setup_page_tables ret
 +    ret
 ```
 
-This subroutine performs the mode transition sequence.
 Fist we load the P4 table address into control register CR3, which tells the CPU where our page tables are located in memory.
 
 Next we enable the Physical Address Extension (PAE) by setting bit 5 in control register CR4. PAE allows the CPU to access more than 4GB of physical memory and is a prerequisite for entering long mode.
@@ -207,7 +216,7 @@ enable_paging:
     ret
 ```
 
-After that we set the Long Mode Enable (LM) bit in the Extended Feature Enable Register (EFER) Model-Specific Register (MSR) using the `rdmsr` and `wrmsr` instructions. This tells the CPU that we want to enter 64-bit mode.
+After that we set the Long Mode Enable bit in the Extended Feature Enable Register (EFER) Model-Specific Register (MSR) using the `rdmsr` and `wrmsr` instructions. This tells the CPU that we want to enter 64-bit mode.
 
 
 ```x86asm-diff
@@ -246,7 +255,7 @@ after: wrmsr
 
 > **Aside: Page Table Naming**
 >
-> The names are confusing because Intel and AMD use different terminology:
+> The page table names used by Intel and AMD are quite confusing, because use different terminology:
 >
 > - **P4/PML4** = Page Map Level 4 (top level)
 > - **P3/PDPT** = Page Directory Pointer Table
@@ -254,6 +263,7 @@ after: wrmsr
 > - **P1/PT** = Page Table (we skip this by using huge pages)
 >
 > We use the shorter P4/P3/P2 names for simplicity.
+
 We're finally in long mode! Add the 64-bit entry point that calls our kernel:
 
 ```x86asm-diff
@@ -279,6 +289,29 @@ after: enable_paging ret
 +    jmp .hang
 ```
 
+```x86asm-diff
+file: kernel/boot/boot.asm
+after: enable_paging ret
+---
+    call kernel_main
+    
++.hang:
++    cli
++    hlt
++    jmp .hang
+```
+
+
+After `kernel_main` returns, we enter an infinite loop that halts the CPU.
+You might be wondering why we need this, because our kernel should never return from `kernel_main`.
+This is only a defensive measure to ensure the CPU doesn't execute random instructions if `kernel_main` were to return.
+
+[!side]
+When working on a kernel, it is crucial to be very defensive, you could even say almost paranoid. 
+Like what happens if my kernel, has a broken BIOS, or a cosmic ray flips a bit in your boot info? 
+Always expect the unexpected!
+[/side]
+
 Now we can actually start writing 64-bit code after we specified the target processor mode using the bits directive.
 In long mode, segment registers aren't used for addressing (flat memory model), but we zero them out for cleanliness. The EDI and ESI registers we saved in Step 2 are now RDI and RSI, perfectly positioned as the first two function arguments per the System V AMD64 calling convention. After we call `kernel_main`, we use a 'hlt' instruction in an infinite loop to halt the CPU when the kernel returns.
 
@@ -292,12 +325,12 @@ after: .hang loop
 +
 +section .rodata
 +gdt64:
-+    dq 0                                    ; Null descriptor
++    dq 0                                    
 +.code: equ $ - gdt64
-+    dq (1<<43) | (1<<44) | (1<<47) | (1<<53) ; Code segment
++    dq (1<<43) | (1<<44) | (1<<47) | (1<<53) 
 +.pointer:
-+    dw $ - gdt64 - 1                        ; GDT size
-+    dq gdt64                                ; GDT address
++    dw $ - gdt64 - 1                        
++    dq gdt64                                
 ```
 
 The code segment descriptor sets bits for: executable (bit 43), code/data segment (bit 44), present (bit 47), and 64-bit mode (bit 53). The value \\((1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)\\) creates a 64-bit value with these specific bits set. 
@@ -314,17 +347,6 @@ graph LR
     C -.->|"Long Mode Enabled!"| C
 ```
 
-> **TODO: Hand-drawn illustration idea**
-> Draw the CPU as a character going through a transformation sequence like a video game power-up. Panel 1: "32-bit CPU" looking small and limited. Panel 2: runnung into a "PAE mushroom" and "EFER star". Panel 3: Powered up"
-
-> **New to the System V AMD64 ABI?**
->
-> ABI stands for Application Binary Interface. 
-> It defines the rules for how functions are called at the assembly level and ensures that code that follows the ABI conventions can also be used under different architectures that implement the same ABI.
-> The System V AMD64 ABI (used by Linux, BSD, and most Unix-like systems) specifies the first six integer or pointer arguments are passed in registers, and the return value is also passed in a register. Additionally it defines that the stack must be 16-byte aligned before a call instruction. Lastly, it specifies which registers are caller-saved and which are callee-saved.
->
-> So when we call `kernel_main(uint32_t magic, void *info)`, the magic number goes in RDI and the info pointer goes in RSI.
-
 Now lets validate that out boot assembly transition to 64-bit mode works properly.
 
 > TODO: Test registers and show variables
@@ -335,22 +357,6 @@ Now rebuild and test:
 ninja -C build
 ninja -C build run
 ```
-
-**Result:** QEMU opens with a blank screen and doesn't crash! The kernel is running. Press Ctrl+C to exit.
-
-We can verify it's working with LLDB (covered in the "Booting Up" chapter).
-
-
-Our boot assembly now:
-
-- Starts in 32-bit protected mode (as GRUB gives us)
-- Sets up identity-mapped page tables for the first 2MB
-- Enables PAE, long mode, and paging
-- Loads a 64-bit GDT
-- Transitions to 64-bit long mode
-- Calls our 64-bit kernel successfully
-
-No more triple faults!
 
 ---
 

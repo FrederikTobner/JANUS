@@ -58,14 +58,13 @@ You now understand more about x86_64 booting than most programmers ever will. Ni
 > - (Bonus) Implement a Limine boot header for TinyOS
 > - (Bonus) Add boot protocol abstraction to support both Multiboot2 and > Limine
 >
-> 1. **Custom Bootloader** (Implementation): Write a tiny bootloader in > assembly that:
+> 6. **Custom Bootloader** (Implementation): Write a tiny bootloader in > assembly that:
 >
 > - Loads your kernel from disk (use BIOS int 0x13)
 > - Switches to 32-bit protected mode
 > - Passes a custom boot info structure to your kernel
-> - (Hint: You'll need to write it to the boot sector and create a disk > image)
 >
-> 1. **Bootloader Compatibility** (Research): Test if your kernel works with > bootloaders other than GRUB:
+> 7. **Bootloader Compatibility** (Research): Test if your kernel works with > bootloaders other than GRUB:
 >     - Try GRUB2 vs GRUB Legacy
 >     - Research: Could syslinux boot a Multiboot2 kernel?
 >     - What would need to change for U-Boot (ARM bootloader)?

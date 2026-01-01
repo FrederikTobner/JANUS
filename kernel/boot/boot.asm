@@ -114,7 +114,7 @@ long_mode_start:
     ; (edi and esi were preserved from 32-bit mode)
     call kernel_main
     
-    ; If kernel_main returns, halt
+    ; If kernel_main returns, halt to ensure no code after our text  section is executed, because that would be undefined behavior.
 .hang:
     cli
     hlt

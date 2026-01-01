@@ -136,10 +136,7 @@ You should see your kernel_main entry code. Now step through the code
 ```
 (lldb) stepi
 (lldb) stepi
-... (step through to the 'call kernel_main' instruction)
 ```
-
-**What really happens:** When you step into `call kernel_main`, check the CPU mode:
 
 ```
 (lldb) exit

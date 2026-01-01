@@ -66,39 +66,6 @@ First we need to recompile, then create a iso run qemu in debug mode and connect
 
 > TODO: Show program flow. Introduce frame variable.
 
-## After bug discovery
-
-## What Went Wrong?
-
-GRUB by default starts in 32bit protected mode and we need to handle the transition to 64 bit.
-
-## Lessons Learned
-
-This is a valuable lesson in OS development:
-
-* **Use a debugger!** What looks like "it works" might be "it's stuck in a halt loop."
-* **Calling conventions matter.** You can't just call functions—you have to pass arguments correctly.
-* **GRUB2 is helpful.** Modern GRUB with Multiboot2 handles mode transitions automatically.
-* **Read the ABI spec.** System V AMD64 ABI defines how to call functions on x86-64.
-
-> **Why Learn the Mode Transition if GRUB Does It?**
->
-> You might wonder: "GRUB2 already transitions to 64-bit mode. Why learn how it works?"
->
-> Because **understanding the transition teaches you fundamental OS concepts** you'll need later:
->
-> * CPU operating modes and their constraints
-> * Page table structure and virtual memory setup
-> * Control registers (CR0, CR3, CR4) and MSRs
-> * The relationship between paging and long mode
-> * GDT structure and segment selectors
->
-> These concepts are essential for memory management (Chapter 5), context switching, and system calls. GRUB's convenience hides them, but you need to understand the machinery to build a real kernel.
->
-> Think of it like learning to drive a manual transmission—even if modern cars are automatic, understanding how the clutch and gears work makes you a better driver.
-
-### Retesting
-
 Open two terminals. In the first terminal, start QEMU with debugging enabled after rebuilding the project:
 
 ```bash

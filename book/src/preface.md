@@ -2,9 +2,12 @@
 
 > *"What I cannot create, I do not understand."*  
 > — Richard Feynman
+
 Operating systems are the unsung heroes of modern computing. They manage computer hardware and software resources, and provide the foundation upon which all other computer programs run. runs. Yet for most programmers, the OS remains a mysterious black box—something you use but never truly understand.
 
-Unlike traditional books regarding operating systems, this book isn't just a dry textbook—it's an implementation guide. We'll build a simple, yet complete operating system from the ground up, step by step.
+Unlike traditional books regarding operating systems, this book isn't a dry textbook that only covers the theoretical aspects. 
+It's an implementation guide that walks you through building a simple operating system from scratch.
+We'll build a simple, yet complete operating system from the ground up, step by step.
 
 The operating system we will be building in this book is intentionally minimal. It won't have all the bells and whistles of a production OS like Linux or Windows. Instead, we will focus on the core concepts that make an OS tick:
 
@@ -13,15 +16,6 @@ The operating system we will be building in this book is intentionally minimal. 
 - **Booting**: Getting from power-on to running code
 
 By the end, you'll have a small but complete operating system that boots on real hardware, manages memory, and runs user programs. More importantly, you'll understand *how* and *why* it works.
-
-This book assumes you:
-
-- Can read and write C code comfortably
-- Understand basic computer architecture (CPU, RAM, storage) and assembly language concepts
-- Know how to use a Unix-like command line
-- Have patience for low-level debugging
-
-You *don't* need to be an expert in systems programming, assembly language, or hardware. We'll learn those together.
 
 Each chapter builds on the previous one. The code evolves incrementally, therefor I it is necessary to follow along from the beginning.
 

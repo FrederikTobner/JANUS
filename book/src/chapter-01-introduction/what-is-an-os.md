@@ -6,7 +6,8 @@ At its core, an operating system is a **resource manager**—a bossy middle man 
 
 [!side]Modern operating systems manage thousands of processes, gigabytes of memory, and dozens of devices simultaneously. All while maintaining the illusion that each program has the machine to itself.[/!side]
 
-But an OS is more than just a manager—it's also an **abstraction layer**. It hides the messy details of hardware from applications, providing clean interfaces like:
+But an OS is more than just a manager.
+It's also acts as an **abstraction layer**, that hides the messy details of hardware from applications, providing an interface that can be used by developers working in the user space.
 
 ```c
 // Instead of programming disk controllers directly:
@@ -21,7 +22,7 @@ pid_t pid = fork();
 
 [!side]The same `fopen()` call works whether you're on Linux with ext4, Windows with NTFS, or macOS with APFS. That's the power of abstraction.[/!side]
 
-These abstractions let programmers write portable software without worrying about the specific hardware and file system underneath.
+These abstractions also let programmers write portable software without worrying about the specific hardware and file system underneath.
 
 ---
 

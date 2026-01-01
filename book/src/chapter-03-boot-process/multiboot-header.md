@@ -1,15 +1,15 @@
 # The Multiboot2 Header
 
-Before we dive deeper, let’s clear up some boot-time jargon. When your PC springs to life, a whole relay race of software layers gets your kernel running. Each has a job to do—let’s meet the team.
+Before we dive deeper, let’s clear up some boot jargon. When your PC is powered on, multiple software layers will be traversed to get your kernel running.
+The first layer is called the firmware. It is the code burned into your motherboard. It’s the first thing that runs when you hit the power button. 
+There are two main types of firmware on modern Computers. The older BIOS (Basic Input Output System) and the more modern UEFI (Unified Extensible Firmware Interface).
 
-**Firmware**
-Firmware is the code burned into your motherboard. It’s the first thing that runs when you hit the power button. There are two main types: the classic BIOS and the more modern UEFI.
+The second layer is the boot loader. The boot loader is a small program loaded by the firmware. Its job is to find your kernel and hand over control.
 
-**Boot Loader**
-A boot loader is a small program loaded by the firmware. Its job? Find your kernel and hand over control. We will be using GRUB which handles Linux, BSD, and more.
+The last layer is your kernel itself. This is the operating system code we will be writing in this book.
 
-**Boot Protocols**
-Boot protocols on the other hands define the machine-state when the kernel is given control by the bootloader
+They way how we transfer control from the bootloader to our kernel is defined by the boot sequence standard.
+It defines how the kernel should be structured so that the bootloader can find and load it correctly and what information the bootloader will provide to the kernel when it is loaded. Additionally it defines the machine state the kernel can expect when it is loaded.
 
 [!side]
 **Aside: Why "Multiboot"?**
@@ -18,15 +18,16 @@ Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? U
 
 We will be using the Multiboot2 standard in this book.
 
-When you power on a PC using UEFI and GRUB, the UEFI will load GRUB from disk. GRUB then scans the first 32KB of our kernel binary looking for a magic number—a secret handshake that says "hey, I'm a bootable kernel, load me!"
+When you power on a PC using a BIOS firmware in combination with the GRUB bootloader,
+the BIOS will first of all load GRUB from disk. 
+GRUB then scans the first 32KB of our kernel binary looking for a magic number—a secret handshake that says "hey, I'm a bootable kernel, load me!"
 
 If you do not provide this magic number GRUB will ignore your kernel.
 
 ```
-Boot Sequence:
 ┌──────────┐    ┌──────────┐    ┌──────────────┐    ┌──────────┐
-│   BIOS   │───▶│   GRUB   │───▶│ Scan for     │───▶│  Found!  │
-│ Power On │    │  Loads   │    │ 0xe85250d6   │    │ Load it  │
+│   BIOS   │───▶│   GRUB   │───▶│ Scan for     │───▶│  Boot    │
+│ Power On │    │  Loads   │    │ 0xe85250d6   │    │  image   │
 └──────────┘    └──────────┘    └──────────────┘    └──────────┘
                                        ▲
                                        │
@@ -38,33 +39,20 @@ Boot Sequence:
 >
 > There are several ways to boot an operating system:
 >
-> * **BIOS + Multiboot2** (what we're using) - Industry standard, well-documented, works everywhere
-> * **UEFI** - Modern standard, boots directly into 64-bit mode, more complex setup
+> * **Multiboot2** - Industry standard, well-documented, works everywhere
 > * **Limine Protocol** - Modern hobby OS-friendly bootloader with cleaner protocol
 > * **Custom bootloader** - Maximum control, maximum work
 >
-> We're using Multiboot2 for this book because:
+> We're using Multiboot2 for several reasons. It is the most widely supported and understood boot protocol, especially for beginners. 
+> Additionally it will provide you with valuable educational insights into the boot process, works on real hardware, and has simple tooling via GRUB.
 >
-> 1. **It's the standard** - Works with GRUB, widely understood, extensive documentation
-> 2. **Educational value** - The 32-bit to 64-bit transition we'll implement teaches important concepts about CPU modes and paging. UEFI skips this by booting directly into 64-bit mode, which is convenient but hides crucial details.
-> 3. **Real hardware support** - Works on actual PCs, not just emulators
-> 4. **Simple tooling** - GRUB handles all the complexity of disk formats, filesystems, etc.
 >
-> **What about UEFI?** It's the modern replacement for BIOS and has real advantages (better hardware discovery, graphics modes, Secure Boot support). But it's significantly more complex for beginners. Once you understand booting with Multiboot2, adding UEFI support is a natural next step—you'll know exactly what the bootloader needs to provide and why.
->
-> For now, focus on understanding the fundamentals. Boot protocol abstraction can come later once you have a working kernel.
+> For now, we will focus on understanding the fundamentals.
 
-## The Multiboot2 Standard
-
-Multiboot2 defines:
-
-1. **Header format**: Magic number, architecture, checksum
-2. **Boot state**: CPU mode, registers, memory state when we're loaded
-3. **Information tags**: What data the bootloader provides
+The Multiboot2 protocol defines the header format our kernel must provide, as well as the information GRUB will pass us when it loads our kernel.
+Additionally it defines the machine state we can expect when GRUB transfers control to us.
 
 We will cover the exact contents of the information later when we actually start using it.
-
-### Multiboot2 Header Structure
 
 ```
 Multiboot2 Header Layout (must be in first 32KB):
@@ -85,8 +73,6 @@ Multiboot2 Header Layout (must be in first 32KB):
 > **TODO: Hand-drawn illustration idea**
 > Draw GRUB as a detective with a magnifying glass scanning through a pile of binary (represented as 1s and 0s), suddenly spotting the magic number 0xe85250d6 and exclaiming "Aha! Found it!" with the kernel hiding behind the pile looking nervous.
 
-### Create the Multiboot Header File
-
 First, create the directory structure and an empty header file:
 
 ```bash
@@ -96,7 +82,6 @@ touch boot/include/boot/multiboot.h
 
 Now let's build the header incrementally.
 
-#### Step 1: Header Guards and Basic Structure
 
 ```c-diff
 file: boot/include/boot/multiboot.h
@@ -110,7 +95,6 @@ replace: entire file
 +#endif // BOOT_MULTIBOOT_H
 ```
 
-#### Step 2: Add Multiboot2 Magic Numbers
 
 ```c-diff
 file: kernel/boot/include/boot/multiboot.h
@@ -129,28 +113,19 @@ after: #include "uapi/int-ll64.h"
 
 Two magic numbers, two different jobs. The header magic (`0xe85250d6`) goes in our assembly—GRUB scans for it to find our kernel. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register as proof it loaded us correctly. Think of them as matching halves of a secret handshake.
 
-### Create the Assembly Header
-
-Now let's build the Multiboot2 header in assembly. Create an empty file:
-
-```bash
-touch boot/multiboot.asm
-```
-
-#### Step 1: Section and Alignment
+Now let's build the Multiboot2 header in assembly. 
+This will be 
 
 ```x86asm-diff
 file: kernel/boot/multiboot.asm
 replace: entire file
 ---
-+; Multiboot2 header - must be in first 32KB of kernel image
 +section .multiboot
 +align 8
 ```
 
-The `.multiboot` section gets its own VIP spot at the start of our kernel binary (thanks to our linker script later). The `align 8` ensures everything starts on an 8-byte boundary—Multiboot2 is picky about alignment, and misaligned headers mean GRUB ignores you completely.
+The `.multiboot` section gets its own special spot at the start of our kernel binary. The `align 8` ensures everything starts on an 8-byte boundary—Multiboot2 is picky about alignment, and misaligned headers mean GRUB ignores you completely.
 
-#### Step 2: Magic Number and Architecture
 
 ```x86asm-diff
 file: kernel/boot/multiboot.asm
@@ -159,18 +134,14 @@ after: align 8
  align 8
 +
 +multiboot_start:
-+    ; Magic number - identifies this as Multiboot2
 +    dd 0xe85250d6
 +    
-+    ; Architecture: 0 = i386 protected mode
 +    dd 0
 ```
 
 First, we need our old friend the Multiboot2 header magic number—the same `0xe85250d6` we defined in the C header. GRUB scans the first 32KB of our kernel looking for this exact number.
 
-The architecture field tells GRUB what CPU mode we expect: `0` means i386 protected mode (32-bit). Even though we'll transition to 64-bit later, GRUB starts us in 32-bit mode and we handle the upgrade ourselves.
-
-#### Step 3: Header Length and Checksum
+The architecture field tells GRUB what CPU mode we expect: `0` means i386 protected mode (32-bit).
 
 ```x86asm-diff
 file: kernel/boot/multiboot.asm
@@ -178,10 +149,8 @@ after: Architecture definition
 ---
      dd 0
 +    
-+    ; Header length
 +    dd multiboot_end - multiboot_start
 +    
-+    ; Checksum: -(magic + arch + length)
 +    dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
 ```
 
@@ -191,7 +160,6 @@ The checksum ensures the header is valid. GRUB verifies that `magic + arch + len
 The checksum is like a parity bit for the entire header. It catches corruption from bad disk reads or linker bugs.
 [/!side]
 
-#### Step 4: Information Request Tag
 
 Ask GRUB for memory information we'll need later:
 
@@ -204,17 +172,16 @@ after: kernel/boot definition
 +; Information request tag
 +align 8
 +info_request_start:
-+    dw 1                    ; Type = information request
-+    dw 0                    ; Flags = required
++    dw 1                    
++    dw 0                    
 +    dd info_request_end - info_request_start
 +    
-+    dd 4                    ; Request: basic memory info
-+    dd 6                    ; Request: memory map
-+    dd 8                    ; Request: framebuffer info (graphics display info)
++    dd 4                    
++    dd 6                    
++    dd 8                    
 +info_request_end:
 ```
 
-#### Step 5: End Tag (Required Terminator)
 
 Every Multiboot2 header must end with this tag:
 
@@ -224,7 +191,6 @@ after: info_request_end label
 ---
  info_request_end:
 +
-+; End tag (required)
 +align 8
 +    dw 0                    ; Type = end
 +    dw 0                    ; Flags

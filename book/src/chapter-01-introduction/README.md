@@ -13,14 +13,6 @@ This chapter provides the foundation for your OS development journey: understand
 
 - How your personal computer boots up from power-on to running code from the operating system 
 
-## Sections
-
-1. [What is an Operating System?](what-is-an-os.md)
-2. [Why Build One?](why-build-one.md)
-3. [What We'll Build](what-well-build.md)
-4. [Prerequisites](prerequisites.md)
-5. [How to Use This Book](how-to-use.md)
-6. [Summary](./summary.md)
 ---
 
 **Next: [What is an Operating System?](what-is-an-os.md)**

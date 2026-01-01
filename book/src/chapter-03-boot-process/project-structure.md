@@ -1,6 +1,6 @@
 # Project Structure
 
-Before we write a single line of code, let's talk organization. 
+Before we write a single line of code, let's talk how we will organize our project. 
 TinyOS follows a modular, library-based design inspired by the Linux kernel and LLVM.
 First, let's create the project skeleton. Run these commands:
 
@@ -41,19 +41,17 @@ TinyOS/
 ```
 
 We will organize our code in different modules
-Each module is self-contained with:
+Each module is self-contained with it's own `CMakeLists.txt`, and an `include/` directory for public headers.
 
-- Its own `CMakeLists.txt`
-- An `include/` directory for public headers
-- Implementation files
-The only outlier here is the include directory that includes our header files.
+[!side]
+Freestanding headers are headers that do not depend on any underlying operating system or standard library.
+These are for example `<stdint.h>`, `stddef.h`, or `stdbool.h`.
+[/!side]
 
-## Type definitions
-
-Since we're in freestanding mode, meaning there is no host OS, we can't use everyhing from the system's C standard library. 
+Since we're in freestanding mode, meaning there is no host OS, we can't use everything the system's C standard library provides. 
 We provide our own with type definitions for commonly used types.
 
-### Create `include/uapi/types.h`
+First lets create a file where we will define all the types that we expose to the user-space. 
 
 ```c-diff
 file: include/uapi/types.h
@@ -74,10 +72,7 @@ replace: entire file
 +#endif
 ```
 
-We have placed it in uapi, so that we can expose it to the user space later.
-
-
-### Create `include/tinyos/types.h`
+Now lets create `include/tinyos/types.h`
 
 ```c-diff
 file: include/tinyos/types.h
@@ -97,10 +92,12 @@ replace: entire file
 +typedef __s64 s64;
 +typedef __u64 u64;
 +
-+#endif // TINYOS_TYPES_H
++#endif 
 ```
 
-If you are asking youself why we are not using standard names or include `stdint.h`, since it is a freestanding header, here is the answer:
+These type defintions we will use throughout the kernel.
+
+Maybe you are asking youself why we are not using standard names or include `stdint.h`, since it is a freestanding header.
 We want to make the seperation of the kernel layer and the user space clearly visible.
 Using the fixed-integer types from stdint.h in the kernel code would blur this line.
 

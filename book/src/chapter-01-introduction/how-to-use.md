@@ -21,4 +21,4 @@ Fixing the bugs yourself is the best way to learn. Resist the urge to look up so
 
 ---
 
-**Next: [Getting Started](getting-started.md)**
+**Next: [Chapter 2: Getting Started](../chapter-02-getting-started/README.md)** 
