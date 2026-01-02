@@ -99,9 +99,7 @@ Process 1 stopped
     frame #0: 0x000000000010109f kernel.elf`kernel_main(magic=920085129, info=0x00000000001010e0) at main.c:42:15
    39   void kernel_main(uint32_t magic, struct multiboot_info * info)
    40   {
-   41       // Verify we were loaded by a Multiboot2-compliant bootloader
--> 42       if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-   43           // Can't print error yet - just halt
+-> 41       if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
 ```
 
 Let's verify GRUB passed us the correct magic number. The `$rdi` register holds the first function argument (the `magic` parameter):

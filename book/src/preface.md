@@ -9,7 +9,9 @@ Unlike traditional books regarding operating systems, this book isn't a dry text
 It's an implementation guide that walks you through building a simple operating system from scratch.
 We'll build a simple, yet complete operating system from the ground up, step by step.
 
-The operating system we will be building in this book is intentionally minimal. It won't have all the bells and whistles of a production OS like Linux or Windows. Instead, we will focus on the core concepts that make an OS tick:
+The operating system we will be building in this book is intentionally minimal. 
+It won't have all the bells and whistles of a production OS like Linux or Windows. 
+Instead, we will focus on the core concepts that make an OS tick.
 
 > TODO: Add other implemented topics from the later chapters, when they are finished
 

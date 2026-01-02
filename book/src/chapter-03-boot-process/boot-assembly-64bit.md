@@ -21,7 +21,7 @@ The memory layout of the full descriptor looks like this:
 [!side]  
 Ever notice how the x86 segment descriptor layout feels like a memory scavenger hunt? The fields are scattered all over to place. 
 The 8 most signifiant bits of the base are stored from 0x3F - 0x38, then the 24 least significant bits are stored from 0x27 to 0x10. The limit is split too, with 4 bits at 0x33-0x30 and 16 bits at 0x0F-0x00. And don't get me started on the access byte and flags in between, some of their individual bits are as mysterious as a `Sys Req` key on a keyboard.
-You practically need a treasure map and and a compass to piece together a single segment descriptor! 
+You practically need a treasure map and and a compass to piece together a the segment descriptor! 
 [/!side]
 
 These concepts are essential for fully understanding the later chapters. 
@@ -32,11 +32,11 @@ Therfor we will implement what other bootloaders do behind the scenes. The trans
 ```mermaid
 flowchart TD
     step1["Save multiboot parameters"]
-    step2["Set up page tables (identity mapping)"]
+    step2["Set up page tables"]
     step3["Enable Physical Address Extension"]
     step4["Set long mode bit in EFER MSR"]
     step5["Enable paging and activate long mode"]
-    step6["Load 64-bit Global descriptor Table (GDT)"]
+    step6["Load 64-bit Global descriptor Table"]
     step7["Jump to 64-bit code"]
     step8["Restore parameters & call kernel_main"]
     step1 --> step2
@@ -76,7 +76,8 @@ extern kernel_main
 +stack_top:
 ```
 
-We reserve space in the BSS (uninitialized data) section for our stack (16KiB) and page tables.
+We reserve 16 KiB space in the BSS section for our stack.
+Additionally we need to reserve space for our page tables.
 
 ```x86asm-diff
 file: kernel/boot/boot.asm
@@ -181,7 +182,7 @@ We create a simple identity mapping: virtual address 0x0 → physical address 0x
 
 The flag value `0b11` equals \\(2^0 + 2^1 = 3\\) (present + writable), and `0b10000011` equals \\(2^0 + 2^1 + 2^7 = 131\\) (present + writable + huge page).
 
-We're using a 2MB **huge page** which skips the P1 (page table) level entirely. This maps the entire first 2MB in one entry instead of 512 individual 4KB pages. A standard 4KB page would require \\(512\\) entries (since \\(2\\text{MB} = 2^{21}\\) bytes and \\(4\\text{KB} = 2^{12}\\) bytes, so \\(2^{21} / 2^{12} = 2^9 = 512\\) pages).
+We're using a huge page, with a size of 2MB which skips the page table level entirely. This maps the entire first 2MB in one entry instead of 512 individual 4KB pages. A standard 4KB page would require \\(512\\) entries (since \\(2\\text{MB} = 2^{21}\\) bytes and \\(4\\text{KB} = 2^{12}\\) bytes, so \\(2^{21} / 2^{12} = 2^9 = 512\\) pages).
 
 Add this subroutine to enable paging.
 
@@ -289,6 +290,13 @@ after: enable_paging ret
 +    jmp .hang
 ```
 
+Now we can actually start writing 64-bit code after we specified the target processor mode using the bits directive.
+In long mode, segment registers aren't used for addressing, but we zero them out for cleanliness. 
+
+> TODO: Is zeroing these registers really necessary, or can we ommit this part?
+
+The EDI and ESI registers we saved in Step 2 are now RDI and RSI, perfectly positioned as the first two function arguments per the System V AMD64 calling convention. 
+
 ```x86asm-diff
 file: kernel/boot/boot.asm
 after: enable_paging ret
@@ -301,19 +309,17 @@ after: enable_paging ret
 +    jmp .hang
 ```
 
-
 After `kernel_main` returns, we enter an infinite loop that halts the CPU.
 You might be wondering why we need this, because our kernel should never return from `kernel_main`.
-This is only a defensive measure to ensure the CPU doesn't execute random instructions if `kernel_main` were to return.
+This is only a defensive measure to ensure the CPU doesn't execute random instructions if `kernel_main`would return due to a bug. 
 
 [!side]
-When working on a kernel, it is crucial to be very defensive, you could even say almost paranoid. 
-Like what happens if my kernel, has a broken BIOS, or a cosmic ray flips a bit in your boot info? 
-Always expect the unexpected!
+When working on a kernel, it is crucial to be program in a very defensive manner, you could even say almost paranoid. 
+What happens if the system my kernel is running on has a broken BIOS, or a cosmic ray flips a bit in your boot info?
+These cases might seem far fetched, but in kernel development you need to expect the unexpected.
 [/side]
 
-Now we can actually start writing 64-bit code after we specified the target processor mode using the bits directive.
-In long mode, segment registers aren't used for addressing (flat memory model), but we zero them out for cleanliness. The EDI and ESI registers we saved in Step 2 are now RDI and RSI, perfectly positioned as the first two function arguments per the System V AMD64 calling convention. After we call `kernel_main`, we use a 'hlt' instruction in an infinite loop to halt the CPU when the kernel returns.
+After we call `kernel_main`, we use a 'hlt' instruction in an infinite loop to halt the CPU when the kernel returns.
 
 Finally, add the GDT that defines our 64-bit code segment:
 
@@ -334,7 +340,7 @@ after: .hang loop
 ```
 
 The code segment descriptor sets bits for: executable (bit 43), code/data segment (bit 44), present (bit 47), and 64-bit mode (bit 53). The value \\((1 << 43) | (1 << 44) | (1 << 47) | (1 << 53)\\) creates a 64-bit value with these specific bits set. 
-
+There is no need to define any segments using individual segment descriptors, because in long mode segmentation is largely ignored and a flat memory model is used.
 
 ```mermaid
 graph LR
@@ -345,17 +351,6 @@ graph LR
     A -->|"Protected Mode"| B
     B -->|"The Scary Part<br/>(Don't mess up!)"| C
     C -.->|"Long Mode Enabled!"| C
-```
-
-Now lets validate that out boot assembly transition to 64-bit mode works properly.
-
-> TODO: Test registers and show variables
-
-Now rebuild and test:
-
-```bash
-ninja -C build
-ninja -C build run
 ```
 
 ---

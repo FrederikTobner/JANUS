@@ -2,19 +2,10 @@
 
 We have a complete kernel: Multiboot2 header, boot assembly, linker script, C entry point, and CMake build system. Everything compiles and links successfully producing a `kernel.elf` file. But how do we actually *boot* it?
 
-Here's the problem: QEMU can't just boot our ELF file. It expects either a Linux-style bzImage or a special PVH boot protocol. Our kernel speaks Multiboot2, which requires a bootloader. Enter GRUB.
+Here's the problem: QEMU can't just boot our ELF file. It expects either a Linux-style bzImage or a special PVH boot protocol. Our kernel speaks Multiboot2, which requires a bootloader. This is where GRUB comes in - the GRand Unified Bootloader.
 
-> **The Crux: Why Can't We Just Load the Kernel Directly?**
->
-> You might wonder why we need this extra step. The kernel is right there! But real hardware doesn't know how to parse ELF files. GRUB acts as the middleman: it understands ELF, sets up the environment our kernel expects (64-bit mode, Multiboot info structure, etc.), and hands control over. Think of it as a helpful librarian who finds your book and opens it to the right page.
 
-## Why an ISO?
-
-An ISO image is a bootable CD/DVD image that contains:
-
-- GRUB bootloader (the first code that runs)
-- Our kernel executable
-- GRUB configuration (the menu you see when booting)
+An ISO image is a bootable CD/DVD image that contains, the GRUB bootloader, our kernel, and GRUB configuration.
 
 [!side]
 ISO 9660 is the CD-ROM filesystem standard from 1988. Still widely used because it works everywhere.
@@ -26,22 +17,15 @@ This is the standard way to distribute and test operating systems. Burn it to a 
 
 To automate ISO creation, we need to add custom CMake targets to the root `CMakeLists.txt`.
 
-### Prerequisites
-
 First, install the required GRUB tools:
 
 ```bash
-# Ubuntu/Debian
+# Debian-based systems 
 sudo apt install grub-pc-bin xorriso mtools
 
 # Arch Linux
 sudo pacman -S grub xorriso mtools
-
-# macOS
-brew install grub xorriso mtools
 ```
-
-### Adding the Targets
 
 The ISO creation uses a GRUB configuration template. First, create `cmake/grub.cfg.in`:
 
@@ -76,7 +60,7 @@ after: add_subdirectory(kernel)
  message(STATUS "========================================")
 ```
 
-Then we setup a custom ninja command to create the iso.
+Next we will setup a custom command to create the ISO image using `grub-mkrescue`.
 
 ```cmake-diff
 file: CMakeLists.txt
@@ -142,11 +126,11 @@ after: add_custom_target(run)
  message(STATUS "========================================")
 ```
 
-**Overview:**
-
-- **`iso`** - Creates the ISO directory structure, copies kernel, generates grub.cfg, and creates tinyos.iso
-- **`run`** - Depends on `iso`, then boots the ISO in QEMU
-- **`debug`** - Same as `run` but with GDB stub enabled on port 1234
+> **Overview:**
+> 
+> - `iso` - Creates the ISO directory structure, copies kernel, generates grub.cfg, and creates tinyos.iso
+> - `run` - Depends on `iso`, then boots the ISO in QEMU
+> - `debug` - Same as `run` but with GDB stub enabled on port 1234, allowing us to connect a debugger
 
 Lets update the printed build configuration to show this:
 
@@ -192,91 +176,47 @@ You'll see output showing the new targets:
 -- Build files have been written to: /home/user/TinyOS/build
 ```
 
-**What changed?**
+Now lets start using the targets we have created.
 
-1. **GRUB config template** - `cmake/grub.cfg.in` is now version-controlled
-2. **CMake generates grub.cfg** - Uses `configure_file()` at configure time
-3. **ISO target simplified** - Just copies the generated file instead of echo commands
-4. **Dependency tracking** - ISO rebuilds if grub.cfg changes
-
-### Using the Targets
+[!side]
+You can use the help command `ninja -C build help` to see all available targets.
+Your new targets `iso`, `run`, and `debug` will be listed there as well as phony targets.
+This does not mean that these targets are fake, it just means they don't prooduce an artifact with the same name.
+Unlike phony politicians, phony targets in CMake are actually useful.
+[/!side]
 
 ```bash
 # Build kernel and create bootable ISO
 ninja -C build iso
 ```
 
-You'll see GRUB and xorriso working to create the bootable image:
+You'll see they creation of the ISO image in the output: 
 
 ```
 ninja: Entering directory `build'
 [1/1] Creating bootable ISO image
-xorriso 1.5.4 : RockRidge filesystem manipulator, libburnia project.
+xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
 
-Drive current: -outdev 'stdio:/home/user/TinyOS/build/tinyos.iso'
+Drive current: -outdev 'stdio:/home/user/TinyOS/build/tinyos_x86_64.iso'
 Media current: stdio file, overwriteable
 Media status : is blank
-Media summary: 0 sessions, 0 data blocks, 0 data, 80.0g free
-Added to ISO image: directory '/'='/tmp/grub.xyz123'
-xorriso : UPDATE :     587 files added in 1 seconds
+Media summary: 0 sessions, 0 data blocks, 0 data, 33.5g free
+Added to ISO image: directory '/'='/tmp/grub.A9hghz'
+xorriso : UPDATE :    1058 files added in 1 seconds
 Added to ISO image: directory '/'='/home/user/TinyOS/build/iso'
-xorriso : UPDATE :     591 files added in 1 seconds
+xorriso : UPDATE :    1062 files added in 1 seconds
 xorriso : NOTE : Copying to System Area: 512 bytes from file '/usr/lib/grub/i386-pc/boot_hybrid.img'
-ISO image produced: 5747 sectors
-Written to medium : 5747 sectors at LBA 0
-Writing to 'stdio: TinyOS/build/tinyos.iso' completed successfully.
+ISO image produced: 15591 sectors
+Written to medium : 15591 sectors at LBA 0
+Writing to 'stdio:/home/user/TinyOS/build/tinyos_x86_64.iso' completed successfully.
 ```
 
-**What just happened?**
+Lets reflect on what we have accomplished now, by running this command. 
+First we create the directory structure for the ISO, then we copy our kernel and GRUB configuration into place, and finally we use `grub-mkrescue` to create the bootable ISO image.
 
-1. **Created directory structure** - `iso/boot/grub/`
-2. **Copied kernel** - `kernel.elf` → `iso/boot/kernel.elf`
-3. **Generated GRUB config** - `grub.cfg` with our boot menu
-4. **Added GRUB modules** - 587 files (GRUB bootloader, modules, fonts)
-5. **Added our kernel** - 4 more files (kernel + directory entries)
+The result is `build/tinyos_x86_64.iso` - a bootable ISO image that works on both BIOS and UEFI systems.
 
-[!side]
-GRUB is modular. Those 587 files include filesystem drivers, video modes, compression support, etc.
-[/!side]
-6. **Created hybrid boot** - Works with both BIOS (i386-pc) and UEFI (x86_64-efi)
-7. **Wrote ISO** - Final image is ~11MB (5747 sectors × 2KB)
-
-The result is `build/tinyos.iso` - a bootable ISO image that works on both BIOS and UEFI systems.
-
-### What's in the ISO?
-
-```
-build/iso/
-├── boot/
-│   ├── kernel.elf          ← Our kernel
-│   └── grub/
-│       └── grub.cfg        ← GRUB configuration
-```
-
-The GRUB configuration (`grub.cfg`) is generated from `cmake/grub.cfg.in`:
-
-```
-set timeout=0
-set default=0
-
-menuentry "TinyOS" {
-    multiboot2 /boot/kernel.elf
-    boot
-}
-```
-
-- `multiboot2 /boot/kernel.elf` - Load using Multiboot2 protocol
-- `boot` - Start execution
-
-## What's Next
-
-We now have a bootable ISO image with our kernel. The build system automates everything:
-
-- `ninja -C build iso` creates the ISO
-- `ninja -C build run` boots it in QEMU
-- `ninja -C build debug` enables debugging
-
-But does it actually work? Let's find out.
+Next we will boot it up in QEMU to verify everything works as expected.
 
 ---
 

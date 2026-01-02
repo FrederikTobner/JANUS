@@ -119,74 +119,145 @@ At the `(lldb)` prompt, connect to QEMU's debugging port:
 
 **What just happened?** LLDB connected to QEMU's GDB stub. The CPU is currently sitting at the BIOS reset vector (address 0xFFF0), about to start executing boot code.
 
-IAfter connecting to QEMU we set a breakpoint at our entry point:
+Open the debugger, then instruct lldb to connect to QEMU's debbiging port to check the result again.
+Next we tell LLDB to pause when we enter `kernel_main`:
 
 ```
 (lldb) b kernel_main
 ```
 
-The debugger should hit the breakpoint at `kernel_main`. Now let's step through and watch what happens. Check the current instruction:
+[!side]
+In most debuggers breakpoints work by replacing the instruction at that address with a special instruction (INT 0x03 on x86) that traps to the debugger.
+[/!side]
+
+Now let the kernel boot:
 
 ```
 (lldb) c
+Process 1 resuming
+Process 1 stopped
+* thread #1, stop reason = breakpoint 1.1
+    frame #0: 0x000000000010109f kernel.elf`kernel_main(magic=920085129, info=0x00000000001010e0) at main.c:42:15
+   39   void kernel_main(uint32_t magic, struct multiboot_info * info)
+   40   {
+-> 41       if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
 ```
 
-You should see your kernel_main entry code. Now step through the code
+Let's verify GRUB passed us the correct magic number. The `$rdi` register holds the first function argument (the `magic` parameter):
 
 ```
-(lldb) stepi
-(lldb) stepi
+(lldb) p/x magic
+(uint64_t) $0 = 0x0000000036d76289
 ```
+
+Let's check the multiboot info pointer in `info` (second argument):
+
+```
+(lldb) p/x info
+(uint64_t) $1 = 0x00000000001010e0
+```
+
+That's a valid address pointing to the Multiboot information structure GRUB created for us.
+Currently we can not check the contents of that structure since we haven't defined it's layout at this point in time.
+
+
+Let's watch the magic number check execute:
+
+```
+(lldb) n
+Process 1 stopped
+* thread #1, stop reason = step over
+    frame #0: 0x00000000001010a9 kernel.elf`kernel_main(magic=920085129, info=0x00000000001010e0) at main.c:51:15
+   48       }
+   49   
+   50       // Verify multiboot info pointer is valid
+-> 51       if (info == NULL) {
+```
+
+**What happened?** `n` means "next" (step to the next line). Since the value was correct the magic check passed, so execution moved to line 51.
+
+After the null check has passed we 
+
+```
+(lldb) n
+Process 1 stopped
+* thread #1, stop reason = step over
+    frame #0: 0x00000000001010b9 kernel.elf`kernel_main(magic=920085129, info=0x00000000001010e0) at main.c:61:12
+   58       
+   59   
+-> 60       for (;;) {
+```
+
+The null check passed too! Now we're at the infinite loop where the kernel halts.
+
+In order to check all the registers and get a more detailed view of the CPU state, we can use the `register read` command:
+
+```
+(lldb) register read
+general:
+       rax = 0x0000000080000000
+       rbx = 0x00000000001010c0
+       rcx = 0x00000000c0000080
+       rdx = 0x0000000000000000
+       rsi = 0x00000000001010c0
+       rdi = 0x0000000036d76289
+       rbp = 0x0000000000106ff0 kernel.elf`stack_bottom + 16368  kernel.elf`stack_bottom + 16368
+       rsp = 0x0000000000106fe0 kernel.elf`stack_bottom + 16352  kernel.elf`stack_bottom + 16352
+        r8 = 0x0000000000000000
+        r9 = 0x0000000000000000
+       r10 = 0x0000000000000000
+       r11 = 0x0000000000000000
+       r12 = 0x0000000000000000
+       r13 = 0x0000000000000000
+       r14 = 0x0000000000000000
+       r15 = 0x0000000000000000
+       rip = 0x000000000010109f kernel.elf`kernel_main + 15 at main.c:42:15  kernel.elf`kernel_main + 15 at main.c:42:15
+```
+
+You can see that `rsp` points to our stack and that `rdi` and `rsi` hold the function arguments.
+
+Using LLDB, we now have verified that GRUB loaded and jumped to our kernel, our boot assembly executed correctly, we transitioned to 64-bit mode, and our C code is running with the correct parameters.
+
+The blank screen isn't a bug—it's exactly what we programmed it to do. Since we haven't written any video or serial output code yet, there's nothing to display. But under the hood, the kernel booted successfully and we verified the magic number and multiboot info pointer.
+
+To exit LLDB, simply type:
 
 ```
 (lldb) exit
 ```
 
-## Common Issues
-
-### The QEMU window is not visible
-
-Using a minimal window manager like i3wm, QEMU might default to using VNC output.
-To make the window visible you can either use a VNC viewer or setup SDL or GTK and specify it as the display type that is used:
-
-```bash
-qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display sdl
-qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display gtk
-```
-
-### Debugger Won't Connect
-
-**Symptom:** `gdb-remote localhost:1234` hangs or fails
-
-**Solution:** Make sure QEMU is running with the `debug` target:
-
-```bash
-ninja -C build debug
-```
-
-You should see "waiting for debugger on :1234" in the output.
-
-### Breakpoint Not Hit
-
-**Symptom:** Breakpoint set but never triggered
-
-**Solution:** Verify the kernel has debug symbols:
-
-```bash
-file build/kernel.elf
-# Should show "with debug_info, not stripped"
-```
-
-## What We've Accomplished
-
-At this point, you have:
-
-- A bootable kernel that loads via GRUB
-- Ability to test changes immediately with `ninja -C build run`
-- Debugging setup with LLDB to verify kernel behavior
-
-The kernel doesn't produce any output yet, but it boots and runs correctly. That's a major milestone!
-
+> **Common Issues:**
+> 
+> **The QEMU window is not visible**
+> 
+> Using a minimal window manager like i3wm, QEMU might default to using VNC output.
+> To make the window visible you can either use a VNC viewer or setup SDL or GTK and specify it as the display type that is used:
+> 
+> ```bash
+> qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display sdl
+> qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display gtk
+> ```
+> 
+> **Debugger Won't Connect**
+> 
+> If you see an error like `error: Failed to connect to localhost:1234` when trying to connect with LLDB make sure QEMU is running in debug mode:
+> 
+> ```bash
+> ninja -C build debug
+> ```
+> 
+> You should see "waiting for debugger on :1234" in the output.
+> 
+> **Breakpoint can not be set**
+> 
+> If they breakpoint for kernel_main can not be set and you get a warning like this `WARNING:  Unable to resolve breakpoint to any actual locations.`,
+> verify that the kernel has been built with debug symbols:
+> 
+> ```bash
+> file build/kernel.elf
+> ```
+> This should show that the file is not stripped and contains debug info.
+ 
 ---
 
 **Next: [Boot Info verification](boot-info-verification.md)**

@@ -65,12 +65,12 @@ if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3
     elseif(PKG_CONFIG_EXECUTABLE)
         execute_process(
             COMMAND ${PKG_CONFIG_EXECUTABLE} --exists gtk+-3.0
-            RESULT_VARIABLE GTK3_FOUND
+            RESULT_VARIABLE GTK3_NOT_FOUND
         )
-        if(GTK3_FOUND EQUAL 0)
-            set(QEMU_DISPLAY_ARG -display gtk)
-        else()
+        if(GTK3_NOT_FOUNDND)
             message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may not show a window under i3.")
+        else()
+            set(QEMU_DISPLAY_ARG -display gtk)
         endif()
     else()
         message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may not show a window under i3.")

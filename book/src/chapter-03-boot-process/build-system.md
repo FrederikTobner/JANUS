@@ -12,8 +12,6 @@ We have source files. We have a linker script. But manually assembling and linki
 The Linux kernel uses Makefiles directly. We use CMake because it's easier to learn and more portable.
 [/!side]
 
-## Build System Architecture
-
 TinyOS utilizes a modular CMake structure where each component is self-contained:
 
 ```
@@ -451,7 +449,8 @@ replace: entire file
 +add_subdirectory(kernel)
 ```
 
-Lets also print the build cnfiguration afterwards:
+Lets also print the build configuration summary in the root `CMakeLists.txt`, to make it easier to spit any misconfigurations:
+
 
 ```cmake-diff
 file: CMakeLists.txt
@@ -512,7 +511,7 @@ cmake -B build -G Ninja
 ninja -C build
 ```
 
-This will produce the `build/kernel.elf` - a bootable ELF executable.
+This will produce the `build/kernel.elf`file a bootable ELF executable.
 But in order to actually boot it, we need to package it into a ISO image.
 
 [!side]
@@ -527,10 +526,10 @@ ISO images are named after the ISO 9660 standard that specifies the file system 
         ┌───────────────┼───────────────┐
         │               │               │
         ▼               ▼               ▼
-   multiboot.asm   boot.asm        main.c
+   multiboot.asm   boot.asm           main.c
         │               │               │
         ▼               ▼               ▼
-     [NASM]          [NASM]         [Clang]
+      [NASM]           [NASM]          [Clang]
         │               │               │
         ▼               ▼               ▼
    multiboot.o      boot.o           *.o files
@@ -538,7 +537,7 @@ ISO images are named after the ISO 9660 standard that specifies the file system 
         └───────┬───────┴───────┬───────┘
                 │               │
                 ▼               ▼
-            boot.a          lib*.a
+             boot.a          lib*.a
                 │               │
                 └───────┬───────┘
                         ▼
