@@ -22,6 +22,7 @@
  */
 
 #include <boot/multiboot.h>
+#include <drivers/serial.h>
 #include <tinyos/types.h>
 
 /**
@@ -52,11 +53,14 @@ void kernel_main(u32 magic, struct multiboot_info * info)
         }
     }
 
-    // TODO (T7): Initialize serial output
-    // TODO (T7): Print boot success message
-    // TODO: Parse multiboot information structure
-    // TODO: Initialize memory management
-    // TODO: Set up interrupt handling
+    if (serial_init() == 0) {
+        serial_write_string(" _   _      _ _         _    _            _     _ _ \n"
+                            "| | | |    | | |       | |  | |          | |   | | |\n"
+                            "| |_| | ___| | | ___   | |  | | ___  _ __| | __| | |\n"
+                            "|  _  |/ _ \\ | |/ _ \\  | |/\\| |/ _ \\| '__| |/ _` | |\n"
+                            "| | | |  __/ | | (_) | \\  /\\  / (_) | |  | | (_| |_|\n"
+                            "\\_| |_/\\___|_|_|\\___/   \\/  \\/ \\___/|_|  |_|\\__,_(_)");
+    }
 
     for (;;) {
         __asm__ volatile("hlt");

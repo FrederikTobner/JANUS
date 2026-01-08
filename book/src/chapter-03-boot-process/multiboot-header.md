@@ -22,7 +22,7 @@ When you power on a PC using a BIOS firmware in combination with the GRUB bootlo
 the BIOS will first of all load GRUB from disk. 
 GRUB then scans the first 32KB of our kernel binary looking for a magic number—a secret handshake that says "hey, I'm a bootable kernel, load me!"
 
-If you do not provide this magic number GRUB will ignore your kernel.
+If you do not provide this magic number GRUB will not recognize your kernel is bootable and will refuse to load it.
 
 ```
 ┌──────────┐    ┌──────────┐    ┌──────────────┐    ┌──────────┐

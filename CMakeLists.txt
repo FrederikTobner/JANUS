@@ -83,6 +83,7 @@ endif()
 add_custom_target(run
     COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
     DEPENDS iso
+    USES_TERMINAL
     COMMENT "Running TinyOS in QEMU"
 )
 
@@ -90,6 +91,7 @@ add_custom_target(run
 add_custom_target(debug
     COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
     DEPENDS iso
+    USES_TERMINAL
     COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
 )
 

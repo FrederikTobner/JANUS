@@ -188,6 +188,7 @@ function(tinyos_create_kernel)
             ${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/include
             ${CMAKE_BINARY_DIR}/include
+            ${CMAKE_SOURCE_DIR}/kernel/drivers/include
     )
 
     # Apply kernel compiler flags

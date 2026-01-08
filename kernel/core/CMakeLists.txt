@@ -10,6 +10,7 @@ tinyos_create_kernel(
         ${KERNEL_SOURCES}
     LIBRARIES
         boot           # Boot assembly objects
+        drivers        # Hardware drivers
     LINKER_SCRIPT
         ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
 )

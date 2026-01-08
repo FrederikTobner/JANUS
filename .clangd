@@ -22,6 +22,7 @@ CompileFlags:
     - "-Ikernel/arch/include"
     - "-Ikernel/boot/include"
     - "-Ikernel/mm/include"
+    - "-Ikernel/drivers/include"
  
   Remove:
     # Remove flags that confuse clangd analysis

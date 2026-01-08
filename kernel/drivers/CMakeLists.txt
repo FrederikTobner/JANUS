@@ -10,7 +10,7 @@ add_library(drivers STATIC)
 target_include_directories(drivers
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/kernel/include
 )
 
 if(DRIVERS_SOURCES)
@@ -32,8 +32,3 @@ target_compile_options(drivers
         -mno-red-zone
 )
 
-target_link_libraries(drivers
-    PRIVATE
-        arch
-        fio
-)
