@@ -19,7 +19,8 @@ message(STATUS "========================================")
 # Set C standard
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON)  # Allow GNU extensions
+# Allow GNU extension
+set(CMAKE_C_EXTENSIONS ON)  
 
 # Include TinyOS platform detection and helper functions
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -30,18 +31,15 @@ include(TinyOSHelpers)
 string(TIMESTAMP TINYOS_BUILD_DATE "%Y-%m-%d")
 string(TIMESTAMP TINYOS_BUILD_TIME "%H:%M:%S")
 
-
 # Copy compile_commands.json to project root for clangd
-if(CMAKE_EXPORT_COMPILE_COMMANDS)
-    add_custom_target(
-        copy_compile_commands ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_BINARY_DIR}/compile_commands.json
-            ${CMAKE_SOURCE_DIR}/compile_commands.json
-        BYPRODUCTS ${CMAKE_SOURCE_DIR}/compile_commands.json
-        COMMENT "Copying compile_commands.json to project root"
-    )
-endif()
+add_custom_target(
+    copy_compile_commands ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_BINARY_DIR}/compile_commands.json
+        ${CMAKE_SOURCE_DIR}/compile_commands.json
+    BYPRODUCTS ${CMAKE_SOURCE_DIR}/compile_commands.json
+    COMMENT "Copying compile_commands.json to project root"
+)
 
 add_subdirectory(kernel)
 
@@ -68,12 +66,12 @@ if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3
             RESULT_VARIABLE GTK3_NOT_FOUND
         )
         if(GTK3_NOT_FOUNDND)
-            message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may not show a window under i3.")
+            message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may start a VNC server under i3.")
         else()
             set(QEMU_DISPLAY_ARG -display gtk)
         endif()
     else()
-        message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may not show a window under i3.")
+            message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may start a VNC server under i3.")
     endif()
 else()
     set(QEMU_DISPLAY_ARG)

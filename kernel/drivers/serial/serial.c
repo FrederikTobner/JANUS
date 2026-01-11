@@ -18,7 +18,6 @@
  * @file serial.c
  * @brief Serial Port Driver (only COM1 with a fixed baud rate of 38400 for now)
  */
-
 #include <drivers/serial.h>
 #include <tinyos/types.h>
 
@@ -92,7 +91,7 @@ void serial_write_char(char c)
         ;
 
     // Send character
-    outb(SERIAL_DATA_PORT(SERIAL_COM1), c);
+    outb(SERIAL_DATA_PORT(SERIAL_COM1), (unsigned char)c);
 }
 
 void serial_write_string(char const * str)

@@ -32,12 +32,7 @@ CompileFlags:
     - "-mtune=*"
 
 Diagnostics:
-  # Don't complain about missing standard library
-  Suppress:
-    - "pp_file_not_found"
-  
   UnusedIncludes: Strict
-  MissingIncludes: None
 
 Index:
   Background: Build
