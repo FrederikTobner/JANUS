@@ -3,23 +3,26 @@
 Right now our kernel boots, validates the multiboot header and info and then politely sits there doing nothing.
 This is emotionally a little bit unfulfilling.
 
-Before we build anything fancy, we need a way to *see* what the kernel is doing.
-In user space you might just use simple printf debugging, but in kernel space, the simplest tool is still the same one it has always been: a serial port.
+Before we build anything fancy, we need a way to *see* what the kernel is actually doing.
+In user space you might just use simple printf debugging, but in kernel space, the simplest tool is still the same one it has always been.
+A simple serial port.
 
 [!side]
-Yes, it’s 2026 and we’re debugging with a device designed when “plug and play” was mostly a rumour.
+Yes, it’s the 21st century and we’re debugging with a device designed when “plug and play” was mostly a rumour.
 Using the serial port is simple and doesn’t care whether your screen driver is currently on fire or like in our case simply doesn’t exist at this point in time.
 [/!side]
 
 > **New to serial ports?**
 >
-> Don’t worry, this isn’t “network programming” in disguise. A UART (Universal Asynchronous Receiver-Transmitter) is basically a tiny byte pipe with a few control knobs.
+> Don’t worry, this isn’t “network programming” in disguise. 
+> A UART (Universal Asynchronous Receiver-Transmitter) is basically a tiny byte pipe with a few control knobs.
 > On x86, the “knobs” live in *I/O port space*, so we talk to them with `inb`/`outb`.
 >
 > COM1 starts at `0x3F8`, and the UART’s registers are just fixed offsets from that base.
-> You write characters by placing a byte into the data register. Before you do that, you ask the UART if it’s ready.
+> You write characters by placing a byte into the data register. 
+> Before you do that, you ask the UART if it’s ready.
 >
-> **These two instuctions we are going to use in this chapter:**
+> For that purpose, we will be using the two following instructions
 >
 > | Instruction | Meaning |
 > | ---- | ---- |
@@ -36,11 +39,12 @@ Therefor we need to change our `run` and `debug` target to see the serial output
 
 ```cmake-diff
 file: CMakeLists.txt
-replace: COMMAND for run target 
+replace: -boot d 
 ---
 add_custom_target(run
--    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d ${QEMU_DISPLAY_ARG}
-+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
+-     -boot d 
++     -boot d -serial stdio 
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU"
 )
@@ -50,20 +54,17 @@ After that we also need to add it to the `debug` target.
 
 ```cmake-diff
 file: CMakeLists.txt
-replace: COMMAND for debug target
+replace: -boot d 
 ---
 add_custom_target(debug
--    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -s -S ${QEMU_DISPLAY_ARG}
-+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
+-     -boot d -s -S 
++     -boot d -serial stdio -s -S 
     DEPENDS iso
     COMMENT "Running TinyOS in QEMU with GDB stub"
 )
 ```
 If you do want to run it manually, this is the idea:
-
-```bash
-qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio
-```
 
 That’s the whole trick: give the kernel a UART to talk to, and you get a voice in return.
 
@@ -94,7 +95,7 @@ tinyos_create_kernel(
         ${KERNEL_SOURCES}
     LIBRARIES
         boot           
-+        drivers      
++       drivers      
     LINKER_SCRIPT
         ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
 )
@@ -159,13 +160,11 @@ after: #define SERIAL_LINE_STATUS_PORT(base)   (base + 5)
 ---
 #define SERIAL_LINE_STATUS_PORT(base)   (base + 5)
 + 
-+ static inline void outb(u16 port, u8 value)
-+ {
++ static inline void outb(u16 port, u8 value) {
 +     __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
 + }
 + 
-+ static inline u8 inb(u16 port)
-+ {
++ static inline u8 inb(u16 port) {
 +     u8 ret;
 +     __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
 +     return ret;
@@ -180,21 +179,19 @@ It programs the UART for 8N1, turns on the FIFO, and does a quick loopback test 
 file: kernel/drivers/serial/serial.c
 after: inb() function
 ---
-static inline u8 inb(u16 port)
-{
+static inline u8 inb(u16 port) {
     u8 ret;
     __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
     return ret;
 }
 
-+ int serial_init()
-+ {
++ int serial_init() {
 +     outb(SERIAL_COM1 + 1, 0x00);
 + 
 +     outb(SERIAL_LINE_COMMAND_PORT(SERIAL_COM1), 0x80);
 + 
 +     outb(SERIAL_DATA_PORT(SERIAL_COM1), 0x03);
-+     outb(SERIAL_COM1 + 1, 0x00); // (hi byte)
++     outb(SERIAL_COM1 + 1, 0x00); 
 + 
 +     outb(SERIAL_LINE_COMMAND_PORT(SERIAL_COM1), 0x03);
 + 
@@ -217,19 +214,21 @@ static inline u8 inb(u16 port)
 ```
 
 Then we will add a function that checks that the current transmit buffer is empty.
+We will call this function later before writing a character to the serial port, to ensure that we do not write data when the buffer is already full.
+
+> TODO: Consider using the error_t type we have defined in the real kernel instead of returning int for error codes.
 
 ```c-diff
 file: kernel/drivers/serial/serial.c
 after: serial_init() function 
 ---
-int serial_init()
-{
+int serial_init() {
     outb(SERIAL_COM1 + 1, 0x00);
 
     outb(SERIAL_LINE_COMMAND_PORT(SERIAL_COM1), 0x80);
 
     outb(SERIAL_DATA_PORT(SERIAL_COM1), 0x03);
-    outb(SERIAL_COM1 + 1, 0x00); // (hi byte)
+    outb(SERIAL_COM1 + 1, 0x00); 
 
     outb(SERIAL_LINE_COMMAND_PORT(SERIAL_COM1), 0x03);
 
@@ -250,8 +249,7 @@ int serial_init()
     return 0;
 }
  
-+ int serial_is_transmit_empty()
-+ {
++ int serial_is_transmit_empty() {
 +     return inb(SERIAL_LINE_STATUS_PORT(SERIAL_COM1)) & 0x20;
 + }
 + 
@@ -263,21 +261,19 @@ Finally we add functions to write a single character and a string to the serial 
 file: kernel/drivers/serial/serial.c
 after: serial_is_transmit_empty() function
 ---
-int serial_is_transmit_empty()
-{
+int serial_is_transmit_empty() {
     return inb(SERIAL_LINE_STATUS_PORT(SERIAL_COM1)) & 0x20;
 }
 
-+ void serial_write_char(char c)
-+ {
-+     while (!serial_is_transmit_empty())
++ void serial_write_char(char c) {
++     while (!serial_is_transmit_empty()) {
 +         ;
++     }
 + 
 +     outb(SERIAL_DATA_PORT(SERIAL_COM1), c);
 + }
 + 
-+ void serial_write_string(char const * str)
-+ {
++ void serial_write_string(char const * str) {
 +     for (int i = 0; str[i] != '\0'; i++) {
 +         serial_write_char(str[i]);
 +     }
@@ -297,9 +293,7 @@ When we add interrupts later, we can stop busy-waiting and let the CPU do someth
 `serial_init()` is the only mildly spicy part.
 
 
-**Calling it from the kernel.**
-
-With the driver in place, we can initialize it early in `kernel_main()` and print something recognizable.
+With the driver in place, we can initialize it in `kernel_main()` and print a simple message to test the functionality. 
 You don’t need a full logging system yet; a single `serial_write_string()` is enough to prove the pipeline works.
 
 ```c-diff
@@ -315,7 +309,7 @@ Since we worked quite a bit to just print this we will be using ASCII-art here, 
 
 ```c-diff
 file: kernel/core/main.c
-after: if (info == 0) {
+after: checking the multiboot info 
 ---
      if (info == 0) {
          for (;;) {
@@ -338,7 +332,8 @@ file: CMakeLists.txt
 after: DEPENDS iso
 ---
 add_custom_target(run
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
+    -boot d -serial stdio     
     DEPENDS iso
 +    USES_TERMINAL
     COMMENT "Running TinyOS in QEMU"
@@ -352,7 +347,8 @@ file: CMakeLists.txt
 after: DEPENDS iso
 ---
 add_custom_target(debug
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
+    -boot d -serial stdio -s -S 
     DEPENDS iso
 +    USES_TERMINAL
     COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"

@@ -37,32 +37,33 @@
  * @param magic Multiboot2 magic number (should be 0x36d76289)
  * @param info Pointer to multiboot information structure
  */
-void kernel_main(u32 magic, struct multiboot_info * info)
-{
-    // Verify we were loaded by a Multiboot2-compliant bootloader
-    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-        for (;;) {
-            __asm__ volatile("cli; hlt");
-        }
-    }
-
-    // Verify multiboot information structure is present
-    if (info == 0) {
-        for (;;) {
-            __asm__ volatile("cli; hlt");
-        }
-    }
-
-    if (serial_init() == 0) {
-        serial_write_string(" _   _      _ _         _    _            _     _ _ \n"
-                            "| | | |    | | |       | |  | |          | |   | | |\n"
-                            "| |_| | ___| | | ___   | |  | | ___  _ __| | __| | |\n"
-                            "|  _  |/ _ \\ | |/ _ \\  | |/\\| |/ _ \\| '__| |/ _` | |\n"
-                            "| | | |  __/ | | (_) | \\  /\\  / (_) | |  | | (_| |_|\n"
-                            "\\_| |_/\\___|_|_|\\___/   \\/  \\/ \\___/|_|  |_|\\__,_(_)");
-    }
-
+void kernel_main(u32 magic, struct multiboot_info *info) {
+  // Verify we were loaded by a Multiboot2-compliant bootloader
+  if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
     for (;;) {
-        __asm__ volatile("hlt");
+      __asm__ volatile("cli; hlt");
     }
+  }
+
+  // Verify multiboot information structure is present
+  if (info == 0) {
+    for (;;) {
+      __asm__ volatile("cli; hlt");
+    }
+  }
+  // Initialize serial port for debugging output
+  if (serial_init() == 0) {
+    // If the serial port initialized successfully, print something lul
+    serial_write_string(
+        " _   _      _ _         _    _            _     _ _ \n"
+        "| | | |    | | |       | |  | |          | |   | | |\n"
+        "| |_| | ___| | | ___   | |  | | ___  _ __| | __| | |\n"
+        "|  _  |/ _ \\ | |/ _ \\  | |/\\| |/ _ \\| '__| |/ _` | |\n"
+        "| | | |  __/ | | (_) | \\  /\\  / (_) | |  | | (_| |_|\n"
+        "\\_| |_/\\___|_|_|\\___/   \\/  \\/ \\___/|_|  |_|\\__,_(_)\n");
+  }
+
+  for (;;) {
+    __asm__ volatile("hlt");
+  }
 }

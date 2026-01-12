@@ -31,9 +31,6 @@
 // Multiboot2 magic value passed by bootloader in EAX
 #define MULTIBOOT2_BOOTLOADER_MAGIC             0x36d76289
 
-// Multiboot2 header magic (in the header itself)
-#define MULTIBOOT2_HEADER_MAGIC                 0xe85250d6
-
 // Architecture types
 #define MULTIBOOT2_ARCHITECTURE_I386            0
 #define MULTIBOOT2_ARCHITECTURE_MIPS32          4

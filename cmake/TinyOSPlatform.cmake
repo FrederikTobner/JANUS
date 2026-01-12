@@ -100,3 +100,4 @@ set(TINYOS_MINSIZEREL_FLAGS
 
 # Export configuration
 set(TINYOS_PLATFORM_LOADED TRUE)
+

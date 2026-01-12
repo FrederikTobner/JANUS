@@ -1,8 +1,12 @@
 # The Multiboot2 Header
 
-Before we dive deeper, let’s clear up some boot jargon. When your PC is powered on, multiple software layers will be traversed to get your kernel running.
-The first layer is called the firmware. It is the code burned into your motherboard. It’s the first thing that runs when you hit the power button. 
-There are two main types of firmware on modern Computers. The older BIOS (Basic Input Output System) and the more modern UEFI (Unified Extensible Firmware Interface).
+Before we dive deeper, let’s clear up some boot jargon. 
+When your PC is powered on, multiple software layers will be traversed to get your kernel running.
+The first layer is called the firmware. 
+It is the code burned into your motherboard. 
+It’s the first thing that runs when you hit the power button. 
+There are two main types of firmware on modern Computers. 
+The older BIOS (Basic Input Output System) and the more modern UEFI (Unified Extensible Firmware Interface).
 
 The second layer is the boot loader. The boot loader is a small program loaded by the firmware. Its job is to find your kernel and hand over control.
 
@@ -18,8 +22,7 @@ Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? U
 
 We will be using the Multiboot2 standard in this book.
 
-When you power on a PC using a BIOS firmware in combination with the GRUB bootloader,
-the BIOS will first of all load GRUB from disk. 
+When you power on a PC using a BIOS firmware in combination with the GRUB bootloader, the BIOS will first of all load GRUB from disk. 
 GRUB then scans the first 32KB of our kernel binary looking for a magic number—a secret handshake that says "hey, I'm a bootable kernel, load me!"
 
 If you do not provide this magic number GRUB will not recognize your kernel is bootable and will refuse to load it.
@@ -82,33 +85,16 @@ touch boot/include/boot/multiboot.h
 
 Now let's build the header incrementally.
 
-
-```c-diff
-file: boot/include/boot/multiboot.h
-replace: entire file
----
-+#ifndef BOOT_MULTIBOOT_H
-+#define BOOT_MULTIBOOT_H
-+
-+#include <stdint.h>
-+
-+#endif // BOOT_MULTIBOOT_H
-```
-
-
 ```c-diff
 file: kernel/boot/include/boot/multiboot.h
-after: #include "uapi/int-ll64.h"
+replace: entire file
 ---
- #include "uapi/int-ll64.h"
++ #include "tinyos/types.h"
 +
 +// Multiboot2 magic value passed by bootloader in EAX
 +#define MULTIBOOT2_BOOTLOADER_MAGIC 0x36d76289
-+
-+// Multiboot2 header magic (in the header itself)
-+#define MULTIBOOT2_HEADER_MAGIC 0xe85250d6
- 
- #endif // BOOT_MULTIBOOT_H
++ 
++#endif // BOOT_MULTIBOOT_H
 ```
 
 Two magic numbers, two different jobs. The header magic (`0xe85250d6`) goes in our assembly—GRUB scans for it to find our kernel. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register as proof it loaded us correctly. Think of them as matching halves of a secret handshake.
@@ -213,4 +199,4 @@ Without this header, GRUB won't recognize our kernel. The header is a contract: 
 
 ---
 
-**Next: [Boot Entry Assembly →](boot-assembly-32bit.md)**
+**Next: [Boot Entry Assembly](./boot-assembly-64bit.md)**

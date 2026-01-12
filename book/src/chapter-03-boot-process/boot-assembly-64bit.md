@@ -1,7 +1,7 @@
 # Understanding the 64-bit Transition
 
 In the previous section, we stated that when boot our kernel using GRUB, we will start in 32-bit protected mode with paging disabled.
-Therefor we will need to handle the transition ourself.
+Therefor we will need to handle the transition to 64-bit long mode ourself.
 Some other bootloaders already handle the transition like Limine. So why are we doing this?
 
 Because understanding the transition teaches a couple of **fundamental OS concepts** that we will need later.
@@ -109,7 +109,8 @@ So when we call `kernel_main(uint32_t magic, void *info)`, the magic number need
 > ABI stands for Application Binary Interface. 
 > It defines the rules for how functions are called at the assembly level and ensures that code that follows the ABI conventions can also be used under different architectures that implement the same ABI.
 > The System V AMD64 ABI, that is used by Linux, BSD, and most Unix-like systems, specifies the first six integer or pointer arguments are passed in registers, and the return value is also passed in a register. 
-> Additionally it defines that the stack must be 16-byte aligned before a call instruction. Lastly, it specifies which registers are caller-saved and which are callee-saved.
+> Additionally it defines that the stack must be 16-byte aligned before a call instruction. 
+> Lastly, it specifies which registers are caller-saved and which are callee-saved.
 
 ```x86asm-diff
 file: kernel/boot/boot.asm
@@ -217,7 +218,8 @@ enable_paging:
     ret
 ```
 
-After that we set the Long Mode Enable bit in the Extended Feature Enable Register (EFER) Model-Specific Register (MSR) using the `rdmsr` and `wrmsr` instructions. This tells the CPU that we want to enter 64-bit mode.
+After that we set the Long Mode Enable bit in the Extended Feature Enable Register (EFER) Model-Specific Register (MSR) using the `rdmsr` and `wrmsr` instructions. 
+This will tell the CPU that we want to enter 64-bit mode.
 
 
 ```x86asm-diff
@@ -311,7 +313,7 @@ after: enable_paging ret
 
 After `kernel_main` returns, we enter an infinite loop that halts the CPU.
 You might be wondering why we need this, because our kernel should never return from `kernel_main`.
-This is only a defensive measure to ensure the CPU doesn't execute random instructions if `kernel_main`would return due to a bug. 
+This is only a defensive measure to ensure the CPU doesn't execute random instructions, if `kernel_main`would return for some reason, for example due to a bug. 
 
 [!side]
 When working on a kernel, it is crucial to be program in a very defensive manner, you could even say almost paranoid. 

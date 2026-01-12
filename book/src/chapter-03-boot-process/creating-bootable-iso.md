@@ -1,9 +1,10 @@
 # Creating a Bootable ISO
 
-We have a complete kernel: Multiboot2 header, boot assembly, linker script, C entry point, and CMake build system. Everything compiles and links successfully producing a `kernel.elf` file. But how do we actually *boot* it?
+We have a complete kernel: Multiboot2 header, boot assembly, linker script, C entry point, and CMake build system. 
+Everything compiles and links successfully producing a `kernel.elf` file. 
+But how do we actually *boot* it?
 
 Here's the problem: QEMU can't just boot our ELF file. It expects either a Linux-style bzImage or a special PVH boot protocol. Our kernel speaks Multiboot2, which requires a bootloader. This is where GRUB comes in - the GRand Unified Bootloader.
-
 
 An ISO image is a bootable CD/DVD image that contains, the GRUB bootloader, our kernel, and GRUB configuration.
 
@@ -11,9 +12,8 @@ An ISO image is a bootable CD/DVD image that contains, the GRUB bootloader, our 
 ISO 9660 is the CD-ROM filesystem standard from 1988. Still widely used because it works everywhere.
 [/!side]
 
-This is the standard way to distribute and test operating systems. Burn it to a USB drive and it'll boot on real hardware. Or just test it in QEMU—same image works everywhere.
-
-## CMake Targets for ISO Creation
+This is the standard way to distribute and test operating systems.
+Burn it to a USB drive and it'll boot on real hardware. Or just test it in QEMU—same image works everywhere.
 
 To automate ISO creation, we need to add custom CMake targets to the root `CMakeLists.txt`.
 
@@ -99,7 +99,8 @@ after: add_custom_target(iso)
 )
 +
 +add_custom_target(run
-+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d 
++    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
++     -boot d 
 +    DEPENDS iso
 +    COMMENT "Running TinyOS in QEMU"
 +)
@@ -118,7 +119,8 @@ after: add_custom_target(run)
 )
 +
 +add_custom_target(debug
-+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso -boot d 
++    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
++      -boot d 
 +    DEPENDS iso
 +    COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
 +)

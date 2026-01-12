@@ -43,15 +43,8 @@ add_custom_target(
 
 add_subdirectory(kernel)
 
-# ISO creation target
-add_custom_target(iso
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/grub.cfg ${CMAKE_BINARY_DIR}/iso/boot/grub/grub.cfg
-    COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso ${CMAKE_BINARY_DIR}/iso/
-    DEPENDS kernel.elf ${CMAKE_BINARY_DIR}/grub.cfg
-    COMMENT "Creating bootable ISO image"
-)
+# TODO: Consider moving this and the display argument logic to TinyOSPlatform.cmake
+set(TINYOS_ISO_NAME "tinyos_${TINYOS_TARGET_ARCH}.iso")
 
 # Using i3 window manager we need to use the SDL display for QEMU to show the window
 if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3")
@@ -59,7 +52,7 @@ if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3
     find_program(PKG_CONFIG_EXECUTABLE pkg-config)
     set(QEMU_DISPLAY_ARG)
     if(SDL2_CONFIG_EXECUTABLE)
-        set(QEMU_DISPLAY_ARG -display sdl)
+       set(QEMU_DISPLAY_ARG -display sdl)
     elseif(PKG_CONFIG_EXECUTABLE)
         execute_process(
             COMMAND ${PKG_CONFIG_EXECUTABLE} --exists gtk+-3.0
@@ -71,25 +64,37 @@ if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3
             set(QEMU_DISPLAY_ARG -display gtk)
         endif()
     else()
-            message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may start a VNC server under i3.")
+        message(WARNING "Neither SDL2 nor GTK3 development libraries found. QEMU display argument will not be set. QEMU may start a VNC server under i3.")
     endif()
 else()
     set(QEMU_DISPLAY_ARG)
 endif()
 
+# ISO creation target
+add_custom_target(iso
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/grub.cfg ${CMAKE_BINARY_DIR}/iso/boot/grub/grub.cfg
+    COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME} ${CMAKE_BINARY_DIR}/iso/
+    DEPENDS kernel.elf ${CMAKE_BINARY_DIR}/grub.cfg
+    COMMENT "Creates a bootable ISO image"
+)
+
 # Custom target to run TinyOS in QEMU
 add_custom_target(run
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio ${QEMU_DISPLAY_ARG}
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME} 
+    -boot d -serial stdio ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     USES_TERMINAL
-    COMMENT "Running TinyOS in QEMU"
+    COMMENT "Runs TinyOS using QEMU"
 )
 
 # Custom target to run TinyOS in QEMU with GDB stub
 add_custom_target(debug
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos_${TINYOS_TARGET_ARCH}.iso -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME}
+    -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
     DEPENDS iso
     USES_TERMINAL
-    COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
+    COMMENT "Running TinyOS using QEMU with GDB stub (waiting for debugger on :1234)"
 )
 
