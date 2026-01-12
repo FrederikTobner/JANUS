@@ -1,6 +1,6 @@
 # Project Structure
 
-Before we write a single line of code, let's talk how we will organize our project. 
+Before we write a single line of code, we should first define how we will organize our project. 
 TinyOS follows a modular, library-based design inspired by the Linux kernel and LLVM.
 First, let's create the project skeleton. Run these commands:
 

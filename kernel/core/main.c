@@ -23,6 +23,7 @@
 
 #include <boot/multiboot.h>
 #include <drivers/serial.h>
+#include <drivers/vga_text.h>
 #include <tinyos/types.h>
 
 /**
@@ -51,6 +52,18 @@ void kernel_main(u32 magic, struct multiboot_info *info) {
       __asm__ volatile("cli; hlt");
     }
   }
+
+  // Initialize VGA text output and print a simple message
+  vga_text_init();
+// Green on black background
+  vga_text_set_color(2, 0);
+  vga_text_write_string(" _   _      _ _         _    _            _     _ _ \n"
+        "| | | |    | | |       | |  | |          | |   | | |\n"
+        "| |_| | ___| | | ___   | |  | | ___  _ __| | __| | |\n"
+        "|  _  |/ _ \\ | |/ _ \\  | |/\\| |/ _ \\| '__| |/ _` | |\n"
+        "| | | |  __/ | | (_) | \\  /\\  / (_) | |  | | (_| |_|\n"
+        "\\_| |_/\\___|_|_|\\___/   \\/  \\/ \\___/|_|  |_|\\__,_(_)\n");
+
   // Initialize serial port for debugging output
   if (serial_init() == 0) {
     // If the serial port initialized successfully, print something lul

@@ -9,14 +9,7 @@ We have our tools installed. Time to write some code that talks directly to hard
 This chapter is where OS development gets real. Every instruction you write executes directly on the CPU.
 [/!side]
 
-In this chapter, we'll:
-
-- Set up the TinyOS project structure
-- Write a Multiboot2-compliant bootloader header
-- Create the boot entry assembly code
-- Define memory layout with a linker script
-- Automate building with CMake and Ninja
-- Implement the kernel entry point in C
+In this chapter, we will setup the project structure, write a Multiboot2-compliant bootloader header, create the boot entry assembly code, define the memory layout with a linker script, automate building with CMake and Ninja, and implement the kernel entry point in C.
 
 By the end of this chapter, we'll have a bootable kernel that verifies it was loaded correctly and halts gracefully.
 
