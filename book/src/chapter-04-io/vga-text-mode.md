@@ -35,7 +35,7 @@ replace: entire file
 +#ifndef DRIVER_VGA_TEXT_H
 +#define DRIVER_VGA_TEXT_H
 +
-+#include <tinyos/types.h>
++#include <janus/types.h>
 +
 +#define VGA_TEXT_WIDTH 80
 +#define VGA_TEXT_HEIGHT 25
@@ -62,7 +62,7 @@ replace: entire file
 ---
 +
 +#include <drivers/vga_text.h>
-+#include <tinyos/types.h>
++#include <janus/types.h>
 +
 +#define VGA_TEXT_MEMORY_PHYS 0xB8000
 +

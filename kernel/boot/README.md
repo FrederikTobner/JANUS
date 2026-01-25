@@ -1,11 +1,11 @@
-# TinyOS Boot Module
+# JANUS Boot Module
 
 Boot-protocol glue and the very earliest execution code that runs before the “normal” kernel world exists.
 
 This module is structured as `(arch, boot protocol)` implementations selected at configure time via:
 
-- `TINYOS_TARGET_ARCH`
-- `TINYOS_BOOT_PROTOCOL`
+- `JANUS_TARGET_ARCH`
+- `JANUS_BOOT_PROTOCOL`
 
 ## Responsibilities
 
@@ -55,7 +55,7 @@ Note: `boot/boot.asm` and `boot/multiboot2.asm` may exist as legacy files, but t
 
 ## Build integration
 
-`boot/CMakeLists.txt` is a selector that adds `boot/${TINYOS_TARGET_ARCH}/${TINYOS_BOOT_PROTOCOL}`.
+`boot/CMakeLists.txt` is a selector that adds `boot/${JANUS_TARGET_ARCH}/${JANUS_BOOT_PROTOCOL}`.
 If the folder (or its `CMakeLists.txt`) does not exist, configuration fails fast with a helpful error.
 
 ## Adding a new boot protocol

@@ -121,14 +121,14 @@ file: kernel/CMakeLists.txt
 after: entire file
 ---
 +# Create kernel executable with linker script
-+tinyos_create_kernel(
++janus_create_kernel(
 +    SOURCES main.c
 +    LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
 +    LIBRARIES ${BOOT_OBJECTS}
 +)
 ```
 
-This uses the `tinyos_create_kernel()` helper function (defined in `cmake/TinyOSHelpers.cmake` to:
+This uses the `janus_create_kernel()` helper function (defined in `cmake/JanusHelpers.cmake` to:
 
 - Link boot assembly objects with `main.c`
 - Apply the custom linker script

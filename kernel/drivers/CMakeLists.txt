@@ -1,10 +1,10 @@
 # Device drivers module
-project(tinyos-drivers)
+project(janus-drivers)
 
 # Automatically find all source files
 file(GLOB_RECURSE DRIVERS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 
-tinyos_add_module(drivers
+janus_add_module(drivers
     SOURCES
         ${DRIVERS_SOURCES}
 )

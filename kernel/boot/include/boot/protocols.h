@@ -1,10 +1,10 @@
 #ifndef BOOT_PROTOCOLS_H
 #define BOOT_PROTOCOLS_H
 
-#include <tinyos/types.h>
+#include <janus/types.h>
 
 enum boot_protocol {
-    BOOT_PROTOCOL_UNKNOWN   = 0,
+    BOOT_PROTOCOL_UNKNOWN = 0,
     BOOT_PROTOCOL_MULTIBOOT2 = 1,
 };
 

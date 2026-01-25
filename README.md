@@ -1,10 +1,11 @@
-# TinyOS
+# JANUS
 
-An educational x86-64 operating system kernel written in C17 and assembly, focusing on low-level hardware interaction and modular architecture.
+JANUS (Just ANother Unix-like System) is an educational x86-64 operating system kernel written in C17 and assembly, focusing on low-level hardware interaction and modular architecture.
 
 ## Quick Start
 
 Building the kernel
+
 ```bash
 # Build the kernel
 cmake -B build 
@@ -12,11 +13,13 @@ cmake --build build
 ```
 
 Creating a bootable ISO
+
 ```bash
 cmake --build build --target iso 
 ```
 
 Running in QEMU
+
 ```bash
 cmake --build build --target run 
 ```
@@ -24,7 +27,7 @@ cmake --build build --target run
 ## Project Structure
 
 ```
-TinyOS/
+JANUS/
 
 ├── scripts/          # Build and utility scripts
 ├── cmake/            # CMake build modules
@@ -32,6 +35,7 @@ TinyOS/
 ├── book/             # Book / tutorial of the project
 ├── Documentation/    # Technical documentation
 └── kernel/           # kernel functionality
+       ├── arch/             # Architecture specific layer
        ├── core/             # Core kernel functionality
        ├── boot/             # Multiboot2 boot loader
        ├── lib/              # Kernel libraries (arch, utility libraries)
@@ -44,7 +48,7 @@ TinyOS/
 
 - **Language**: C17 (ISO/IEC 9899:2018) with GNU extensions
 - **Compiler**: Clang 17 or GCC with x86_64-elf cross-compilation support
-- **Assembler**: NASM 
+- **Assembler**: NASM
 - **Build System**: CMake 3.20+
 
 ## Documentation

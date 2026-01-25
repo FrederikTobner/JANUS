@@ -5,7 +5,7 @@ include_guard(GLOBAL)
 
 # Ensure platform is loaded
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "JANUSPlatform.cmake must be included before JANUSHelpers.cmake")
+    message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusHelpers.cmake")
 endif()
 
 #

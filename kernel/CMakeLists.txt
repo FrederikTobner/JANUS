@@ -1,12 +1,12 @@
 
 # Configure config.h from config.h.in
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/tinyos/config.h.in"
-    "${CMAKE_BINARY_DIR}/include/tinyos/config.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/janus/config.h.in"
+    "${CMAKE_BINARY_DIR}/include/janus/config.h"
     @ONLY
 )
 
-if(TINYOS_BOOT_PROTOCOL STREQUAL "multiboot2")
+if(JANUS_BOOT_PROTOCOL STREQUAL "multiboot2")
     # Generate grub.cfg from template
     configure_file(
         ${CMAKE_SOURCE_DIR}/cmake/boot/multiboot2/grub.cfg.in
@@ -14,7 +14,7 @@ if(TINYOS_BOOT_PROTOCOL STREQUAL "multiboot2")
         @ONLY
     )
 else()
-    message(STATUS "Boot protocol '${TINYOS_BOOT_PROTOCOL}' selected: GRUB config generation is not implemented")
+    message(STATUS "Boot protocol '${JANUS_BOOT_PROTOCOL}' selected: GRUB config generation is not implemented")
 endif()
 
 # Add generated config.h to include path

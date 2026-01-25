@@ -29,7 +29,7 @@ Before moving on, try these exercises to deepen your understanding. Some are res
 5. **Limine Protocol** (Implementation): Limine is a modern bootloader with a simpler protocol than Multiboot2. Read the Limine protocol specification, then:
 
 - Compare it to Multiboot2. What's simpler? What's missing?
-- (Bonus) Implement a Limine boot header for TinyOS.
+- (Bonus) Implement a Limine boot header for JANUS.
 - (Bonus) Add boot protocol abstraction to support both Multiboot2 and Limine.
 
 1. **Custom Bootloader** (Implementation): Write a tiny bootloader in assembly that:

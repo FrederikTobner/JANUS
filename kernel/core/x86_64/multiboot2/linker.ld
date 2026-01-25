@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOs.                                              *
+ * This file is part of JANUS.                                              *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -16,7 +16,7 @@
 
 /**
  * @file linker_x86_64.ld
- * @brief TinyOS kernel linker script
+ * @brief JANUS kernel linker script
  * 
  * Defines the memory layout of the kernel image:
  * - Loads at 1MB (0x100000) - standard higher-half kernel load address

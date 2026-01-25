@@ -36,7 +36,7 @@ replace: entire file
 +set timeout=0
 +set default=0
 +
-+menuentry "TinyOS" {
++menuentry "JANUS" {
 +    multiboot2 /boot/kernel.elf
 +    boot
 +}
@@ -77,7 +77,7 @@ configure_file(
 +    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
 +    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
 +    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/grub.cfg ${CMAKE_BINARY_DIR}/iso/boot/grub/grub.cfg
-+    COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/tinyos.iso ${CMAKE_BINARY_DIR}/iso/
++    COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/janus_x86_64.iso ${CMAKE_BINARY_DIR}/iso/
 +    DEPENDS kernel.elf ${CMAKE_BINARY_DIR}/grub.cfg
 +    COMMENT "Creating bootable ISO image"
 +)
@@ -87,7 +87,7 @@ configure_file(
  message(STATUS "========================================")
 ```
 
-This command does a couple of things. It creates the ISO directory structure, copies kernel, generates grub.cfg, and finally creates the tinyos.iso image.
+This command does a couple of things. It creates the ISO directory structure, copies kernel, generates grub.cfg, and finally creates the janus_x86_64.iso image.
 
 Now let's add another custom command to boot the ISO image in QEMU. This command depends on `iso`.
 
@@ -99,10 +99,10 @@ after: add_custom_target(iso)
 )
 +
 +add_custom_target(run
-+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
++    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/janus_x86_64.iso 
 +     -boot d 
 +    DEPENDS iso
-+    COMMENT "Running TinyOS in QEMU"
++    COMMENT "Running JANUS in QEMU"
 +)
 +
  
@@ -115,14 +115,14 @@ And another command to debug our application using a GDB stub enabled on port 12
 file: CMakeLists.txt
 after: add_custom_target(run)
 ---
-    COMMENT "Running TinyOS in QEMU"
+    COMMENT "Running JANUS in QEMU"
 )
 +
 +add_custom_target(debug
-+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
++    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/janus_x86_64.iso 
 +      -boot d 
 +    DEPENDS iso
-+    COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
++    COMMENT "Running JANUS in QEMU with GDB stub (waiting for debugger on :1234)"
 +)
  
  message(STATUS "========================================")
@@ -130,7 +130,7 @@ after: add_custom_target(run)
 
 > **Overview:**
 >
-> - `iso` - Creates the ISO directory structure, copies kernel, generates grub.cfg, and creates tinyos.iso
+> - `iso` - Creates the ISO directory structure, copies kernel, generates grub.cfg, and creates janus_x86_64.iso
 > - `run` - Depends on `iso`, then boots the ISO in QEMU
 > - `debug` - Same as `run` but with GDB stub enabled on port 1234, allowing us to connect a debugger
 
@@ -159,7 +159,7 @@ You'll see output showing the new targets:
 
 ```
 -- ========================================
--- TinyOS Build Configuration
+-- JANUS Build Configuration
 -- ========================================
 -- C Standard: C17
 -- Build Type: Debug
@@ -174,7 +174,7 @@ You'll see output showing the new targets:
 -- ========================================
 -- Configuring done (0.0s)
 -- Generating done (0.0s)
--- Build files have been written to: /home/user/TinyOS/build
+-- Build files have been written to: /home/user/JANUS/build
 ```
 
 Now let's start using the targets we have created.
@@ -198,24 +198,24 @@ ninja: Entering directory `build'
 [1/1] Creating bootable ISO image
 xorriso 1.5.6 : RockRidge filesystem manipulator, libburnia project.
 
-Drive current: -outdev 'stdio:/home/user/TinyOS/build/tinyos_x86_64.iso'
+Drive current: -outdev 'stdio:/home/user/JANUS/build/janus_x86_64.iso'
 Media current: stdio file, overwriteable
 Media status : is blank
 Media summary: 0 sessions, 0 data blocks, 0 data, 33.5g free
 Added to ISO image: directory '/'='/tmp/grub.A9hghz'
 xorriso : UPDATE :    1058 files added in 1 seconds
-Added to ISO image: directory '/'='/home/user/TinyOS/build/iso'
+Added to ISO image: directory '/'='/home/user/JANUS/build/iso'
 xorriso : UPDATE :    1062 files added in 1 seconds
 xorriso : NOTE : Copying to System Area: 512 bytes from file '/usr/lib/grub/i386-pc/boot_hybrid.img'
 ISO image produced: 15591 sectors
 Written to medium : 15591 sectors at LBA 0
-Writing to 'stdio:/home/user/TinyOS/build/tinyos_x86_64.iso' completed successfully.
+Writing to 'stdio:/home/user/JANUS/build/janus_x86_64.iso' completed successfully.
 ```
 
 Let's reflect on what we have accomplished now by running this command.
 First we create the directory structure for the ISO, then we copy our kernel and GRUB configuration into place, and finally we use `grub-mkrescue` to create the bootable ISO image.
 
-The result is `build/tinyos_x86_64.iso` - a bootable ISO image that works on both BIOS and UEFI systems.
+The result is `build/janus_x86_64.iso` - a bootable ISO image that works on both BIOS and UEFI systems.
 
 Next we will boot it up in QEMU to verify everything works as expected.
 

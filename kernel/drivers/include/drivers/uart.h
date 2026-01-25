@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOS.                                             *
+ * This file is part of JANUS.                                             *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -21,7 +21,7 @@
 
 #ifndef DRIVER_UART_H
 #define DRIVER_UART_H
-#include "tinyos/types.h"
+#include "janus/types.h"
 #define UART_COM1 0x3F8
 
 // TODO: Add support for COM2, COM3, COM4 and make the baud rate configurable

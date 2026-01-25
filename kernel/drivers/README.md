@@ -43,7 +43,7 @@ Note: because this uses `file(GLOB_RECURSE ...)`, adding new source files may re
 ## Dependencies
 
 - `arch` (currently for port I/O via `arch/io.h`, used by the UART driver)
-- `tinyos` base headers (e.g. `tinyos/types.h`)
+- `janus` base headers (e.g. `janus/types.h`)
 
 ## Adding a new driver
 

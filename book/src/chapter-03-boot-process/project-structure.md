@@ -1,20 +1,20 @@
 # Project Structure
 
 Before we write a single line of code, we should first define how we will organize our project.
-TinyOS follows a modular, library-based design inspired by the Linux kernel and LLVM.
+JANUS follows a modular, library-based design inspired by the Linux kernel and LLVM.
 First, let's create the project skeleton. Run these commands:
 
 ```bash
 # Create the project root
-mkdir -p TinyOS
-cd TinyOS
+mkdir -p JANUS
+cd JANUS
 
 # Create kernel root and cmake directories
 mkdir -p kernel cmake
 cd kernel
 
 # Create module directories
-mkdir -p boot kernel include/tinyos include/uapi 
+mkdir -p boot kernel include/janus include/uapi 
 
 # Create placeholder CMakeLists.txt files
 touch boot/CMakeLists.txt
@@ -25,10 +25,10 @@ touch CMakeLists.txt
 Your structure should now look like this:
 
 ```
-TinyOS/
+JANUS/
 ├── cmake/                        # Build system modules
-│   ├── TinyOSPlatform.cmake 
-│   └── TinyOSHelpers.cmake
+│   ├── JanusPlatform.cmake 
+│   └── JanusHelpers.cmake
 ├── CMakeLists.txt                # Root build config
 └── kernel
     ├── boot/                     # Boot module
@@ -37,7 +37,7 @@ TinyOS/
     │   └── CMakeLists.txt        # Kernel build config
     └── include/                  # Global headers of our kernel
         ├── uapi/                 # User API headers
-        └── tinyos/               # TinyOS-specific kernel headers
+        └── janus/               # JANUS-specific kernel headers
 ```
 
 We will organize our code in different modules
@@ -72,10 +72,10 @@ replace: entire file
 +#endif
 ```
 
-Now let's create `include/tinyos/types.h`.
+Now let's create `include/janus/types.h`.
 
 ```c-diff
-file: include/tinyos/types.h
+file: include/janus/types.h
 replace: entire file
 ---
 +#ifndef KERNEL_GLOBAL_TYPES_H

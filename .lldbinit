@@ -1,4 +1,4 @@
-# LLDB configuration for TinyOS kernel debugging
+# LLDB configuration for JANUS kernel debugging
 # This file is loaded automatically when LLDB starts in this directory
 
 # Set Intel syntax for assembly (more readable for x86-64)
@@ -39,5 +39,5 @@ type format add --format hex phys_addr_t
 type format add --format hex virt_addr_t
 
 # Print message on startup
-script print("TinyOS LLDB configuration loaded")
+script print("JANUS LLDB configuration loaded")
 script print("Use 'connect-qemu' to attach to QEMU on localhost:1234")

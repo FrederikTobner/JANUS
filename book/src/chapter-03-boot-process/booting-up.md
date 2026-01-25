@@ -8,9 +8,9 @@ Time for the moment of truth. Boot the ISO in QEMU:
 ninja -C build run
 ```
 
-QEMU should open with and tell us it is booting TinyOS. After that there will be no other visible output—just a black screen.
+QEMU should open with and tell us it is booting JANUS. After that there will be no other visible output—just a black screen.
 
-QEMU should open and begin booting TinyOS. After that there will be no other visible output—just a black screen.
+QEMU should open and begin booting JANUS. After that there will be no other visible output—just a black screen.
 
 **Don't panic. This is success.**
 
@@ -235,8 +235,8 @@ To exit LLDB, simply type:
 > To make the window visible you can either use a VNC viewer or setup SDL or GTK and specify it as the display type that is used:
 >
 > ```bash
-> qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display sdl
-> qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display gtk
+> qemu-system-x86_64 -cdrom ./build/janus_x86_64.iso -boot d -serial stdio -display sdl
+> qemu-system-x86_64 -cdrom ./build/janus_x86_64.iso -boot d -serial stdio -display gtk
 > ```
 >
 > **Debugger Won't Connect**

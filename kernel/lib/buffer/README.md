@@ -9,6 +9,7 @@ Provides safe, memory-aware character buffer operations for kernel string handli
 ## Planned Contents
 
 ### char_buffer.h / char_buffer.c
+
 - Character buffer creation and destruction
 - Buffer slicing and views
 - Safe append and manipulation operations
@@ -33,7 +34,7 @@ Provides safe, memory-aware character buffer operations for kernel string handli
 
 char_buffer_t* buf = buf_create(256);
 buf_append(buf, "Hello, ");
-buf_append(buf, "TinyOS!");
+buf_append(buf, "JANUS!");
 
 // Create a view without copying
 char_buffer_view_t view = buf_slice(buf, 0, 5);

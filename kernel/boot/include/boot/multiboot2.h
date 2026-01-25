@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOS.                                              *
+ * This file is part of JANUS.                                              *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -25,8 +25,8 @@
  * See: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
  */
 
-#include <tinyos/attributes.h>
-#include <tinyos/types.h>
+#include <janus/attributes.h>
+#include <janus/types.h>
 
 // Multiboot2 magic value passed by bootloader in EAX
 #define MULTIBOOT2_BOOTLOADER_MAGIC             0x36d76289

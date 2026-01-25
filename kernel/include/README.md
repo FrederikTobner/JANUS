@@ -1,6 +1,6 @@
 # include - Global Headers
 
-Global, cross-cutting header files used throughout TinyOS.
+Global, cross-cutting header files used throughout JANUS.
 
 ## Purpose
 
@@ -10,7 +10,7 @@ Provides kernel-wide type definitions, configuration, and version information ac
 
 ```
 include/
-├── tinyos/              # Main OS interface
+├── janus/               # Main OS interface
 │   ├── types.h          # Global kernel types (phys_addr_t, virt_addr_t, pid_t, etc.)
 │   ├── config.h.in      # Build configuration template (processed by CMake)
 │   ├── config.h         # Generated build configuration (in build/include/)
@@ -22,14 +22,13 @@ include/
 
 ```c
 // For kernel code needing global types
-#include <tinyos/types.h>
+#include <janus/types.h>
 
 phys_addr_t phys_addr = 0x100000;
 virt_addr_t virt_addr = 0xFFFFFFFF80000000;
 
 // For version information
-#include <tinyos/version.h>
+#include <janus/version.h>
 
-const char * version = tinyos_version_string();
+const char * version = janus_version_string();
 ```
-

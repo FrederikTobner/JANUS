@@ -1,6 +1,6 @@
-# TinyOS Documentation
+# JANUS Documentation
 
-This directory contains the technical documentation for TinyOS.
+This directory contains the technical documentation for JANUS.
 
 1. **[Setup.md](Setup.md)** - Install required dependencies (CMake, Clang, NASM, LLDB, QEMU)
 
@@ -40,7 +40,6 @@ Documents describing the architecture and structure of the codebase.
   - CMake build system organization
   - Library structure
 
-
 - **[Include-Hierarchy.md](Code-Organization/Global-Include-Hierarchy.md)**
   - Header file organization (public vs internal)
   - Include path structure
@@ -49,7 +48,7 @@ Documents describing the architecture and structure of the codebase.
   - CMake include directory configuration
 
 - **[Global-Include-Hierarchy.md](Code-Organization/Global-Include-Hierarchy.md)**
-  - What goes in `include/tinyos/`
+  - What goes in `include/janus/`
   - Global vs module-specific headers
   - When to promote headers to global
   - Include patterns and examples

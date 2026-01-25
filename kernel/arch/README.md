@@ -1,8 +1,8 @@
-# TinyOS Architecture Layer
+# JANUS Architecture Layer
 
 Architecture-specific code and small hardware abstractions.
 
-The goal of this module is to keep the rest of the kernel (core, drivers, mm, …) as architecture-independent as possible by providing narrow, stable APIs.
+The goal of this module is to keep the rest of the kernel (core, drivers, mm, …) as architecture-independent as possible.
 
 ## Supported architectures
 
@@ -41,7 +41,7 @@ arch/
 
 ## Build integration
 
-`arch/CMakeLists.txt` selects sources from `arch/${TINYOS_TARGET_ARCH}/` and always exports the public headers from `arch/include/arch/`.
+`arch/CMakeLists.txt` selects sources from `arch/${JANUS_TARGET_ARCH}/` and always exports the public headers from `arch/include/arch/`.
 
 Note: because it uses `file(GLOB_RECURSE ...)`, adding new source files may require re-running CMake configuration (e.g. `cmake -S . -B build`) so the new files are picked up.
 
@@ -52,4 +52,3 @@ Keep it minimal and extendable:
 1. Add a small, architecture-neutral header in `include/arch/`.
 2. Implement it in `arch/<arch>/`.
 3. Avoid leaking instruction set details to other modules; prefer APIs like `cpu_halt_forever()` over embedding inline assembly in core code.
-

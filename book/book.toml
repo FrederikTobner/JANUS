@@ -21,9 +21,9 @@ command = "mdbook-mermaid"
 [output.html]
 default-theme = "rust"
 preferred-dark-theme = "navy"
-git-repository-url = "https://github.com/FrederikTobner/TinyOS"
-edit-url-template = "https://github.com/FrederikTobner/TinyOS/edit/main/book/{path}"
-site-url = "/TinyOS/"
+git-repository-url = "https://github.com/FrederikTobner/JANUS"
+edit-url-template = "https://github.com/FrederikTobner/JANUS/edit/main/book/{path}"
+site-url = "/JANUS/"
 cname = ""
 additional-css = ["theme/side-notes.css", "theme/css/code-diff.css"]
 mathjax-support = true

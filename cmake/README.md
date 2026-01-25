@@ -1,6 +1,6 @@
 # cmake - CMake Build Helpers
 
-CMake modules and helper functions for TinyOS build system.
+CMake modules and helper functions for JANUS build system.
 
 ## Purpose
 
@@ -8,19 +8,19 @@ Provides platform detection, cross-compilation setup, and build helper functions
 
 ## Contents
 
-### TinyOSPlatform.cmake
+### JanusPlatform.cmake
 
 - Platform and compiler detection
 - Cross-compilation toolchain setup for x86_64-elf
 - Compiler flags configuration (freestanding, no-stdlib, etc.)
 - Build type configuration (Debug, Release)
 
-### TinyOSHelpers.cmake
+### JanusHelpers.cmake
 
-- `tinyos_add_library()` - Add a library module with automatic configuration
-- `tinyos_add_module()` - Add a kernel module with dependencies
-- `tinyos_add_test()` - Add BMUnit test suite
-- `tinyos_add_tests()` - Batch test registration
+- `janus_add_library()` - Add a library module with automatic configuration
+- `janus_add_module()` - Add a kernel module with dependencies
+- `janus_add_test()` - Add BMUnit test suite
+- `janus_add_tests()` - Batch test registration
 
 ## Key Features
 
@@ -33,7 +33,7 @@ Provides platform detection, cross-compilation setup, and build helper functions
 
 ```cmake
 # In a module CMakeLists.txt
-tinyos_add_library(buffer
+janus_add_library(buffer
     SOURCES
         buffer.c
     DEPENDENCIES
@@ -41,7 +41,7 @@ tinyos_add_library(buffer
         memory
 )
 
-tinyos_add_test(buffer_test
+janus_add_test(buffer_test
     SOURCES buffer_test.c
     DEPENDS buffer
 )

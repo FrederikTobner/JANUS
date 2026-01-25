@@ -11,7 +11,7 @@ In this chapter, we'll give our kernel a voice and ears. We'll implement:
 - **VGA Text Mode** — Display text on screen for user interaction
 - **Keyboard Input** — Read keypresses and handle basic input
 
-By the end of this chapter, our kernel will be able to print "Hello, TinyOS!" and respond to keyboard input. No more flying blind!
+By the end of this chapter, our kernel will be able to print "Hello, JANUS!" and respond to keyboard input. No more flying blind!
 
 ---
 

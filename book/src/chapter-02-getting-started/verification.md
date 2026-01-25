@@ -145,7 +145,7 @@ rm -rf build CMakeLists.txt test.c test.asm test.o test_asm.o
 
 ## All Tests Pass?
 
-If all tests succeeded, you have a working TinyOS development environment. If any failed, review the error messages and consult the troubleshooting section in the previous chapter.
+If all tests succeeded, you have a working JANUS development environment. If any failed, review the error messages and consult the troubleshooting section in the previous chapter.
 
 ---
 

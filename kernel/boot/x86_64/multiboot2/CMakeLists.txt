@@ -19,15 +19,15 @@ target_include_directories(boot
 )
 
 target_compile_options(boot PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:${TINYOS_COMMON_FLAGS}>
+    $<$<COMPILE_LANGUAGE:C>:${JANUS_COMMON_FLAGS}>
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(boot PRIVATE $<$<COMPILE_LANGUAGE:C>:${TINYOS_DEBUG_FLAGS}>)
+    target_compile_options(boot PRIVATE $<$<COMPILE_LANGUAGE:C>:${JANUS_DEBUG_FLAGS}>)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    target_compile_options(boot PRIVATE $<$<COMPILE_LANGUAGE:C>:${TINYOS_RELEASE_FLAGS}>)
+    target_compile_options(boot PRIVATE $<$<COMPILE_LANGUAGE:C>:${JANUS_RELEASE_FLAGS}>)
 elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-    target_compile_options(boot PRIVATE $<$<COMPILE_LANGUAGE:C>:${TINYOS_MINSIZEREL_FLAGS}>)
+    target_compile_options(boot PRIVATE $<$<COMPILE_LANGUAGE:C>:${JANUS_MINSIZEREL_FLAGS}>)
 endif()
 
-message(STATUS "  Added module: boot (${TINYOS_TARGET_ARCH}/${TINYOS_BOOT_PROTOCOL})")
+message(STATUS "  Added module: boot (${JANUS_TARGET_ARCH}/${JANUS_BOOT_PROTOCOL})")

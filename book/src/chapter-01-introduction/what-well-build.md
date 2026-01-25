@@ -1,6 +1,6 @@
 # What We'll Build
 
-**TinyOS** is a minimalist operating system for x86_64 architecture. By the end of this book, it will:
+**JANUS** is a minimalist operating system for x86_64 architecture. By the end of this book, it will:
 
 - Boot on real hardware (or a virtual machine)  
 - Support 64-bit long mode  

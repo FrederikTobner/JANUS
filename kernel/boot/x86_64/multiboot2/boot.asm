@@ -1,8 +1,8 @@
 ; Boot Entry Point
-; TinyOS Boot Assembly Code
+; JANUS Boot Assembly Code
 ;
 ; Copyright (C) 2025 by Frederik Tobner
-; This file is part of TinyOS.
+; This file is part of JANUS.
 ; Licensed under the GNU Affero General Public License v3.0
 ; See https://www.gnu.org/licenses/agpl-3.0.en.html
 

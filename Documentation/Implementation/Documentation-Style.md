@@ -1,10 +1,10 @@
-# TinyOS Documentation Style Guide
+# JANUS Documentation Style Guide
 
 ## Overview
 
 **Document why, not what. If your comment just repeats what the code says, delete it.**
 
-Documentation in TinyOS has the following purpose:
+Documentation in JANUS has the following purpose:
 
 - **Explain complex logic** - Algorithms and design decisions that aren't obvious
 - **Define APIs** - Interfaces and contracts
@@ -151,7 +151,7 @@ void complex_initialization(void) {
     /*
      * Phase 2: Parse configuration
      */
-    config_t * config = parse_config_file("/etc/tinyos.conf");
+    config_t * config = parse_config_file("/etc/janus.conf");
     if (config == NULL) {
         // Fall back to defaults
         config = get_default_config();
@@ -206,8 +206,8 @@ void complex_initialization(void) {
  *   char_buffer_free(&buf);
  */
 
-#ifndef TINYOS_LIB_CHAR_BUFFER_H
-#define TINYOS_LIB_CHAR_BUFFER_H
+#ifndef JANUS_LIB_CHAR_BUFFER_H
+#define JANUS_LIB_CHAR_BUFFER_H
 
 #include <stdint.h>
 #include <stddef.h>

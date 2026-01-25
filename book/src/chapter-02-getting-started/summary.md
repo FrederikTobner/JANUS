@@ -9,7 +9,7 @@ You're now equipped with:
 - **Debugger** — LLDB for inspecting kernel execution
 - **Bootloader** — GRUB for loading our kernel
 - **Verified environment** — All tools tested and working
-- **Project structure** — TinyOS directory initialized with git
+- **Project structure** — JANUS directory initialized with git
 
 Now we have fully set up the OS development environment: everything you need to write, build, debug, and boot a kernel.
 
@@ -67,21 +67,23 @@ Before moving on, try these exercises to deepen your understanding of your toolc
 2. **Freestanding vs Hosted** (Experiment): Write a simple C program that uses `printf`. Try compiling it with `-ffreestanding` vs without. What errors do you get, and why? Try fixing it by implementing your own `printf` that writes to a buffer instead of stdout.
 
 3. **Assembly Deep Dive** (Implementation): Write a NASM program that:
- - Reserves 1024 bytes in the `.bss` section
- - Sets up a stack pointer to the top of that memory
- - Calls a C function you write
- - The C function uses that stack and returns a value
- - Compile both, link them, and verify with `readelf` that the stack is correctly aligned
 
-4. **QEMU Machine Exploration** (Research): Run `qemu-system-x86_64 -machine help`. What machines can QEMU emulate? Research the differences between `pc` (default) and `q35`. Which is more modern, and what advantages does q35 have?
+- Reserves 1024 bytes in the `.bss` section
+- Sets up a stack pointer to the top of that memory
+- Calls a C function you write
+- The C function uses that stack and returns a value
+- Compile both, link them, and verify with `readelf` that the stack is correctly aligned
 
-5. **Build System Comparison** (Research): CMake generates build files for Ninja. Research alternatives like Meson, Make, or build2. What are their tradeoffs? Why might we choose CMake+Ninja for kernel development? (Hint: consider dependency tracking, parallel builds, and cross-compilation support.)
+1. **QEMU Machine Exploration** (Research): Run `qemu-system-x86_64 -machine help`. What machines can QEMU emulate? Research the differences between `pc` (default) and `q35`. Which is more modern, and what advantages does q35 have?
 
-6. **Custom Toolchain** (Advanced): Try building a true cross-compiler from source:
- - Build binutils for an `x86_64-elf` target
- - Build GCC with `--target=x86_64-elf --disable-hosted`
- - Compare the resulting toolchain to Clang's built-in cross-compilation
- - Which approach is simpler? Which gives more control?
+2. **Build System Comparison** (Research): CMake generates build files for Ninja. Research alternatives like Meson, Make, or build2. What are their tradeoffs? Why might we choose CMake+Ninja for kernel development? (Hint: consider dependency tracking, parallel builds, and cross-compilation support.)
+
+3. **Custom Toolchain** (Advanced): Try building a true cross-compiler from source:
+
+- Build binutils for an `x86_64-elf` target
+- Build GCC with `--target=x86_64-elf --disable-hosted`
+- Compare the resulting toolchain to Clang's built-in cross-compilation
+- Which approach is simpler? Which gives more control?
 
 ---
 

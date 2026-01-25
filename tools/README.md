@@ -1,6 +1,6 @@
-# TinyOS Development Tools
+# JANUS Development Tools
 
-This directory contains development tools and utilities for TinyOS development.
+This directory contains development tools and utilities for JANUS development.
 
 ## Structure
 

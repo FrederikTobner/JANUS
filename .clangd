@@ -1,4 +1,4 @@
-# clangd configuration for TinyOS kernel development
+# clangd configuration for JANUS kernel development
 # This file tells clangd (LSP) how to understand our freestanding kernel code
 
 CompileFlags:

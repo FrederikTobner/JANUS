@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
-project(TinyOS VERSION 0.1.0 LANGUAGES C ASM_NASM)
+project(JANUS VERSION 0.1.0 LANGUAGES C ASM_NASM)
 
 # Print build configuration
 message(STATUS "========================================")
-message(STATUS "TinyOS Build Configuration")
+message(STATUS "JANUS Build Configuration")
 message(STATUS "========================================")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Compiler: ${CMAKE_C_COMPILER} (version ${CMAKE_C_COMPILER_VERSION})")
@@ -22,14 +22,14 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Allow GNU extension
 set(CMAKE_C_EXTENSIONS ON)  
 
-# Include TinyOS platform detection and helper functions
+# Include JANUS platform detection and helper functions
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-include(TinyOSPlatform)
-include(TinyOSHelpers)
+include(JanusPlatform)
+include(JanusHelpers)
 
 # Generate build timestamp
-string(TIMESTAMP TINYOS_BUILD_DATE "%Y-%m-%d")
-string(TIMESTAMP TINYOS_BUILD_TIME "%H:%M:%S")
+string(TIMESTAMP JANUS_BUILD_DATE "%Y-%m-%d")
+string(TIMESTAMP JANUS_BUILD_TIME "%H:%M:%S")
 
 # Copy compile_commands.json to project root for clangd
 add_custom_target(
@@ -43,8 +43,8 @@ add_custom_target(
 
 add_subdirectory(kernel)
 
-# TODO: Consider moving this and the display argument logic to TinyOSPlatform.cmake
-set(TINYOS_ISO_NAME "tinyos_${TINYOS_TARGET_ARCH}.iso")
+# TODO: Consider moving this and the display argument logic to JanusPlatform.cmake
+set(JANUS_ISO_NAME "janus_${JANUS_TARGET_ARCH}.iso")
 
 # Using i3 window manager we need to use the SDL display for QEMU to show the window
 if(DEFINED ENV{XDG_CURRENT_DESKTOP} AND "$ENV{XDG_CURRENT_DESKTOP}" STREQUAL "i3")
@@ -71,35 +71,35 @@ else()
 endif()
 
 # ISO creation target
-if(TINYOS_TARGET_ARCH STREQUAL "x86_64" AND TINYOS_BOOT_PROTOCOL STREQUAL "multiboot2")
+if(JANUS_TARGET_ARCH STREQUAL "x86_64" AND JANUS_BOOT_PROTOCOL STREQUAL "multiboot2")
     add_custom_target(iso
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/grub.cfg ${CMAKE_BINARY_DIR}/iso/boot/grub/grub.cfg
-        COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME} ${CMAKE_BINARY_DIR}/iso/
+        COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/${JANUS_ISO_NAME} ${CMAKE_BINARY_DIR}/iso/
         DEPENDS kernel.elf ${CMAKE_BINARY_DIR}/grub.cfg
         COMMENT "Creates a bootable ISO image"
     )
 else()
     add_custom_target(iso
-        COMMAND ${CMAKE_COMMAND} -E echo "ISO packaging not implemented for TINYOS_TARGET_ARCH='${TINYOS_TARGET_ARCH}', TINYOS_BOOT_PROTOCOL='${TINYOS_BOOT_PROTOCOL}'."
+        COMMAND ${CMAKE_COMMAND} -E echo "ISO packaging not implemented for JANUS_TARGET_ARCH='${JANUS_TARGET_ARCH}', JANUS_BOOT_PROTOCOL='${JANUS_BOOT_PROTOCOL}'."
         COMMAND ${CMAKE_COMMAND} -E false
         COMMENT "ISO packaging not implemented for this arch/protocol"
     )
 endif()
 
-# Custom target to run TinyOS in QEMU
-if(TINYOS_TARGET_ARCH STREQUAL "x86_64" AND TINYOS_BOOT_PROTOCOL STREQUAL "multiboot2")
+# Custom target to run JANUS in QEMU
+if(JANUS_TARGET_ARCH STREQUAL "x86_64" AND JANUS_BOOT_PROTOCOL STREQUAL "multiboot2")
     add_custom_target(run
-        COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME} 
+        COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${JANUS_ISO_NAME} 
         -boot d -serial stdio ${QEMU_DISPLAY_ARG}
         DEPENDS iso
         USES_TERMINAL
-        COMMENT "Runs TinyOS using QEMU"
+        COMMENT "Runs JANUS using QEMU"
     )
 else()
     add_custom_target(run
-        COMMAND ${CMAKE_COMMAND} -E echo "Run target not implemented for TINYOS_TARGET_ARCH='${TINYOS_TARGET_ARCH}', TINYOS_BOOT_PROTOCOL='${TINYOS_BOOT_PROTOCOL}'."
+        COMMAND ${CMAKE_COMMAND} -E echo "Run target not implemented for JANUS_TARGET_ARCH='${JANUS_TARGET_ARCH}', JANUS_BOOT_PROTOCOL='${JANUS_BOOT_PROTOCOL}'."
         COMMAND ${CMAKE_COMMAND} -E false
         DEPENDS iso
         USES_TERMINAL
@@ -107,18 +107,18 @@ else()
     )
 endif()
 
-# Custom target to run TinyOS in QEMU with GDB stub
-if(TINYOS_TARGET_ARCH STREQUAL "x86_64" AND TINYOS_BOOT_PROTOCOL STREQUAL "multiboot2")
+# Custom target to run JANUS in QEMU with GDB stub
+if(JANUS_TARGET_ARCH STREQUAL "x86_64" AND JANUS_BOOT_PROTOCOL STREQUAL "multiboot2")
     add_custom_target(debug
-        COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME}
+        COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${JANUS_ISO_NAME}
         -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
         DEPENDS iso
         USES_TERMINAL
-        COMMENT "Running TinyOS using QEMU with GDB stub (waiting for debugger on :1234)"
+        COMMENT "Running JANUS using QEMU with GDB stub (waiting for debugger on :1234)"
     )
 else()
     add_custom_target(debug
-        COMMAND ${CMAKE_COMMAND} -E echo "Debug target not implemented for TINYOS_TARGET_ARCH='${TINYOS_TARGET_ARCH}', TINYOS_BOOT_PROTOCOL='${TINYOS_BOOT_PROTOCOL}'."
+        COMMAND ${CMAKE_COMMAND} -E echo "Debug target not implemented for JANUS_TARGET_ARCH='${JANUS_TARGET_ARCH}', JANUS_BOOT_PROTOCOL='${JANUS_BOOT_PROTOCOL}'."
         COMMAND ${CMAKE_COMMAND} -E false
         DEPENDS iso
         USES_TERMINAL

@@ -1,15 +1,15 @@
-# TinyOS Module Structure
+# JANUS Module Structure
 
 ## Module Organization Philosophy
 
 **Flat hierarchy. Independent modules. No spaghetti.**
 
-TinyOS follows a modular structure inspired by Linux and LLVM: each major component is a first-class module with clear boundaries and **zero circular dependencies**. If you create a circular dependency, you've designed it wrong. Fix it.
+JANUS follows a modular structure inspired by Linux and LLVM: each major component is a first-class module with clear boundaries and **zero circular dependencies**. If you create a circular dependency, you've designed it wrong. Fix it.
 
 ## Top-Level Directory Structure
 
 ```
-TinyOS/
+janus/
 ├── kernel/           # Core kernel functionality
 │   ├── include/          # Global headers
 │   ├── boot/             # Boot loader and initialization
@@ -52,7 +52,7 @@ Dependencies flow in **one direction**:
                 │
                 ▼
        ┌──────────────────┐
-       │  include/tinyos  │
+       │  include/janus  │
        └──────────────────┘
 ```
 

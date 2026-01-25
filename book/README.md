@@ -1,6 +1,6 @@
-# Building TinyOS: The Book
+# Building JANUS: The Book
 
-This directory contains the source for the TinyOS book, written using [mdBook](https://rust-lang.github.io/mdBook/).
+This directory contains the source for the JANUS book, written using [mdBook](https://rust-lang.github.io/mdBook/).
 
 ## Building the Book
 

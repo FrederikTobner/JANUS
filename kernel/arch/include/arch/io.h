@@ -2,7 +2,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOS.                                             *
+ * This file is part of JANUS.                                             *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -18,11 +18,11 @@
 #ifndef ASM_IO_H
 #define ASM_IO_H
 
-#include <tinyos/attributes.h>
-#include <tinyos/types.h>
+#include <janus/attributes.h>
+#include <janus/types.h>
 
 void outb(u16 port, u8 value);
 
-u8 inb(u16 port); 
+u8 inb(u16 port);
 
 #endif // ASM_IO_H

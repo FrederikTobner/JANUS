@@ -4,7 +4,7 @@
 file(GLOB_RECURSE FIO_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 file(GLOB_RECURSE FIO_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-tinyos_add_library(fio
+janus_add_library(fio
     SOURCES
         ${FIO_SOURCES}
     DEPENDENCIES
@@ -12,7 +12,7 @@ tinyos_add_library(fio
 )
 
 # Add tests if enabled
-tinyos_add_tests(fio
+janus_add_tests(fio
     SOURCES
         # fio_test.c (future)
 )

@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOS.                                              *
+ * This file is part of JANUS.                                              *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -16,12 +16,14 @@
 
 #include <arch/cpu.h>
 
-void cpu_halt(void) {
-  __asm__ volatile("hlt");
+void cpu_halt(void)
+{
+    __asm__ volatile("hlt");
 }
 
-__noreturn void cpu_halt_forever(void) {
-  for (;;) {
-    __asm__ volatile("cli; hlt");
-  }
+__noreturn void cpu_halt_forever(void)
+{
+    for (;;) {
+        __asm__ volatile("cli; hlt");
+    }
 }

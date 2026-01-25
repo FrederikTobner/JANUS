@@ -1,14 +1,14 @@
-# TinyOS Coding Style Guide
+# JANUS Coding Style Guide
 
 ## Overview
 
-TinyOS uses `clang-format` to enforce consistent style. If you're coming from C++, Rust, or Zig, most of this will be familiar. We only document the non-obvious parts here - things that might surprise you or are specific to kernel development.
+JANUS uses `clang-format` to enforce consistent style. If you're coming from C++, Rust, or Zig, most of this will be familiar. We only document the non-obvious parts here - things that might surprise you or are specific to kernel development.
 
 ## Multi-Dimensional Memory Access
 
 ### Pointer Arithmetic for Multi-Dimensional Data
 
-TinyOS prefers **explicit pointer arithmetic** over array indexing for multi-dimensional data structures to make memory layout and performance characteristics visible.
+JANUS prefers **explicit pointer arithmetic** over array indexing for multi-dimensional data structures to make memory layout and performance characteristics visible.
 
 ```c
 // Preferred: Explicit pointer arithmetic
@@ -67,7 +67,7 @@ for (size_t i = 0; i < count; i++) {
 
 ### Public Structures
 
-**TinyOS uses public structure definitions rather than opaque handles.**
+**JANUS uses public structure definitions rather than opaque handles.**
 
 Opaque handles (`typedef struct foo * foo_handle_t`) hide structure definitions from callers. This pattern is common in userspace libraries for API stability, but creates significant problems in kernel development:
 
@@ -207,4 +207,3 @@ static inline bool pte_is_present(pte_t const * pte) {
 // Direct manipulation when you know what you're doing
 pte->value = phys_addr | PTE_PRESENT | PTE_WRITABLE;
 ```
-

@@ -1,8 +1,8 @@
-# TinyOS Naming Conventions and Terminology
+# JANUS Naming Conventions and Terminology
 
 ## Core Terminology Philosophy
 
-**Use precise terminology.** TinyOS uses explicit, hardware-aware terminology that reflects actual implementation rather than abstract concepts.
+**Use precise terminology.** JANUS uses explicit, hardware-aware terminology that reflects actual implementation rather than abstract concepts.
 
 If you call a hashtable a "map," you're hiding the implementation. If you call a character buffer a "string," you're importing assumptions from high-level languages. **Words matter. Use precise ones.**
 
@@ -26,7 +26,9 @@ If you call a hashtable a "map," you're hiding the implementation. If you call a
 ### Type Naming
 
 #### Suffix Convention: `_t`
+
 All custom types use the `_t` suffix:
+
 ```c
 typedef struct hashtable hashtable_t;
 typedef struct char_buffer char_buffer_t;
@@ -37,6 +39,7 @@ typedef uint64_t phys_addr_t;
 #### Structure Names
 
 Use descriptive, implementation-specific names:
+
 ```c
 // Good: Implementation-based naming
 typedef struct linked_list linked_list_t;
@@ -53,6 +56,7 @@ typedef struct map map_t;
 #### Memory Management Types
 
 Be explicit about physical vs virtual, kernel vs user:
+
 ```c
 typedef struct page_frame page_frame_t;           // Physical memory frame
 typedef struct virt_addr_space virt_addr_space_t; // Virtual address space
@@ -103,7 +107,7 @@ lib/
 
 - Fixed-width integer types (uint8_t, int32_t, etc.)
 - Boolean type and macros
-- Compiler attributes (__packed, __noreturn, likely/unlikely)
+- Compiler attributes (__packed,__noreturn, likely/unlikely)
 - Essential macros (NULL, ARRAY_SIZE, container_of)
 - Platform-independent type definitions
 
@@ -168,6 +172,7 @@ page_frame_t* mm_alloc_page_frame(void);
 #### Operation Clarity
 
 Function names must clearly indicate:
+
 1. **What they do** - The operation performed
 2. **What they modify** - Any side effects
 3. **What they return** - Return value semantics
@@ -218,5 +223,5 @@ When referring to hardware features, use the **exact** terminology from processo
 - Translation Table Entry (TTE)
 - Exception Vector Table (EVT)
 - System Control Register (SCTLR)
- 
+
  NOTE: This of course only applies to the types used in arch/.

@@ -52,7 +52,7 @@ sudo pacman -S nasm
 
 **Build System: CMake and Ninja**
 
-CMake generates build files that Ninja then uses to build TinyOS.
+CMake generates build files that Ninja then uses to build JANUS.
 
 ```bash
 # Debian-based systems
@@ -83,7 +83,7 @@ sudo pacman -S qemu-system-x86
 
 **Debugger: LLDB**
 
-LLDB debugs TinyOS by connecting to QEMU's GDB server.
+LLDB debugs JANUS by connecting to QEMU's GDB server.
 
 ```bash
 # Debian-based systems

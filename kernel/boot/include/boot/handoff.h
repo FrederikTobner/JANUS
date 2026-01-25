@@ -2,7 +2,7 @@
 #define BOOT_HANDOFF_H
 
 #include <boot/protocols.h>
-#include <tinyos/types.h>
+#include <janus/types.h>
 
 /**
  * Minimal boot handoff structure.
@@ -16,7 +16,7 @@ struct boot_handoff {
     u32 reserved;
 
     u64 loader_magic;
-    void *loader_info;
+    void * loader_info;
 };
 
 #endif /* BOOT_HANDOFF_H */

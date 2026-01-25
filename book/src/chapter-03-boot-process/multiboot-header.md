@@ -1,10 +1,10 @@
 # The Multiboot2 Header
 
-Before we dive deeper, let’s clear up some boot jargon. 
+Before we dive deeper, let’s clear up some boot jargon.
 When your PC is powered on, multiple software layers will be traversed to get your kernel running.
-The first layer is called the firmware. 
-It is the code burned into your motherboard and the first thing that runs when you hit the power button. 
-There are two main types of firmware on modern Computers. 
+The first layer is called the firmware.
+It is the code burned into your motherboard and the first thing that runs when you hit the power button.
+There are two main types of firmware on modern Computers.
 The older BIOS (Basic Input Output System) and the more modern UEFI (Unified Extensible Firmware Interface).
 
 The second layer is the boot loader. The boot loader is a small program loaded by the firmware. Its job is to find your kernel and hand over control.
@@ -21,7 +21,7 @@ Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? U
 
 We will be using the Multiboot2 standard in this book.
 
-When you power on a PC using a BIOS firmware in combination with the GRUB bootloader, the BIOS will first of all load GRUB from disk. 
+When you power on a PC using a BIOS firmware in combination with the GRUB bootloader, the BIOS will first of all load GRUB from disk.
 GRUB then scans the first 32KB of our kernel binary looking for a magic number `0xe85250d6` that identifies our kernel as a Multiboot2 compliant kernel.
 
 If you do not provide this magic number GRUB will not recognize your kernel is bootable and will refuse to load it.
@@ -46,7 +46,7 @@ If you do not provide this magic number GRUB will not recognize your kernel is b
 > * **Limine Protocol** - Modern hobby OS-friendly bootloader with cleaner protocol
 > * **Custom bootloader** - Maximum control, maximum work
 >
-> We're using Multiboot2 for several reasons. It is the most widely supported and understood boot protocol, especially for beginners. 
+> We're using Multiboot2 for several reasons. It is the most widely supported and understood boot protocol, especially for beginners.
 > Additionally it will provide you with valuable educational insights into the boot process, works on real hardware, and has simple tooling via GRUB.
 >
 >
@@ -89,7 +89,7 @@ Now let's build the header incrementally.
 file: kernel/boot/include/boot/multiboot.h
 replace: entire file
 ---
-+ #include "tinyos/types.h"
++ #include "janus/types.h"
 +
 +// Multiboot2 magic value passed by bootloader in EAX
 +#define MULTIBOOT2_BOOTLOADER_MAGIC 0x36d76289
@@ -97,10 +97,9 @@ replace: entire file
 +#endif // BOOT_MULTIBOOT_H
 ```
 
-Two magic numbers, two different jobs. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register to indicate that the kernel was loader by a mutliboot2 compliant bootloader. 
+Two magic numbers, two different jobs. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register to indicate that the kernel was loader by a mutliboot2 compliant bootloader.
 
-Now let's build the Multiboot2 header in assembly. 
-
+Now let's build the Multiboot2 header in assembly.
 
 ```x86asm-diff
 file: kernel/boot/multiboot.asm
@@ -111,7 +110,6 @@ replace: entire file
 ```
 
 The `.multiboot` section gets its own special spot at the start of our kernel binary. The `align 8` ensures everything starts on an 8-byte boundary—Multiboot2 is picky about alignment, and misaligned headers mean GRUB ignores you completely.
-
 
 ```x86asm-diff
 file: kernel/boot/multiboot.asm
@@ -125,7 +123,7 @@ after: align 8
 +    dd 0
 ```
 
-The header magic (`0xe85250d6`) goes in our assembly. 
+The header magic (`0xe85250d6`) goes in our assembly.
 GRUB scans the first 32KB of our kernel looking for this exact number.
 If it doesn't find it, GRUB will refuse to load our kernel.
 
@@ -147,7 +145,6 @@ The checksum ensures the header is valid. GRUB verifies that `magic + arch + len
 [!side]
 The checksum is like a parity bit for the entire header. It catches corruption from bad disk reads or linker bugs.
 [/!side]
-
 
 Ask GRUB for memory information we'll need later:
 

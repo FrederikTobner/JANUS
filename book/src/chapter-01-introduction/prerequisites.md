@@ -49,7 +49,7 @@ If you want, you can also try to use Windows or macOS, but since we are using GN
 ARM would be tempting as well but its not as common on desktops, making it less likely that readers have access to hardware to test on.
 [/!side]
 
-TinyOS targets the **x86_64** architecture. It is ideal for learning OS development because it is widely used and well-documented. Additionally, most developers have access to x86_64 hardware, which is crucial for testing and running our operating system on real hardware.
+JANUS targets the **x86_64** architecture. It is ideal for learning OS development because it is widely used and well-documented. Additionally, most developers have access to x86_64 hardware, which is crucial for testing and running our operating system on real hardware.
 The rich ecosystem of tools and documentation further supports development on this architecture.
 
 [!side]

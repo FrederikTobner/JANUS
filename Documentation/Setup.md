@@ -1,6 +1,6 @@
 # Setup Guide
 
-This guide covers the essential dependencies needed to build and test TinyOS. For general development environment setup (editor configuration, shell, etc.), refer to your preferred tools' documentation.
+This guide covers the essential dependencies needed to build and test JANUS. For general development environment setup (editor configuration, shell, etc.), refer to your preferred tools' documentation.
 
 ## Required Dependencies
 
@@ -8,7 +8,7 @@ This guide covers the essential dependencies needed to build and test TinyOS. Fo
 
 **CMake 3.20 or later**
 
-CMake is the build system generator for TinyOS.
+CMake is the build system generator for JANUS.
 
 ```bash
 # Debian/Ubuntu
@@ -22,7 +22,7 @@ sudo pacman -S cmake
 
 **Clang 17 or later**
 
-TinyOS requires Clang for C17 support and cross-compilation to x86_64-elf.
+JANUS requires Clang for C17 support and cross-compilation to x86_64-elf.
 
 ```bash
 # Debian/Ubuntu
@@ -52,7 +52,7 @@ sudo pacman -S nasm
 
 **LLDB**
 
-LLDB is used for debugging TinyOS in QEMU.
+LLDB is used for debugging JANUS in QEMU.
 
 ```bash
 # Debian/Ubuntu
@@ -68,7 +68,7 @@ The project includes a [.lldbinit](../.lldbinit) configuration file with QEMU-sp
 
 **QEMU (x86_64 system emulation)**
 
-QEMU is used to run and test TinyOS without bare metal hardware.
+QEMU is used to run and test JANUS without bare metal hardware.
 
 ```bash
 # Debian/Ubuntu
@@ -107,6 +107,3 @@ sudo apt install clangd
 # Arch Linux
 sudo pacman -S clang  # Includes clangd
 ```
-
-
-

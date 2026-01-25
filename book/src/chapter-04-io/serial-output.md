@@ -41,11 +41,11 @@ file: CMakeLists.txt
 replace: -boot d 
 ---
 add_custom_target(run
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/janus_x86_64.iso 
 -     -boot d 
 +     -boot d -serial stdio 
     DEPENDS iso
-    COMMENT "Running TinyOS in QEMU"
+    COMMENT "Running JANUS in QEMU"
 )
 ```
 
@@ -56,11 +56,11 @@ file: CMakeLists.txt
 replace: -boot d 
 ---
 add_custom_target(debug
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/janus_x86_64.iso 
 -     -boot d -s -S 
 +     -boot d -serial stdio -s -S 
     DEPENDS iso
-    COMMENT "Running TinyOS in QEMU with GDB stub"
+    COMMENT "Running JANUS in QEMU with GDB stub"
 )
 ```
 
@@ -90,7 +90,7 @@ We also need to link the drivers into the kernel core.
 file: kernel/core/CMakeLists.text
 after: LIBRARIES boot
 ---
-tinyos_create_kernel(
+janus_create_kernel(
     SOURCES
         ${KERNEL_SOURCES}
     LIBRARIES
@@ -131,18 +131,18 @@ file: kernel/drivers/serial/serial.c
 replace: entire file
 ---
 + #include <drivers/serial.h>
-+ #include <tinyos/types.h>
++ #include <janus/types.h>
 ```
 
 Next we define the port offsets for the various UART registers.
 
 ```c-diff
 file: kernel/drivers/serial/serial.c
-after: #include <tinyos/types.h>
+after: #include <janus/types.h>
 ---
  #include <drivers/serial.h>
  #include <asm/io.h>
- #include <tinyos/types.h>
+ #include <janus/types.h>
  
 + // Port offsets for COM1
 + #define SERIAL_DATA_PORT(base)          (base)
@@ -336,11 +336,11 @@ file: CMakeLists.txt
 after: DEPENDS iso
 ---
 add_custom_target(run
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/janus_x86_64.iso 
     -boot d -serial stdio     
     DEPENDS iso
 +    USES_TERMINAL
-    COMMENT "Running TinyOS in QEMU"
+    COMMENT "Running JANUS in QEMU"
 )
 ```
 
@@ -351,11 +351,11 @@ file: CMakeLists.txt
 after: DEPENDS iso
 ---
 add_custom_target(debug
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/tinyos.iso 
+    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/janus_x86_64.iso 
     -boot d -serial stdio -s -S 
     DEPENDS iso
 +    USES_TERMINAL
-    COMMENT "Running TinyOS in QEMU with GDB stub (waiting for debugger on :1234)"
+    COMMENT "Running JANUS in QEMU with GDB stub (waiting for debugger on :1234)"
 )
 ```
 

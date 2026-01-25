@@ -1,6 +1,6 @@
-# TinyOS Kernel Libraries
+# JANUS Kernel Libraries
 
-This directory contains utility libraries used by the TinyOS kernel. Each library is a separate module with clear responsibilities and no dependencies besides the kernel main headers (kernel/include/tinyos). E.g. String an memory operations, data structures. compression, decompression, checksum calculation, hashing, formatted I/O and math or general algorithms. Additionally parsers.
+This directory contains utility libraries used by the JANUS kernel. Each library is a separate module with clear responsibilities and no dependencies besides the kernel main headers (kernel/include/janus). E.g. String an memory operations, data structures. compression, decompression, checksum calculation, hashing, formatted I/O and math or general algorithms. Additionally parsers.
 Only a stub for now.
 
 ## Library Modules
@@ -16,7 +16,6 @@ Provides essential memory operations without libc:
 - memset - Fill memory with byte value
 - memcmp - Compare memory regions
 - memzero - Zero-fill memory
-
 
 ### buffer
 
@@ -54,7 +53,7 @@ Each library builds as a static library (.a file) with CMake:
 
 ```cmake
 # lib/foo/CMakeLists.txt
-tinyos_add_library(foo STATIC foo.c)
+janus_add_library(foo STATIC foo.c)
 ```
 
 Libraries are linked into the final kernel binary.

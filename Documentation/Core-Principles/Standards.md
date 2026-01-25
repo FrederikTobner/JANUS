@@ -1,10 +1,10 @@
-# TinyOS C Programming Standards
+# JANUS C Programming Standards
 
 ## Language Standard
 
 ### C17 (ISO/IEC 9899:2018)
 
-TinyOS uses C17 (ISO/IEC 9899:2018) as specified in `.clang-format`:
+JANUS uses C17 (ISO/IEC 9899:2018) as specified in `.clang-format`:
 
 ```yaml
 Language: C
@@ -51,5 +51,3 @@ There is no recovery mechanism. There is no debugger popup. The system freezes o
 - Integer overflow → Use unsigned types or validate ranges
 
 **This is not theoretical.** Every item in this list can and will crash the entire system if it occurs in kernel code.
-
-

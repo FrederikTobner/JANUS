@@ -1,5 +1,5 @@
 ---
-# TinyOS C formatting configuration
+# JANUS C formatting configuration
 Language: Cpp
 
 AlignConsecutiveMacros:

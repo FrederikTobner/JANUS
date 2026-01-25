@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of TinyOS.                                             *
+ * This file is part of JANUS.                                             *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -16,7 +16,7 @@
 
 /**
  * @file main.c
- * @brief TinyOS Kernel Entry Point
+ * @brief JANUS Kernel Entry Point
  *
  * This is called by boot.asm after the bootloader transfers control.
  */
@@ -26,10 +26,10 @@
 #include <boot/verify.h>
 #include <drivers/uart.h>
 #include <drivers/vga_text.h>
-#include <tinyos/types.h>
-#include <tinyos/version.h>
+#include <janus/types.h>
+#include <janus/version.h>
 
-#define TINYOS_HELLO_MESSAGE                                     \
+#define JANUS_HELLO_MESSAGE                                      \
     " _   _      _ _         _    _            _     _ _ \n"     \
     "| | | |    | | |       | |  | |          | |   | | |\n"     \
     "| |_| | ___| | | ___   | |  | | ___  _ __| | __| | |\n"     \
@@ -58,16 +58,17 @@ void kernel_main(struct boot_handoff const * handoff)
     vga_text_init();
     // Green font color on black background
     vga_text_set_color(2, 0);
-    vga_text_write_string(TINYOS_HELLO_MESSAGE);
-    vga_text_write_string("\nTinyOS Version:"
-                          " " TINYOS_VERSION_STRING "\n\n");
+    vga_text_write_string(JANUS_HELLO_MESSAGE);
+    vga_text_write_string("\nJANUS Version:"
+                          " " JANUS_VERSION_STRING "\n\n");
 
     // Initialize serial port for debugging output
     if (uart_init() == 0) {
         // If the serial port initialized successfully, print something lul
-        uart_write_string(TINYOS_HELLO_MESSAGE);
+        uart_write_string(JANUS_HELLO_MESSAGE);
     }
 
+    // Halt the CPU forever
     for (;;) {
         cpu_halt();
     }

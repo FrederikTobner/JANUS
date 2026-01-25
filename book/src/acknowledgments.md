@@ -10,6 +10,6 @@ The **OSDev Wiki** community has created an invaluable resource for aspiring ker
 Additionally the **Wiki of the Low-Level Community (LLC)** and good old **Wikipedia** have been a greatly appreciated.
 Also, thank you for reading this book. I hope it provide you with the required knowledge to understand the fundamentals of an operating system and enables you to extend the functionality further on your own.
 
-Finally, I want to thank my family for their unwavering support.
+Finally, I want to thank my parents for their unwavering support and my brother.
 
 ---
