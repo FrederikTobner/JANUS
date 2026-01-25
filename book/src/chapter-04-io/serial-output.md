@@ -1,11 +1,11 @@
 # Serial Output
 
-Right now our kernel boots, validates the multiboot header and info and then politely sits there doing nothing.
-This is emotionally a little bit unfulfilling.
+Right now our kernel boots, validates the Multiboot header and info, and then politely sits there doing nothing.
+This is a bit unsatisfying (and not very debuggable), to say the least.
 
-Before we build anything fancy, we need a way to *see* what the kernel is actually doing.
-In user space you might just use simple printf debugging, but in kernel space, the simplest tool is still the same one it has always been.
-A simple serial port.
+Before we build anything fancy, we need a way to actually see what the kernel is doing.
+In user space you might reach for `printf()` debugging, but in kernel space the simplest tool is still the same one it has always been:
+A serial port.
 
 [!side]
 Yes, it’s the 21st century and we’re debugging with a device designed when “plug and play” was mostly a rumour.
@@ -14,15 +14,15 @@ Using the serial port is simple and doesn’t care whether your screen driver is
 
 > **New to serial ports?**
 >
-> Don’t worry, this isn’t “network programming” in disguise. 
-> A UART (Universal Asynchronous Receiver-Transmitter) is basically a tiny byte pipe with a few control knobs.
-> On x86, the “knobs” live in *I/O port space*, so we talk to them with `inb`/`outb`.
+> A UART (Universal Asynchronous Receiver-Transmitter) is basically a tiny byte pipe with a few control knobs attached.
+> On x86, the “knobs” live in the *I/O port space*, so we talk to them with `inb`/`outb` assembler mnemonics.
 >
 > COM1 starts at `0x3F8`, and the UART’s registers are just fixed offsets from that base.
-> You write characters by placing a byte into the data register. 
-> Before you do that, you ask the UART if it’s ready.
+> You write characters by placing a byte into the data register.
+> But before you are doing that, we need to verify that the UART is ready to accept a new byte.
+> Otherwise we might overwrite data that hasn’t been sent yet.
 >
-> For that purpose, we will be using the two following instructions
+> For that purpose, we'll use two operations:
 >
 > | Instruction | Meaning |
 > | ---- | ---- |
@@ -30,12 +30,11 @@ Using the serial port is simple and doesn’t care whether your screen driver is
 > | `inb(port)` | Read an 8-bit value from an I/O port |
 >
 > The rest is just setting the UART into a known mode.
-> We use the classic 8N1 framing (8 data bits, no parity, 1 stop bit), enable the FIFO, and then do a loopback test by sending `0xAE` and reading it back.
-> If the UART can’t even echo a byte to itself, it’s not going to be a great conversationalist.
+> We will be using the classic 8N1 framing (8 data bits, no parity, 1 stop bit), enable the FIFO, and then do a loopback test by sending `0xAE` and reading it back.
+> If the UART can’t even echo a byte to itself, we won't be able to use it.
 
-QEMU makes testing this very easy. If you run QEMU with the `-serial stdio` option, anything we write to COM1 shows up in the terminal.
-Your build already does this for the `run` target, so you don’t need to remember the flags.
-Therefor we need to change our `run` and `debug` target to see the serial output.
+QEMU makes testing this very easy. If you run QEMU with the `-serial stdio` option, anything we write to COM1 shows up in the terminal from which we launched QEMU.
+Therefore, we need to change our `run` and `debug` target to see the serial output.
 
 ```cmake-diff
 file: CMakeLists.txt
@@ -64,6 +63,7 @@ add_custom_target(debug
     COMMENT "Running TinyOS in QEMU with GDB stub"
 )
 ```
+
 If you do want to run it manually, this is the idea:
 
 That’s the whole trick: give the kernel a UART to talk to, and you get a voice in return.
@@ -141,6 +141,7 @@ file: kernel/drivers/serial/serial.c
 after: #include <tinyos/types.h>
 ---
  #include <drivers/serial.h>
+ #include <asm/io.h>
  #include <tinyos/types.h>
  
 + // Port offsets for COM1
@@ -153,12 +154,14 @@ after: #include <tinyos/types.h>
 
 Next we need to define the `outb` and `inb` functions to read and write to I/O ports.
 These are just thin wrappers around the x86 instructions of the same name.
+We will define them in a dedicated asm/io.h file.
 
 ```c-diff
-file: kernel/drivers/serial/serial.c
-after: #define SERIAL_LINE_STATUS_PORT(base)   (base + 5)
+file: kernel/include/asm/io.h
+replace: entire file
 ---
-#define SERIAL_LINE_STATUS_PORT(base)   (base + 5)
++#ifndef ASM_IO_H
++#define ASM_IO_H
 + 
 + static inline void outb(u16 port, u8 value) {
 +     __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
@@ -170,7 +173,10 @@ after: #define SERIAL_LINE_STATUS_PORT(base)   (base + 5)
 +     return ret;
 + }
 + 
++#endif
 ```
+
+> TODO: Move these two into a dedicated asm/io.h file
 
 Now that we have the port access functions, we can implement initialization function called `serial_init()`.
 It programs the UART for 8N1, turns on the FIFO, and does a quick loopback test (write `0xAE`, read it back). If that test fails, we return a non-zero error code to indicate that the serial port is not usable.
@@ -280,7 +286,6 @@ int serial_is_transmit_empty() {
 + }
 ```
 
-
 There are only two moving parts here.
 First, `outb`/`inb` talk to the I/O port space (not memory). They are tiny wrappers around the x86 instructions of the same name.
 Second, `serial_write_char()` waits until the UART says the transmit buffer is ready, then writes the byte.
@@ -292,8 +297,7 @@ When we add interrupts later, we can stop busy-waiting and let the CPU do someth
 
 `serial_init()` is the only mildly spicy part.
 
-
-With the driver in place, we can initialize it in `kernel_main()` and print a simple message to test the functionality. 
+With the driver in place, we can initialize it in `kernel_main()` and print a simple message to test the functionality.
 You don’t need a full logging system yet; a single `serial_write_string()` is enough to prove the pipeline works.
 
 ```c-diff
@@ -360,4 +364,3 @@ Now boot the kernel under QEMU. If everything is wired up correctly you should s
 ---
 
 **Next: [VGA Text Mode](vga-text-mode.md)**
-

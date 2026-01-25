@@ -14,8 +14,8 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef BOOT_MULTIBOOT_H
-#define BOOT_MULTIBOOT_H
+#ifndef BOOT_MULTIBOOT2_H
+#define BOOT_MULTIBOOT2_H
 
 /**
  * @file multiboot.h
@@ -25,7 +25,7 @@
  * See: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
  */
 
-#include <tinyos/compiler.h>
+#include <tinyos/attributes.h>
 #include <tinyos/types.h>
 
 // Multiboot2 magic value passed by bootloader in EAX
@@ -172,4 +172,4 @@ static inline bool multiboot_is_end_tag(struct multiboot_tag * tag)
     return tag->type == MULTIBOOT2_TAG_TYPE_END && tag->size == 8;
 }
 
-#endif /* BOOT_MULTIBOOT_H */
+#endif /* BOOT_MULTIBOOT2_H */

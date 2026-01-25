@@ -5,16 +5,19 @@
 
 Operating system development requires specialized tools. Unlike application development where you compile against an existing OS, we're building the OS itself—there's no standard library, no runtime, just bare metal.
 
-We need to setup the following tools:
+We need to set up the following tools:
 
-[!side]Why are we using the tools provided by LLVM instead of GCC? LLVM offers a better error messages from the compiler, but you can also use GCC if you prefer. Since Clang is a drop-in replacement for GCC, the code we write will be compatible with both compilers.
+[!side]
+Why are we using LLVM tools instead of GCC?
+
+LLVM generally produces better compiler error messages, but you can also use GCC if you prefer. Since Clang is largely a drop-in replacement for GCC, the code we write will be compatible with both compilers.
 [/!side]
 
-- Clang 17+ 
+- Clang 17+
 - NASM 2.15+
 - CMake 3.20+ and Ninja
 - QEMU 6.2+
-- LLDB 
+- LLDB
 - GRUB, xorriso, mtools
 
 **Compiler: Clang 17+**
@@ -34,10 +37,9 @@ sudo pacman -S clang
 NASM assembles x86_64 boot code and low-level kernel code.
 
 [!side]
-NASM uses Intel syntax 
-e.g. `mov eax, 5`. 
-The GNU Assembler, called GAS uses AT&T syntax 
-e.g. `movl $5, %eax`. 
+NASM uses Intel syntax, e.g. `mov eax, 5`.
+
+The GNU Assembler (GAS) uses AT&T syntax, e.g. `movl $5, %eax`.
 [/!side]
 
 ```bash
@@ -50,7 +52,7 @@ sudo pacman -S nasm
 
 **Build System: CMake and Ninja**
 
-CMake generates the build files, that Ninja then uses to build TinyOS.
+CMake generates build files that Ninja then uses to build TinyOS.
 
 ```bash
 # Debian-based systems
@@ -61,10 +63,10 @@ sudo pacman -S cmake ninja
 ```
 
 [!side]
-Make would, of course, work as well. 
+Make would, of course, work as well.
 Omit the `-G Ninja` from CMake commands to use Make instead.
-But be warned, we will only show how to use Ninja in this book.
-If you are not already familiar with Make, I recommend sticking with Ninja to avoid confusion.
+
+However, we will only show how to use Ninja in this book. If you are not already familiar with Make, I recommend sticking with Ninja to avoid confusion.
 [/!side]
 
 **Emulator: QEMU**
@@ -105,12 +107,12 @@ sudo pacman -S grub xorriso mtools
 
 `grub-mkrescue` creates a bootable ISO image with GRUB as the bootloader. `xorriso` and `mtools` are dependencies required by `grub-mkrescue`.
 
-> TODO: Verify these are the correct package names. Could be wrong since I haven't validated them
+> TODO: Verify these are the correct package names. They may differ by distro.
 
 To install all required tools in one go:
 
 ```bash
-# Debian - based systems
+# Debian-based systems
 sudo apt update
 sudo apt install -y clang ninja-build nasm cmake \
                     qemu-system-x86 lldb \

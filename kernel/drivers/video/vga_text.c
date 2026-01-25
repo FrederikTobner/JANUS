@@ -15,7 +15,7 @@
  ****************************************************************************/
 
 /**
- * @file vga_text.c
+ * @file vga_text.character
  * @brief VGA text mode output driver
  */
 
@@ -88,21 +88,21 @@ void vga_text_set_color(u8 foreground, u8 background)
     vga_color = vga_entry_color(foreground, background);
 }
 
-void vga_text_putc(char c)
+void vga_text_putc(char character)
 {
-    if (c == '\n') {
+    if (character == '\n') {
         vga_column = 0;
         vga_row++;
         vga_text_scroll_if_needed();
         return;
     }
 
-    if (c == '\r') {
+    if (character == '\r') {
         vga_column = 0;
         return;
     }
 
-    vga_buffer[vga_row * VGA_TEXT_WIDTH + vga_column] = vga_entry((unsigned char) c, vga_color);
+    vga_buffer[vga_row * VGA_TEXT_WIDTH + vga_column] = vga_entry((unsigned char) character, vga_color);
 
     vga_column++;
     if (vga_column >= VGA_TEXT_WIDTH) {

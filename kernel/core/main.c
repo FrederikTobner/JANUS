@@ -21,10 +21,21 @@
  * This is called by boot.asm after the bootloader transfers control.
  */
 
-#include <boot/multiboot.h>
-#include <drivers/serial.h>
+#include <arch/cpu.h>
+#include <boot/handoff.h>
+#include <boot/verify.h>
+#include <drivers/uart.h>
 #include <drivers/vga_text.h>
 #include <tinyos/types.h>
+#include <tinyos/version.h>
+
+#define TINYOS_HELLO_MESSAGE                                     \
+    " _   _      _ _         _    _            _     _ _ \n"     \
+    "| | | |    | | |       | |  | |          | |   | | |\n"     \
+    "| |_| | ___| | | ___   | |  | | ___  _ __| | __| | |\n"     \
+    "|  _  |/ _ \\ | |/ _ \\  | |/\\| |/ _ \\| '__| |/ _` | |\n" \
+    "| | | |  __/ | | (_) | \\  /\\  / (_) | |  | | (_| |_|\n"   \
+    "\\_| |_/\\___|_|_|\\___/   \\/  \\/ \\___/|_|  |_|\\__,_(_)\n"
 
 /**
  * @brief Main kernel entry point
@@ -35,48 +46,29 @@
  * - Interrupts are disabled
  * - Paging is disabled
  *
- * @param magic Multiboot2 magic number (should be 0x36d76289)
- * @param info Pointer to multiboot information structure
+ * @param handoff Minimal boot handoff structure
  */
-void kernel_main(u32 magic, struct multiboot_info *info) {
-  // Verify we were loaded by a Multiboot2-compliant bootloader
-  if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-    for (;;) {
-      __asm__ volatile("cli; hlt");
+void kernel_main(struct boot_handoff const * handoff)
+{
+    if (boot_verify_handoff(handoff) != 0) {
+        cpu_halt_forever();
     }
-  }
 
-  // Verify multiboot information structure is present
-  if (info == 0) {
-    for (;;) {
-      __asm__ volatile("cli; hlt");
+    // Initialize VGA text output and print a simple message
+    vga_text_init();
+    // Green font color on black background
+    vga_text_set_color(2, 0);
+    vga_text_write_string(TINYOS_HELLO_MESSAGE);
+    vga_text_write_string("\nTinyOS Version:"
+                          " " TINYOS_VERSION_STRING "\n\n");
+
+    // Initialize serial port for debugging output
+    if (uart_init() == 0) {
+        // If the serial port initialized successfully, print something lul
+        uart_write_string(TINYOS_HELLO_MESSAGE);
     }
-  }
 
-  // Initialize VGA text output and print a simple message
-  vga_text_init();
-// Green on black background
-  vga_text_set_color(2, 0);
-  vga_text_write_string(" _   _      _ _         _    _            _     _ _ \n"
-        "| | | |    | | |       | |  | |          | |   | | |\n"
-        "| |_| | ___| | | ___   | |  | | ___  _ __| | __| | |\n"
-        "|  _  |/ _ \\ | |/ _ \\  | |/\\| |/ _ \\| '__| |/ _` | |\n"
-        "| | | |  __/ | | (_) | \\  /\\  / (_) | |  | | (_| |_|\n"
-        "\\_| |_/\\___|_|_|\\___/   \\/  \\/ \\___/|_|  |_|\\__,_(_)\n");
-
-  // Initialize serial port for debugging output
-  if (serial_init() == 0) {
-    // If the serial port initialized successfully, print something lul
-    serial_write_string(
-        " _   _      _ _         _    _            _     _ _ \n"
-        "| | | |    | | |       | |  | |          | |   | | |\n"
-        "| |_| | ___| | | ___   | |  | | ___  _ __| | __| | |\n"
-        "|  _  |/ _ \\ | |/ _ \\  | |/\\| |/ _ \\| '__| |/ _` | |\n"
-        "| | | |  __/ | | (_) | \\  /\\  / (_) | |  | | (_| |_|\n"
-        "\\_| |_/\\___|_|_|\\___/   \\/  \\/ \\___/|_|  |_|\\__,_(_)\n");
-  }
-
-  for (;;) {
-    __asm__ volatile("hlt");
-  }
+    for (;;) {
+        cpu_halt();
+    }
 }

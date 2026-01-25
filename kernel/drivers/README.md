@@ -1,63 +1,54 @@
 # drivers - Device Drivers Module
 
-Kernel device drivers for hardware interaction.
-Only a stub for now.
+Hardware-facing drivers that provide small, C-friendly APIs to the rest of the kernel.
 
-## Purpose
+The overall structure is meant to stay simple and be easy to extend: each driver lives in its own folder, and its public interface lives under `include/drivers/`.
 
-Provides device drivers for keyboards, storage, network cards, and other hardware peripherals.
+## Current drivers
 
-## Planned Contents
+### UART (COM1)
 
-### Input Devices
+- Implementation: `uart/uart.c`
+- Public API: `include/drivers/uart.h`
+- Notes: currently targets COM1 (`0x3F8`) and uses a fixed baud rate (see header/source for details).
 
-- PS/2 keyboard driver
-- PS/2 mouse driver
-- USB HID support (future)
+### VGA text mode
 
-### Storage Devices
+- Implementation: `video/vga_text.c`
+- Public API: `include/drivers/vga_text.h`
+- Notes: basic 80x25 text output and scrolling.
 
-- ATA/IDE disk driver
-- AHCI SATA driver
-- NVMe driver (future)
+## Directory layout
 
-### Network Devices
-
-- Intel E1000 network driver
-- RTL8139 network driver (future)
-
-### Other Devices
-
-- PCI/PCIe bus enumeration
-- ACPI power management
-- RTC (Real-Time Clock)
-
-## Structure
-
-```
+```text
 drivers/
-├── keyboard/
-│   └── ps2_keyboard.c
-├── storage/
-│   ├── ata.c
-│   └── ahci.c
-├── network/
-│   └── e1000.c
-├── pci/
-│   └── pci.c
-└── include/drivers/
-    ├── keyboard.h
-    ├── storage.h
-    └── network.h
+├── CMakeLists.txt
+├── README.md
+├── include/
+│   └── drivers/
+│       ├── uart.h
+│       └── vga_text.h
+├── uart/
+│   └── uart.c
+└── video/
+      └── vga_text.c
 ```
+
+## Build integration
+
+`drivers/CMakeLists.txt` glob-collects all `*.c` files under this module and builds them into the `drivers` library.
+
+Note: because this uses `file(GLOB_RECURSE ...)`, adding new source files may require re-running CMake configuration (e.g. `cmake -S . -B build`) so the new files are picked up.
 
 ## Dependencies
 
-- `types` - Type definitions
-- `arch` - I/O operations
-- `fio` - Debug output
-- `mm` - Memory allocation
+- `arch` (currently for port I/O via `arch/io.h`, used by the UART driver)
+- `tinyos` base headers (e.g. `tinyos/types.h`)
 
-## Status
+## Adding a new driver
 
-⚠️ **Placeholder** - Implementation pending in future development phases.
+Minimal convention:
+
+1. Create a folder (e.g. `storage/ata.c`).
+2. Add its public header to `include/drivers/` (e.g. `include/drivers/ata.h`).
+3. Keep the API narrow and avoid leaking architecture/protocol details.

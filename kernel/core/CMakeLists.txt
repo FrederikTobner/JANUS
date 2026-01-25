@@ -4,28 +4,26 @@
 file(GLOB_RECURSE KERNEL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 file(GLOB_RECURSE KERNEL_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-# Create bootable kernel executable
+set(_tinyos_linker_script_arch_protocol "${CMAKE_CURRENT_SOURCE_DIR}/${TINYOS_TARGET_ARCH}/${TINYOS_BOOT_PROTOCOL}/linker.ld")
+
+if(EXISTS "${_tinyos_linker_script_arch_protocol}")
+    set(_tinyos_linker_script "${_tinyos_linker_script_arch_protocol}")
+else()
+    message(FATAL_ERROR
+        "Linker script not found for TINYOS_TARGET_ARCH='${TINYOS_TARGET_ARCH}' and "
+        "TINYOS_BOOT_PROTOCOL='${TINYOS_BOOT_PROTOCOL}'.\n"
+        "Expected file: ${_tinyos_linker_script_arch_protocol}\n"
+        "Add that file to support this combination.")
+endif()
+
 tinyos_create_kernel(
     SOURCES
         ${KERNEL_SOURCES}
     LIBRARIES
+        arch           # Architecture-specific code
         boot           # Boot assembly objects
         drivers        # Hardware drivers
     LINKER_SCRIPT
-        ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld
+        ${_tinyos_linker_script}
 )
 
-# Custom target to display kernel information
-add_custom_target(kernel-info
-    COMMAND ${CMAKE_COMMAND} -E echo "=========================================="
-    COMMAND ${CMAKE_COMMAND} -E echo "Kernel Information"
-    COMMAND ${CMAKE_COMMAND} -E echo "=========================================="
-    COMMAND ${CMAKE_COMMAND} -E echo "Location: ${CMAKE_BINARY_DIR}/kernel.elf"
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND readelf -h ${CMAKE_BINARY_DIR}/kernel.elf
-    COMMAND ${CMAKE_COMMAND} -E echo ""
-    COMMAND readelf -l ${CMAKE_BINARY_DIR}/kernel.elf
-    DEPENDS kernel.elf
-    COMMENT "Displaying kernel information"
-    VERBATIM
-)

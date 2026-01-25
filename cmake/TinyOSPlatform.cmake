@@ -18,6 +18,9 @@ endif()
 set(TINYOS_TARGET_ARCH "x86_64" CACHE STRING "Target architecture")
 set(TINYOS_TARGET_PLATFORM "elf")
 
+# Boot protocol (wired as a real parameter, but only one supported today)
+set(TINYOS_BOOT_PROTOCOL "multiboot2" CACHE STRING "Boot protocol")
+
 # Compiler detection
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(TINYOS_COMPILER_CLANG TRUE)
@@ -36,6 +39,7 @@ endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Target: ${TINYOS_TARGET_ARCH}-${TINYOS_TARGET_PLATFORM}")
+message(STATUS "Boot protocol: ${TINYOS_BOOT_PROTOCOL}")
 
 # Export compile commands for clangd/IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
@@ -43,37 +47,45 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json"
 # Common compiler flags for all kernel code
 if(TINYOS_COMPILER_CLANG)
     set(TINYOS_COMMON_FLAGS
-        -target x86_64-elf
-        -nostdlib
-        -ffreestanding
-        -fno-builtin
-        -fno-stack-protector
-        -mno-red-zone
-        -Wall
-        -Wextra
-        -Werror
-        # Additional warnings for stricter code quality
-        -Wconversion
-        -Wimplicit
-        -Wcast-qual
-        -Wpointer-arith
+            -target ${TINYOS_TARGET_ARCH}-${TINYOS_TARGET_PLATFORM}
+            -nostdlib
+            -ffreestanding
+            -fno-builtin
+            -fno-stack-protector
+            -mno-red-zone
+            -Wall
+            -Wextra
+            -Werror
+            # Additional warnings for stricter code quality
+            -Wconversion
+            -Wimplicit
+            -Wcast-qual
+            -Wpointer-arith
     )
 else()
-    # GCC
-    set(TINYOS_COMMON_FLAGS
-        -nostdlib
-        -ffreestanding
-        -fno-builtin
-        -fno-stack-protector
-        -mno-red-zone
-        -Wall
-        -Wextra
-        -Werror
-        #Additional warnings for stricter code quality
-        -Wconversion
-        -Wimplicit
-        -Wcast-qual
-        -Wpointer-arith
+       # GCC
+        if(TINYOS_TARGET_ARCH STREQUAL "x86_64")
+             set(GCC_CODE_GEN_FLAG"-m64")
+             set(GCC_ARCHITECTURE_FLAG "x86-64")
+        else()
+            message(FATAL_ERROR "Unsupported target architecture for GCC: ${TINYOS_TARGET_ARCH}")
+        endif()
+        set(TINYOS_COMMON_FLAGS
+            ${GCC_CODE_GEN_FLAG}
+            -march=${GCC_ARCHITECTURE_FLAG}
+            -nostdlib
+            -ffreestanding
+            -fno-builtin
+            -fno-stack-protector
+            -mno-red-zone
+            -Wall
+            -Wextra
+            -Werror
+            #Additional warnings for stricter code quality
+            -Wconversion
+            -Wimplicit
+            -Wcast-qual
+            -Wpointer-arith
     )
 endif()
 

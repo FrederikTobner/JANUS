@@ -8,13 +8,13 @@ align 8
 multiboot_start:
     ; Multiboot2 header magic number
     dd 0xe85250d6
-    
+
     ; Architecture: 0 = i386/x86_64 protected mode
     dd 0
-    
+
     ; Header length (from start to end tag)
     dd multiboot_end - multiboot_start
-    
+
     ; Checksum: -(header magic + architecture + header_length)
     dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
 
@@ -25,7 +25,7 @@ information_request_tag_start:
     dw 1                             ; type = 1 (information request)
     dw 0                             ; flags = 0 (required)
     dd information_request_tag_end - information_request_tag_start ; size
-    
+
     ; Request types:
     dd 4                             ; Basic memory information
     dd 6                             ; Memory map

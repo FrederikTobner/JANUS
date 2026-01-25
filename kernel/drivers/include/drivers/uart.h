@@ -15,43 +15,42 @@
  ****************************************************************************/
 
 /**
- * @file serial.h
- * @brief Serial Port Driver (only COM1 with a fixed baud rate of 38400 for now)
+ * @file uart.h
+ * @brief UART Driver (only COM1 with a fixed baud rate of 38400 for now)
  */
 
-#ifndef DRIVER_SERIAL_H
-#define DRIVER_SERIAL_H
-
+#ifndef DRIVER_UART_H
+#define DRIVER_UART_H
 #include "tinyos/types.h"
-#define SERIAL_COM1 0x3F8
+#define UART_COM1 0x3F8
 
 // TODO: Add support for COM2, COM3, COM4 and make the baud rate configurable
 
 /**
- * @brief Initialize serial port COM1
+ * @brief Initialize UART COM1
  * @return 0 on success, non-zero on failure
  */
-error_t serial_init();
+error_t uart_init();
 
 /**
- * @brief Check if the serial transmit buffer is empty
+ * @brief Check if the UART transmit buffer is empty
  * @return 1 if empty, 0 otherwise
  */
-int serial_is_transmit_empty();
+int uart_is_transmit_empty();
 
 /**
- * @brief Write a character to the serial port
- * @param c Character to write
+ * @brief Write a character to the universal asynchronous receiver/transmitter (UART)
+ * @param character Character to write
  */
-void serial_write_char(char c);
+void uart_write_char(char character);
 
 /**
- * @brief Write a null-terminated string to the serial port
+ * @brief Write a null-terminated string to the universal asynchronous receiver/transmitter (UART)
  * @param char_buffer Pointer to the null-terminated character buffer
  *
  * @warning This function expects the character buffer to be null-terminated. Failing to do so will result in UNDEFINED
  * BEHAVIOR
  */
-void serial_write_string(char const * char_buffer);
+void uart_write_string(char const * char_buffer);
 
 #endif

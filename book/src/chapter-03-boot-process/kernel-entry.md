@@ -1,11 +1,10 @@
 # The Kernel Entry Point
 
-We have created the boot assembly that calls `kernel_main()`and the build system that links everything together. Time to write the actual C code that runs when the kernel starts.
+We have created the boot assembly that calls `kernel_main()` and the build system that links everything together. Time to write the actual C code that runs when the kernel starts.
 
 This is it—the moment where all that assembly setup pays off and we finally get to write normal C code. Well, "normal" is relative. We're still in a freestanding environment with no standard library, but at least we're not juggling registers and segment selectors anymore.
 
 When our boot assembly calls `kernel_main()`, here's what we're guaranteed:
-
 
 ```
     Assembly World      │  Transition  │     C World
@@ -36,7 +35,7 @@ When our boot assembly calls `kernel_main()`, here's what we're guaranteed:
 > which become RDI and RSI in 64-bit mode. Perfect!
 
 [!side]
-Windows uses a different ABI. We follow System V because it's the Unix standard and therefor used by Linux, macOS, and BSD.
+Windows uses a different ABI. We follow System V because it's the Unix standard and therefore used by Linux, macOS, and BSD.
 Under Windows only the first four arguments are passed using registers, everything else goes on the stack.
 Under Unix systems the first six arguments go in registers, before the stack is utilized, which is more efficient.
 [/!side]
@@ -49,7 +48,7 @@ We expect to have the Multiboot2 magic number (`0x36d76289`) in RDI and the phys
 
 Also the CPU is in 64-bit long mode with paging enabled (identity-mapped first 2MB) and all segment registers cleared for a flat memory model.
 But there are also many things that are currently not available to us, since we have only setup a minimal environment at this point in time, compared to what we are used to in normal C programming.
-There is no heap setup yet, and we are freestanding, meaning no standard library is available. 
+There is no heap setup yet, and we are freestanding, meaning no standard library is available.
 Additionally we have no error handling beyond halting the system.
 
 Let's build the kernel entry point step by step. Create an empty file:
@@ -70,7 +69,7 @@ replace: entire file
 +#include <boot/multiboot.h>
 ```
 
-Lets create the main entry point of our kernel:
+Let's create the main entry point of our kernel:
 
 ```c-diff
 file: kernel/core/main.c
@@ -112,10 +111,10 @@ void kernel_main(uint32_t magic, void * info)
 Think of the `hlt` instruction as Gandalf standing in front of the CPU and screaming "You shall not pass!" until an interrupt comes along.
 [/!side]
 
-The `cli` instruction disables interrupts. This is redundant for now, but since we will enable interrupts later on, it's a good practice to ensure they are disabled before halting. 
+The `cli` instruction disables interrupts. This is redundant for now, but since we will enable interrupts later on, it's a good practice to ensure they are disabled before halting.
 The `hlt` puts the CPU to sleep until the next interrupt. Since interrupts are disabled, this halts the CPU permanently.
 
-Now lets create the `kernel/core/CMakeLists.txt` file in order to build the final executable.
+Now let's create the `kernel/core/CMakeLists.txt` file in order to build the final executable.
 
 ```cmake-diff
 file: kernel/CMakeLists.txt

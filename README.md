@@ -4,17 +4,21 @@ An educational x86-64 operating system kernel written in C17 and assembly, focus
 
 ## Quick Start
 
+Building the kernel
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd TinyOS
-
 # Build the kernel
-cmake -B build
+cmake -B build 
 cmake --build build
+```
 
-# Run in QEMU
-qemu-system-x86_64 -kernel build/kernel.elf -serial stdio
+Creating a bootable ISO
+```bash
+cmake --build build --target iso 
+```
+
+Running in QEMU
+```bash
+cmake --build build --target run 
 ```
 
 ## Project Structure
@@ -28,10 +32,9 @@ TinyOS/
 ├── book/             # Book / tutorial of the project
 ├── Documentation/    # Technical documentation
 └── kernel/           # kernel functionality
-       ├── core/           # Core kernel functionality
+       ├── core/             # Core kernel functionality
        ├── boot/             # Multiboot2 boot loader
-       ├── arch/             # Architecture-specific code (x86_64)
-       ├── lib/              # Kernel libraries (types, memory, buffer, fio)
+       ├── lib/              # Kernel libraries (arch, utility libraries)
        ├── mm/               # Memory management
        ├── drivers/          # Device drivers
        └── include/          # Global headers
@@ -40,12 +43,9 @@ TinyOS/
 ## Technology Stack
 
 - **Language**: C17 (ISO/IEC 9899:2018) with GNU extensions
-- **Compiler**: Clang 17
-- **Debugger**: LLDB 17
-- **Assembler**: NASM (Intel syntax)
+- **Compiler**: Clang 17 or GCC with x86_64-elf cross-compilation support
+- **Assembler**: NASM 
 - **Build System**: CMake 3.20+
-- **Target**: x86_64-elf (bare metal)
-- **Testing**: Planned - BMUnit (Bare Metal Unit testing framework)
 
 ## Documentation
 
@@ -55,7 +55,7 @@ Comprehensive documentation is in the [`Documentation/`](Documentation/) folder:
 
 ### Prerequisites
 
-- **Clang 17+** - C compiler with x86_64-elf cross-compilation support
+- **Clang 17+ or GCC 15+** - C compilers with x86_64-elf cross-compilation support
 - **NASM** - Assembler for boot code and low-level kernel code
 - **CMake 3.20+** - Build system generator
 - **Ninja** - Fast build tool (recommended) or Make
@@ -63,7 +63,7 @@ Comprehensive documentation is in the [`Documentation/`](Documentation/) folder:
 - **GRUB tools** - grub-pc-bin, xorriso, mtools (for creating bootable ISO images)
 - **LLDB** - Debugger for kernel debugging (optional but recommended)
 
-Installation:
+Installing prerequisites:
 
 ```bash
 # Debian/Ubuntu
@@ -79,24 +79,6 @@ brew install llvm nasm cmake ninja qemu grub xorriso mtools
 ```
 
 See [Documentation/Setup.md](Documentation/Setup.md) for detailed installation instructions.
-
-### Build Commands
-
-```bash
-# Configure build
-cmake -B build -G Ninja
-
-# Build kernel
-ninja -C build
-
-# Create bootable ISO
-ninja -C build iso
-
-# Build and run in QEMU
-ninja -C build run
-
-# Build and run with debugger
-ninja -C build debug
 
 ## License
 

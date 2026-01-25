@@ -5,7 +5,7 @@ Sometimes you want the machine itself to say something, on its own screen, witho
 
 On a classic PC there’s a delightfully low-tech way to do this.
 VGA text mode isn’t a “driver” in the modern sense. It’s a chunk of memory.
-Write characters into it and they appear on screen.
+Write bytes into it, and characters appear on screen.
 
 [!side]
 If you’ve seen older tutorials talk about setting video modes with `int 0x10`, that’s BIOS territory.
@@ -73,82 +73,82 @@ replace: entire file
 +static u8 vga_color = 0x07; // light grey on black
 +
 +static inline u8 vga_entry_color(u8 foreground, u8 background) {
-+	const u8 fg = (u8)(foreground & (u8)0x0F);
-+	const u8 bg = (u8)((u8)(background & (u8)0x0F) << 4u);
-+	return (u8)(fg | bg);
++ const u8 fg = (u8)(foreground & (u8)0x0F);
++ const u8 bg = (u8)((u8)(background & (u8)0x0F) << 4u);
++ return (u8)(fg | bg);
 +}
 +
 +static inline u16 vga_entry(unsigned char uc, u8 color) {
-+	return (u16)((u16)uc | (u16)((u16)color << 8u));
++ return (u16)((u16)uc | (u16)((u16)color << 8u));
 +}
 +
 +static void vga_text_scroll_if_needed() {
-+	if (vga_row < VGA_TEXT_HEIGHT) {
-+		return;
-+	}
++ if (vga_row < VGA_TEXT_HEIGHT) {
++  return;
++ }
 +
-+	for (u16 y = 1; y < VGA_TEXT_HEIGHT; y++) {
-+		for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
-+			vga_buffer[(y - 1) * VGA_TEXT_WIDTH + x] = vga_buffer[y * VGA_TEXT_WIDTH + x];
-+		}
-+	}
++ for (u16 y = 1; y < VGA_TEXT_HEIGHT; y++) {
++  for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
++   vga_buffer[(y - 1) * VGA_TEXT_WIDTH + x] = vga_buffer[y * VGA_TEXT_WIDTH + x];
++  }
++ }
 +
-+	for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
-+		vga_buffer[(VGA_TEXT_HEIGHT - 1) * VGA_TEXT_WIDTH + x] = vga_entry(' ', vga_color);
-+	}
++ for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
++  vga_buffer[(VGA_TEXT_HEIGHT - 1) * VGA_TEXT_WIDTH + x] = vga_entry(' ', vga_color);
++ }
 +
-+	vga_row = VGA_TEXT_HEIGHT - 1;
++ vga_row = VGA_TEXT_HEIGHT - 1;
 +}
 +
 +void vga_text_init() {
-+	vga_row = 0;
-+	vga_column = 0;
-+	vga_color = vga_entry_color(7, 0);
-+	vga_text_clear();
++ vga_row = 0;
++ vga_column = 0;
++ vga_color = vga_entry_color(7, 0);
++ vga_text_clear();
 +}
 +
 +void vga_text_clear() {
-+	for (u16 y = 0; y < VGA_TEXT_HEIGHT; y++) {
-+		for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
-+			vga_buffer[y * VGA_TEXT_WIDTH + x] = vga_entry(' ', vga_color);
-+		}
-+	}
++ for (u16 y = 0; y < VGA_TEXT_HEIGHT; y++) {
++  for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
++   vga_buffer[y * VGA_TEXT_WIDTH + x] = vga_entry(' ', vga_color);
++  }
++ }
 +
-+	vga_row = 0;
-+	vga_column = 0;
++ vga_row = 0;
++ vga_column = 0;
 +}
 +
 +void vga_text_set_color(u8 foreground, u8 background) {
-+	vga_color = vga_entry_color(foreground, background);
++ vga_color = vga_entry_color(foreground, background);
 +}
 +
 +void vga_text_putc(char c) {
-+	if (c == '\n') {
-+		vga_column = 0;
-+		vga_row++;
-+		vga_text_scroll_if_needed();
-+		return;
-+	}
++ if (c == '\n') {
++  vga_column = 0;
++  vga_row++;
++  vga_text_scroll_if_needed();
++  return;
++ }
 +
-+	if (c == '\r') {
-+		vga_column = 0;
-+		return;
-+	}
++ if (c == '\r') {
++  vga_column = 0;
++  return;
++ }
 +
-+	vga_buffer[vga_row * VGA_TEXT_WIDTH + vga_column] = vga_entry((unsigned char)c, vga_color);
++ vga_buffer[vga_row * VGA_TEXT_WIDTH + vga_column] = vga_entry((unsigned char)c, vga_color);
 +
-+	vga_column++;
-+	if (vga_column >= VGA_TEXT_WIDTH) {
-+		vga_column = 0;
-+		vga_row++;
-+		vga_text_scroll_if_needed();
-+	}
++ vga_column++;
++ if (vga_column >= VGA_TEXT_WIDTH) {
++  vga_column = 0;
++  vga_row++;
++  vga_text_scroll_if_needed();
++ }
 +}
 +
 +void vga_text_write_string(char const *char_buffer) {
-+	for (int i = 0; char_buffer[i] != '\0'; i++) {
-+		vga_text_putc(char_buffer[i]);
-+	}
++ for (int i = 0; char_buffer[i] != '\0'; i++) {
++  vga_text_putc(char_buffer[i]);
++ }
 +}
 ```
 

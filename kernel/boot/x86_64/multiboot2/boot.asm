@@ -14,13 +14,17 @@ extern kernel_main
 
 ; Reserve stack space in BSS section
 section .bss
-align 16
+alignb 16
 stack_bottom:
     resb 16384              ; 16 KiB stack
 stack_top:
 
+alignb 16
+boot_handoff:
+    resb 24
+
 ; Page tables for long mode (must be page-aligned)
-align 4096
+alignb 4096
 p4_table:
     resb 4096
 p3_table:
@@ -36,21 +40,21 @@ _start:
     ; - EAX contains the multiboot2 magic value (0x36d76289)
     ; - EBX contains the physical address of the multiboot information structure
     ; - CPU is in 32-bit protected mode
-    
+
     ; Save multiboot info (we'll need them after switching to long mode)
     mov edi, eax            ; Save magic
     mov esi, ebx            ; Save multiboot info pointer
-    
+
     ; Set up stack pointer
     mov esp, stack_top
-    
+
     ; Set up page tables for long mode
     call setup_page_tables
     call enable_paging
-    
+
     ; Load 64-bit GDT
     lgdt [gdt64.pointer]
-    
+
     ; Jump to 64-bit code
     jmp gdt64.code:long_mode_start
 
@@ -61,17 +65,17 @@ setup_page_tables:
     mov eax, p3_table
     or eax, 0b11            ; Present + writable
     mov [p4_table], eax
-    
+
     ; Map P3[0] -> P2
     mov eax, p2_table
     or eax, 0b11            ; Present + writable
     mov [p3_table], eax
-    
+
     ; Map P2[0] -> 0MB (2MB huge page)
     mov eax, 0x0
     or eax, 0b10000011      ; Present + writable + huge page
     mov [p2_table], eax
-    
+
     ret
 
 ; Enable paging and enter long mode
@@ -79,23 +83,23 @@ enable_paging:
     ; Load P4 table address into CR3
     mov eax, p4_table
     mov cr3, eax
-    
+
     ; Enable PAE (Physical Address Extension)
     mov eax, cr4
     or eax, 1 << 5          ; Set PAE bit
     mov cr4, eax
-    
+
     ; Enable long mode in EFER MSR
     mov ecx, 0xC0000080     ; EFER MSR
     rdmsr
     or eax, 1 << 8          ; Set LM bit
     wrmsr
-    
+
     ; Enable paging
     mov eax, cr0
     or eax, 1 << 31         ; Set PG bit
     mov cr0, eax
-    
+
     ret
 
 ; 64-bit code starts here
@@ -108,13 +112,19 @@ long_mode_start:
     mov es, ax
     mov fs, ax
     mov gs, ax
-    
-    ; Call kernel main with preserved multiboot info
-    ; System V AMD64 ABI: first arg in RDI, second in RSI
-    ; (edi and esi were preserved from 32-bit mode)
+
+    ; Build minimal handoff struct and call into C.
+    ; RDI = multiboot magic (preserved from EDI)
+    ; RSI = multiboot info pointer (preserved from ESI)
+    mov dword [rel boot_handoff + 0], 1         ; BOOT_PROTOCOL_MULTIBOOT2
+    mov dword [rel boot_handoff + 4], 0
+    mov qword [rel boot_handoff + 8], rdi
+    mov qword [rel boot_handoff + 16], rsi
+
+    lea rdi, [rel boot_handoff]             ; first arg: handoff pointer
     call kernel_main
-    
-    ; If kernel_main returns, halt to ensure no code after our text  section is executed, because that would be undefined behavior.
+
+    ; If kernel_main returns, halt to ensure no code after our text section is executed.
 .hang:
     cli
     hlt
@@ -123,9 +133,9 @@ long_mode_start:
 ; Global Descriptor Table for 64-bit mode
 section .rodata
 gdt64:
-    dq 0                                    ; Null descriptor
+    dq 0                                     ; Null descriptor
 .code: equ $ - gdt64
     dq (1<<43) | (1<<44) | (1<<47) | (1<<53) ; Code segment
 .pointer:
-    dw $ - gdt64 - 1                        ; GDT size
-    dq gdt64                                ; GDT address
+    dw $ - gdt64 - 1                         ; GDT size
+    dq gdt64                                 ; GDT address

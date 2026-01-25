@@ -1,5 +1,5 @@
-#ifndef LIB_COMPILER_H
-#define LIB_COMPILER_H
+#ifndef TINYOS_COMPILER_H
+#define TINYOS_COMPILER_H
 
 /**
  * Compiler-specific attributes and macros for TinyOS
@@ -13,7 +13,7 @@
 #elif defined(__GNUC__)
     #define COMPILER_GCC 1
 #else
-    #error "Unsupported compiler - TinyOS requires Clang or GCC"
+    #error "Unsupported compiler - TinyOS requires Clang or GCC - Screw you MSVC!"
 #endif
 
 // Function attributes
@@ -59,4 +59,4 @@
        __typeof__(b) _b = (b); \
        _a > _b ? _a : _b; })
 
-#endif // LIB_COMPILER_H
+#endif // TINYOS_COMPILER_H

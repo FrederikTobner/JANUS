@@ -71,30 +71,58 @@ else()
 endif()
 
 # ISO creation target
-add_custom_target(iso
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/grub.cfg ${CMAKE_BINARY_DIR}/iso/boot/grub/grub.cfg
-    COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME} ${CMAKE_BINARY_DIR}/iso/
-    DEPENDS kernel.elf ${CMAKE_BINARY_DIR}/grub.cfg
-    COMMENT "Creates a bootable ISO image"
-)
+if(TINYOS_TARGET_ARCH STREQUAL "x86_64" AND TINYOS_BOOT_PROTOCOL STREQUAL "multiboot2")
+    add_custom_target(iso
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/grub.cfg ${CMAKE_BINARY_DIR}/iso/boot/grub/grub.cfg
+        COMMAND grub-mkrescue -o ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME} ${CMAKE_BINARY_DIR}/iso/
+        DEPENDS kernel.elf ${CMAKE_BINARY_DIR}/grub.cfg
+        COMMENT "Creates a bootable ISO image"
+    )
+else()
+    add_custom_target(iso
+        COMMAND ${CMAKE_COMMAND} -E echo "ISO packaging not implemented for TINYOS_TARGET_ARCH='${TINYOS_TARGET_ARCH}', TINYOS_BOOT_PROTOCOL='${TINYOS_BOOT_PROTOCOL}'."
+        COMMAND ${CMAKE_COMMAND} -E false
+        COMMENT "ISO packaging not implemented for this arch/protocol"
+    )
+endif()
 
 # Custom target to run TinyOS in QEMU
-add_custom_target(run
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME} 
-    -boot d -serial stdio ${QEMU_DISPLAY_ARG}
-    DEPENDS iso
-    USES_TERMINAL
-    COMMENT "Runs TinyOS using QEMU"
-)
+if(TINYOS_TARGET_ARCH STREQUAL "x86_64" AND TINYOS_BOOT_PROTOCOL STREQUAL "multiboot2")
+    add_custom_target(run
+        COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME} 
+        -boot d -serial stdio ${QEMU_DISPLAY_ARG}
+        DEPENDS iso
+        USES_TERMINAL
+        COMMENT "Runs TinyOS using QEMU"
+    )
+else()
+    add_custom_target(run
+        COMMAND ${CMAKE_COMMAND} -E echo "Run target not implemented for TINYOS_TARGET_ARCH='${TINYOS_TARGET_ARCH}', TINYOS_BOOT_PROTOCOL='${TINYOS_BOOT_PROTOCOL}'."
+        COMMAND ${CMAKE_COMMAND} -E false
+        DEPENDS iso
+        USES_TERMINAL
+        COMMENT "Run target not implemented for this arch/protocol"
+    )
+endif()
 
 # Custom target to run TinyOS in QEMU with GDB stub
-add_custom_target(debug
-    COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME}
-    -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
-    DEPENDS iso
-    USES_TERMINAL
-    COMMENT "Running TinyOS using QEMU with GDB stub (waiting for debugger on :1234)"
-)
+if(TINYOS_TARGET_ARCH STREQUAL "x86_64" AND TINYOS_BOOT_PROTOCOL STREQUAL "multiboot2")
+    add_custom_target(debug
+        COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${TINYOS_ISO_NAME}
+        -boot d -serial stdio -s -S ${QEMU_DISPLAY_ARG}
+        DEPENDS iso
+        USES_TERMINAL
+        COMMENT "Running TinyOS using QEMU with GDB stub (waiting for debugger on :1234)"
+    )
+else()
+    add_custom_target(debug
+        COMMAND ${CMAKE_COMMAND} -E echo "Debug target not implemented for TINYOS_TARGET_ARCH='${TINYOS_TARGET_ARCH}', TINYOS_BOOT_PROTOCOL='${TINYOS_BOOT_PROTOCOL}'."
+        COMMAND ${CMAKE_COMMAND} -E false
+        DEPENDS iso
+        USES_TERMINAL
+        COMMENT "Debug target not implemented for this arch/protocol"
+    )
+endif()
 

@@ -15,7 +15,7 @@
  ****************************************************************************/
 
 /**
- * @file linker.ld
+ * @file linker_x86_64.ld
  * @brief TinyOS kernel linker script
  * 
  * Defines the memory layout of the kernel image:

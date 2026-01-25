@@ -11,7 +11,7 @@ This chapter provides the foundation for your OS development journey: understand
 
 > TODO: Update this list as we finish more chapters
 
-- How your personal computer boots up from power-on to running code from the operating system 
+- How your personal computer boots up from power-on to running code from the operating system
 
 ---
 

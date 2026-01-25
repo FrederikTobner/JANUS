@@ -4,10 +4,10 @@ We have source files. We have a linker script. But manually assembling and linki
 
 > **The Crux: Why Not Just a Shell Script?**
 >
-> You could write a bash script: `running nasm on our assembly files, clang on our C files, and then use ld to create the ELF file`. It would work! For about a week. Then you add a new source file and forget to update the script. Or you want debug builds vs. release builds. Or you work on multiple systems with different compilers, linkers or a different underlying build system, like Make instead of Ninja. Shell scripts don't scale well in that regard. 
+> You could write a bash script: `running nasm on our assembly files, clang on our C files, and then use ld to create the ELF file`. It would work! For about a week. Then you add a new source file and forget to update the script. Or you want debug builds vs. release builds. Or you work on multiple systems with different compilers, linkers or a different underlying build system, like Make instead of Ninja. Shell scripts don't scale well in that regard.
 > CMake handles dependency tracking, parallel builds, cross-platform differences, and allows you to change the underlying build system.
 > For that reason it is called a meta build system. It's the industry standard for good reason.
-> Newer meta build systems like Meson and Bazel exist, but CMake is still the most widely used when working with C. Therefor we'll use it for TinyOS.
+> Newer meta build systems like Meson and Bazel exist, but CMake is still the most widely used when working with C. Therefore, we'll use it for TinyOS.
 
 [!side]
 The Linux kernel uses Makefiles directly. We use CMake because it's easier to learn and more portable.
@@ -30,7 +30,7 @@ Additionally this will help to keep the complexity manageable as the project gro
 
 ## Platform Detection
 
-Fist we will create a seperate CMake module for platform detection and compiler setup.
+First we'll create a separate CMake module for platform detection and compiler setup.
 
 This module detects your environment and sets up cross-compilation:
 
@@ -47,18 +47,19 @@ This module detects your environment and sets up cross-compilation:
 -ffreestanding          # Freestanding environment
 -mno-red-zone           # Disable red zone (x86-64 ABI quirk)
 -fno-stack-protector    # Dont setup a stack protector
+-fno-stack-protector    # Don't set up a stack protector
 ```
 
 [!side]
 Stack protectors insert canary values in order to detect buffer overflows.
-Which is neat, but they requires runtime support which we don't have in a freestanding environment.
+Which is neat, but they require runtime support that we don't have in a freestanding environment.
 [/!side]
 
 > **Implementation detail:**
 >
 > TinyOSPlatform.cmake sets these flags in variables like `TINYOS_COMMON_FLAGS`, `TINYOS_DEBUG_FLAGS`, etc. The helper functions in TinyOSHelpers.cmake apply them to targets automatically. This keeps platform-specific logic centralized—if you port to ARM later, you only change one file.
 >
-> For now, lets create a minimal `TinyOSPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
+> For now, let's create a minimal `TinyOSPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
 
 > TODO: Make a little bit less minimal, but without adding all the complexity from the real repo.
 
@@ -426,8 +427,7 @@ replace: entire file
 +add_subdirectory(kernel)
 ```
 
-Lets also print the build configuration summary in the root `CMakeLists.txt`, to make it easier to spit any misconfigurations:
-
+Let's also print the build configuration summary in the root `CMakeLists.txt`, to make it easier to spot any misconfigurations:
 
 ```cmake-diff
 file: CMakeLists.txt
@@ -550,8 +550,8 @@ statically linked, with debug_info, not stripped
 > **New to ELF?**
 >
 > ELF (Executable and Linkable Format) is the standard object file format on Unix-like systems (Linux, BSD, etc.).
-> Like PE on Windows or Mach-O on macOs it has evolved from the assembler output format (.out) and later the common object file format (.coff).
->It's a container that holds:
+> Like PE on Windows or Mach-O on macOS, it evolved from the assembler output format (.out) and later the common object file format (.coff).
+> It's a container that holds:
 >
 > - **Machine code** (your compiled program)
 > - **Section headers** (where different parts of code/data live)

@@ -10,6 +10,8 @@ ninja -C build run
 
 QEMU should open with and tell us it is booting TinyOS. After that there will be no other visible output—just a black screen.
 
+QEMU should open and begin booting TinyOS. After that there will be no other visible output—just a black screen.
+
 **Don't panic. This is success.**
 
 I know, I know—a black screen doesn't *feel* like success. But think about what should now have happened behind that void:
@@ -30,19 +32,19 @@ Press Ctrl+C to exit QEMU. But how do we know it's actually working?
 Let's use LLDB to prove the kernel is actually running our code.
 
 [!side]
-The GDB stub supports the GDB Remote Serial Protocol and can therefor be used with GDB as well as LLDB. If you are better acquinted to GDB, feel free to use it instead of LLDB for this section.
+The GDB stub supports the GDB Remote Serial Protocol and can therefore be used with GDB as well as LLDB. If you are more familiar with GDB, feel free to use it instead of LLDB for this section.
 [/!side]
 
 LLDB is a debugger (like GDB) that lets you pause a running program, inspect memory and registers, and step through code line by line. QEMU has a "GDB stub" that lets debuggers connect to the virtual machine and control the CPU.
 
 > **New to LLDB?**
 >
-> Yes, it's a command-line debugger. If you've used a debugger in an IDE you already know the concepts—breakpoints, stepping, inspecting variables. 
+> Yes, it's a command-line debugger. If you've used a debugger in an IDE you already know the concepts—breakpoints, stepping, inspecting variables.
 > LLDB just does it via text instead of clicking some buttons. Think of it as your GUI debugger's grumpy but efficient terminal-dwelling relative.
 >
 > Another key difference also comes from using QEMU: we need to debug *remotely* over a network connection to QEMU's virtual CPU.
 >
-> Additionally when debuggin our kernel the values in our CPU registers will become important. Variables? Sure, they exist. But when debugging at this level, you'll spend a lot of time looking at registers directly, rater than at named variables. Especially when we are debugging assembly this will become vital. 
+> When debugging a kernel, register values become important. Variables exist, but at this level you'll spend a lot of time looking at registers directly rather than at named variables—especially when you're stepping through assembly.
 >
 > **Essential commands (the cheat sheet):**
 >
@@ -119,7 +121,7 @@ At the `(lldb)` prompt, connect to QEMU's debugging port:
 
 **What just happened?** LLDB connected to QEMU's GDB stub. The CPU is currently sitting at the BIOS reset vector (address 0xFFF0), about to start executing boot code.
 
-Open the debugger, then instruct lldb to connect to QEMU's debbiging port to check the result again.
+Open the debugger, then instruct LLDB to connect to QEMU's debugging port.
 Next we tell LLDB to pause when we enter `kernel_main`:
 
 ```
@@ -158,8 +160,7 @@ Let's check the multiboot info pointer in `info` (second argument):
 ```
 
 That's a valid address pointing to the Multiboot information structure GRUB created for us.
-Currently we can not check the contents of that structure since we haven't defined it's layout at this point in time.
-
+Currently we cannot check the contents of that structure since we haven't defined its layout at this point in time.
 
 Let's watch the magic number check execute:
 
@@ -176,7 +177,7 @@ Process 1 stopped
 
 **What happened?** `n` means "next" (step to the next line). Since the value was correct the magic check passed, so execution moved to line 51.
 
-After the null check has passed we 
+After the null check has passed we
 
 ```
 (lldb) n
@@ -227,37 +228,38 @@ To exit LLDB, simply type:
 ```
 
 > **Common Issues:**
-> 
+>
 > **The QEMU window is not visible**
-> 
+>
 > Using a minimal window manager like i3wm, QEMU might default to using VNC output.
 > To make the window visible you can either use a VNC viewer or setup SDL or GTK and specify it as the display type that is used:
-> 
+>
 > ```bash
 > qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display sdl
 > qemu-system-x86_64 -cdrom ./build/tinyos.iso -boot d -serial stdio -display gtk
 > ```
-> 
+>
 > **Debugger Won't Connect**
-> 
+>
 > If you see an error like `error: Failed to connect to localhost:1234` when trying to connect with LLDB make sure QEMU is running in debug mode:
-> 
+>
 > ```bash
 > ninja -C build debug
 > ```
-> 
+>
 > You should see "waiting for debugger on :1234" in the output.
-> 
-> **Breakpoint can not be set**
-> 
-> If they breakpoint for kernel_main can not be set and you get a warning like this `WARNING:  Unable to resolve breakpoint to any actual locations.`,
+>
+> **Breakpoint cannot be set**
+>
+> If the breakpoint for kernel_main cannot be set and you get a warning like `WARNING:  Unable to resolve breakpoint to any actual locations.`,
 > verify that the kernel has been built with debug symbols:
-> 
+>
 > ```bash
 > file build/kernel.elf
 > ```
+>
 > This should show that the file is not stripped and contains debug info.
- 
+
 ---
 
 **Next: [Boot Info verification](boot-info-verification.md)**

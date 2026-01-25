@@ -6,7 +6,7 @@ Let's make sure everything actually works before we get three chapters in and di
 This section takes 2 minutes. Do it. Future you will thank present you.
 [/!side]
 
-First lets verify the versions of the tools we have installed by running these commands:
+First, let's verify the versions of the tools we installed by running these commands:
 
 ```bash
 clang --version      # ≥ 17.0
@@ -19,7 +19,7 @@ lldb --version       # Any recent version
 
 All tools should be found and display version information.
 
-Now that we have made sure the tools are installed, let's verify they work correctly for OS development.
+Now that we know the tools are installed, let's verify they work correctly for OS development.
 
 [!side]
 The `_start` symbol is the entry point for freestanding programs. The OS doesn't set this up—we do.
@@ -62,11 +62,11 @@ If this works, your compiler is correctly configured for OS development.
 >
 > It's liberating and terrifying in equal measure.
 
-Let's verify Clang can compile freestanding code for x86_64:
+You can sanity-check this further:
 
-Try adding `printf("hello\n");` to the code above and recompile. Clang will complain that `printf` is undefined. There's no C standard library here. We're on our own.
+Try adding `printf("hello\n");` to the code above and recompile. Clang will complain that `printf` is undefined. There's no C standard library here—we're on our own.
 
-This is expected! If `printf` somehow works, your environment isn't properly configured for freestanding development.
+This is expected. If `printf` somehow works, your environment isn't properly configured for freestanding development.
 
 ## Test: Assemble with NASM
 

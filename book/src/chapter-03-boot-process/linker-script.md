@@ -19,7 +19,6 @@ Linker script syntax is arcane. Don't try to memorize it. Copy, modify, and refe
 
 Our **memory layout** will look like this:
 
-
 ```
 Physical Memory Map:
 ┌─────────────────────────────────────────────────┐
@@ -43,12 +42,12 @@ We will touch on this later in chapter 4 when we will implement the handling of 
 
 As you may have spotted from the diagram, we load our kernel at **1MB**. This is a traditional location for kernels on x86 architecture.
 
-The reason for this is that the first 1MB is a minefield of BIOS tables, video memory, and historical baggage. 
+The reason for this is that the first 1MB is a minefield of BIOS tables, video memory, and historical baggage.
 Loading at 1MB and ignoring the other regions that would in theory also be usable makes our life much simpler.
 
 Our linker script will define these sections in order:
 
-1. **`.multiboot`** — GRUB scans the first 32KB for this section. We need to insure it is placed in the very beginning of our binary. 
+1. **`.multiboot`** — GRUB scans the first 32KB for this section. We need to insure it is placed in the very beginning of our binary.
 2. **`.text`** — Executable code (read-only, executable)
 3. **`.rodata`** — Read-only data (string literals, const variables)
 4. **`.data`** — Initialized global/static variables
@@ -62,7 +61,6 @@ BSS = Block Started by Symbol (historical IBM assembler term). Saves disk space�
 
 Let's build our linker script incrementally. Create `kernel/core/linker.ld` and we'll add to it step by step.
 
-
 Start with the skeleton—where execution begins and where the kernel loads:
 
 ```ld-diff
@@ -75,10 +73,10 @@ after: entire file
 +    . = 0x100000;
 +}
 ```
-Fist of all we state that the execution starts at our `_start` label from boot.asm 
+
+Fist of all we state that the execution starts at our `_start` label from boot.asm
 by using the `ENTRY` directive. Next we define the `SECTIONS` block, which contains all our memory layout.
 Then we set the location counter `.` to `0x100000` (1MB)—our load address.
-
 
 GRUB scans the first 32KB for the Multiboot header. Add it right after the load address:
 
@@ -144,6 +142,7 @@ after: .text section
 The `.rodata` section holds read-only data like string literals and `const` globals.
 
 Next we will add the data section for initialized variables.
+
 ```ld-diff
 file: kernel/core/linker.ld
 after: .rodata section
@@ -203,8 +202,8 @@ after: .bss section
  }
 ```
 
-First we set the `kernel_start` symbol to `0x100000` (our load address). 
-Then we set `kernel_end` to the current location counter `.` (the end of all sections). 
+First we set the `kernel_start` symbol to `0x100000` (our load address).
+Then we set `kernel_end` to the current location counter `.` (the end of all sections).
 Finally, we compute `kernel_size` as the difference between `kernel_end` and `kernel_start`.
 
 These become usable in C:
@@ -213,17 +212,16 @@ These become usable in C:
 extern char kernel_end;
 void *end = &kernel_end;  // Get the address
 ```
-Before moving on, lets clarify a few things.
+
+Before moving on, let's clarify a few things.
 You might be wondering why we need exact control over the memory layout and why 1MB is our starting address.
 This is needed because the BIOS and GRUB own most of the first 1MB of memory, and we need to avoid conflicts with it.
-
 
 [!side]
 If any of these feel unclear, re-read the sections above. The linker script controls your entire memory layout—worth understanding deeply.
 [/!side]
 
-
-After building, cou can verify the layout using the readelf tool. We use the option `-l` to display the program headers:
+After building, you can verify the layout using the readelf tool. We use the option `-l` to display the program headers:
 
 ```bash
 readelf -l build/kernel.elf
@@ -261,7 +259,6 @@ Program Headers:
    04     .note.gnu.build-id 
    05     
 ```
-
 
 ---
 

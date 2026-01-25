@@ -1,17 +1,17 @@
 # What is an Operating System?
 
-Ask a programmer what an OS does and you'll get: "Well... it runs programs?" 
-Which is true but not really helpful, if you plan to implement it yourself or just look under the hood and get a glimpse of the different components work together to make this happen.
+Ask a programmer what an OS does and you'll get: "Well... it runs programs?"
+Which is true, but not really helpful if you plan to implement it yourself—or even just look under the hood and get a glimpse of the different components that work together to make this happen.
 At its core, an operating system is a **resource manager**.
-You can think of it as a bossy middle man between your programs and the hardware resources available on the current system, coordinating access to CPU time, memory, I/O devices, storage devices, etc. 
+You can think of it as a bossy middleman between your programs and the hardware resources available on the current system, coordinating access to CPU time, memory, I/O devices, storage devices, and more.
 
 [!side]
-Modern operating systems manage thousands of processes, gigabytes of memory, and dozens of devices simultaneously. 
+Modern operating systems manage thousands of processes, gigabytes of memory, and dozens of devices simultaneously.
 All while maintaining the illusion that each program has the machine to itself.
 [/!side]
 
 But an OS is more than just a manager.
-It's also acts as an **abstraction layer**, that hides the messy details of hardware from applications, providing an interface that can be used by developers working in the user space.
+It also acts as an **abstraction layer** that hides the messy details of hardware from applications, providing an interface that can be used by developers working in user space.
 
 ```c
 // Instead of programming disk controllers directly:

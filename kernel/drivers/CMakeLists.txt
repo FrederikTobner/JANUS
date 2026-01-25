@@ -3,8 +3,6 @@ project(tinyos-drivers)
 
 # Automatically find all source files
 file(GLOB_RECURSE DRIVERS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
-file(GLOB_RECURSE DRIVERS_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-
 
 tinyos_add_module(drivers
     SOURCES
@@ -17,3 +15,7 @@ target_include_directories(drivers
         ${CMAKE_SOURCE_DIR}/kernel/include
 )
 
+target_link_libraries(drivers
+    PUBLIC
+        arch
+)

@@ -1,7 +1,7 @@
 # Creating a Bootable ISO
 
-We have a complete kernel: Multiboot2 header, boot assembly, linker script, C entry point, and CMake build system. 
-Everything compiles and links successfully producing a `kernel.elf` file. 
+We have a complete kernel: Multiboot2 header, boot assembly, linker script, C entry point, and CMake build system.
+Everything compiles and links successfully producing a `kernel.elf` file.
 But how do we actually *boot* it?
 
 Here's the problem: QEMU can't just boot our ELF file. It expects either a Linux-style bzImage or a special PVH boot protocol. Our kernel speaks Multiboot2, which requires a bootloader. This is where GRUB comes in - the GRand Unified Bootloader.
@@ -89,7 +89,7 @@ configure_file(
 
 This command does a couple of things. It creates the ISO directory structure, copies kernel, generates grub.cfg, and finally creates the tinyos.iso image.
 
-Now lets add another custom command to boot the iso in QEMU. This command depends in iso.
+Now let's add another custom command to boot the ISO image in QEMU. This command depends on `iso`.
 
 ```cmake-diff
 file: CMakeLists.txt
@@ -129,13 +129,12 @@ after: add_custom_target(run)
 ```
 
 > **Overview:**
-> 
+>
 > - `iso` - Creates the ISO directory structure, copies kernel, generates grub.cfg, and creates tinyos.iso
 > - `run` - Depends on `iso`, then boots the ISO in QEMU
 > - `debug` - Same as `run` but with GDB stub enabled on port 1234, allowing us to connect a debugger
 
-Lets update the printed build configuration to show this:
-
+Let's update the printed build configuration to show this:
 
 ```cmake-diff
 file: CMakeLists.txt
@@ -178,12 +177,12 @@ You'll see output showing the new targets:
 -- Build files have been written to: /home/user/TinyOS/build
 ```
 
-Now lets start using the targets we have created.
+Now let's start using the targets we have created.
 
 [!side]
 You can use the help command `ninja -C build help` to see all available targets.
 Your new targets `iso`, `run`, and `debug` will be listed there as well as phony targets.
-This does not mean that these targets are fake, it just means they don't prooduce an artifact with the same name.
+This does not mean that these targets are fake; it just means they don't produce an artifact with the same name.
 Unlike phony politicians, phony targets in CMake are actually useful.
 [/!side]
 
@@ -192,7 +191,7 @@ Unlike phony politicians, phony targets in CMake are actually useful.
 ninja -C build iso
 ```
 
-You'll see they creation of the ISO image in the output: 
+You'll see the creation of the ISO image in the output:
 
 ```
 ninja: Entering directory `build'
@@ -213,7 +212,7 @@ Written to medium : 15591 sectors at LBA 0
 Writing to 'stdio:/home/user/TinyOS/build/tinyos_x86_64.iso' completed successfully.
 ```
 
-Lets reflect on what we have accomplished now, by running this command. 
+Let's reflect on what we have accomplished now by running this command.
 First we create the directory structure for the ISO, then we copy our kernel and GRUB configuration into place, and finally we use `grub-mkrescue` to create the bootable ISO image.
 
 The result is `build/tinyos_x86_64.iso` - a bootable ISO image that works on both BIOS and UEFI systems.

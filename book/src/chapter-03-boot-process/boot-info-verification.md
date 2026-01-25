@@ -1,4 +1,4 @@
-# Boot info verification
+# Boot Info Verification
 
 Before we dive deeper into the creation of our kernel and start using the data GRUB handed us, there's something we should have done already but glossed over: **actually checking that Multiboot info is valid**.
 This is needed to ensure that we can use the data in it later. This data can include:
@@ -18,7 +18,7 @@ This is a pattern you'll see throughout kernel development: trust nothing, verif
 
 Right now, we're trusting that GRUB gave us good data in `magic` and `info`. That's... optimistic. What if GRUB didn't boot us? What if something went wrong? What if we're running on different hardware that uses a different bootloader?
 
-Let's add proper validation before the kernels entry point starts using this data.
+Let's add proper validation before the kernel's entry point starts using this data.
 
 First we verify we were loaded by a Multiboot2-compliant bootloader. If not we will just halt the system for now since we can't print any error message at this point.
 
@@ -61,8 +61,8 @@ after: after magic number verification
 
 ## Verification
 
-Now lets start qemu in debug mode and use lldb to have a look at the flow of the program.
-First we need to recompile, then create a iso run qemu in debug mode and connect to it using lldb.
+Now let's start QEMU in debug mode and use LLDB to look at the flow of the program.
+First we need to recompile, then create an ISO image, run QEMU in debug mode, and connect to it using LLDB.
 
 > TODO: Show program flow. Introduce frame variable.
 
@@ -75,7 +75,7 @@ lldb build/kernel.elf
 (lldb) gdb-remote localhost:1234
 ```
 
-Open the debugger, then instruct lldb to connect to QEMU's debbiging port to check the result again.
+Open the debugger, then instruct LLDB to connect to QEMU's debugging port.
 Next we tell LLDB to pause when we enter `kernel_main`:
 
 ```
@@ -117,7 +117,6 @@ Let's check the multiboot info pointer in `info` (second argument):
 ```
 
 That's a valid address pointing to the Multiboot information structure GRUB created for us.
-
 
 Let's watch the magic number check execute:
 

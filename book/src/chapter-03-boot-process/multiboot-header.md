@@ -3,8 +3,7 @@
 Before we dive deeper, let’s clear up some boot jargon. 
 When your PC is powered on, multiple software layers will be traversed to get your kernel running.
 The first layer is called the firmware. 
-It is the code burned into your motherboard. 
-It’s the first thing that runs when you hit the power button. 
+It is the code burned into your motherboard and the first thing that runs when you hit the power button. 
 There are two main types of firmware on modern Computers. 
 The older BIOS (Basic Input Output System) and the more modern UEFI (Unified Extensible Firmware Interface).
 
@@ -23,13 +22,14 @@ Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? U
 We will be using the Multiboot2 standard in this book.
 
 When you power on a PC using a BIOS firmware in combination with the GRUB bootloader, the BIOS will first of all load GRUB from disk. 
-GRUB then scans the first 32KB of our kernel binary looking for a magic number—a secret handshake that says "hey, I'm a bootable kernel, load me!"
+GRUB then scans the first 32KB of our kernel binary looking for a magic number `0xe85250d6` that identifies our kernel as a Multiboot2 compliant kernel.
 
 If you do not provide this magic number GRUB will not recognize your kernel is bootable and will refuse to load it.
 
 ```
 ┌──────────┐    ┌──────────┐    ┌──────────────┐    ┌──────────┐
-│   BIOS   │───▶│   GRUB   │───▶│ Scan for     │───▶│  Boot    │
+│   BIOS   │    │   GRUB   │    │ Scans the ISO│    │  Booting │
+│          │───▶│          │───▶│ image for    │───▶│  the     │
 │ Power On │    │  Loads   │    │ 0xe85250d6   │    │  image   │
 └──────────┘    └──────────┘    └──────────────┘    └──────────┘
                                        ▲
@@ -58,7 +58,7 @@ Additionally it defines the machine state we can expect when GRUB transfers cont
 We will cover the exact contents of the information later when we actually start using it.
 
 ```
-Multiboot2 Header Layout (must be in first 32KB):
+Multiboot2 Header Layout 
 ┌─────────────────────────────────────────┐
 │  Offset  │  Field         │  Value      │
 ├─────────────────────────────────────────┤
@@ -97,10 +97,10 @@ replace: entire file
 +#endif // BOOT_MULTIBOOT_H
 ```
 
-Two magic numbers, two different jobs. The header magic (`0xe85250d6`) goes in our assembly—GRUB scans for it to find our kernel. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register as proof it loaded us correctly. Think of them as matching halves of a secret handshake.
+Two magic numbers, two different jobs. The bootloader magic (`0x36d76289`) is what GRUB passes us in the EAX register to indicate that the kernel was loader by a mutliboot2 compliant bootloader. 
 
 Now let's build the Multiboot2 header in assembly. 
-This will be 
+
 
 ```x86asm-diff
 file: kernel/boot/multiboot.asm
@@ -125,7 +125,9 @@ after: align 8
 +    dd 0
 ```
 
-First, we need our old friend the Multiboot2 header magic number—the same `0xe85250d6` we defined in the C header. GRUB scans the first 32KB of our kernel looking for this exact number.
+The header magic (`0xe85250d6`) goes in our assembly. 
+GRUB scans the first 32KB of our kernel looking for this exact number.
+If it doesn't find it, GRUB will refuse to load our kernel.
 
 The architecture field tells GRUB what CPU mode we expect: `0` means i386 protected mode (32-bit).
 
@@ -168,6 +170,7 @@ after: kernel/boot definition
 +info_request_end:
 ```
 
+This tag requests that GRUB provides us with memory map information when it loads our kernel.
 
 Every Multiboot2 header must end with this tag:
 
@@ -184,18 +187,9 @@ after: info_request_end label
 +multiboot_end:
 ```
 
-**What this does:**
-
-* Magic `0xe85250d6` identifies us as Multiboot2
-* Checksum validates the header structure  
-* Information request asks GRUB for memory details
-* End tag terminates the header
+The Magic number `0xe85250d6` identifies our kernel as Multiboot2 compliant.
 
 GRUB validates the checksum by ensuring `magic + architecture + length + checksum = 0`.
-
-## Why This Matters
-
-Without this header, GRUB won't recognize our kernel. The header is a contract: "I'm a valid kernel, here's what I need from you."
 
 ---
 
