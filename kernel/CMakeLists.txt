@@ -1,4 +1,4 @@
-
+include(JanusLibrary)
 # Configure config.h from config.h.in
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/include/janus/config.h.in"
@@ -20,16 +20,17 @@ endif()
 # Add generated config.h to include path
 include_directories("${CMAKE_BINARY_DIR}/kernel/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# Boot module
-add_subdirectory(boot)
-
-# Core kernel module
-add_subdirectory(core)
-
-# Driver kernel module
-add_subdirectory(drivers)
-
 # Kernel libraries - These can only include the types from our include directory
 add_subdirectory(lib)
 
+# Architecture-specific code
 add_subdirectory(arch)
+
+# Kernel subsystems 
+add_subdirectory(subsys)
+
+# Kernel initialization (protocol-agnostic)
+add_subdirectory(kmain)
+
+# Entry point (creates kernel.elf, must be last)
+add_subdirectory(_start)

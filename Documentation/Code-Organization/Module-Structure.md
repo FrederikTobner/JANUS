@@ -12,11 +12,13 @@ JANUS follows a modular structure inspired by Linux and LLVM: each major compone
 janus/
 ├── kernel/           # Core kernel functionality
 │   ├── include/          # Global headers
-│   ├── boot/             # Boot loader and initialization
+│   ├── entry/            # Entry points (creates kernel.elf)
+│   ├── init/             # Kernel initialization (main.c)
+│   ├── boot/             # Boot protocol handling
 │   ├── arch/             # Architecture-specific code
 │   ├── lib/              # Utility libraries
 │   ├── mm/               # Memory management
-│   └── drivers/          # Device drivers (future)
+│   └── drivers/          # Device drivers
 ├── scripts/          # Build and utility scripts
 ├── cmake/            # CMake build modules
 ├── tools/            # Development tools
@@ -24,74 +26,139 @@ janus/
 └── Documentation/    # Technical documentation
 ```
 
-## Module Dependencies
+## Module Layers
 
-Dependencies flow in **one direction**:
-
-```
-           ┌──────────┐
-           │  core    │
-           └────┬─────┘
-                │
-       ┌────────┴────────┐
-       ▼                 ▼
-  ┌─────────┐      ┌─────────┐
-  │   mm    │      │  boot   │
-  └────┬────┘      └────┬────┘
-       │                │
-       └────────┬───────┘
-                ▼
-         ┌─────────────┐
-         │  arch/x86   │
-         └──────┬──────┘
-                │
-                ▼
-           ┌──────────┐
-           │  lib/X   │
-           └────┬─────┘
-                │
-                ▼
-       ┌──────────────────┐
-       │  include/janus  │
-       └──────────────────┘
-```
+Modules are organized in layers. Dependencies flow **downward only**.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  Core Layer (kernel/core)                                            │
+│  Entry Layer (kernel/entry/)                                         │
+│  - Creates kernel.elf executable                                     │
+│  - Owns entry point (_start) and linker script                       │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Subsystem Layer (kernel/mm/, kernel/drivers/, kernel/boot)          │
+│  Init Layer (kernel/init/)                                           │
+│  - Kernel initialization (main.c)                                    │
+│  - Protocol-agnostic, architecture-agnostic                          │
 ├──────────────────────────────────────────────────────────────────────┤
-│ Support Library Layer (lib/*)                                        │
+│  Subsystem Layer (kernel/mm/, kernel/drivers/, kernel/boot/)         │
+│  - boot/ handles protocol verification and boot info parsing         │
+│  - mm/ handles memory management                                     │
+│  - drivers/ provides device drivers                                  │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Platform/Architecture Layer (arch/x86_64/)                          │
+│  Support Library Layer (kernel/lib/)                                 │
+│  - Freestanding utilities (hash, string, etc.)                       │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Global interface layer (include)                                    │
+│  Platform/Architecture Layer (kernel/arch/)                          │
+│  - CPU-specific code (x86_64, aarch64, etc.)                         │
+├──────────────────────────────────────────────────────────────────────┤
+│  Global Interface Layer (kernel/include/)                            │
+│  - Type definitions, attributes, common headers                      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-## Core Modules
+## Module Dependency Flow
 
-### `kernel/core/` - Core Kernel
+```
+                    ┌──────────────┐
+                    │    entry     │  ← Creates kernel.elf
+                    └──────┬───────┘
+                           │
+                    ┌──────┴───────┐
+                    │     init     │  ← Protocol-agnostic init
+                    └──────┬───────┘
+                           │
+          ┌────────────────┼────────────────┐
+          ▼                ▼                ▼
+    ┌──────────┐    ┌──────────┐    ┌──────────┐
+    │   boot   │    │    mm    │    │ drivers  │
+    │(protocol │    │          │    │          │
+    │  verify) │    │          │    │          │
+    └────┬─────┘    └────┬─────┘    └────┬─────┘
+         │               │               │
+         └───────────────┼───────────────┘
+                         ▼
+                  ┌─────────────┐
+                  │  arch/x86   │
+                  └──────┬──────┘
+                         │
+                         ▼
+                    ┌──────────┐
+                    │  lib/*   │
+                    └────┬─────┘
+                         │
+                         ▼
+                ┌──────────────────┐
+                │  include/janus   │
+                └──────────────────┘
+```
 
-Main kernel functionality and entry point.
+**Key insight:** `entry/` is responsible for linking all modules into the final `kernel.elf`. It owns the entry point (`_start`) and the linker script. `boot/` provides protocol verification as a library.
+
+## Module Descriptions
+
+### `kernel/entry/` - Entry Point Module
+
+Entry point and final executable creation. Organized by `${ARCH}/${PROTOCOL}`.
 
 **Responsibilities:**
 
-- Kernel initialization sequence
+- Entry point (`_start`) in assembly
+- Protocol header (Multiboot2, Limine, etc.)
+- Linker script (memory layout)
+- **Creates `kernel.elf`** by linking all other modules
+
+**Structure:**
+
+```
+kernel/entry/
+├── CMakeLists.txt              # Dispatches to arch/protocol
+└── x86_64/
+    └── multiboot2/
+        ├── CMakeLists.txt      # Creates kernel.elf
+        ├── link.ld             # Linker script
+        ├── boot.asm            # Entry point (_start)
+        └── multiboot2.asm      # Protocol header
+```
+
+**Build output:** `kernel.elf` executable
+
+### `kernel/init/` - Kernel Initialization
+
+Protocol-agnostic and architecture-agnostic kernel initialization.
+
+**Responsibilities:**
+
+- Kernel initialization sequence (`kernel_main()`)
 - Main kernel loop
 - Panic and error handling
 - Global kernel state
 
-### `kernel/boot/` - Boot Module
+**Build output:** Object library (linked by entry)
 
-Boot loader interface and early initialization.
+### `kernel/boot/` - Boot Protocol Module
+
+Boot protocol handling and verification. Organized by `${ARCH}/${PROTOCOL}`.
 
 **Responsibilities:**
 
-- Multiboot2 header and compliance
-- Initial CPU state setup (stack, registers)
-- Transition from boot loader to kernel
+- Boot handoff verification
+- Boot info structure parsing
+- Protocol-specific definitions
+
+**Structure:**
+
+```
+kernel/boot/
+├── CMakeLists.txt              # Dispatches to arch/protocol
+├── include/                    # Shared boot headers
+└── x86_64/
+    └── multiboot2/
+        ├── CMakeLists.txt      # Creates static library
+        ├── multiboot2.h        # Protocol definitions
+        └── verify.c            # Handoff verification
+```
+
+**Build output:** Static library
 
 ### `kernel/arch/` - Architecture Abstraction
 
@@ -104,8 +171,66 @@ Architecture-specific code with generic interfaces.
 - Platform initialization
 - Hardware abstraction interfaces
 
-## Support Library Layer
+**Build output:** Static library
 
-Contains libraries that only depend on the core definitions and are able to work without any specific architecture layer. E.g. FNV-1a hash or other hash implementations.
+### `kernel/drivers/` - Device Drivers
 
-> Not fully defined yet.
+Hardware device drivers.
+
+**Responsibilities:**
+
+- VGA/framebuffer output
+- Serial console
+- Keyboard input
+- Future: disk, network, etc.
+
+**Build output:** Static library
+
+### `kernel/lib/` - Support Libraries
+
+Freestanding utility libraries with no kernel dependencies.
+
+**Responsibilities:**
+
+- String manipulation
+- Hash functions (FNV-1a, etc.)
+- Data structures
+
+**Build output:** Interface library (header-only) or static library
+
+## Build Flow
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    kernel/CMakeLists.txt                         │
+│  add_subdirectory(lib)      # Built first (utilities)            │
+│  add_subdirectory(arch)     # Architecture support               │
+│  add_subdirectory(drivers)  # Device drivers                     │
+│  add_subdirectory(boot)     # Protocol verification library      │
+│  add_subdirectory(init)     # Kernel initialization              │
+│  add_subdirectory(entry)    # Built last, creates kernel.elf     │
+└──────────────────────────────────────────────────────────────────┘
+                           │
+    ┌──────────────────────┼──────────────────────┬────────────────┐
+    ▼                      ▼                      ▼                ▼
+┌──────────┐        ┌──────────┐          ┌──────────┐      ┌──────────┐
+│   init   │        │   arch   │          │ drivers  │      │   lib    │
+│ (OBJECT) │        │ (STATIC) │          │ (STATIC) │      │(INTERFACE│
+└────┬─────┘        └────┬─────┘          └────┬─────┘      └──────────┘
+     │                   │                     │
+     │              ┌────┴─────┐               │
+     │              │   boot   │               │
+     │              │ (STATIC) │               │
+     │              └────┬─────┘               │
+     │                   │                     │
+     └───────────────────┼─────────────────────┘
+                         ▼
+          ┌──────────────────────────────────┐
+          │  entry/${ARCH}/${PROTOCOL}/      │
+          │  janus_link_kernel(...)          │
+          └────────────────┬─────────────────┘
+                           ▼
+                    ┌──────────────┐
+                    │  kernel.elf  │
+                    └──────────────┘
+```

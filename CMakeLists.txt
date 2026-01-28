@@ -25,7 +25,6 @@ set(CMAKE_C_EXTENSIONS ON)
 # Include JANUS platform detection and helper functions
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(JanusPlatform)
-include(JanusHelpers)
 
 # Generate build timestamp
 string(TIMESTAMP JANUS_BUILD_DATE "%Y-%m-%d")
