@@ -18,10 +18,7 @@ alignb 16
 stack_bottom:
     resb 16384              ; 16 KiB stack
 stack_top:
-
 alignb 16
-boot_handoff:
-    resb 24
 
 ; Page tables for long mode (must be page-aligned)
 alignb 4096

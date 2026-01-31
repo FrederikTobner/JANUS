@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                             *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -15,48 +15,40 @@
  ****************************************************************************/
 
 /**
- * @file vga_text.h
- * @brief VGA text mode output driver
+ * @file arch/impl/drivers/io.h
+ * @brief x86_64 port I/O operations.
+ *
+ * Internal header for arch implementations within the drivers subsystem.
  */
 
-#ifndef DRIVER_VGA_TEXT_H
-#define DRIVER_VGA_TEXT_H
+#ifndef X86_64_IMPL_DRIVERS_IO_H
+#define X86_64_IMPL_DRIVERS_IO_H
 
+#include <janus/attributes.h>
 #include <janus/types.h>
 
-#define VGA_TEXT_WIDTH  80
-#define VGA_TEXT_HEIGHT 25
-
 /**
- * @brief Initialize VGA text mode output
- */
-void vga_text_init(void);
-
-/**
- * @brief Clear the screen using the current color
- */
-void vga_text_clear(void);
-
-/**
- * @brief Set the VGA text color
- * @param foreground Foreground color (0-15)
- * @param background Background color (0-15)
- */
-void vga_text_set_color(u8 foreground, u8 background);
-
-/**
- * @brief Write a character to the VGA text buffer
- * @param c Character to write
- */
-void vga_text_putc(char c);
-
-/**
- * @brief Write a null-terminated string to the VGA text buffer
- * @param char_buffer Pointer to the null-terminated character buffer
+ * Write a byte to an I/O port.
  *
- * @warning This function expects the character buffer to be null-terminated. Failing to do so will result in UNDEFINED
- * BEHAVIOR
+ * @param port The I/O port address.
+ * @param value The byte value to write.
  */
-void vga_text_write_string(char const * char_buffer);
+static __always_inline void outb(u16 port, u8 value)
+{
+    __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
+}
 
-#endif
+/**
+ * Read a byte from an I/O port.
+ *
+ * @param port The I/O port address.
+ * @return The byte read from the port.
+ */
+static __always_inline u8 inb(u16 port)
+{
+    u8 ret;
+    __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}
+
+#endif /* X86_64_IMPL_DRIVERS_IO_H */

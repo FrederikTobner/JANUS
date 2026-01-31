@@ -13,11 +13,11 @@ add_library(_start OBJECT
     boot.asm
 )
 
-message(STATUS "  Added module: _start (${JANUS_TARGET_ARCH}/${JANUS_BOOT_PROTOCOL})")
+message(STATUS "  Added linkable kernel target: _start (${JANUS_TARGET_ARCH}/${JANUS_BOOT_PROTOCOL})")
 
 # Link everything into kernel.elf
 janus_link_kernel(
     LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/link.ld
-    LIBRARIES arch drivers boot
+    LIBRARIES drivers boot
     OBJECTS _start kmain
 )

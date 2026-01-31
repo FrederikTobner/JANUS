@@ -21,10 +21,11 @@
  * This is called by boot.asm after the bootloader transfers control.
  */
 
-#include <arch/cpu.h>
 #include <boot/verify.h>
-#include <drivers/uart.h>
-#include <drivers/vga_text.h>
+#include <drivers/cpu.h>
+#include <drivers/serial.h>
+#include <drivers/tty.h>
+#include <janus/attributes.h>
 #include <janus/types.h>
 #include <janus/version.h>
 
@@ -41,31 +42,35 @@
  *
  * Called from boot.asm after initial setup. At this point:
  * - Stack is configured (16 KiB)
- * - CPU is in 32-bit protected mode
+ * - CPU is in 64-bit long mode
  * - Interrupts are disabled
  * - Paging is disabled
  *
  * @param handoff Minimal boot handoff structure
  */
-void kernel_main(u64 loader_magic, void * info)
+__noreturn void kernel_main(u64 loader_magic, void * info)
 {
     if (boot_verify_handoff(loader_magic, info) != 0) {
+        // Disable interrupts and halt forever on boot verification failure
         cpu_halt_forever();
     }
-
-    // Initialize VGA text output and print a simple message
-    vga_text_init();
-    // Green font color on black background
-    vga_text_set_color(2, 0);
-    vga_text_write_string(JANUS_HELLO_MESSAGE);
-    vga_text_write_string("\nJANUS Version:"
-                          " " JANUS_VERSION_STRING "\n\n");
-
+    bool serial_initialized = false;
     // Initialize serial port for debugging output
-    if (uart_init() == 0) {
+    if (serial_init() == 0) {
         // If the serial port initialized successfully, print something lul
-        uart_write_string(JANUS_HELLO_MESSAGE);
+        serial_puts("Serial driver initialized\n");
+        serial_initialized = true;
     }
+    // Initialize TTY output and print a simple message
+    tty_init();
+    if (serial_initialized) {
+        serial_puts("TTY driver initialized\n");
+    }
+    // Green font color on black background
+    tty_set_color(2, 0);
+    tty_puts(JANUS_HELLO_MESSAGE);
+    tty_puts("\nJANUS Version:"
+             " " JANUS_VERSION_STRING "\n\n");
 
     // Halt the CPU forever
     for (;;) {

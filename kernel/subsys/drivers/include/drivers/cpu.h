@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                             *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -15,42 +15,37 @@
  ****************************************************************************/
 
 /**
- * @file uart.h
- * @brief UART Driver (only COM1 with a fixed baud rate of 38400 for now)
- */
-
-#ifndef DRIVER_UART_H
-#define DRIVER_UART_H
-#include "janus/types.h"
-#define UART_COM1 0x3F8
-
-// TODO: Add support for COM2, COM3, COM4 and make the baud rate configurable
-
-/**
- * @brief Initialize UART COM1
- * @return 0 on success, non-zero on failure
- */
-error_t uart_init(void);
-
-/**
- * @brief Check if the UART transmit buffer is empty
- * @return 1 if empty, 0 otherwise
- */
-int uart_is_transmit_empty(void);
-
-/**
- * @brief Write a character to the universal asynchronous receiver/transmitter (UART)
- * @param character Character to write
- */
-void uart_write_char(char character);
-
-/**
- * @brief Write a null-terminated string to the universal asynchronous receiver/transmitter (UART)
- * @param char_buffer Pointer to the null-terminated character buffer
+ * @file cpu.h
+ * @brief CPU control interface.
  *
- * @warning This function expects the character buffer to be null-terminated. Failing to do so will result in UNDEFINED
- * BEHAVIOR
+ * Header-only driver. Architecture implementation is pulled in via
+ * include path resolution: <arch/drivers/cpu.h> → <arch/impl/drivers/cpu.h>
  */
-void uart_write_string(char const * char_buffer);
 
-#endif
+#ifndef DRIVERS_CPU_H
+#define DRIVERS_CPU_H
+
+#include <arch/drivers/cpu.h>
+#include <janus/attributes.h>
+
+static __always_inline void cpu_halt(void)
+{
+    arch_cpu_halt();
+}
+
+static __always_inline __noreturn void cpu_halt_forever(void)
+{
+    arch_cpu_halt_forever();
+}
+
+static __always_inline void cpu_disable_interrupts(void)
+{
+    arch_cpu_disable_interrupts();
+}
+
+static __always_inline void cpu_enable_interrupts(void)
+{
+    arch_cpu_enable_interrupts();
+}
+
+#endif /* DRIVERS_CPU_H */

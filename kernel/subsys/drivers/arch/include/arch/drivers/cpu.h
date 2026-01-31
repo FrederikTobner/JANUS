@@ -1,8 +1,7 @@
-
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                             *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -15,14 +14,22 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef ASM_IO_H
-#define ASM_IO_H
+/**
+ * @file arch/drivers/cpu.h
+ * @brief CPU control architecture contract.
+ *
+ * This file acts as a bridge - it just includes the architecture-specific
+ * implementation header. The include path determines which architecture
+ * is used (set by build system).
+ *
+ * Include chain: <drivers/cpu.h> → <arch/drivers/cpu.h> → <arch/impl/drivers/cpu.h>
+ */
 
-#include <janus/attributes.h>
-#include <janus/types.h>
+#ifndef ARCH_DRIVERS_CPU_H
+#define ARCH_DRIVERS_CPU_H
 
-void outb(u16 port, u8 value);
+// Pull in the architecture-specific implementation
+// Resolved via include path: -I drivers/arch/x86_64/include
+#include <arch/impl/drivers/cpu.h>
 
-u8 inb(u16 port);
-
-#endif // ASM_IO_H
+#endif /* ARCH_DRIVERS_CPU_H */

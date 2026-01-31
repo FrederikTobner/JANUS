@@ -28,21 +28,50 @@ cmake --build build --target run
 
 ```
 JANUS/
-
 ├── scripts/          # Build and utility scripts
 ├── cmake/            # CMake build modules
 ├── tools/            # Development tools
 ├── book/             # Book / tutorial of the project
 ├── Documentation/    # Technical documentation
-└── kernel/           # kernel functionality
-       ├── arch/             # Architecture specific layer
-       ├── core/             # Core kernel functionality
-       ├── boot/             # Multiboot2 boot loader
-       ├── lib/              # Kernel libraries (arch, utility libraries)
-       ├── mm/               # Memory management
-       ├── drivers/          # Device drivers
-       └── include/          # Global headers
+└── kernel/           # Kernel functionality
+    ├── include/          # Global headers (janus/types.h, etc.)
+    ├── _start/           # Entry point (creates kernel.elf)
+    ├── kmain/            # Kernel main - final assembly point
+    ├── lib/              # Shared utility libraries
+    └── subsys/           # Independent subsystems
+        ├── boot/             # Boot protocol handling
+        ├── drivers/          # Device drivers (with arch/)
+        └── mm/               # Memory management
 ```
+
+### Architecture Code
+
+Architecture-specific code lives **inside each subsystem** that needs it, using a three-tier include model:
+
+```
+kernel/subsys/example/
+├── include/example/                    # Tier 1: Public API
+│   └── *.h
+├── *.c                                 # Generic impl (optional)
+└── arch/
+    ├── include/arch/example/           # Tier 2: Contract headers
+    │   └── *.h                         #   declares arch_* or includes Tier 3
+    └── x86_64/
+        ├── include/arch/impl/example/  # Tier 3: Arch inline headers
+        │   └── *.h
+        └── *.c                         # Arch source files (optional)
+```
+
+**Flexibility:**
+
+- **Generic layer**: Each public header can be header-only or have a `.c` file
+- **Arch layer**: Each contract can include inline headers (Tier 3) or declare functions implemented in `.c` files
+- **No 1:1 mapping required**: A public `X.h` can include arch contracts `Y.h` and `Z.h`; arch implementations can be split across multiple `.c` files
+
+The only rule: Tier 2 contracts declare `arch_*` functions that get implemented either inline (Tier 3) or in arch `.c` files.
+
+For a detailed explanation of the architecture (arch) layer structure and all supported patterns, see:
+[Documentation/Code-Organization/Arch-Layer-Structure.md](Documentation/Code-Organization/Arch-Layer-Structure.md)
 
 ## Technology Stack
 

@@ -1,8 +1,7 @@
-
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                             *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -15,22 +14,54 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef ASM_IO_H
-#define ASM_IO_H
+/**
+ * @file arch/impl/drivers/cpu.h
+ * @brief x86_64 CPU control implementation.
+ *
+ * Provides inline implementations of arch_cpu_* functions.
+ * This header is pulled in via include path resolution.
+ */
+
+#ifndef X86_64_IMPL_DRIVERS_CPU_H
+#define X86_64_IMPL_DRIVERS_CPU_H
 
 #include <janus/attributes.h>
-#include <janus/types.h>
 
-void outb(u16 port, u8 value)
+/**
+ * @brief Halt the CPU until the next interrupt/event.
+ */
+static __always_inline void arch_cpu_halt(void)
 {
-    __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
+    __asm__ volatile("hlt");
 }
 
-u8 inb(u16 port)
+/**
+ * @brief Disable interrupts.
+ */
+static __always_inline void arch_cpu_disable_interrupts(void)
 {
-    u8 ret;
-    __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
-    return ret;
+    __asm__ volatile("cli");
 }
 
-#endif // ASM_IO_H
+/**
+ * @brief Enable interrupts.
+ */
+static __always_inline void arch_cpu_enable_interrupts(void)
+{
+    __asm__ volatile("sti");
+}
+
+/**
+ * @brief Disable interrupts and halt forever.
+ *
+ * This function never returns and is used for unrecoverable errors.
+ */
+static __always_inline __noreturn void arch_cpu_halt_forever(void)
+{
+    arch_cpu_disable_interrupts();
+    for (;;) {
+        arch_cpu_halt();
+    }
+}
+
+#endif /* X86_64_IMPL_DRIVERS_CPU_H */

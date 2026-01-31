@@ -11,19 +11,44 @@ JANUS follows a modular structure inspired by Linux and LLVM: each major compone
 ```
 janus/
 ├── kernel/           # Core kernel functionality
-│   ├── include/          # Global headers
-│   ├── entry/            # Entry points (creates kernel.elf)
-│   ├── init/             # Kernel initialization (main.c)
-│   ├── boot/             # Boot protocol handling
-│   ├── arch/             # Architecture-specific code
-│   ├── lib/              # Utility libraries
-│   ├── mm/               # Memory management
-│   └── drivers/          # Device drivers
+│   ├── include/          # Global headers (janus/types.h, etc.)
+│   ├── _start/           # Entry point (creates kernel.elf)
+│   ├── kmain/            # Kernel main - final assembly point
+│   ├── lib/              # Shared utility libraries
+│   └── subsys/           # Independent subsystems
+│       ├── boot/             # Boot protocol handling
+│       ├── drivers/          # Device drivers
+│       └── mm/               # Memory management
 ├── scripts/          # Build and utility scripts
 ├── cmake/            # CMake build modules
 ├── tools/            # Development tools
 │   └── bmunit/       # BMUnit testing framework
 └── Documentation/    # Technical documentation
+```
+
+### Architecture Code Lives Inside Subsystems
+
+Architecture-specific code is **co-located with each subsystem** rather than in a separate `kernel/arch/` directory:
+
+```
+kernel/subsys/drivers/
+├── include/drivers/              # Public API (Tier 1)
+│   ├── cpu.h                     # #include <drivers/cpu.h>
+│   ├── tty.h
+│   └── serial.h
+├── arch/
+│   ├── include/arch/drivers/     # Contract headers (Tier 2)
+│   │   ├── cpu.h                 # #include <arch/drivers/cpu.h>
+│   │   ├── tty.h
+│   │   └── serial.h
+│   └── x86_64/
+│       ├── include/arch/impl/drivers/  # Implementation (Tier 3)
+│       │   ├── cpu.h             # #include <arch/impl/drivers/cpu.h>
+│       │   └── io.h
+│       ├── tty.c                 # VGA text mode
+│       └── serial.c              # COM1 UART
+├── tty.c                         # Generic driver code
+└── serial.c
 ```
 
 ## Module Layers
@@ -32,24 +57,25 @@ Modules are organized in layers. Dependencies flow **downward only**.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  Entry Layer (kernel/entry/)                                         │
+│  Entry Layer (kernel/_start/)                                        │
 │  - Creates kernel.elf executable                                     │
 │  - Owns entry point (_start) and linker script                       │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Init Layer (kernel/init/)                                           │
+│  Assembly Layer (kernel/kmain/)                                      │
+│  - Final assembly point - links all subsystems                       │
 │  - Kernel initialization (main.c)                                    │
-│  - Protocol-agnostic, architecture-agnostic                          │
+│  - Only module allowed to depend on subsystems                       │
 ├──────────────────────────────────────────────────────────────────────┤
-│  Subsystem Layer (kernel/mm/, kernel/drivers/, kernel/boot/)         │
+│  Subsystem Layer (kernel/subsys/*)                                   │
 │  - boot/ handles protocol verification and boot info parsing         │
 │  - mm/ handles memory management                                     │
 │  - drivers/ provides device drivers                                  │
+│  - Each subsystem contains its own arch/ code                        │
+│  - Subsystems are ISOLATED: cannot depend on each other!             │
 ├──────────────────────────────────────────────────────────────────────┤
 │  Support Library Layer (kernel/lib/)                                 │
 │  - Freestanding utilities (hash, string, etc.)                       │
-├──────────────────────────────────────────────────────────────────────┤
-│  Platform/Architecture Layer (kernel/arch/)                          │
-│  - CPU-specific code (x86_64, aarch64, etc.)                         │
+│  - Subsystems may depend on lib                                      │
 ├──────────────────────────────────────────────────────────────────────┤
 │  Global Interface Layer (kernel/include/)                            │
 │  - Type definitions, attributes, common headers                      │
@@ -60,43 +86,44 @@ Modules are organized in layers. Dependencies flow **downward only**.
 
 ```
                     ┌──────────────┐
-                    │    entry     │  ← Creates kernel.elf
+                    │   _start     │  ← Creates kernel.elf
                     └──────┬───────┘
                            │
                     ┌──────┴───────┐
-                    │     init     │  ← Protocol-agnostic init
-                    └──────┬───────┘
+                    │    kmain     │  ← Final assembly point
+                    └──────┬───────┘    (only one that can link subsystems)
                            │
           ┌────────────────┼────────────────┐
           ▼                ▼                ▼
     ┌──────────┐    ┌──────────┐    ┌──────────┐
-    │   boot   │    │    mm    │    │ drivers  │
-    │(protocol │    │          │    │          │
-    │  verify) │    │          │    │          │
-    └────┬─────┘    └────┬─────┘    └────┬─────┘
-         │               │               │
-         └───────────────┼───────────────┘
-                         ▼
-                  ┌─────────────┐
-                  │  arch/x86   │
-                  └──────┬──────┘
-                         │
-                         ▼
-                    ┌──────────┐
-                    │  lib/*   │
-                    └────┬─────┘
-                         │
-                         ▼
-                ┌──────────────────┐
-                │  include/janus   │
-                └──────────────────┘
+    │   boot   │    │    mm    │    │ drivers  │   ← Each has its own arch/
+    │  ┌───┐  │    │  ┌───┐  │    │  ┌───┐  │
+    │  │x86│  │    │  │x86│  │    │  │x86│  │
+    │  └───┘  │    │  └───┘  │    │  └───┘  │
+    └────┬────┘    └────┬────┘    └────┬────┘
+         │              │              │
+         └──────────────┼──────────────┘
+                        │
+                   ┌────┴─────┐
+                   │  lib/*   │  ← Can have arch/ too
+                   └────┬─────┘
+                        │
+                        ▼
+               ┌──────────────────┐
+               │  include/janus   │
+               └──────────────────┘
 ```
 
-**Key insight:** `entry/` is responsible for linking all modules into the final `kernel.elf`. It owns the entry point (`_start`) and the linker script. `boot/` provides protocol verification as a library.
+**Key insight:**
+
+- `_start/` creates `kernel.elf` by linking `kmain` and all subsystems
+- `kmain/` is the **only** module that can depend on subsystems (enforced by CMake!)
+- Subsystems are **isolated**: they cannot depend on each other
+- Each subsystem contains its own `arch/` folder with architecture-specific code
 
 ## Module Descriptions
 
-### `kernel/entry/` - Entry Point Module
+### `kernel/_start/` - Entry Point Module
 
 Entry point and final executable creation. Organized by `${ARCH}/${PROTOCOL}`.
 
@@ -110,7 +137,7 @@ Entry point and final executable creation. Organized by `${ARCH}/${PROTOCOL}`.
 **Structure:**
 
 ```
-kernel/entry/
+kernel/_start/
 ├── CMakeLists.txt              # Dispatches to arch/protocol
 └── x86_64/
     └── multiboot2/
@@ -122,22 +149,22 @@ kernel/entry/
 
 **Build output:** `kernel.elf` executable
 
-### `kernel/init/` - Kernel Initialization
+### `kernel/kmain/` - Kernel Main (Assembly Point)
 
-Protocol-agnostic and architecture-agnostic kernel initialization.
+The final assembly point that links all subsystems together.
 
 **Responsibilities:**
 
 - Kernel initialization sequence (`kernel_main()`)
 - Main kernel loop
 - Panic and error handling
-- Global kernel state
+- **Only module allowed to depend on subsystems** (enforced by CMake!)
 
-**Build output:** Object library (linked by entry)
+**Build output:** Static library (linked by _start)
 
-### `kernel/boot/` - Boot Protocol Module
+### `kernel/subsys/boot/` - Boot Protocol Module
 
-Boot protocol handling and verification. Organized by `${ARCH}/${PROTOCOL}`.
+Boot protocol handling and verification.
 
 **Responsibilities:**
 
@@ -145,46 +172,55 @@ Boot protocol handling and verification. Organized by `${ARCH}/${PROTOCOL}`.
 - Boot info structure parsing
 - Protocol-specific definitions
 
-**Structure:**
-
-```
-kernel/boot/
-├── CMakeLists.txt              # Dispatches to arch/protocol
-├── include/                    # Shared boot headers
-└── x86_64/
-    └── multiboot2/
-        ├── CMakeLists.txt      # Creates static library
-        ├── multiboot2.h        # Protocol definitions
-        └── verify.c            # Handoff verification
-```
-
 **Build output:** Static library
 
-### `kernel/arch/` - Architecture Abstraction
+### `kernel/subsys/drivers/` - Device Drivers
 
-Architecture-specific code with generic interfaces.
-
-**Responsibilities:**
-
-- Hardware I/O operations
-- CPU-specific functions
-- Platform initialization
-- Hardware abstraction interfaces
-
-**Build output:** Static library
-
-### `kernel/drivers/` - Device Drivers
-
-Hardware device drivers.
+Hardware device drivers with architecture-specific implementations.
 
 **Responsibilities:**
 
 - VGA/framebuffer output
 - Serial console
-- Keyboard input
+- CPU operations (halt, interrupts)
 - Future: disk, network, etc.
 
+**Structure (with arch):**
+
+```
+kernel/subsys/drivers/
+├── include/drivers/              # Tier 1: Public API
+│   ├── cpu.h                     # #include <drivers/cpu.h>
+│   ├── tty.h
+│   └── serial.h
+├── arch/
+│   ├── include/arch/drivers/     # Tier 2: Contract headers
+│   │   ├── cpu.h                 # #include <arch/drivers/cpu.h>
+│   │   ├── tty.h
+│   │   └── serial.h
+│   └── x86_64/
+│       ├── include/arch/impl/drivers/  # Tier 3: Implementation
+│       │   ├── cpu.h             # Header-only (inline asm)
+│       │   └── io.h              # Port I/O helpers
+│       ├── tty.c                 # VGA text mode
+│       └── serial.c              # COM1 UART
+├── tty.c                         # Generic driver code
+└── serial.c
+```
+
 **Build output:** Static library
+
+### `kernel/subsys/mm/` - Memory Management
+
+Memory management subsystem.
+
+**Responsibilities:**
+
+- Physical memory allocator
+- Virtual memory management
+- Page tables
+
+**Build output:** Static library (placeholder)
 
 ### `kernel/lib/` - Support Libraries
 
@@ -198,35 +234,76 @@ Freestanding utility libraries with no kernel dependencies.
 
 **Build output:** Interface library (header-only) or static library
 
+## Three-Tier Include Model
+
+Each subsystem with architecture code uses a three-tier include hierarchy:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Tier 1: Public API (subsys/foo/include/foo/)                       │
+│  #include <drivers/cpu.h>                                           │
+│  - What consumers use                                               │
+│  - Architecture-agnostic interface                                  │
+│  - Includes Tier 2 contract                                         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Tier 2: Contract Headers (subsys/foo/arch/include/arch/foo/)       │
+│  #include <arch/drivers/cpu.h>                                      │
+│  - Bridge between public and impl                                   │
+│  - Declares arch_* functions                                        │
+│  - Includes Tier 3 for current architecture                         │
+├─────────────────────────────────────────────────────────────────────┤
+│  Tier 3: Implementation (subsys/foo/arch/<ARCH>/include/arch/impl/) │
+│  #include <arch/impl/drivers/cpu.h>                                 │
+│  - x86_64, aarch64, etc.                                            │
+│  - Actual inline assembly or .c files                               │
+│  - Never included directly by consumers                             │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## CMake Auto-Detection
+
+The `janus_add_subsys()` function automatically:
+
+1. **Detects arch/ folders** - no manual `HAS_ARCH` flag needed
+2. **Globs .c files** from `arch/<ARCH>/`
+3. **Sets up include paths** transitively (PUBLIC)
+4. **Enforces isolation** - FATAL_ERROR if subsystem depends on subsystem
+
+```cmake
+# Simple! CMake figures out the rest.
+janus_add_subsys(drivers
+    SOURCES tty.c serial.c
+)
+```
+
 ## Build Flow
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                    kernel/CMakeLists.txt                         │
 │  add_subdirectory(lib)      # Built first (utilities)            │
-│  add_subdirectory(arch)     # Architecture support               │
-│  add_subdirectory(drivers)  # Device drivers                     │
-│  add_subdirectory(boot)     # Protocol verification library      │
-│  add_subdirectory(init)     # Kernel initialization              │
-│  add_subdirectory(entry)    # Built last, creates kernel.elf     │
+│  add_subdirectory(subsys)   # Subsystems (isolated)              │
+│  add_subdirectory(kmain)    # Assembly point                     │
+│  add_subdirectory(_start)   # Built last, creates kernel.elf     │
 └──────────────────────────────────────────────────────────────────┘
                            │
-    ┌──────────────────────┼──────────────────────┬────────────────┐
-    ▼                      ▼                      ▼                ▼
-┌──────────┐        ┌──────────┐          ┌──────────┐      ┌──────────┐
-│   init   │        │   arch   │          │ drivers  │      │   lib    │
-│ (OBJECT) │        │ (STATIC) │          │ (STATIC) │      │(INTERFACE│
-└────┬─────┘        └────┬─────┘          └────┬─────┘      └──────────┘
-     │                   │                     │
-     │              ┌────┴─────┐               │
-     │              │   boot   │               │
-     │              │ (STATIC) │               │
-     │              └────┬─────┘               │
-     │                   │                     │
-     └───────────────────┼─────────────────────┘
-                         ▼
-          ┌──────────────────────────────────┐
-          │  entry/${ARCH}/${PROTOCOL}/      │
+                           ▼
+          ┌────────────────────────────────────┐
+          │   subsys/ (each isolated)          │
+          │   ┌────────┐ ┌────────┐ ┌────────┐ │
+          │   │  boot  │ │drivers │ │   mm   │ │
+          │   │┌─────┐ │ │┌─────┐ │ │┌─────┐ │ │
+          │   ││arch/│ │ ││arch/│ │ ││arch/│ │ │
+          │   │└─────┘ │ │└─────┘ │ │└─────┘ │ │
+          │   └────────┘ └────────┘ └────────┘ │
+          └────────────────┬───────────────────┘
+                           │
+                    ┌──────┴───────┐
+                    │    kmain     │  ← Links all subsystems
+                    └──────┬───────┘
+                           │
+          ┌────────────────┴─────────────────┐
+          │  _start/${ARCH}/${PROTOCOL}/     │
           │  janus_link_kernel(...)          │
           └────────────────┬─────────────────┘
                            ▼
@@ -234,3 +311,21 @@ Freestanding utility libraries with no kernel dependencies.
                     │  kernel.elf  │
                     └──────────────┘
 ```
+
+````
+This is the description of what the code block changes:
+<changeDescription>
+Add a reference to the new arch layer structure document after the intro and before the directory structure.
+</changeDescription>
+
+This is the code block that represents the suggested code change:
+```markdown
+...existing code...
+
+## Architecture Layer Structure
+
+For a detailed explanation of the architecture (arch) layer patterns, directory conventions, and best practices—including how to organize arch code in subsystems and libraries—see [Arch-Layer-Structure.md](./Arch-Layer-Structure.md).
+```
+<userPrompt>
+Provide the fully rewritten file, incorporating the suggested code change. You must produce the complete file.
+</userPrompt>

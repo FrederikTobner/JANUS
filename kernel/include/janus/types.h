@@ -44,7 +44,7 @@ typedef __u32 dev_t; ///< Device number
 // Generic error type for kernel operations
 typedef __s32 error_t; ///< Error code (negative = error, 0 = success, positive = info)
 
-// Kernl shorthands for integers
+// Kernel shorthands for integers
 typedef __s8 s8;
 typedef __u8 u8;
 typedef __s16 s16;
@@ -54,10 +54,13 @@ typedef __u32 u32;
 typedef __s64 s64;
 typedef __u64 u64;
 
-// Kenrnel shorthands for boolean
+// Kernel shorthands for boolean
 #define bool                          __bool
 #define true                          1
 #define false                         0
 #define __bool_true_false_are_defined 1
+
+// Null pointer definition
+#define NULL                          ((void *) 0)
 
 #endif /* JANUS_TYPES_H */

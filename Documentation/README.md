@@ -34,20 +34,17 @@ Foundational documents that define the project's philosophy and standards.
 Documents describing the architecture and structure of the codebase.
 
 - **[Module-Structure.md](Code-Organization/Module-Structure.md)**
-  - Directory hierarchy
+  - Directory hierarchy and subsystem organization
+  - Architecture code inside subsystems (three-tier model)
   - Module responsibilities and boundaries
-  - Dependency graph and build order
-  - CMake build system organization
-  - Library structure
-
-- **[Include-Hierarchy.md](Code-Organization/Global-Include-Hierarchy.md)**
-  - Header file organization (public vs internal)
-  - Include path structure
-  - Forward declarations and reducing dependencies
-  - Architecture-specific headers
-  - CMake include directory configuration
+  - Dependency graph and subsystem isolation
+  - CMake auto-detection and build flow
 
 - **[Global-Include-Hierarchy.md](Code-Organization/Global-Include-Hierarchy.md)**
+  - Header file organization (public vs internal)
+  - Include path structure and namespacing
+  - Architecture-specific headers (Tier 1/2/3)
+  - CMake include directory configuration
   - What goes in `include/janus/`
   - Global vs module-specific headers
   - When to promote headers to global

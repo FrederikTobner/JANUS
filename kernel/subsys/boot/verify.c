@@ -28,7 +28,7 @@ error_t boot_verify_handoff(u64 loader_magic, void * info)
         return -1;
     }
 
-    if (info == 0) {
+    if (info == NULL) {
         return -2;
     }
 

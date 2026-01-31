@@ -71,6 +71,12 @@ endif()
 
 # ISO creation target
 if(JANUS_TARGET_ARCH STREQUAL "x86_64" AND JANUS_BOOT_PROTOCOL STREQUAL "multiboot2")
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/cmake/boot/multiboot2/grub.cfg.in
+        ${CMAKE_BINARY_DIR}/grub.cfg
+        @ONLY
+    )
+
     add_custom_target(iso
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/grub
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel.elf> ${CMAKE_BINARY_DIR}/iso/boot/kernel.elf

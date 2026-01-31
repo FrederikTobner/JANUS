@@ -1,16 +1,17 @@
-# Kernel init module
+# Kernel init module - the final assembly point
 
 file(GLOB INIT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 
-# Create init as an object library (linked by boot)
-janus_add_subsys(kmain SOURCES ${INIT_SOURCES})
+# kmain links to subsystems - arch includes propagate automatically via PUBLIC
+janus_add_subsys(kmain SOURCES ${INIT_SOURCES}
+    DEPENDENCIES
+        drivers
+        boot
+)
 
+# Only add paths not provided by dependencies
 target_include_directories(kmain
     PUBLIC
-        ${CMAKE_SOURCE_DIR}/kernel/include
-        ${CMAKE_BINARY_DIR}/include
-        ${CMAKE_SOURCE_DIR}/kernel/arch/include
-        ${CMAKE_SOURCE_DIR}/kernel/subsys/drivers/include
-        ${CMAKE_SOURCE_DIR}/kernel/subsys/boot/include
+        ${CMAKE_BINARY_DIR}/include  # Generated headers
 )
 

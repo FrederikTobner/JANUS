@@ -57,7 +57,8 @@ function(janus_link_kernel)
         PRIVATE
             ${CMAKE_SOURCE_DIR}/kernel/include
             ${CMAKE_BINARY_DIR}/include
-            ${CMAKE_SOURCE_DIR}/kernel/drivers/include
+            ${CMAKE_SOURCE_DIR}/kernel/subsys/drivers/include
+            ${CMAKE_SOURCE_DIR}/kernel/subsys/boot/include
             ${CMAKE_SOURCE_DIR}/kernel/arch/include
     )
 

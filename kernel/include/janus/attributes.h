@@ -35,9 +35,6 @@
 #define LIKELY(x)                       __builtin_expect(!!(x), 1)
 #define UNLIKELY(x)                     __builtin_expect(!!(x), 0)
 
-// Barrier for compiler optimization
-#define BARRIER()                       __asm__ __volatile__("" ::: "memory")
-
 // Static assertion
 #define STATIC_ASSERT(expr, msg)        _Static_assert(expr, msg)
 
