@@ -48,12 +48,12 @@ __noreturn void kernel_main(u64 loader_magic, void * info, void * fb_info)
 {
     // Verify boot handoff
     if (boot_verify_handoff(loader_magic, info) != 0) {
-        cpu_halt_forever();
+        drivers_cpu_halt_forever();
     }
 
     // Initialize boot info (must be done before drivers that need HHDM offset)
     if (boot_info_init(loader_magic, info) != 0) {
-        cpu_halt_forever();
+        drivers_cpu_halt_forever();
     }
 
     // Initialize drivers
@@ -64,5 +64,5 @@ __noreturn void kernel_main(u64 loader_magic, void * info, void * fb_info)
     kbanner_print(serial_available, tty_available);
 
     // Halt the CPU forever
-    cpu_halt_forever();
+    drivers_cpu_halt_forever();
 }

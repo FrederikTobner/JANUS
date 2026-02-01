@@ -28,19 +28,11 @@
 #include <arch/impl/drivers/io.h>
 #include <janus/types.h>
 
-/*===========================================================================
- * Constants
- *===========================================================================*/
-
 #define VGA_WIDTH       80
 #define VGA_HEIGHT      25
 #define VGA_BUFFER_PHYS 0xB8000
 #define VGA_CRTC_INDEX  0x3D4
 #define VGA_CRTC_DATA   0x3D5
-
-/*===========================================================================
- * Inline Functions
- *===========================================================================*/
 
 /**
  * @brief Create a VGA text mode character entry.

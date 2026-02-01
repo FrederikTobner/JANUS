@@ -22,36 +22,35 @@
  * from being in a separate compilation unit.
  */
 
+#include <arch/internal/drivers/font8x16.h>
 #include <arch/internal/drivers/framebuffer.h>
 
-#include "font8x16.h"
-
-void fb_draw_char(fb_state_t const * state, u16 col, u16 row, char c, u8 fg, u8 bg)
+void framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
 {
-    if (!state->base || col >= state->text_width || row >= state->text_height) {
+    if (!state->base || column >= state->text_width || row >= state->text_height) {
         return;
     }
 
-    u64 px = col * FB_FONT_WIDTH;
-    u64 py = row * FB_FONT_HEIGHT;
-    u32 fg_color = fb_color_palette[fg & 0x0F];
-    u32 bg_color = fb_color_palette[bg & 0x0F];
+    u64 px = column * FRAMEBUFFER_FONT_WIDTH;
+    u64 py = row * FRAMEBUFFER_FONT_HEIGHT;
+    u32 fg_color = framebuffer_color_palette[foreground & 0x0F];
+    u32 bg_color = framebuffer_color_palette[background & 0x0F];
 
     /* Get font bitmap for this character */
     u8 const * glyph;
     if (c >= 32 && c < 127) {
-        glyph = font8x16_data + (c - 32) * FB_FONT_HEIGHT;
+        glyph = font8x16_data + (c - 32) * FRAMEBUFFER_FONT_HEIGHT;
     } else {
         /* Use space for unprintable characters */
         glyph = font8x16_data;
     }
 
     /* Draw each pixel of the character */
-    for (u8 cy = 0; cy < FB_FONT_HEIGHT; cy++) {
+    for (u8 cy = 0; cy < FRAMEBUFFER_FONT_HEIGHT; cy++) {
         u8 row_data = glyph[cy];
-        for (u8 cx = 0; cx < FB_FONT_WIDTH; cx++) {
+        for (u8 cx = 0; cx < FRAMEBUFFER_FONT_WIDTH; cx++) {
             u32 color = (row_data & (0x80 >> cx)) ? fg_color : bg_color;
-            fb_put_pixel(state, px + cx, py + cy, color);
+            framebuffer_put_pixel(state, px + cx, py + cy, color);
         }
     }
 }

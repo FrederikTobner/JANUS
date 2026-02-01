@@ -49,7 +49,7 @@ static void scroll(void)
     }
 }
 
-error_t tty_init(tty_display_config_t const * config)
+error_t drivers_tty_init(tty_display_config_t const * config)
 {
     error_t err = arch_tty_init(config);
     if (err != 0) {
@@ -62,11 +62,11 @@ error_t tty_init(tty_display_config_t const * config)
     current_fg = TTY_COLOR_WHITE;
     current_bg = TTY_COLOR_BLACK;
 
-    tty_clear();
+    drivers_tty_clear();
     return 0;
 }
 
-void tty_putc(char c)
+void drivers_tty_putc(char c)
 {
     if (c == '\n') {
         cursor_x = 0;
@@ -99,20 +99,20 @@ void tty_putc(char c)
     arch_tty_set_cursor(cursor_x, cursor_y);
 }
 
-void tty_puts(char const * str)
+void drivers_tty_puts(char const * str)
 {
     while (*str) {
-        tty_putc(*str++);
+        drivers_tty_putc(*str++);
     }
 }
 
-void tty_set_color(tty_color_t fg, tty_color_t bg)
+void drivers_tty_set_color(tty_color_t fg, tty_color_t bg)
 {
     current_fg = (u8) fg;
     current_bg = (u8) bg;
 }
 
-void tty_clear(void)
+void drivers_tty_clear(void)
 {
     for (u16 y = 0; y < screen_height; y++) {
         for (u16 x = 0; x < screen_width; x++) {
@@ -124,14 +124,14 @@ void tty_clear(void)
     arch_tty_set_cursor(0, 0);
 }
 
-void tty_set_cursor(u16 x, u16 y)
+void drivers_tty_set_cursor(u16 x, u16 y)
 {
     cursor_x = (x < screen_width) ? x : screen_width - 1;
     cursor_y = (y < screen_height) ? y : screen_height - 1;
     arch_tty_set_cursor(cursor_x, cursor_y);
 }
 
-void tty_get_cursor(u16 * x, u16 * y)
+void drivers_tty_get_cursor(u16 * x, u16 * y)
 {
     if (x) {
         *x = cursor_x;
@@ -141,7 +141,7 @@ void tty_get_cursor(u16 * x, u16 * y)
     }
 }
 
-void tty_get_size(u16 * width, u16 * height)
+void drivers_tty_get_size(u16 * width, u16 * height)
 {
     if (width) {
         *width = screen_width;

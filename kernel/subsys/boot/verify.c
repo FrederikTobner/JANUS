@@ -24,8 +24,8 @@
  */
 
 #include <boot/verify.h>
-#include <protocol/limine.h>
-#include <protocol/multiboot2.h>
+#include <internal/protocol/limine.h>
+#include <internal/protocol/multiboot2.h>
 
 error_t boot_verify_handoff(u64 loader_magic, void * info)
 {

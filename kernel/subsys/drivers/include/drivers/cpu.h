@@ -33,7 +33,7 @@ static __always_inline void cpu_halt(void)
     arch_cpu_halt();
 }
 
-static __always_inline __noreturn void cpu_halt_forever(void)
+static __always_inline __noreturn void drivers_cpu_halt_forever(void)
 {
     arch_cpu_halt_forever();
 }

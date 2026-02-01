@@ -42,7 +42,7 @@ static display_mode_t g_display_mode = DISPLAY_MODE_NONE;
 static u16 volatile * g_vga_buffer = NULL;
 
 /* Framebuffer state */
-static fb_state_t g_fb_state;
+static framebuffer_state_t g_framebuffer_state;
 
 error_t arch_tty_init(tty_display_config_t const * config)
 {
@@ -54,15 +54,15 @@ error_t arch_tty_init(tty_display_config_t const * config)
     }
 
     /* Framebuffer mode */
-    fb_init(&g_fb_state,
-            config->framebuffer,
-            config->width,
-            config->height,
-            config->pitch,
-            config->bpp,
-            config->red_mask_shift,
-            config->green_mask_shift,
-            config->blue_mask_shift);
+    framebuffer_init(&g_framebuffer_state,
+                     config->framebuffer,
+                     config->width,
+                     config->height,
+                     config->pitch,
+                     config->bpp,
+                     config->red_mask_shift,
+                     config->green_mask_shift,
+                     config->blue_mask_shift);
 
     g_display_mode = DISPLAY_MODE_FRAMEBUFFER;
     return 0;
@@ -82,10 +82,10 @@ void arch_tty_get_size(u16 * width, u16 * height)
 
     case DISPLAY_MODE_FRAMEBUFFER:
         if (width) {
-            *width = g_fb_state.text_width;
+            *width = g_framebuffer_state.text_width;
         }
         if (height) {
-            *height = g_fb_state.text_height;
+            *height = g_framebuffer_state.text_height;
         }
         break;
 
@@ -100,15 +100,15 @@ void arch_tty_get_size(u16 * width, u16 * height)
     }
 }
 
-void arch_tty_write_cell(u16 x, u16 y, char c, u8 fg, u8 bg)
+void arch_tty_write_cell(u16 x, u16 y, char c, u8 foreground, u8 background)
 {
     switch (g_display_mode) {
     case DISPLAY_MODE_VGA:
-        vga_write_cell(g_vga_buffer, x, y, c, fg, bg);
+        vga_write_cell(g_vga_buffer, x, y, c, foreground, background);
         break;
 
     case DISPLAY_MODE_FRAMEBUFFER:
-        fb_draw_char(&g_fb_state, x, y, c, fg, bg);
+        framebuffer_draw_char(&g_framebuffer_state, x, y, c, foreground, background);
         break;
 
     default:
@@ -116,11 +116,11 @@ void arch_tty_write_cell(u16 x, u16 y, char c, u8 fg, u8 bg)
     }
 }
 
-void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * fg, u8 * bg)
+void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background)
 {
     switch (g_display_mode) {
     case DISPLAY_MODE_VGA:
-        vga_read_cell(g_vga_buffer, x, y, c, fg, bg);
+        vga_read_cell(g_vga_buffer, x, y, c, foreground, background);
         break;
 
     case DISPLAY_MODE_FRAMEBUFFER:
@@ -128,11 +128,11 @@ void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * fg, u8 * bg)
         if (c) {
             *c = ' ';
         }
-        if (fg) {
-            *fg = TTY_COLOR_WHITE;
+        if (foreground) {
+            *foreground = TTY_COLOR_WHITE;
         }
-        if (bg) {
-            *bg = TTY_COLOR_BLACK;
+        if (background) {
+            *background = TTY_COLOR_BLACK;
         }
         break;
 
@@ -140,11 +140,11 @@ void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * fg, u8 * bg)
         if (c) {
             *c = ' ';
         }
-        if (fg) {
-            *fg = 0;
+        if (foreground) {
+            *foreground = 0;
         }
-        if (bg) {
-            *bg = 0;
+        if (background) {
+            *background = 0;
         }
         break;
     }

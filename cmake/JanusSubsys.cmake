@@ -62,7 +62,6 @@ function(janus_add_subsys NAME)
 
     # Handle empty subsystems (placeholders)
     if(NOT ALL_SOURCES)
-        message(STATUS "  Added module: ${NAME} (placeholder, no sources yet)")
         add_library(${NAME} INTERFACE)
         target_include_directories(${NAME} INTERFACE
             ${SUBSYS_DIR}/include
@@ -90,7 +89,7 @@ function(janus_add_subsys NAME)
             # Arch implementation headers (Tier 3) - propagates to consumers
             $<$<BOOL:${HAS_ARCH}>:${ARCH_IMPL_DIR}/include>
         PRIVATE
-            # Internal helpers - NOT visible to consumers (e.g., vga.h, framebuffer.h)
+            # Internal helpers - NOT visible to consumers 
             $<$<BOOL:${HAS_ARCH}>:${ARCH_IMPL_DIR}/internal>
     )
 
@@ -110,5 +109,4 @@ function(janus_add_subsys NAME)
         target_compile_options(${NAME} PRIVATE ${JANUS_MINSIZEREL_FLAGS})
     endif()
 
-    message(STATUS "  Added subsystem: ${NAME}")
 endfunction()

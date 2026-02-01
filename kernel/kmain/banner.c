@@ -43,13 +43,13 @@ void kbanner_print(bool serial_available, bool tty_available)
 {
     if (tty_available) {
         // Green font color on black background
-        tty_set_color(2, 0);
-        tty_puts(JANUS_HELLO_MESSAGE);
-        tty_puts("\nJANUS Version: " JANUS_VERSION_STRING "\n\n");
+        drivers_tty_set_color(2, 0);
+        drivers_tty_puts(JANUS_HELLO_MESSAGE);
+        drivers_tty_puts("\nJANUS Version: " JANUS_VERSION_STRING "\n\n");
     }
 
     if (serial_available) {
-        serial_puts(JANUS_HELLO_MESSAGE);
-        serial_puts("\nJANUS Version: " JANUS_VERSION_STRING "\n\n");
+        drivers_serial_puts(JANUS_HELLO_MESSAGE);
+        drivers_serial_puts("\nJANUS Version: " JANUS_VERSION_STRING "\n\n");
     }
 }

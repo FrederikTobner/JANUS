@@ -9,10 +9,6 @@
     It also handles dependency checking for required external tools.
 ]]
 
-#===============================================================================
-# Required Tool Detection
-#===============================================================================
-
 # Check for required tools and provide helpful error messages
 function(janus_check_required_tools)
     set(MISSING_TOOLS "")
@@ -79,10 +75,6 @@ function(janus_check_required_tools)
     set(JANUS_LIMINE_FOUND ${LIMINE_EXECUTABLE} PARENT_SCOPE)
 endfunction()
 
-#===============================================================================
-# Limine Detection
-#===============================================================================
-
 function(janus_find_limine)
     # Check for Limine executable
     find_program(LIMINE_EXECUTABLE limine)
@@ -113,18 +105,12 @@ function(janus_find_limine)
             "\n"
             "Alternative: Use 'ninja iso-grub' for GRUB-based ISO instead."
         )
-    else()
-        message(STATUS "Limine data directory: ${LIMINE_DATA_DIR}")
     endif()
 
     # Export to parent scope
     set(LIMINE_DATA_DIR ${LIMINE_DATA_DIR} PARENT_SCOPE)
     set(LIMINE_EXECUTABLE ${LIMINE_EXECUTABLE} PARENT_SCOPE)
 endfunction()
-
-#===============================================================================
-# QEMU Display Configuration
-#===============================================================================
 
 function(janus_configure_qemu_display)
     # Using i3 window manager we need to use the SDL display for QEMU to show the window
@@ -155,10 +141,6 @@ function(janus_configure_qemu_display)
         set(QEMU_DISPLAY_ARG "" PARENT_SCOPE)
     endif()
 endfunction()
-
-#===============================================================================
-# ISO Creation Targets
-#===============================================================================
 
 function(janus_add_iso_targets)
     set(JANUS_ISO_NAME "janus_${JANUS_TARGET_ARCH}.iso")
@@ -280,10 +262,6 @@ function(janus_add_iso_targets)
     endif()
 endfunction()
 
-#===============================================================================
-# Run Targets
-#===============================================================================
-
 function(janus_add_run_targets)
     set(JANUS_ISO_NAME "janus_${JANUS_TARGET_ARCH}.iso")
     set(JANUS_ISO_GRUB_NAME "janus_${JANUS_TARGET_ARCH}_grub.iso")
@@ -388,10 +366,6 @@ function(janus_add_run_targets)
     )
 endfunction()
 
-#===============================================================================
-# Debug Targets
-#===============================================================================
-
 function(janus_add_debug_targets)
     set(JANUS_ISO_NAME "janus_${JANUS_TARGET_ARCH}.iso")
     set(JANUS_ISO_GRUB_NAME "janus_${JANUS_TARGET_ARCH}_grub.iso")
@@ -474,21 +448,10 @@ function(janus_add_debug_targets)
     )
 endfunction()
 
-#===============================================================================
-# Main Setup Function
-#===============================================================================
-
 function(janus_setup_targets)
-    # Check for required tools
     janus_check_required_tools()
-
-    # Find Limine installation
     janus_find_limine()
-
-    # Configure QEMU display
     janus_configure_qemu_display()
-
-    # Add all targets
     janus_add_iso_targets()
     janus_add_run_targets()
     janus_add_debug_targets()

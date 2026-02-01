@@ -19,7 +19,7 @@
  * @brief Text display driver interface.
  *
  * This header contains:
- * - Public API (tty_*)
+ * - Public API (drivers_tty_*)
  * - Types (tty_color_t)
  *
  * Architecture contract (arch_tty_*) is in <arch/drivers/tty.h>.
@@ -34,10 +34,6 @@
 #define DRIVERS_TTY_H
 
 #include <janus/types.h>
-
-/*===========================================================================
- * Types
- *===========================================================================*/
 
 /** TTY text colors (portable subset) */
 typedef enum {
@@ -77,10 +73,6 @@ typedef struct {
     u8 blue_mask_shift;  /**< Blue channel bit position */
 } tty_display_config_t;
 
-/*===========================================================================
- * Public API — Implemented in subsys/drivers/tty.c
- *===========================================================================*/
-
 /**
  * @brief Initialize the TTY.
  * @param config Display configuration. If NULL, uses VGA text mode (x86_64 only).
@@ -88,51 +80,51 @@ typedef struct {
  *               If config->framebuffer is set, uses framebuffer text rendering.
  * @return 0 on success, negative error code if not available.
  */
-error_t tty_init(tty_display_config_t const * config);
+error_t drivers_tty_init(tty_display_config_t const * config);
 
 /**
  * @brief Write a single character at cursor position.
  * @param c The character to write.
  */
-void tty_putc(char c);
+void drivers_tty_putc(char c);
 
 /**
  * @brief Write a null-terminated string.
  * @param str The string to write.
  */
-void tty_puts(char const * str);
+void drivers_tty_puts(char const * str);
 
 /**
  * @brief Set foreground and background colors.
  * @param fg Foreground color.
  * @param bg Background color.
  */
-void tty_set_color(tty_color_t fg, tty_color_t bg);
+void drivers_tty_set_color(tty_color_t fg, tty_color_t bg);
 
 /**
  * @brief Clear the screen.
  */
-void tty_clear(void);
+void drivers_tty_clear(void);
 
 /**
  * @brief Set cursor position.
  * @param x Column position.
  * @param y Row position.
  */
-void tty_set_cursor(u16 x, u16 y);
+void drivers_tty_set_cursor(u16 x, u16 y);
 
 /**
  * @brief Get cursor position.
  * @param x Pointer to store column (may be NULL).
  * @param y Pointer to store row (may be NULL).
  */
-void tty_get_cursor(u16 * x, u16 * y);
+void drivers_tty_get_cursor(u16 * x, u16 * y);
 
 /**
  * @brief Get screen dimensions.
  * @param width Pointer to store width (may be NULL).
  * @param height Pointer to store height (may be NULL).
  */
-void tty_get_size(u16 * width, u16 * height);
+void drivers_tty_get_size(u16 * width, u16 * height);
 
 #endif /* DRIVERS_TTY_H */

@@ -13,17 +13,12 @@ set(CMAKE_ASM_NASM_COMPILE_OBJECT "<CMAKE_ASM_NASM_COMPILER> <INCLUDES> <FLAGS> 
 add_library(_start_common OBJECT
     common/gdt64.asm
 )
-message(STATUS "  Added object library: _start_common (shared x86_64 startup)")
 
-# ============================================================================
-# Limine Protocol Kernel (higher-half, portable)
-# ============================================================================
 if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
     add_library(_start_limine OBJECT
         limine/entry.asm
         limine/requests.asm
     )
-    message(STATUS "  Added object library: _start_limine")
     
     # Build kernel-limine.elf with Limine linker script
     janus_link_kernel(
@@ -34,20 +29,16 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
     )
 endif()
 
-# ============================================================================
-# Multiboot2 Protocol Kernel (physical addresses, x86_64 only)
-# ============================================================================
 if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
     add_library(_start_multiboot2 OBJECT
         multiboot2/entry.asm
         multiboot2/header.asm
     )
-    message(STATUS "  Added object library: _start_multiboot2")
     
     # Build kernel-multiboot2.elf with Multiboot2 linker script
     janus_link_kernel(
         TARGET kernel-multiboot2.elf
-        LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/link.ld
+        LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/link-multiboot2.ld
         LIBRARIES drivers boot
         OBJECTS _start_common _start_multiboot2 kmain
     )

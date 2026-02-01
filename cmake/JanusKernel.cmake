@@ -75,9 +75,5 @@ function(janus_link_kernel)
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
 
-    message(STATUS "  Created kernel executable: ${ARG_TARGET}")
-    message(STATUS "    Linker script: ${ARG_LINKER_SCRIPT}")
-    message(STATUS "    Libraries: ${ARG_LIBRARIES}")
-    message(STATUS "    Objects: ${ARG_OBJECTS}")
 endfunction()
 

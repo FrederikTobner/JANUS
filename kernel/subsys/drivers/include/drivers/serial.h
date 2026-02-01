@@ -32,15 +32,11 @@
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-/*===========================================================================
- * Public API — Inline implementations using arch primitives
- *===========================================================================*/
-
 /**
  * @brief Initialize the serial port.
  * @return 0 on success, negative error code on failure.
  */
-static __always_inline error_t serial_init(void)
+static __always_inline error_t drivers_serial_init(void)
 {
     return arch_serial_init();
 }
@@ -49,7 +45,7 @@ static __always_inline error_t serial_init(void)
  * @brief Write a single character (blocking).
  * @param c The character to write.
  */
-static __always_inline void serial_putc(char c)
+static __always_inline void drivers_serial_putc(char c)
 {
     while (!arch_serial_tx_ready()) {
         /* Wait for transmit buffer to be ready */
@@ -61,13 +57,13 @@ static __always_inline void serial_putc(char c)
  * @brief Write a null-terminated string with CR+LF conversion.
  * @param str The string to write.
  */
-static __always_inline void serial_puts(char const * str)
+static __always_inline void drivers_serial_puts(char const * str)
 {
     while (*str) {
         if (*str == '\n') {
-            serial_putc('\r'); /* CR+LF for serial terminals */
+            drivers_serial_putc('\r'); /* CR+LF for serial terminals */
         }
-        serial_putc(*str++);
+        drivers_serial_putc(*str++);
     }
 }
 
@@ -75,7 +71,7 @@ static __always_inline void serial_puts(char const * str)
  * @brief Check if transmit buffer is ready.
  * @return true if ready, false otherwise.
  */
-static __always_inline bool serial_tx_ready(void)
+static __always_inline bool drivers_serial_tx_ready(void)
 {
     return arch_serial_tx_ready();
 }
@@ -84,7 +80,7 @@ static __always_inline bool serial_tx_ready(void)
  * @brief Read a character (non-blocking).
  * @return The character read, or -1 if none available.
  */
-static __always_inline s32 serial_getc(void)
+static __always_inline s32 drivers_serial_getc(void)
 {
     if (!arch_serial_rx_ready()) {
         return -1;
@@ -96,7 +92,7 @@ static __always_inline s32 serial_getc(void)
  * @brief Check if receive buffer has data.
  * @return true if data available, false otherwise.
  */
-static __always_inline bool serial_rx_ready(void)
+static __always_inline bool drivvers_serial_rx_ready(void)
 {
     return arch_serial_rx_ready();
 }

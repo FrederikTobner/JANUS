@@ -27,16 +27,8 @@
 
 #include <janus/types.h>
 
-/*===========================================================================
- * Constants
- *===========================================================================*/
-
-#define FB_FONT_WIDTH  8
-#define FB_FONT_HEIGHT 16
-
-/*===========================================================================
- * Types
- *===========================================================================*/
+#define FRAMEBUFFER_FONT_WIDTH  8
+#define FRAMEBUFFER_FONT_HEIGHT 16
 
 /**
  * @brief Framebuffer state for text rendering.
@@ -52,18 +44,14 @@ typedef struct {
     u8 blue_shift;      /**< Blue channel bit position */
     u16 text_width;     /**< Width in characters */
     u16 text_height;    /**< Height in characters */
-} fb_state_t;
-
-/*===========================================================================
- * Color Palette
- *===========================================================================*/
+} framebuffer_state_t;
 
 /**
  * @brief Standard 16-color palette (VGA compatible).
  *
  * Maps TTY color indices (0-15) to RGB values.
  */
-static u32 const fb_color_palette[16] = {
+static u32 const framebuffer_color_palette[16] = {
     0x000000, /* Black */
     0x0000AA, /* Blue */
     0x00AA00, /* Green */
@@ -82,10 +70,6 @@ static u32 const fb_color_palette[16] = {
     0xFFFFFF, /* White */
 };
 
-/*===========================================================================
- * Inline Functions
- *===========================================================================*/
-
 /**
  * @brief Initialize framebuffer state from configuration.
  *
@@ -99,8 +83,15 @@ static u32 const fb_color_palette[16] = {
  * @param g_shift  Green channel bit position
  * @param b_shift  Blue channel bit position
  */
-static inline void
-fb_init(fb_state_t * state, void * base, u64 width, u64 height, u64 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift)
+static inline void framebuffer_init(framebuffer_state_t * state,
+                                    void * base,
+                                    u64 width,
+                                    u64 height,
+                                    u64 pitch,
+                                    u16 bpp,
+                                    u8 r_shift,
+                                    u8 g_shift,
+                                    u8 b_shift)
 {
     state->base = (u8 volatile *) base;
     state->width = width;
@@ -110,8 +101,8 @@ fb_init(fb_state_t * state, void * base, u64 width, u64 height, u64 pitch, u16 b
     state->red_shift = r_shift;
     state->green_shift = g_shift;
     state->blue_shift = b_shift;
-    state->text_width = (u16) (width / FB_FONT_WIDTH);
-    state->text_height = (u16) (height / FB_FONT_HEIGHT);
+    state->text_width = (u16) (width / FRAMEBUFFER_FONT_WIDTH);
+    state->text_height = (u16) (height / FRAMEBUFFER_FONT_HEIGHT);
 }
 
 /**
@@ -122,7 +113,7 @@ fb_init(fb_state_t * state, void * base, u64 width, u64 height, u64 pitch, u16 b
  * @param y     Y coordinate (pixels)
  * @param color RGB color (0x00RRGGBB)
  */
-static inline void fb_put_pixel(fb_state_t const * state, u64 x, u64 y, u32 color)
+static inline void framebuffer_put_pixel(framebuffer_state_t const * state, u64 x, u64 y, u32 color)
 {
     if (x >= state->width || y >= state->height) {
         return;
@@ -141,10 +132,6 @@ static inline void fb_put_pixel(fb_state_t const * state, u64 x, u64 y, u32 colo
     }
 }
 
-/*===========================================================================
- * Functions (implemented in framebuffer.c)
- *===========================================================================*/
-
 /**
  * @brief Draw a character at the specified text position.
  *
@@ -155,6 +142,6 @@ static inline void fb_put_pixel(fb_state_t const * state, u64 x, u64 y, u32 colo
  * @param fg    Foreground color index (0-15)
  * @param bg    Background color index (0-15)
  */
-void fb_draw_char(fb_state_t const * state, u16 col, u16 row, char c, u8 fg, u8 bg);
+void framebuffer_draw_char(framebuffer_state_t const * state, u16 col, u16 row, char c, u8 fg, u8 bg);
 
 #endif /* ARCH_IMPL_DRIVERS_FRAMEBUFFER_H */

@@ -22,8 +22,8 @@
  */
 
 #include <boot/info.h>
-#include <protocol/limine.h>
-#include <protocol/multiboot2.h>
+#include <internal/protocol/limine.h>
+#include <internal/protocol/multiboot2.h>
 
 /* Boot information storage */
 static boot_protocol_t g_boot_protocol = BOOT_PROTOCOL_UNKNOWN;

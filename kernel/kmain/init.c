@@ -40,12 +40,12 @@
  */
 static bool init_tty_vga(bool serial_available)
 {
-    if (tty_init(NULL) != 0) {
+    if (drivers_tty_init(NULL) != 0) {
         return false;
     }
 
     if (serial_available) {
-        serial_puts("TTY driver initialized (VGA text mode)\n");
+        drivers_serial_puts("TTY driver initialized (VGA text mode)\n");
     }
     return true;
 }
@@ -72,25 +72,23 @@ static bool init_tty_framebuffer(struct limine_framebuffer const * fb, bool seri
     config.green_mask_shift = fb->green_mask_shift;
     config.blue_mask_shift = fb->blue_mask_shift;
 
-    if (tty_init(&config) != 0) {
+    if (drivers_tty_init(&config) != 0) {
         return false;
     }
 
     if (serial_available) {
-        serial_puts("TTY driver initialized (framebuffer mode)\n");
+        drivers_serial_puts("TTY driver initialized (framebuffer mode)\n");
     }
     return true;
 }
 
-/* -------------------------- Public Functions -------------------------- */
-
 bool kinit_serial(void)
 {
-    if (serial_init() != 0) {
+    if (drivers_serial_init() != 0) {
         return false;
     }
 
-    serial_puts("Serial driver initialized\n");
+    drivers_serial_puts("Serial driver initialized\n");
     return true;
 }
 
@@ -104,7 +102,7 @@ bool kinit_tty(u64 hhdm_offset, void * fb_info, bool serial_available)
     // Higher-half mapped (Limine): Need framebuffer for text output
     if (fb_info == NULL) {
         if (serial_available) {
-            serial_puts("TTY skipped (Limine without framebuffer)\n");
+            drivers_serial_puts("TTY skipped (Limine without framebuffer)\n");
         }
         return false;
     }
@@ -112,7 +110,7 @@ bool kinit_tty(u64 hhdm_offset, void * fb_info, bool serial_available)
     struct limine_framebuffer_response const * fb_resp = fb_info;
     if (fb_resp->framebuffer_count == 0 || fb_resp->framebuffers == NULL) {
         if (serial_available) {
-            serial_puts("TTY skipped (no framebuffer available)\n");
+            drivers_serial_puts("TTY skipped (no framebuffer available)\n");
         }
         return false;
     }
