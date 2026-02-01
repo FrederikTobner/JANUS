@@ -24,13 +24,15 @@
 #ifndef ARCH_DRIVERS_TTY_H
 #define ARCH_DRIVERS_TTY_H
 
+#include <drivers/tty.h>
 #include <janus/types.h>
 
 /**
  * @brief Initialize display hardware.
+ * @param config Display configuration (framebuffer or VGA).
  * @return 0 on success, negative error code on failure.
  */
-error_t arch_tty_init(void);
+error_t arch_tty_init(tty_display_config_t const * config);
 
 /**
  * @brief Get display dimensions.

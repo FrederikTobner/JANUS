@@ -15,36 +15,60 @@
  ****************************************************************************/
 
 /**
- * @file verify.c
- * @brief Boot handoff verification for multiple protocols
+ * @file info.c
+ * @brief Boot information storage and retrieval
  *
- * Supports:
- * - Multiboot2 (GRUB)
- * - Limine
+ * Stores boot information from different boot protocols in a unified format.
  */
 
-#include <boot/verify.h>
+#include <boot/info.h>
 #include <protocol/limine.h>
 #include <protocol/multiboot2.h>
 
-error_t boot_verify_handoff(u64 loader_magic, void * info)
+/* Boot information storage */
+static boot_protocol_t g_boot_protocol = BOOT_PROTOCOL_UNKNOWN;
+static u64 g_hhdm_offset = 0;
+
+error_t boot_info_init(u64 loader_magic, void * info)
 {
-    // Check for Multiboot2 magic (32-bit, upper 32 bits should be zero)
+    /* Check for Multiboot2 magic (32-bit) */
     if ((u32) loader_magic == MULTIBOOT2_BOOTLOADER_MAGIC) {
-        if (info == NULL) {
-            return -2; // Multiboot2 info pointer is NULL
-        }
-        return 0; // Valid Multiboot2 handoff
+        g_boot_protocol = BOOT_PROTOCOL_MULTIBOOT2;
+        /* Multiboot2 with our identity-mapped boot has HHDM offset of 0 */
+        g_hhdm_offset = 0;
+        (void) info; /* Multiboot2 info not used for HHDM */
+        return 0;
     }
 
-    // Check for Limine magic
+    /* Check for Limine magic */
     if (loader_magic == LIMINE_BOOTLOADER_MAGIC) {
-        if (info == NULL) {
-            return -2; // Limine info pointer is NULL
+        g_boot_protocol = BOOT_PROTOCOL_LIMINE;
+
+        /*
+         * For Limine, 'info' points to a limine_hhdm_response structure
+         * that was set by the Limine entry point.
+         */
+        if (info != NULL) {
+            struct limine_hhdm_response * hhdm_response = 
+                (struct limine_hhdm_response *) info;
+            g_hhdm_offset = hhdm_response->offset;
+        } else {
+            /* No HHDM info provided - this is a problem */
+            return -3;
         }
-        return 0; // Valid Limine handoff
+        return 0;
     }
 
-    // Unknown bootloader magic
+    /* Unknown bootloader */
     return -1;
+}
+
+boot_protocol_t boot_info_get_protocol(void)
+{
+    return g_boot_protocol;
+}
+
+u64 boot_info_get_hhdm_offset(void)
+{
+    return g_hhdm_offset;
 }

@@ -49,9 +49,9 @@ static void scroll(void)
     }
 }
 
-error_t tty_init(void)
+error_t tty_init(tty_display_config_t const * config)
 {
-    error_t err = arch_tty_init();
+    error_t err = arch_tty_init(config);
     if (err != 0) {
         return err;
     }

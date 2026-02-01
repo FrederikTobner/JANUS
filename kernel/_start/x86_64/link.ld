@@ -15,53 +15,57 @@
  ****************************************************************************/
 
 /**
- * @file multiboot2.ld
- * @brief JANUS kernel linker script for x86_64 + Multiboot2
+ * @file link.ld (link-multiboot2.ld)
+ * @brief JANUS kernel linker script for Multiboot2 protocol (x86_64)
  * 
- * Defines the memory layout of the kernel image:
- * - Loads at 1MB (0x100000) - standard higher-half kernel load address
- * - Multiboot header must be in first section
- * - Sections aligned to 4KB page boundaries
+ * Physical address kernel for GRUB/Multiboot2 bootloader.
+ * The kernel sets up its own paging after boot.
+ * 
+ * Memory layout:
+ * - Load/run address: 0x100000 (1MB) - above BIOS reserved area
+ * - Multiboot2 header must be in first 32KB of kernel image
+ * 
+ * Note: This is x86_64-specific. Multiboot2 is not available on ARM.
  */
 
-/* Entry point symbol defined in boot/boot.asm */
-ENTRY(_start)
+ENTRY(_start_multiboot2)
 
 SECTIONS {
-    /* Kernel loads at 1MB - above BIOS reserved area */
+    /* Kernel loads at 1MB */
     . = 0x100000;
     
-    /* Multiboot header must be at the very start */
+    /* Multiboot2 header must be first (GRUB requirement: first 32KB) */
     .multiboot ALIGN(8) : {
         *(.multiboot)
     }
     
-    /* Code section - executable instructions */
+    /* Code section */
     .text ALIGN(4K) : {
+        *(.text.multiboot2_entry)
         *(.text)
         *(.text.*)
     }
     
-    /* Read-only data - string literals, const variables */
+    /* Read-only data */
     .rodata ALIGN(4K) : {
         *(.rodata)
         *(.rodata.*)
     }
     
-    /* Initialized data - global/static variables with initial values */
+    /* Initialized data */
     .data ALIGN(4K) : {
         *(.data)
         *(.data.*)
     }
     
-    /* Uninitialized data - global/static variables zeroed at boot */
+    /* Uninitialized data */
     .bss ALIGN(4K) : {
         *(COMMON)
         *(.bss)
         *(.bss.*)
     }
     
-    /* Symbols for kernel bounds - useful for memory management */
+    /* Kernel bounds symbols */
     kernel_start = 0x100000;
     kernel_end = .;
     kernel_size = kernel_end - kernel_start;

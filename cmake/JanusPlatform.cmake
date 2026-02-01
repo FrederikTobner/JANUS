@@ -18,8 +18,8 @@ endif()
 set(JANUS_TARGET_ARCH "x86_64" CACHE STRING "Target architecture")
 set(JANUS_TARGET_PLATFORM "elf")
 
-# Boot protocol (wired as a real parameter, but only one supported today)
-set(JANUS_BOOT_PROTOCOL "multiboot2" CACHE STRING "Boot protocol")
+# Boot protocols to include in kernel (both by default)
+set(JANUS_BOOT_PROTOCOLS "multiboot2;limine" CACHE STRING "Boot protocols to support (semicolon-separated)")
 
 # Compiler detection
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
@@ -39,7 +39,7 @@ endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Target: ${JANUS_TARGET_ARCH}-${JANUS_TARGET_PLATFORM}")
-message(STATUS "Boot protocol: ${JANUS_BOOT_PROTOCOL}")
+message(STATUS "Boot protocols: ${JANUS_BOOT_PROTOCOLS}")
 
 # Export compile commands for clangd/IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
