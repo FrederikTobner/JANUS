@@ -1,4 +1,7 @@
+include(JanusRegistry)
+
 include(JanusLibrary)
+
 # Configure config.h from config.h.in
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/include/janus/config.h.in"
@@ -21,3 +24,6 @@ add_subdirectory(kmain)
 
 # Entry point (creates kernel.elf, must be last)
 add_subdirectory(_start)
+
+# Validate subsystem/library registry for dependency isolation
+janus_validate_registry()

@@ -8,6 +8,10 @@ if(NOT JANUS_PLATFORM_LOADED)
     message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusLibrary.cmake")
 endif()
 
+if(NOT JANUS_REGISTRY_LOADED)
+    message(FATAL_ERROR "JanusRegistry.cmake must be included before JanusLibrary.cmake")
+endif()
+
 #
 # Add a kernel library with standard configuration
 # 
@@ -44,6 +48,8 @@ function(janus_add_library NAME)
             target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
         endif()
         
+        # Register library and dependencies in global registry
+        janus_register(${NAME} LIB "${ARG_DEPENDENCIES}")
         return()
     endif()
 

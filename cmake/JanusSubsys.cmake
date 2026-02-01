@@ -8,11 +8,9 @@ if(NOT JANUS_PLATFORM_LOADED)
     message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusSubsys.cmake")
 endif()
 
-# Track all subsystems globally for isolation enforcement
-define_property(GLOBAL PROPERTY JANUS_ALL_SUBSYSTEMS
-    BRIEF_DOCS "List of all registered subsystems"
-    FULL_DOCS "Used to enforce isolation - subsystems cannot depend on each other"
-)
+if(NOT JANUS_REGISTRY_LOADED)
+    message(FATAL_ERROR "JanusRegistry.cmake must be included before JanusSubsys.cmake")
+endif()
 
 #
 # Add a kernel subsystem (like boot, drivers, mm)
@@ -35,23 +33,8 @@ function(janus_add_subsys NAME)
         ${ARGN}
     )
 
-    # Get list of all registered subsystems
-    get_property(ALL_SUBSYSTEMS GLOBAL PROPERTY JANUS_ALL_SUBSYSTEMS)
-    
-    # ENFORCE: No subsystem-to-subsystem dependencies!
-    # Exception: 'kmain' is the final assembly point that links all subsystems.
-    if(NOT NAME STREQUAL "kmain")
-        foreach(DEP ${ARG_DEPENDENCIES})
-            if(DEP IN_LIST ALL_SUBSYSTEMS)
-                message(FATAL_ERROR 
-                    "ISOLATION VIOLATION: Subsystem '${NAME}' cannot depend on subsystem '${DEP}'.\n"
-                    "Subsystems must be independent. Use 'lib' for shared code or resolve in 'kmain'.")
-            endif()
-        endforeach()
-    endif()
-    
-    # Register this subsystem (BEFORE creating target, so we catch cycles)
-    set_property(GLOBAL APPEND PROPERTY JANUS_ALL_SUBSYSTEMS ${NAME})
+    # Register subsystem and dependencies in global registry
+    janus_register(${NAME} SUBSYS "${ARG_DEPENDENCIES}")
 
     set(SUBSYS_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
     set(ALL_SOURCES ${ARG_SOURCES})
@@ -129,3 +112,6 @@ function(janus_add_subsys NAME)
 
     message(STATUS "  Added subsystem: ${NAME}")
 endfunction()
+
+# At the end of CMakeLists.txt (or after all subsystems/libs are registered), call:
+# janus_validate_registry()
