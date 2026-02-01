@@ -79,8 +79,7 @@ function(janus_add_subsys NAME)
     # Create static library
     add_library(${NAME} STATIC ${ALL_SOURCES})
 
-    # Include directories - all PUBLIC for transitive propagation
-    # This is safe because we enforce subsystem isolation above!
+    # Include directories - PUBLIC for transitive propagation to consumers
     # When kmain links to drivers, it automatically gets drivers' arch includes.
     target_include_directories(${NAME}
         PUBLIC
@@ -90,6 +89,9 @@ function(janus_add_subsys NAME)
             $<$<BOOL:${HAS_ARCH}>:${ARCH_DIR}/include>
             # Arch implementation headers (Tier 3) - propagates to consumers
             $<$<BOOL:${HAS_ARCH}>:${ARCH_IMPL_DIR}/include>
+        PRIVATE
+            # Internal helpers - NOT visible to consumers (e.g., vga.h, framebuffer.h)
+            $<$<BOOL:${HAS_ARCH}>:${ARCH_IMPL_DIR}/internal>
     )
 
     # Link dependencies (only lib allowed, not other subsystems)

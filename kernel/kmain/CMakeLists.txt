@@ -9,9 +9,11 @@ janus_add_subsys(kmain SOURCES ${INIT_SOURCES}
         boot
 )
 
-# Only add paths not provided by dependencies
+# Add kmain's own include directory and generated headers
 target_include_directories(kmain
     PUBLIC
         ${CMAKE_BINARY_DIR}/include  # Generated headers
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/internal  # For <kmain/*.h> (internal only)
 )
 
