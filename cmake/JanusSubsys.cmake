@@ -67,8 +67,6 @@ function(janus_add_subsys NAME)
         target_include_directories(${NAME} INTERFACE
             ${SUBSYS_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/include
-            # Arch includes as PUBLIC - will propagate transitively
-            # Safe because subsystems can't link to each other anyway!
             $<$<BOOL:${HAS_ARCH}>:${ARCH_DIR}/include>
             $<$<BOOL:${HAS_ARCH}>:${ARCH_IMPL_DIR}/include>
         )
@@ -112,6 +110,3 @@ function(janus_add_subsys NAME)
 
     message(STATUS "  Added subsystem: ${NAME}")
 endfunction()
-
-# At the end of CMakeLists.txt (or after all subsystems/libs are registered), call:
-# janus_validate_registry()

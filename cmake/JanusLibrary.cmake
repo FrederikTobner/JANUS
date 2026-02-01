@@ -48,7 +48,6 @@ function(janus_add_library NAME)
             target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
         endif()
         
-        # Register library and dependencies in global registry
         janus_register(${NAME} LIB "${ARG_DEPENDENCIES}")
         return()
     endif()
