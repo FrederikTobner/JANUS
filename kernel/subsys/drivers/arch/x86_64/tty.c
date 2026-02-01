@@ -43,11 +43,11 @@ static display_mode_t g_display_mode = DISPLAY_MODE_NONE;
  * VGA Text Mode Backend
  *===========================================================================*/
 
-#define VGA_WIDTH          80
-#define VGA_HEIGHT         25
-#define VGA_BUFFER_PHYS    0xB8000
-#define VGA_CRTC_INDEX     0x3D4
-#define VGA_CRTC_DATA      0x3D5
+#define VGA_WIDTH       80
+#define VGA_HEIGHT      25
+#define VGA_BUFFER_PHYS 0xB8000
+#define VGA_CRTC_INDEX  0x3D4
+#define VGA_CRTC_DATA   0x3D5
 
 static volatile u16 * vga_buffer = NULL;
 
@@ -62,8 +62,8 @@ static inline u16 vga_entry(char c, u8 fg, u8 bg)
  *===========================================================================*/
 
 /* Simple 8x16 bitmap font (embedded below) */
-#define FONT_WIDTH   8
-#define FONT_HEIGHT  16
+#define FONT_WIDTH  8
+#define FONT_HEIGHT 16
 
 static volatile u8 * fb_base = NULL;
 static u64 fb_pitch = 0;
@@ -108,12 +108,11 @@ static inline void fb_put_pixel(u64 x, u64 y, u32 color)
         return;
     }
     u64 offset = y * fb_pitch + x * (fb_bpp / 8);
-    u32 pixel = ((color >> 16) & 0xFF) << fb_red_shift |
-                ((color >> 8) & 0xFF) << fb_green_shift |
+    u32 pixel = ((color >> 16) & 0xFF) << fb_red_shift | ((color >> 8) & 0xFF) << fb_green_shift |
                 (color & 0xFF) << fb_blue_shift;
 
     if (fb_bpp == 32) {
-        *((volatile u32 *) (fb_base + offset)) = pixel;
+        *((u32 volatile *) (fb_base + offset)) = pixel;
     } else if (fb_bpp == 24) {
         fb_base[offset] = pixel & 0xFF;
         fb_base[offset + 1] = (pixel >> 8) & 0xFF;
@@ -171,13 +170,13 @@ error_t arch_tty_init(tty_display_config_t const * config)
 {
     if (config == NULL || config->framebuffer == NULL) {
         /* VGA text mode - only works with identity-mapped memory */
-        vga_buffer = (volatile u16 *) VGA_BUFFER_PHYS;
+        vga_buffer = (u16 volatile *) VGA_BUFFER_PHYS;
         g_display_mode = DISPLAY_MODE_VGA;
         return 0;
     }
 
     /* Framebuffer mode */
-    fb_base = (volatile u8 *) config->framebuffer;
+    fb_base = (u8 volatile *) config->framebuffer;
     fb_width = config->width;
     fb_height = config->height;
     fb_pitch = config->pitch;

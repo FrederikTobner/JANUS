@@ -123,14 +123,13 @@ __noreturn void kernel_main(u64 loader_magic, void * info, void * fb_info)
         }
     } else if (fb_info != NULL) {
         // Higher-half mapped (Limine): Use framebuffer for text output
-        struct limine_framebuffer_response * fb_resp =
-            (struct limine_framebuffer_response *)fb_info;
+        struct limine_framebuffer_response * fb_resp = (struct limine_framebuffer_response *) fb_info;
 
         if (fb_resp->framebuffer_count > 0 && fb_resp->framebuffers != NULL) {
             struct limine_framebuffer * fb = fb_resp->framebuffers[0];
 
             // Set up display config from Limine framebuffer
-            tty_config.framebuffer = (u8 *)fb->address;
+            tty_config.framebuffer = (u8 *) fb->address;
             tty_config.width = fb->width;
             tty_config.height = fb->height;
             tty_config.pitch = fb->pitch;

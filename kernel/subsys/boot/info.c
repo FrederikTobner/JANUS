@@ -49,8 +49,7 @@ error_t boot_info_init(u64 loader_magic, void * info)
          * that was set by the Limine entry point.
          */
         if (info != NULL) {
-            struct limine_hhdm_response * hhdm_response = 
-                (struct limine_hhdm_response *) info;
+            struct limine_hhdm_response * hhdm_response = (struct limine_hhdm_response *) info;
             g_hhdm_offset = hhdm_response->offset;
         } else {
             /* No HHDM info provided - this is a problem */

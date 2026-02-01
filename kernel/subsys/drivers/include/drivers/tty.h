@@ -67,14 +67,14 @@ typedef enum {
  * For graphical framebuffer, provide the framebuffer details.
  */
 typedef struct {
-    void * framebuffer;     /**< Framebuffer address (NULL for VGA text mode) */
-    u64 width;              /**< Width in pixels (framebuffer) or ignored (VGA) */
-    u64 height;             /**< Height in pixels (framebuffer) or ignored (VGA) */
-    u64 pitch;              /**< Bytes per row (framebuffer) or ignored (VGA) */
-    u16 bpp;                /**< Bits per pixel (framebuffer) or ignored (VGA) */
-    u8 red_mask_shift;      /**< Red channel bit position */
-    u8 green_mask_shift;    /**< Green channel bit position */
-    u8 blue_mask_shift;     /**< Blue channel bit position */
+    void * framebuffer;  /**< Framebuffer address (NULL for VGA text mode) */
+    u64 width;           /**< Width in pixels (framebuffer) or ignored (VGA) */
+    u64 height;          /**< Height in pixels (framebuffer) or ignored (VGA) */
+    u64 pitch;           /**< Bytes per row (framebuffer) or ignored (VGA) */
+    u16 bpp;             /**< Bits per pixel (framebuffer) or ignored (VGA) */
+    u8 red_mask_shift;   /**< Red channel bit position */
+    u8 green_mask_shift; /**< Green channel bit position */
+    u8 blue_mask_shift;  /**< Blue channel bit position */
 } tty_display_config_t;
 
 /*===========================================================================
