@@ -21,14 +21,16 @@
  * @file framebuffer.h
  * @brief Framebuffer text rendering interface.
  *
- * Provides text rendering on a linear framebuffer using an 8x16 bitmap font.
+ * Provides text rendering on a linear framebuffer using the Terminus 16x32 bitmap font.
  * Used for Limine boot protocol where VGA text mode isn't available.
  */
 
 #include <janus/types.h>
 
-#define FRAMEBUFFER_FONT_WIDTH  8
-#define FRAMEBUFFER_FONT_HEIGHT 16
+#include <arch/internal/drivers/terminus.h>
+
+#define FRAMEBUFFER_FONT_WIDTH  TERMINUS_WIDTH
+#define FRAMEBUFFER_FONT_HEIGHT TERMINUS_HEIGHT
 
 /**
  * @brief Framebuffer state for text rendering.

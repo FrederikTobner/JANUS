@@ -46,6 +46,9 @@ add_custom_target(
 
 add_subdirectory(kernel)
 
+# Build host tools (uses host compiler, not cross-compiler)
+add_subdirectory(tools)
+
 # Setup all custom targets (iso, run, debug, etc.)
 include(JanusTargets)
 janus_setup_targets()

@@ -22,7 +22,6 @@
  * from being in a separate compilation unit.
  */
 
-#include <arch/internal/drivers/font8x16.h>
 #include <arch/internal/drivers/framebuffer.h>
 
 void framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
@@ -36,21 +35,25 @@ void framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 ro
     u32 fg_color = framebuffer_color_palette[foreground & 0x0F];
     u32 bg_color = framebuffer_color_palette[background & 0x0F];
 
-    /* Get font bitmap for this character */
-    u8 const * glyph;
-    if (c >= 32 && c < 127) {
-        glyph = font8x16_data + (c - 32) * FRAMEBUFFER_FONT_HEIGHT;
-    } else {
-        /* Use space for unprintable characters */
-        glyph = font8x16_data;
-    }
+    /* Get font bitmap for this character (Terminus font covers all 256 codepoints) */
+    u8 const * glyph = terminus_glyphs[(u8) c];
 
-    /* Draw each pixel of the character */
+    /* Draw each pixel of the character.
+     * Terminus 16x32 is stored as 2 bytes per row (16 bits wide, 32 rows tall). */
     for (u8 cy = 0; cy < FRAMEBUFFER_FONT_HEIGHT; cy++) {
-        u8 row_data = glyph[cy];
-        for (u8 cx = 0; cx < FRAMEBUFFER_FONT_WIDTH; cx++) {
-            u32 color = (row_data & (0x80 >> cx)) ? fg_color : bg_color;
+        /* Each row is 2 bytes: high byte (left 8 pixels), low byte (right 8 pixels) */
+        u8 row_hi = glyph[cy * 2];
+        u8 row_lo = glyph[cy * 2 + 1];
+
+        /* Draw left 8 pixels */
+        for (u8 cx = 0; cx < 8; cx++) {
+            u32 color = (row_hi & (0x80 >> cx)) ? fg_color : bg_color;
             framebuffer_put_pixel(state, px + cx, py + cy, color);
+        }
+        /* Draw right 8 pixels */
+        for (u8 cx = 0; cx < 8; cx++) {
+            u32 color = (row_lo & (0x80 >> cx)) ? fg_color : bg_color;
+            framebuffer_put_pixel(state, px + 8 + cx, py + cy, color);
         }
     }
 }
