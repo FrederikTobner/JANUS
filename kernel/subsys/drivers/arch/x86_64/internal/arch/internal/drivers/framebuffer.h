@@ -138,12 +138,13 @@ static inline void framebuffer_put_pixel(framebuffer_state_t const * state, u64 
  * @brief Draw a character at the specified text position.
  *
  * @param state Framebuffer state
- * @param col   Column (character position)
+ * @param column   Column (character position)
  * @param row   Row (character position)
  * @param c     Character to draw
- * @param fg    Foreground color index (0-15)
- * @param bg    Background color index (0-15)
+ * @param foreground    Foreground color index (0-15)
+ * @param background    Background color index (0-15)
  */
-void framebuffer_draw_char(framebuffer_state_t const * state, u16 col, u16 row, char c, u8 fg, u8 bg);
+void framebuffer_draw_char(
+    framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background);
 
 #endif /* ARCH_IMPL_DRIVERS_FRAMEBUFFER_H */

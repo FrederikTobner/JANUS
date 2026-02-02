@@ -102,7 +102,7 @@ void drivers_tty_putc(char c)
 void drivers_tty_puts(char const * str)
 {
     while (*str) {
-        tty_putc(*str++);
+        drivers_tty_putc(*str++);
     }
 }
 
