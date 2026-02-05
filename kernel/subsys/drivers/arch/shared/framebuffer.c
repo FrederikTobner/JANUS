@@ -16,13 +16,13 @@
 
 /**
  * @file framebuffer.c
- * @brief Framebuffer text rendering implementation.
+ * @brief Shared framebuffer text rendering implementation.
  *
- * Contains the more complex character drawing logic that benefits
- * from being in a separate compilation unit.
+ * Contains the character drawing logic for framebuffer-based text output.
+ * This code is shared between architectures (x86_64 Limine mode, aarch64).
  */
 
-#include <arch/internal/drivers/framebuffer.h>
+#include <arch/shared/drivers/framebuffer.h>
 
 void framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
 {

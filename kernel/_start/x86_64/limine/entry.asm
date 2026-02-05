@@ -14,12 +14,19 @@
 ; - A valid GDT with segments at 0x28 (code) and 0x30 (data)
 ;
 ; We simply call kernel_main with appropriate arguments.
+;
+; Note: Limine request structures are defined in common/limine_requests.c
+; for portability across architectures.
 
 global _start_limine
 extern kernel_main
 
 ; Limine bootloader magic (passed to kernel_main for protocol detection)
 %define LIMINE_MAGIC 0x4C494D494E450000  ; "LIMINE\0\0" as u64
+
+; Import limine request symbols from limine_requests.c
+extern limine_hhdm_request
+extern limine_framebuffer_request
 
 section .text.limine_entry
 bits 64
@@ -41,12 +48,14 @@ _start_limine:
     mov rdi, LIMINE_MAGIC
     
     ; Get HHDM response pointer from the request structure
+    ; C struct layout: id[4] (32 bytes) + revision (8 bytes) + response (8 bytes)
+    ; Offset to response = 32 + 8 = 40 bytes
     lea rax, [rel limine_hhdm_request]
-    mov rsi, [rax + 40]        ; Offset 40 = response pointer (after id[4] + revision)
+    mov rsi, [rax + 40]        ; response pointer
 
     ; Get framebuffer response pointer from the request structure
     lea rax, [rel limine_framebuffer_request]
-    mov rdx, [rax + 40]        ; Offset 40 = response pointer
+    mov rdx, [rax + 40]        ; response pointer
 
     ; Call kernel_main
     call kernel_main
@@ -56,8 +65,3 @@ _start_limine:
     cli
     hlt
     jmp .hang
-
-; Import limine request symbols
-extern limine_base_revision
-extern limine_hhdm_request
-extern limine_framebuffer_request

@@ -15,9 +15,18 @@ add_library(_start_common OBJECT
 )
 
 if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
+    # Limine requests in portable C (shared across architectures)
+    add_library(_start_limine_requests OBJECT
+        ${CMAKE_SOURCE_DIR}/kernel/_start/common/limine_requests.c
+    )
+    target_include_directories(_start_limine_requests PRIVATE
+        ${CMAKE_SOURCE_DIR}/kernel/include
+    )
+    target_compile_options(_start_limine_requests PRIVATE ${JANUS_COMMON_FLAGS})
+
+    # x86_64 specific Limine entry point (assembly)
     add_library(_start_limine OBJECT
         limine/entry.asm
-        limine/requests.asm
     )
     
     # Build kernel-limine.elf with Limine linker script
@@ -25,7 +34,7 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
         TARGET kernel-limine.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/link-limine.ld
         LIBRARIES drivers boot
-        OBJECTS _start_common _start_limine kmain
+        OBJECTS _start_common _start_limine _start_limine_requests kmain
     )
 endif()
 

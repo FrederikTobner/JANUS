@@ -29,9 +29,13 @@
 /**
  * @brief Initialize the serial port for debugging output.
  *
+ * @param hhdm_offset The HHDM offset for physical to virtual address translation.
+ *                    Pass 0 for identity-mapped boot (Multiboot2).
+ *                    On x86_64 this is ignored (port I/O doesn't need HHDM).
+ *                    On AArch64 this is required for MMIO access.
  * @return true if serial was initialized successfully
  */
-bool kinit_serial(void);
+bool kinit_serial(u64 hhdm_offset);
 
 /**
  * @brief Initialize the TTY subsystem.

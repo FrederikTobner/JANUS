@@ -26,8 +26,8 @@
  * for clarity and maintainability.
  */
 
-#include <arch/internal/drivers/framebuffer.h>
 #include <arch/internal/drivers/vga.h>
+#include <arch/shared/drivers/framebuffer.h>
 #include <drivers/tty.h>
 
 typedef enum {

@@ -37,8 +37,11 @@
 #define LINE_STAT_TX_EMPTY 0x20
 #define LINE_STAT_RX_READY 0x01
 
-error_t arch_serial_init(void)
+error_t arch_serial_init(u64 hhdm_offset)
 {
+    /* x86_64 uses port I/O, not MMIO, so HHDM offset is unused */
+    (void) hhdm_offset;
+
     /* Disable all interrupts */
     outb(COM1_INT_EN, 0x00);
 

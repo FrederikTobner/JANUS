@@ -28,9 +28,15 @@
 
 /**
  * @brief Initialize serial hardware.
+ *
+ * @param hhdm_offset Higher Half Direct Map offset for translating physical
+ *                    addresses to virtual addresses. Pass 0 for identity-mapped
+ *                    boot (Multiboot2) or the HHDM offset for Limine.
+ *                    On x86_64 this is ignored (port I/O doesn't need HHDM).
+ *                    On AArch64 this is required for MMIO access.
  * @return 0 on success, negative error code on failure.
  */
-error_t arch_serial_init(void);
+error_t arch_serial_init(u64 hhdm_offset);
 
 /**
  * @brief Write a byte to serial hardware.

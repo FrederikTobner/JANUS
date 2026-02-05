@@ -14,20 +14,20 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef ARCH_IMPL_DRIVERS_FRAMEBUFFER_H
-#define ARCH_IMPL_DRIVERS_FRAMEBUFFER_H
+#ifndef ARCH_SHARED_DRIVERS_FRAMEBUFFER_H
+#define ARCH_SHARED_DRIVERS_FRAMEBUFFER_H
 
 /**
  * @file framebuffer.h
- * @brief Framebuffer text rendering interface.
+ * @brief Shared framebuffer text rendering interface.
  *
  * Provides text rendering on a linear framebuffer using the Terminus 16x32 bitmap font.
- * Used for Limine boot protocol where VGA text mode isn't available.
+ * This code is shared between architectures that use framebuffer output.
  */
 
 #include <janus/types.h>
 
-#include <arch/internal/drivers/terminus.h>
+#include <arch/shared/drivers/terminus.h>
 
 #define FRAMEBUFFER_FONT_WIDTH  TERMINUS_WIDTH
 #define FRAMEBUFFER_FONT_HEIGHT TERMINUS_HEIGHT
@@ -147,4 +147,4 @@ static inline void framebuffer_put_pixel(framebuffer_state_t const * state, u64 
 void framebuffer_draw_char(
     framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background);
 
-#endif /* ARCH_IMPL_DRIVERS_FRAMEBUFFER_H */
+#endif /* ARCH_SHARED_DRIVERS_FRAMEBUFFER_H */

@@ -34,11 +34,14 @@
 
 /**
  * @brief Initialize the serial port.
+ *
+ * @param hhdm_offset Higher Half Direct Map offset for physical to virtual
+ *                    address translation. Pass 0 for identity-mapped boot.
  * @return 0 on success, negative error code on failure.
  */
-static __always_inline error_t drivers_serial_init(void)
+static __always_inline error_t drivers_serial_init(u64 hhdm_offset)
 {
-    return arch_serial_init();
+    return arch_serial_init(hhdm_offset);
 }
 
 /**

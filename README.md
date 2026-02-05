@@ -1,28 +1,34 @@
 # JANUS
 
-JANUS (Just ANother Unix-like System) is an educational x86-64 operating system kernel written in C17 and assembly, focusing on low-level hardware interaction and modular architecture.
+JANUS (Just ANother Unix-like System) is an educational operating system kernel written in C17 and assembly, supporting **x86_64** and **aarch64** architectures. The project focuses on low-level hardware interaction and modular, multi-architecture design.
 
 ## Quick Start
 
 Building the kernel
 
 ```bash
-# Build the kernel
-cmake -B build 
-cmake --build build
+# x86_64 (default)
+cmake -B build -G Ninja
+ninja -C build
+
+# aarch64
+cmake -B build -DJANUS_TARGET_ARCH=aarch64 -G Ninja
+ninja -C build
 ```
 
 Creating a bootable ISO
 
 ```bash
-cmake --build build --target iso 
+ninja -C build iso
 ```
 
 Running in QEMU
 
 ```bash
-cmake --build build --target run 
+ninja -C build run
 ```
+
+**Note:** When switching architectures, delete the build directory first: `rm -rf build`
 
 ## Project Structure
 
@@ -35,7 +41,7 @@ JANUS/
 ├── Documentation/    # Technical documentation
 └── kernel/           # Kernel functionality
     ├── include/          # Global headers (janus/types.h, etc.)
-    ├── _start/           # Entry point (creates kernel.elf)
+    ├── _start/           # Entry point (per-arch: x86_64/, aarch64/)
     ├── kmain/            # Kernel main - final assembly point
     ├── lib/              # Shared utility libraries
     └── subsys/           # Independent subsystems
@@ -56,10 +62,16 @@ kernel/subsys/example/
 └── arch/
     ├── include/arch/example/           # Tier 2: Contract headers
     │   └── *.h                         #   declares arch_* or includes Tier 3
-    └── x86_64/
+    ├── shared/                         # Shared arch code (framebuffer, etc.)
+    │   └── *.c
+    ├── x86_64/
+    │   ├── include/arch/impl/example/  # Tier 3: Arch inline headers
+    │   │   └── *.h
+    │   └── *.c                         # Arch source files
+    └── aarch64/
         ├── include/arch/impl/example/  # Tier 3: Arch inline headers
         │   └── *.h
-        └── *.c                         # Arch source files (optional)
+        └── *.c                         # Arch source files
 ```
 
 **Flexibility:**
@@ -76,9 +88,10 @@ For a detailed explanation of the architecture (arch) layer structure and all su
 ## Technology Stack
 
 - **Language**: C17 (ISO/IEC 9899:2018) with GNU extensions
-- **Compiler**: Clang 17 or GCC with x86_64-elf cross-compilation support
-- **Assembler**: NASM
+- **Compiler**: Clang 17 (x86_64), aarch64-linux-gnu-gcc (aarch64)
+- **Assembler**: NASM (x86_64), GAS (aarch64)
 - **Build System**: CMake 3.20+
+- **Target Architectures**: x86_64, aarch64 (QEMU virt machine)
 
 ## Documentation
 
@@ -88,27 +101,45 @@ Comprehensive documentation is in the [`Documentation/`](Documentation/) folder:
 
 ### Prerequisites
 
-- **Clang 17+ or GCC 15+** - C compilers with x86_64-elf cross-compilation support
-- **NASM** - Assembler for boot code and low-level kernel code
+**Common tools:**
+
 - **CMake 3.20+** - Build system generator
 - **Ninja** - Fast build tool (recommended) or Make
-- **QEMU** - x86_64 system emulator for testing
-- **GRUB tools** - grub-pc-bin, xorriso, mtools (for creating bootable ISO images)
-- **LLDB** - Debugger for kernel debugging (optional but recommended)
+- **QEMU** - System emulator for testing
+- **xorriso, mtools** - ISO creation tools
+
+**For x86_64:**
+
+- **Clang 17+** - C compiler
+- **NASM** - Assembler
+- **GRUB tools** - grub-pc-bin (for bootable ISO images)
+
+**For aarch64:**
+
+- **aarch64-linux-gnu-gcc** - Cross-compiler toolchain
+
+**Optional:**
+
+- **LLDB / GDB** - Debugger for kernel debugging
 
 Installing prerequisites:
 
 ```bash
-# Debian/Ubuntu
+# Debian/Ubuntu (x86_64)
 sudo apt install clang nasm cmake ninja-build qemu-system-x86 \
-                 grub-pc-bin xorriso mtools lldb
+                 grub-pc-bin xorriso mtools lldb limine
 
-# Arch Linux
+# Debian/Ubuntu (aarch64)
+sudo apt install gcc-aarch64-linux-gnu cmake ninja-build \
+                 qemu-system-arm xorriso mtools gdb-multiarch limine
+
+# Arch Linux (x86_64)
 sudo pacman -S clang nasm cmake ninja qemu-system-x86 \
-               grub xorriso mtools lldb
+               grub xorriso mtools lldb limine
 
-# macOS
-brew install llvm nasm cmake ninja qemu grub xorriso mtools
+# Arch Linux (aarch64)
+sudo pacman -S aarch64-linux-gnu-gcc cmake ninja \
+               qemu-system-aarch64 xorriso mtools limine
 ```
 
 See [Documentation/Setup.md](Documentation/Setup.md) for detailed installation instructions.

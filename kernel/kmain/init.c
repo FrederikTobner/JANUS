@@ -82,9 +82,9 @@ static bool init_tty_framebuffer(struct limine_framebuffer const * fb, bool seri
     return true;
 }
 
-bool kinit_serial(void)
+bool kinit_serial(u64 hhdm_offset)
 {
-    if (drivers_serial_init() != 0) {
+    if (drivers_serial_init(hhdm_offset) != 0) {
         return false;
     }
 
