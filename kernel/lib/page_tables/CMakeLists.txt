@@ -3,9 +3,7 @@ if(JANUS_TARGET_ARCH STREQUAL "aarch64")
     janus_add_library(page_tables
         SOURCES
             arch/aarch64/mmu.c
-        HEADERS
-            include/page_tables/mmu.h
-        INCLUDE_DIRECTORIES
-            include
     )
+else()
+    add_library(page_tables INTERFACE)
 endif()
