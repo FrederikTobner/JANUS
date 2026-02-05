@@ -68,6 +68,40 @@ boot_protocol_t boot_info_get_protocol(void);
 u64 boot_info_get_hhdm_offset(void);
 
 /**
+ * @brief Get kernel physical base address
+ *
+ * Returns the physical address where the kernel was loaded.
+ * Only valid under Limine boot protocol.
+ *
+ * @return Kernel physical base address, or 0 if unavailable
+ */
+u64 boot_info_get_kernel_phys_base(void);
+
+/**
+ * @brief Get kernel virtual base address
+ *
+ * Returns the virtual address where the kernel is mapped.
+ * Only valid under Limine boot protocol.
+ *
+ * @return Kernel virtual base address, or 0 if unavailable
+ */
+u64 boot_info_get_kernel_virt_base(void);
+
+/**
+ * @brief Convert a kernel virtual address to physical
+ *
+ * Converts a kernel-space virtual address to its physical address.
+ * This uses the kernel physical/virtual bases, NOT the HHDM.
+ *
+ * @param virt Kernel virtual address
+ * @return Physical address
+ */
+static inline u64 boot_kernel_virt_to_phys(u64 virt)
+{
+    return virt - boot_info_get_kernel_virt_base() + boot_info_get_kernel_phys_base();
+}
+
+/**
  * @brief Convert a physical address to a virtual address
  *
  * Uses the HHDM offset to convert physical addresses to virtual.

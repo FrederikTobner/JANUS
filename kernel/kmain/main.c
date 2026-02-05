@@ -58,7 +58,9 @@ __noreturn void kernel_main(u64 loader_magic, void * info, void * fb_info)
 
     // Initialize drivers
     u64 hhdm_offset = boot_info_get_hhdm_offset();
-    bool serial_available = kinit_serial(hhdm_offset);
+    u64 kernel_phys_base = boot_info_get_kernel_phys_base();
+    u64 kernel_virt_base = boot_info_get_kernel_virt_base();
+    bool serial_available = kinit_serial(hhdm_offset, kernel_phys_base, kernel_virt_base);
     bool tty_available = kinit_tty(hhdm_offset, fb_info, serial_available);
 
     // Print greeting

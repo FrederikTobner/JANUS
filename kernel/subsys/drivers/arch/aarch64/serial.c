@@ -20,15 +20,13 @@
  *
  * Implements arch_serial_* contract from <arch/drivers/serial.h>.
  *
- * STUB IMPLEMENTATION - Full PL011 driver to be implemented in Todo #5.
- * Currently hardcoded for QEMU virt machine (UART at 0x09000000).
- *
- * IMPORTANT: On AArch64 with Limine, we run with HHDM (Higher-Half Direct Map).
- * Physical MMIO addresses must be accessed through the HHDM offset.
+ * On AArch64 with Limine, the HHDM only maps RAM, not device MMIO.
+ * We use mmu_map_mmio() to map the PL011 UART with device memory attributes.
  */
 
 #include <arch/drivers/serial.h>
 #include <arch/impl/drivers/mmio.h>
+#include <arch/impl/drivers/mmu.h>
 
 /* PL011 UART physical base address for QEMU virt machine */
 #define PL011_PHYS_BASE    0x09000000UL
@@ -56,7 +54,7 @@
 #define PL011_LCR_H_WLEN_8 (3 << 5) /* 8-bit word length */
 #define PL011_LCR_H_FEN    (1 << 4) /* FIFO enable */
 
-/* Virtual base address (computed at init time using HHDM offset) */
+/* Virtual base address (computed at init time via MMIO mapping) */
 static u64 g_pl011_base = 0;
 
 /**
@@ -67,26 +65,24 @@ static inline u64 pl011_reg(u32 offset)
     return g_pl011_base + offset;
 }
 
-error_t arch_serial_init(u64 hhdm_offset)
+error_t arch_serial_init(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base)
 {
     /*
-     * IMPORTANT: On aarch64 with Limine, the HHDM only maps RAM, not device
-     * MMIO regions. The PL011 UART at 0x09000000 is device memory and is NOT
-     * included in the HHDM mapping.
-     *
-     * Options to fix this properly:
-     * 1. Map the UART MMIO region ourselves (requires page table manipulation)
-     * 2. Use Limine's terminal feature for early output
-     * 3. Check if UEFI left device regions identity-mapped (unreliable)
-     *
-     * For now, we skip serial initialization on aarch64 with Limine.
-     * The kernel will use framebuffer output instead.
+     * Initialize the MMU module for MMIO mapping.
+     * This must be done before mmu_map_mmio() can be called.
      */
-    (void) hhdm_offset;
+    mmu_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
 
-    /* Return error to indicate serial is not available */
-    /* The kernel will fall back to framebuffer-only output */
-    return -1;
+    /*
+     * Map PL011 UART MMIO region into kernel address space.
+     * The HHDM only maps RAM, so we need explicit MMIO mapping.
+     */
+    u64 mapped = mmu_map_mmio(PL011_PHYS_BASE, 0x1000);
+    if (mapped == 0) {
+        /* Failed to map UART - fall back to framebuffer-only output */
+        return -1;
+    }
+    g_pl011_base = mapped;
 
     /* Disable UART while configuring */
     mmio_write32(pl011_reg(PL011_REG_CR), 0);

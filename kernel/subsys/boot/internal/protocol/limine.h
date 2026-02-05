@@ -84,4 +84,13 @@ struct limine_memmap_response {
     struct limine_memmap_entry ** entries;
 };
 
+/* -------------------------- Executable Address -------------------------- */
+
+/// Executable address response - provides kernel physical/virtual base addresses
+struct limine_executable_address_response {
+    u64 revision;
+    u64 physical_base;
+    u64 virtual_base;
+};
+
 #endif /* BOOT_LIMINE_PRIVATE_H */

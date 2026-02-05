@@ -2,6 +2,7 @@
 
 janus_add_arch_subsys(drivers
     SOURCES
+        mmu.c
         serial.c
         tty.c
         ../shared/framebuffer.c

@@ -37,11 +37,13 @@
  *
  * @param hhdm_offset Higher Half Direct Map offset for physical to virtual
  *                    address translation. Pass 0 for identity-mapped boot.
+ * @param kernel_phys_base Physical base address of the kernel image.
+ * @param kernel_virt_base Virtual base address of the kernel image.
  * @return 0 on success, negative error code on failure.
  */
-static __always_inline error_t drivers_serial_init(u64 hhdm_offset)
+static __always_inline error_t drivers_serial_init(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base)
 {
-    return arch_serial_init(hhdm_offset);
+    return arch_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
 }
 
 /**

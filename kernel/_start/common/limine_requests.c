@@ -57,6 +57,9 @@
 #define LIMINE_FRAMEBUFFER_REQUEST_ID \
     {LIMINE_COMMON_MAGIC_0, LIMINE_COMMON_MAGIC_1, 0x9d5827dcd881dd75ULL, 0xa3148604f6fab11bULL}
 
+#define LIMINE_EXECUTABLE_ADDRESS_REQUEST_ID \
+    {LIMINE_COMMON_MAGIC_0, LIMINE_COMMON_MAGIC_1, 0x71ba76863cc55f63ULL, 0xb2644a48c516a487ULL}
+
 /* ========================== Request Structures ========================== */
 
 /* Entry point request */
@@ -84,6 +87,13 @@ struct limine_hhdm_request {
 
 /* Framebuffer request */
 struct limine_framebuffer_request {
+    u64 id[4];
+    u64 revision;
+    void * response;
+};
+
+/* Executable address request - provides kernel physical/virtual base */
+struct limine_executable_address_request {
     u64 id[4];
     u64 revision;
     void * response;
@@ -154,4 +164,15 @@ __attribute__((used,
     .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
     .revision = 0,
     .response = NULL,
+};
+
+/*
+ * Executable address request - provides kernel physical and virtual base addresses.
+ * Needed for aarch64 to compute physical addresses of kernel memory for page tables.
+ */
+__attribute__((used, section(".limine_requests"))) volatile struct limine_executable_address_request
+    limine_executable_address_request = {
+        .id = LIMINE_EXECUTABLE_ADDRESS_REQUEST_ID,
+        .revision = 0,
+        .response = NULL,
 };

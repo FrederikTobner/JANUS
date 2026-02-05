@@ -25,9 +25,18 @@
 #include <internal/protocol/limine.h>
 #include <internal/protocol/multiboot2.h>
 
+/* External Limine request for executable address (defined in limine_requests.c) */
+extern volatile struct {
+    u64 id[4];
+    u64 revision;
+    struct limine_executable_address_response * response;
+} limine_executable_address_request;
+
 /* Boot information storage */
 static boot_protocol_t g_boot_protocol = BOOT_PROTOCOL_UNKNOWN;
 static u64 g_hhdm_offset = 0;
+static u64 g_kernel_phys_base = 0;
+static u64 g_kernel_virt_base = 0;
 
 error_t boot_info_init(u64 loader_magic, void * info)
 {
@@ -55,6 +64,16 @@ error_t boot_info_init(u64 loader_magic, void * info)
             /* No HHDM info provided - this is a problem */
             return -3;
         }
+
+        /*
+         * Get kernel physical/virtual addresses from the executable address request.
+         * This is needed on aarch64 to convert kernel addresses for page table manipulation.
+         */
+        if (limine_executable_address_request.response != NULL) {
+            g_kernel_phys_base = limine_executable_address_request.response->physical_base;
+            g_kernel_virt_base = limine_executable_address_request.response->virtual_base;
+        }
+
         return 0;
     }
 
@@ -70,4 +89,14 @@ boot_protocol_t boot_info_get_protocol(void)
 u64 boot_info_get_hhdm_offset(void)
 {
     return g_hhdm_offset;
+}
+
+u64 boot_info_get_kernel_phys_base(void)
+{
+    return g_kernel_phys_base;
+}
+
+u64 boot_info_get_kernel_virt_base(void)
+{
+    return g_kernel_virt_base;
 }

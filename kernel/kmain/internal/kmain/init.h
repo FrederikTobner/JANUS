@@ -33,9 +33,15 @@
  *                    Pass 0 for identity-mapped boot (Multiboot2).
  *                    On x86_64 this is ignored (port I/O doesn't need HHDM).
  *                    On AArch64 this is required for MMIO access.
+ * @param kernel_phys_base Physical base address of the kernel image.
+ *                         On x86_64 this is ignored.
+ *                         On AArch64 this is required for page table allocation.
+ * @param kernel_virt_base Virtual base address of the kernel image.
+ *                         On x86_64 this is ignored.
+ *                         On AArch64 this is required for page table allocation.
  * @return true if serial was initialized successfully
  */
-bool kinit_serial(u64 hhdm_offset);
+bool kinit_serial(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base);
 
 /**
  * @brief Initialize the TTY subsystem.

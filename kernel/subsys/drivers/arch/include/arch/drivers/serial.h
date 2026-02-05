@@ -34,9 +34,15 @@
  *                    boot (Multiboot2) or the HHDM offset for Limine.
  *                    On x86_64 this is ignored (port I/O doesn't need HHDM).
  *                    On AArch64 this is required for MMIO access.
+ * @param kernel_phys_base Physical base address of the kernel image.
+ *                         On x86_64 this is ignored.
+ *                         On AArch64 this is required for page table allocation.
+ * @param kernel_virt_base Virtual base address of the kernel image.
+ *                         On x86_64 this is ignored.
+ *                         On AArch64 this is required for page table allocation.
  * @return 0 on success, negative error code on failure.
  */
-error_t arch_serial_init(u64 hhdm_offset);
+error_t arch_serial_init(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base);
 
 /**
  * @brief Write a byte to serial hardware.
