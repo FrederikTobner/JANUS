@@ -55,7 +55,9 @@ typedef __s64 s64;
 typedef __u64 u64;
 
 // Kernel shorthands for boolean
-#define bool                          __bool
+#ifndef __cplusplus
+typedef _Bool bool;
+#endif
 #define true                          1
 #define false                         0
 #define __bool_true_false_are_defined 1
