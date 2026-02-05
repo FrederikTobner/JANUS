@@ -69,10 +69,14 @@ error_t boot_info_init(u64 loader_magic, void * info)
          * Get kernel physical/virtual addresses from the executable address request.
          * This is needed on aarch64 to convert kernel addresses for page table manipulation.
          */
+
+        // TODO: REMOVE THIS UGLY AS FUCK CONDITIONAL COMPILATION
+#if defined(__aarch64__)
         if (limine_executable_address_request.response != NULL) {
             g_kernel_phys_base = limine_executable_address_request.response->physical_base;
             g_kernel_virt_base = limine_executable_address_request.response->virtual_base;
         }
+#endif
 
         return 0;
     }
