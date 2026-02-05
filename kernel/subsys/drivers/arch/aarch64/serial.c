@@ -26,7 +26,7 @@
 
 #include <arch/drivers/serial.h>
 #include <arch/impl/drivers/mmio.h>
-#include <arch/impl/drivers/mmu.h>
+#include <page_tables/mmu.h>
 
 /* PL011 UART physical base address for QEMU virt machine */
 #define PL011_PHYS_BASE    0x09000000UL
@@ -117,12 +117,12 @@ u8 arch_serial_read(void)
 
 bool arch_serial_tx_ready(void)
 {
-    /* Ready if TX FIFO is not full */
+    // Ready if TX FIFO is not full
     return (mmio_read32(pl011_reg(PL011_REG_FR)) & PL011_FR_TXFF) == 0;
 }
 
 bool arch_serial_rx_ready(void)
 {
-    /* Ready if RX FIFO is not empty */
+    // Ready if RX FIFO is not empty
     return (mmio_read32(pl011_reg(PL011_REG_FR)) & PL011_FR_RXFE) == 0;
 }

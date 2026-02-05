@@ -2,7 +2,7 @@
  * @file mmu.c
  * @brief aarch64 MMU helper for mapping MMIO regions
  *
- * This module provides page table manipulation routines for mapping
+// This file has been removed. See kernel/lib/page_tables/ for the new implementation.
  * device MMIO regions into the kernel's virtual address space.
  *
  * IMPORTANT: This module is self-contained and does not depend on
