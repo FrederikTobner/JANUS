@@ -51,7 +51,7 @@ __noreturn void kernel_main(u64 loader_magic, void * info, void * fb_info)
         drivers_cpu_halt_forever();
     }
 
-    // Initialize boot info (must be done before drivers that need HHDM offset)
+    // Initialize boot info (arch setup now handled internally)
     if (boot_info_init(loader_magic, info) != 0) {
         drivers_cpu_halt_forever();
     }

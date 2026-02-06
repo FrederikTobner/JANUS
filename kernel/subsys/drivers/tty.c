@@ -34,7 +34,7 @@ static u8 current_bg = TTY_COLOR_BLACK;
 
 static void scroll(void)
 {
-    /* Move all lines up by one */
+    // Move all lines up by one 
     for (u16 y = 0; y < screen_height - 1; y++) {
         for (u16 x = 0; x < screen_width; x++) {
             char ch;
@@ -43,7 +43,7 @@ static void scroll(void)
             arch_tty_write_cell(x, y, ch, fg, bg);
         }
     }
-    /* Clear last line */
+    // Clear last line 
     for (u16 x = 0; x < screen_width; x++) {
         arch_tty_write_cell(x, screen_height - 1, ' ', current_fg, current_bg);
     }

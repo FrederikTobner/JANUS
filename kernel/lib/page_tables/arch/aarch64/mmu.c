@@ -23,20 +23,24 @@
 #define L3_INDEX(va)         (((va) >> L3_SHIFT) & 0x1FF)
 #define MMIO_VIRT_BASE       0xFFFFFF0000000000UL
 #define PAGE_TABLE_POOL_SIZE 8
+
 static u64 page_table_pool[PAGE_TABLE_POOL_SIZE][ENTRIES_PER_TABLE] __attribute__((aligned(PAGE_SIZE)));
 static u32 pool_next_index;
 static u64 g_hhdm_offset;
 static u64 g_kernel_phys_base;
 static u64 g_kernel_virt_base;
 static bool g_initialized;
+
 static u64 kernel_virt_to_phys(u64 virt)
 {
     return virt - g_kernel_virt_base + g_kernel_phys_base;
 }
+
 static u64 phys_to_virt(u64 phys)
 {
     return phys + g_hhdm_offset;
 }
+
 static u64 alloc_page_table_phys(void)
 {
     if (pool_next_index >= PAGE_TABLE_POOL_SIZE) {
@@ -48,6 +52,7 @@ static u64 alloc_page_table_phys(void)
     }
     return kernel_virt_to_phys((u64) table);
 }
+
 static u64 * get_or_create_pte(u64 table_phys, u32 index, bool is_table_level)
 {
     u64 * table = (u64 *) phys_to_virt(table_phys);
@@ -62,6 +67,7 @@ static u64 * get_or_create_pte(u64 table_phys, u32 index, bool is_table_level)
     *pte = new_table_phys | PTE_VALID | PTE_TABLE;
     return pte;
 }
+
 void mmu_init(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base)
 {
     g_hhdm_offset = hhdm_offset;
@@ -70,6 +76,7 @@ void mmu_init(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base)
     g_initialized = true;
     pool_next_index = 0;
 }
+
 u64 mmu_map_mmio(u64 phys_addr, u64 size)
 {
     if (!g_initialized) {

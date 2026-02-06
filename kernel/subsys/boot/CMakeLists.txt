@@ -6,7 +6,8 @@ file(GLOB_RECURSE BOOT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 # Build boot as static library
 janus_add_subsys(boot 
 SOURCES
-    ${BOOT_SOURCES}
+   info.c
+   verify.c 
 )
 
 target_include_directories(boot

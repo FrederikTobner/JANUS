@@ -21,16 +21,10 @@
  * Stores boot information from different boot protocols in a unified format.
  */
 
+#include <boot/arch_requests.h>
 #include <boot/info.h>
 #include <internal/protocol/limine.h>
 #include <internal/protocol/multiboot2.h>
-
-/* External Limine request for executable address (defined in limine_requests.c) */
-extern volatile struct {
-    u64 id[4];
-    u64 revision;
-    struct limine_executable_address_response * response;
-} limine_executable_address_request;
 
 /* Boot information storage */
 static boot_protocol_t g_boot_protocol = BOOT_PROTOCOL_UNKNOWN;
@@ -40,48 +34,32 @@ static u64 g_kernel_virt_base = 0;
 
 error_t boot_info_init(u64 loader_magic, void * info)
 {
+    // Set up protocol-specific boot requests via boot arch layer
+    struct boot_info_requests boot_requests;
+    boot_requests.limine_executable_address_request = NULL;
+    boot_arch_setup_requests(&boot_requests);
+
     /* Check for Multiboot2 magic (32-bit) */
     if ((u32) loader_magic == MULTIBOOT2_BOOTLOADER_MAGIC) {
         g_boot_protocol = BOOT_PROTOCOL_MULTIBOOT2;
-        /* Multiboot2 with our identity-mapped boot has HHDM offset of 0 */
         g_hhdm_offset = 0;
-        (void) info; /* Multiboot2 info not used for HHDM */
+        (void) info;
         return 0;
     }
 
     /* Check for Limine magic */
     if (loader_magic == LIMINE_BOOTLOADER_MAGIC) {
         g_boot_protocol = BOOT_PROTOCOL_LIMINE;
-
-        /*
-         * For Limine, 'info' points to a limine_hhdm_response structure
-         * that was set by the Limine entry point.
-         */
         if (info != NULL) {
             struct limine_hhdm_response * hhdm_response = (struct limine_hhdm_response *) info;
             g_hhdm_offset = hhdm_response->offset;
         } else {
-            /* No HHDM info provided - this is a problem */
             return -3;
         }
 
-        /*
-         * Get kernel physical/virtual addresses from the executable address request.
-         * This is needed on aarch64 to convert kernel addresses for page table manipulation.
-         */
-
-        // TODO: REMOVE THIS UGLY AS FUCK CONDITIONAL COMPILATION
-#if defined(__aarch64__)
-        if (limine_executable_address_request.response != NULL) {
-            g_kernel_phys_base = limine_executable_address_request.response->physical_base;
-            g_kernel_virt_base = limine_executable_address_request.response->virtual_base;
-        }
-#endif
-
+        boot_arch_extract_executable_address(&g_kernel_phys_base, &g_kernel_virt_base);
         return 0;
     }
-
-    /* Unknown bootloader */
     return -1;
 }
 
