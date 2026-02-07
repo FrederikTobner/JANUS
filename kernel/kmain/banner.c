@@ -25,7 +25,7 @@
 
 #include <drivers/serial.h>
 #include <drivers/tty.h>
-#include <janus/version.h>
+#include <janus/config.h>
 
 #define JANUS_HELLO_MESSAGE                  \
     "     _   _    _   _ _   _ ____  \n"     \

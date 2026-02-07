@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 # Phase 1: Include JANUS platform detection BEFORE project() for cross-compiler setup
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-include(JanusPlatform)
 
+    set_property(CACHE JANUS_TARGET_ARCH PROPERTY STRINGS "x86_64" "aarch64")
 # Enable appropriate assembler based on target architecture
 if(JANUS_TARGET_ARCH STREQUAL "x86_64")
     project(JANUS VERSION 0.1.0 LANGUAGES C ASM_NASM)
@@ -13,6 +13,7 @@ else()
     project(JANUS VERSION 0.1.0 LANGUAGES C)
 endif()
 
+include(JanusPlatform)
 # Phase 2: Configure compiler flags after project() sets CMAKE_C_COMPILER_ID
 include(JanusPlatform)
 

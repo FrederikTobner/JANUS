@@ -54,18 +54,10 @@
 #define JANUS_BUILD_TIME         "@JANUS_BUILD_TIME@"
 
 /*
- * Feature Flags (configured by CMake options)
- */
-#cmakedefine BUILD_TESTS
-#cmakedefine ENABLE_DEBUG_OUTPUT
-#cmakedefine ENABLE_SERIAL_OUTPUT
-#cmakedefine ENABLE_VGA_OUTPUT
-
-/*
  * Memory Configuration
  */
-#define JANUS_PAGE_SIZE        4096
-#define JANUS_KERNEL_VIRT_BASE 0xFFFFFFFF80000000UL
+#define JANUS_PAGE_SIZE          4096
+#define JANUS_KERNEL_VIRT_BASE   0xFFFFFFFF80000000UL
 
 /*
  * Compiler Detection

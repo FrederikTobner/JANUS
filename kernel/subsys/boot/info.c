@@ -39,7 +39,7 @@ error_t boot_info_init(u64 loader_magic, void * info)
     boot_requests.limine_executable_address_request = NULL;
     boot_arch_setup_requests(&boot_requests);
 
-    /* Check for Multiboot2 magic (32-bit) */
+    // Check for Multiboot2 magic number
     if ((u32) loader_magic == MULTIBOOT2_BOOTLOADER_MAGIC) {
         g_boot_protocol = BOOT_PROTOCOL_MULTIBOOT2;
         g_hhdm_offset = 0;
@@ -47,7 +47,7 @@ error_t boot_info_init(u64 loader_magic, void * info)
         return 0;
     }
 
-    /* Check for Limine magic */
+    // Check for Limine magic number
     if (loader_magic == LIMINE_BOOTLOADER_MAGIC) {
         g_boot_protocol = BOOT_PROTOCOL_LIMINE;
         if (info != NULL) {
