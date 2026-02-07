@@ -24,8 +24,20 @@ include_guard(GLOBAL)
 #           ../shared/framebuffer.c
 #   )
 #
+
+# Ensure platform is loaded
+if(NOT JANUS_PLATFORM_LOADED)
+    message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusSubsys.cmake")
+endif()
+
 function(janus_add_arch_subsys NAME)
-    cmake_parse_arguments(ARCH "" "" "SOURCES" ${ARGN})
+    cmake_parse_arguments(
+        ARG
+        ""
+        ""
+        "SOURCES;DEPENDENCIES"
+        ${ARGN}
+    )
 
     set(ARCH_BASE "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
@@ -51,5 +63,28 @@ function(janus_add_arch_subsys NAME)
     )
 
     message(STATUS "  [${NAME}] Arch sources (${JANUS_TARGET_ARCH}): ${ABS_SOURCES}")
+    set(ARCH_LIB_NAME "${NAME}_arch")
+    add_library(${ARCH_LIB_NAME} STATIC ${ARG_SOURCES})
+    target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMMON_FLAGS})
+    target_include_directories(${ARCH_LIB_NAME} 
+    PUBLIC 
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"          # <arch/impl/drivers/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/../shared/include" # <arch/shared/include/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/../include"         # <arch/include/drivers/*.h>
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/internal"         # <arch/internal/drivers/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../include"         # <drivrs/include/*.h>
+    )
+    # Link dependencies (only lib allowed, not other subsystems)
+    if(ARG_DEPENDENCIES)
+        target_link_libraries(${ARCH_LIB_NAME} PUBLIC ${ARG_DEPENDENCIES})
+    endif()
 
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_DEBUG_FLAGS})
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_RELEASE_FLAGS})
+    elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_MINSIZEREL_FLAGS})
+    endif()
 endfunction()

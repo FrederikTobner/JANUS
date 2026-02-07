@@ -52,11 +52,6 @@ function(janus_add_subsys NAME)
         set(HAS_ARCH TRUE)
         # Include the arch CMakeLists which will call janus_add_arch_subsys
         add_subdirectory(arch)
-        # Retrieve arch sources added by janus_add_arch_subsys
-        get_property(ARCH_SOURCES GLOBAL PROPERTY "JANUS_ARCH_SOURCES_${NAME}")
-        if(ARCH_SOURCES)
-            list(APPEND ALL_SOURCES ${ARCH_SOURCES})
-        endif()
     endif()
 
     # Handle empty subsystems (placeholders)
@@ -65,7 +60,6 @@ function(janus_add_subsys NAME)
         target_include_directories(${NAME} INTERFACE
             ${SUBSYS_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/include
-            $<$<BOOL:${HAS_ARCH}>:${ARCH_DIR}/include>
         )
         if(ARG_DEPENDENCIES)
             target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
@@ -81,22 +75,11 @@ function(janus_add_subsys NAME)
         PUBLIC
             ${SUBSYS_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/include
-            # Arch contract headers (Tier 2) - propagates to consumers
-            $<$<BOOL:${HAS_ARCH}>:${ARCH_DIR}/include>
-            # Shared arch code headers (for framebuffer etc.)
-            $<$<BOOL:${HAS_ARCH}>:${ARCH_DIR}/shared/include>
     )
     
     # Add arch-specific include directories if arch exists
     if(HAS_ARCH)
-        get_property(ARCH_INCLUDES GLOBAL PROPERTY "JANUS_ARCH_INCLUDES_${NAME}")
-        if(ARCH_INCLUDES)
-            target_include_directories(${NAME} PUBLIC ${ARCH_INCLUDES})
-        endif()
-        get_property(ARCH_PRIVATE_INCLUDES GLOBAL PROPERTY "JANUS_ARCH_PRIVATE_INCLUDES_${NAME}")
-        if(ARCH_PRIVATE_INCLUDES)
-            target_include_directories(${NAME} PRIVATE ${ARCH_PRIVATE_INCLUDES})
-        endif()
+        target_link_libraries(${NAME} PUBLIC ${NAME}_arch)
     endif()
 
     # Link dependencies (only lib allowed, not other subsystems)
