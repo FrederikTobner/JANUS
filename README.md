@@ -44,6 +44,7 @@ JANUS/
     ├── _start/           # Entry point (per-arch: x86_64/, aarch64/)
     ├── kmain/            # Kernel main - final assembly point
     ├── lib/              # Shared utility libraries
+    │   └── page_tables/               # Page tables library 
     └── subsys/           # Independent subsystems
         ├── boot/             # Boot protocol handling
         ├── drivers/          # Device drivers (with arch/)
@@ -93,10 +94,6 @@ For a detailed explanation of the architecture (arch) layer structure and all su
 - **Build System**: CMake 3.20+
 - **Target Architectures**: x86_64, aarch64 (QEMU virt machine)
 
-## Documentation
-
-Comprehensive documentation is in the [`Documentation/`](Documentation/) folder:
-
 ## Building
 
 ### Prerequisites
@@ -110,37 +107,18 @@ Comprehensive documentation is in the [`Documentation/`](Documentation/) folder:
 
 **For x86_64:**
 
-- **Clang 17+** - C compiler
+- **Clang 17+ or GCC** - C compiler
 - **NASM** - Assembler
-- **GRUB tools** - grub-pc-bin (for bootable ISO images)
+- **GRUB tools or Limine** - grub-pc-bin (for bootable ISO images) or limine
 
 **For aarch64:**
 
-- **aarch64-linux-gnu-gcc** - Cross-compiler toolchain
+- **Clang 17+ or aarch64-linux-gnu-gcc** - C and ASM compiler
+- **aarch64-linux-gnu-ld** - Linker
 
 **Optional:**
 
 - **LLDB / GDB** - Debugger for kernel debugging
-
-Installing prerequisites:
-
-```bash
-# Debian/Ubuntu (x86_64)
-sudo apt install clang nasm cmake ninja-build qemu-system-x86 \
-                 grub-pc-bin xorriso mtools lldb limine
-
-# Debian/Ubuntu (aarch64)
-sudo apt install gcc-aarch64-linux-gnu cmake ninja-build \
-                 qemu-system-arm xorriso mtools gdb-multiarch limine
-
-# Arch Linux (x86_64)
-sudo pacman -S clang nasm cmake ninja qemu-system-x86 \
-               grub xorriso mtools lldb limine
-
-# Arch Linux (aarch64)
-sudo pacman -S aarch64-linux-gnu-gcc cmake ninja \
-               qemu-system-aarch64 xorriso mtools limine
-```
 
 See [Documentation/Setup.md](Documentation/Setup.md) for detailed installation instructions.
 

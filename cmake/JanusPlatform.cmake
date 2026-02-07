@@ -1,12 +1,5 @@
 # JANUS Platform Detection and Configuration
 # Defines platform-specific settings and common compiler flags
-#
-# This file is included TWICE:
-# 1. Before project() - to set up cross-compiler (Phase 1)
-# 2. After project() - to configure compiler flags (Phase 2)
-#
-# Use JANUS_PLATFORM_PHASE to track which phase we're in.
-
 
 # Detect host platform
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -16,17 +9,11 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(JANUS_HOST_MACOS TRUE)
 else()
-    # Pre-project, system name might not be set
-    set(JANUS_HOST_LINUX TRUE)  # Assume Linux for now
+    message(FATAL_ERROR "Unable to detect underlying system")
 endif()
 
 # Target architecture (x86_64 or aarch64)
 set(JANUS_TARGET_PLATFORM "elf")
-
-# Validate target architecture
-if(NOT JANUS_TARGET_ARCH STREQUAL "x86_64" AND NOT JANUS_TARGET_ARCH STREQUAL "aarch64")
-    message(FATAL_ERROR "Invalid JANUS_TARGET_ARCH: ${JANUS_TARGET_ARCH}. Must be 'x86_64' or 'aarch64'.")
-endif()
 
 # Cross-compilation setup for aarch64
 if(JANUS_TARGET_ARCH STREQUAL "aarch64")
@@ -40,12 +27,10 @@ if(JANUS_TARGET_ARCH STREQUAL "aarch64")
         set(CMAKE_C_COMPILER ${AARCH64_CLANG})
         set(CMAKE_ASM_COMPILER ${AARCH64_CLANG})
         set(JANUS_AARCH64_CLANG TRUE)
-        message(STATUS "Cross-compiling for aarch64 using Clang: ${AARCH64_CLANG}")
     elseif(AARCH64_GCC)
         set(CMAKE_C_COMPILER ${AARCH64_GCC})
         set(CMAKE_ASM_COMPILER ${AARCH64_GCC})
         set(JANUS_AARCH64_GCC TRUE)
-        message(STATUS "Cross-compiling for aarch64 using GCC: ${AARCH64_GCC}")
     else()
         message(FATAL_ERROR 
             "No suitable aarch64 cross-compiler found. Install clang or gcc cross-compiler:\n"
@@ -76,10 +61,6 @@ endif()
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (Debug, Release, MinSizeRel)" FORCE)
 endif()
-
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Target: ${JANUS_TARGET_ARCH}-${JANUS_TARGET_PLATFORM}")
-message(STATUS "Boot protocols: ${JANUS_BOOT_PROTOCOLS}")
 
 # Export compile commands for clangd/IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
