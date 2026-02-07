@@ -25,7 +25,7 @@
  */
 
 #include <arch/drivers/serial.h>
-#include <arch/impl/drivers/mmio.h>
+#include <arch/internal/drivers/mmio.h>
 #include <page_tables/mmu.h>
 
 /* PL011 UART physical base address for QEMU virt machine */
