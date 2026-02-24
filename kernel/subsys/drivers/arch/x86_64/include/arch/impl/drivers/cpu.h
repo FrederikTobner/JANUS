@@ -51,17 +51,4 @@ static __always_inline void arch_cpu_enable_interrupts(void)
     __asm__ volatile("sti");
 }
 
-/**
- * @brief Disable interrupts and halt forever.
- *
- * This function never returns and is used for unrecoverable errors.
- */
-static __always_inline __noreturn void arch_cpu_halt_forever(void)
-{
-    arch_cpu_disable_interrupts();
-    for (;;) {
-        arch_cpu_halt();
-    }
-}
-
 #endif /* X86_64_IMPL_DRIVERS_CPU_H */

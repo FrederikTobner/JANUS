@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 
+# Set C standard
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+# Allow GNU extension
+set(CMAKE_C_EXTENSIONS ON)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # Target architecture: x86_64 or aarch64
@@ -56,16 +62,6 @@ if(JANUS_TARGET_ARCH STREQUAL "x86_64")
     message(STATUS "  ninja debug-grub - Boot GRUB ISO with GDB server (x86_64 only)")
 endif()
 message(STATUS "========================================")
-
-# Set C standard
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-# Allow GNU extension
-set(CMAKE_C_EXTENSIONS ON)
-
-# Generate build timestamp
-string(TIMESTAMP JANUS_BUILD_DATE "%Y-%m-%d")
-string(TIMESTAMP JANUS_BUILD_TIME "%H:%M:%S")
 
 # Copy compile_commands.json to project root for clangd
 add_custom_target(

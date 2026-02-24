@@ -35,7 +35,7 @@ static u64 g_kernel_virt_base = 0;
 error_t boot_info_init(u64 loader_magic, void * info)
 {
     // Set up protocol-specific boot requests via boot arch layer
-    struct boot_info_requests boot_requests;
+    struct boot_info_requests_t boot_requests;
     boot_requests.limine_executable_address_request = NULL;
     boot_arch_setup_requests(&boot_requests);
 

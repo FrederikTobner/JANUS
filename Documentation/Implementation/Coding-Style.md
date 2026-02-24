@@ -2,7 +2,7 @@
 
 ## Overview
 
-JANUS uses `clang-format` to enforce consistent style. If you're coming from C++, Rust, or Zig, most of this will be familiar. We only document the non-obvious parts here - things that might surprise you or are specific to kernel development.
+JANUS uses `clang-format` to enforce consistent style.
 
 ## Multi-Dimensional Memory Access
 
@@ -173,8 +173,6 @@ typedef struct fs_driver * fs_driver_handle_t;
 - Anything performance-critical
 - Anything that needs stack allocation
 - Anything where you want developers to understand the layout
-
-If you find yourself typing `typedef struct foo * foo_handle_t` for a buffer or list or tree, **stop**. You're about to write bad code.
 
 ### Document Your Structures
 

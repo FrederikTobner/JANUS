@@ -51,12 +51,12 @@ flowchart TD
 ```
 
 Let's implement this step-by-step.
-We'll build `kernel/boot/boot.asm` incrementally, adding each piece as we explain it.
+We'll build `kernel/_start/x86_64/multiboot2/entry.asm` incrementally, adding each piece as we explain it.
 
 Start with the global declarations:
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 replace: entire file
 ---
 +global _start
@@ -65,7 +65,7 @@ replace: entire file
 ```
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 replace: entire file
 ---
 global _start
@@ -81,7 +81,7 @@ We reserve 16 KiB space in the BSS section for our stack.
 Additionally we need to reserve space for our page tables.
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 replace: entire file
 ---
     resb 16384              
@@ -114,7 +114,7 @@ So when we call `kernel_main(uint32_t magic, void *info)`, the magic number need
 > Lastly, it specifies which registers are caller-saved and which are callee-saved.
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: resb 4096
 ---
  p2_table:
@@ -135,7 +135,7 @@ Then we call a subroutine to set up the page tables and enable long mode.
 Additionally we need to load the global descriptor table and perform a far jump to switch to the 64-bit code segment.
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: resb 4096
 ---
 _start:
@@ -155,7 +155,7 @@ _start:
 Now add the function that creates our page tables:
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: jmp gdt64.code:long_mode_start
 ---
      jmp gdt64.code:long_mode_start
@@ -189,7 +189,7 @@ We're using a huge page, with a size of 2MB which skips the page table level ent
 Add this subroutine to enable paging.
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: setup_page_tables ret
 ---
      ret
@@ -206,7 +206,7 @@ First we load the P4 table address into control register CR3, which tells the CP
 Next we enable the Physical Address Extension (PAE) by setting bit 5 in control register CR4. PAE allows the CPU to access more than 4GB of physical memory and is a prerequisite for entering long mode.
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: mov cr3, eax 
 ---
 enable_paging:
@@ -224,7 +224,7 @@ After that we set the Long Mode Enable bit in the Extended Feature Enable Regist
 This will tell the CPU that we want to enter 64-bit mode.
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: mov cr4, eax 
 ---
     mov eax, cr4
@@ -242,7 +242,7 @@ after: mov cr4, eax
 Finally, we enable paging by setting the Paging (PG) bit in control register CR0. Once paging is enabled and long mode is set, the CPU transitions to 64-bit mode.
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: wrmsr 
 ---
     mov ecx, 0xC0000080     
@@ -271,7 +271,7 @@ after: wrmsr
 Now we are finally in long mode! Add the 64-bit entry point that calls our kernel:
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: enable_paging ret
 ---
      ret
@@ -301,7 +301,7 @@ In long mode, segment registers aren't used for addressing, but we zero them out
 The EDI and ESI registers we saved in Step 2 are now RDI and RSI, perfectly positioned as the first two function arguments per the System V AMD64 calling convention.
 
 ```x86asm-diff
-file: kernel/boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: enable_paging ret
 ---
     call kernel_main
@@ -327,7 +327,7 @@ After we call `kernel_main`, we use a `hlt` instruction in an infinite loop to h
 Finally, add the GDT that defines our 64-bit code segment:
 
 ```x86asm-diff
-file: boot/boot.asm
+file: kernel/_start/x86_64/multiboot2/entry.asm
 after: .hang loop
 ---
      jmp .hang

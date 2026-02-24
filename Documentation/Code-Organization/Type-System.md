@@ -2,8 +2,6 @@
 
 This document explains how types are organized across different headers in JANUS.
 
-## Three-Level Type Hierarchy
-
 ### Level 1: User API Types (`/kernel/include/uapi/types.h`)
 
 **Purpose:** Exposes kernel-specific types to user programs.
@@ -18,6 +16,6 @@ This document explains how types are organized across different headers in JANUS
 
 **Contents:**
 
-- Fixed-width integer types: `u8`, `s8`, `u16`, `u16`, `u32`, `u32`, `u64`, `u64`
+- Fixed-width integer types: `u8`, `s8`, `u16`, `s16`, `u32`, `s32`, `u64`, `s64`
 
 **Used by:** All kernel code that needs basic types.

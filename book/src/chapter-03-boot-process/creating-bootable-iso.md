@@ -30,7 +30,7 @@ sudo pacman -S grub xorriso mtools
 The ISO creation uses a GRUB configuration template. First, create `cmake/grub.cfg.in`:
 
 ```cfg-diff
-file: cmake/grub.cfg.in
+file: cmake/boot/multiboot2/grub.cfg.in
 replace: entire file
 ---
 +set timeout=0

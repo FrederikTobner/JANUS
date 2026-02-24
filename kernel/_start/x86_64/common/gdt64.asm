@@ -1,10 +1,16 @@
-; 64-bit GDT (Global Descriptor Table)
-; JANUS Boot Assembly Code
-;
-; Copyright (C) 2025 by Frederik Tobner
-; This file is part of JANUS.
-; Licensed under the GNU Affero General Public License v3.0
-; See https://www.gnu.org/licenses/agpl-3.0.en.html
+; Copyright (C) 2025 by Frederik Tobner                                     
+;                                                                           
+; This file is part of JANUS.                                              
+;                                                                           
+; Permission to use, copy, modify, and distribute this software and its     
+; documentation under the terms of the GNU Affero General Public License is 
+; hereby granted.                                                           
+; No representations are made about the suitability of this software for    
+; any purpose.                                                              
+; It is provided "as is" without express or implied warranty.               
+; See the <https://www.gnu.org/licenses/agpl-3.0.en.html>                   
+; GNU Affero General Public License                                         
+; License for more details.     
 
 ; Shared GDT for 64-bit long mode, used by both Multiboot2 and Limine entry points.
 ; Segment selector values (offsets into GDT):
@@ -37,8 +43,8 @@ gdt64:
     dq (1<<41) | (1<<44) | (1<<47)
 
 gdt64_pointer:
-    dw gdt64_pointer - gdt64 - 1    ; GDT size (limit)
-    dq gdt64                         ; GDT address
+    dw gdt64_pointer - gdt64 - 1      ; GDT size (limit)
+    dq gdt64                          ; GDT address
 
 ; Export selector values as data (for use with `mov ax, [gdt64_code_selector]`)
 align 2

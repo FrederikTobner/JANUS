@@ -2,9 +2,7 @@
 
 ## Module Organization Philosophy
 
-**Flat hierarchy. Independent modules. No spaghetti.**
-
-JANUS follows a modular structure inspired by Linux and LLVM: each major component is a first-class module with clear boundaries and **zero circular dependencies**. If you create a circular dependency, you've designed it wrong. Fix it.
+JANUS follows a modular structure inspired by Linux and LLVM: each major component is a first-class module with clear boundaries and **zero circular dependencies**. 
 
 ## Top-Level Directory Structure
 
@@ -22,13 +20,12 @@ janus/
 ├── scripts/          # Build and utility scripts
 ├── cmake/            # CMake build modules
 ├── tools/            # Development tools
-│   └── bmunit/       # BMUnit testing framework
 └── Documentation/    # Technical documentation
 ```
 
 ### Architecture Code Lives Inside Subsystems
 
-Architecture-specific code is **co-located with each subsystem** rather than in a separate `kernel/arch/` directory:
+Architecture-specific code is **co-located with each subsystem** rather than in a separate `kernel/arch/` directory, like it is done in the Linux kernel.
 
 ```
 kernel/subsys/drivers/
@@ -95,23 +92,23 @@ Modules are organized in layers. Dependencies flow **downward only**.
                            │
           ┌────────────────┼────────────────┐
           ▼                ▼                ▼
-    ┌──────────┐    ┌──────────┐    ┌──────────┐
-    │   boot   │    │    mm    │    │ drivers  │   ← Each has its own arch/
-    │  ┌───┐  │    │  ┌───┐  │    │  ┌───┐  │
-    │  │x86│  │    │  │x86│  │    │  │x86│  │
-    │  └───┘  │    │  └───┘  │    │  └───┘  │
-    └────┬────┘    └────┬────┘    └────┬────┘
-         │              │              │
-         └──────────────┼──────────────┘
-                        │
-                   ┌────┴─────┐
-                   │  lib/*   │  ← Can have arch/ too
-                   └────┬─────┘
-                        │
-                        ▼
-               ┌──────────────────┐
-               │  include/janus   │
-               └──────────────────┘
+     ┌─────────┐    ┌─────────┐    ┌─────────┐
+     │   boot  │    │    mm   │    │ drivers │   ← Each has its own arch/
+     │  ┌───┐  │    │  ┌───┐  │    │  ┌───┐  │
+     │  │x86│  │    │  │x86│  │    │  │x86│  │
+     │  └───┘  │    │  └───┘  │    │  └───┘  │
+     └────┬────┘    └────┬────┘    └────┬────┘
+          │              │              │
+          └──────────────┼──────────────┘
+                         │
+                    ┌────┴─────┐
+                    │  lib/*   │  ← Can have arch/ too
+                    └────┬─────┘
+                         │
+                         ▼
+                ┌──────────────────┐
+                │  include/janus   │
+                └──────────────────┘
 ```
 
 **Key insight:**
@@ -260,72 +257,6 @@ Each subsystem with architecture code uses a three-tier include hierarchy:
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-## CMake Auto-Detection
-
-The `janus_add_subsys()` function automatically:
-
-1. **Detects arch/ folders** - no manual `HAS_ARCH` flag needed
-2. **Globs .c files** from `arch/<ARCH>/`
-3. **Sets up include paths** transitively (PUBLIC)
-4. **Enforces isolation** - FATAL_ERROR if subsystem depends on subsystem
-
-```cmake
-# Simple! CMake figures out the rest.
-janus_add_subsys(drivers
-    SOURCES tty.c serial.c
-)
-```
-
-## Build Flow
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                    kernel/CMakeLists.txt                         │
-│  add_subdirectory(lib)      # Built first (utilities)            │
-│  add_subdirectory(subsys)   # Subsystems (isolated)              │
-│  add_subdirectory(kmain)    # Assembly point                     │
-│  add_subdirectory(_start)   # Built last, creates kernel.elf     │
-└──────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-          ┌────────────────────────────────────┐
-          │   subsys/ (each isolated)          │
-          │   ┌────────┐ ┌────────┐ ┌────────┐ │
-          │   │  boot  │ │drivers │ │   mm   │ │
-          │   │┌─────┐ │ │┌─────┐ │ │┌─────┐ │ │
-          │   ││arch/│ │ ││arch/│ │ ││arch/│ │ │
-          │   │└─────┘ │ │└─────┘ │ │└─────┘ │ │
-          │   └────────┘ └────────┘ └────────┘ │
-          └────────────────┬───────────────────┘
-                           │
-                    ┌──────┴───────┐
-                    │    kmain     │  ← Links all subsystems
-                    └──────┬───────┘
-                           │
-          ┌────────────────┴─────────────────┐
-          │  _start/${ARCH}/${PROTOCOL}/     │
-          │  janus_link_kernel(...)          │
-          └────────────────┬─────────────────┘
-                           ▼
-                    ┌──────────────┐
-                    │  kernel.elf  │
-                    └──────────────┘
-```
-
-````
-This is the description of what the code block changes:
-<changeDescription>
-Add a reference to the new arch layer structure document after the intro and before the directory structure.
-</changeDescription>
-
-This is the code block that represents the suggested code change:
-```markdown
-...existing code...
-
 ## Architecture Layer Structure
 
 For a detailed explanation of the architecture (arch) layer patterns, directory conventions, and best practices—including how to organize arch code in subsystems and libraries—see [Arch-Layer-Structure.md](./Arch-Layer-Structure.md).
-```
-<userPrompt>
-Provide the fully rewritten file, incorporating the suggested code change. You must produce the complete file.
-</userPrompt>

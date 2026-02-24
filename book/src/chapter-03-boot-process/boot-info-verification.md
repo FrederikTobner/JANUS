@@ -23,7 +23,7 @@ Let's add proper validation before the kernel's entry point starts using this da
 First we verify we were loaded by a Multiboot2-compliant bootloader. If not we will just halt the system for now since we can't print any error message at this point.
 
 ```c-diff
-file: kernel/main.c
+file: kernel/kmain/main.c
 after: after function entry point
 ---
 void kernel_main(uint32_t magic, void * info)
@@ -42,7 +42,7 @@ void kernel_main(uint32_t magic, void * info)
 Then we ensure that the multiboot info pointer is valid. If not we will simply halt the system as well.
 
 ```c-diff
-file: kernel/main.c
+file: kernel/kmain/main.c
 after: after magic number verification
 ---
               __asm__ volatile("cli; hlt");

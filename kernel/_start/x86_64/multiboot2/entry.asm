@@ -1,10 +1,16 @@
-; Multiboot2 Entry Point
-; JANUS Boot Assembly Code
-;
-; Copyright (C) 2025 by Frederik Tobner
-; This file is part of JANUS.
-; Licensed under the GNU Affero General Public License v3.0
-; See https://www.gnu.org/licenses/agpl-3.0.en.html
+; Copyright (C) 2025 by Frederik Tobner                                     
+;                                                                           
+; This file is part of JANUS.                                              
+;                                                                           
+; Permission to use, copy, modify, and distribute this software and its     
+; documentation under the terms of the GNU Affero General Public License is 
+; hereby granted.                                                           
+; No representations are made about the suitability of this software for    
+; any purpose.                                                              
+; It is provided "as is" without express or implied warranty.               
+; See the <https://www.gnu.org/licenses/agpl-3.0.en.html>                   
+; GNU Affero General Public License                                         
+; License for more details.     
 
 ; This code is executed immediately after GRUB/Limine transfers control via Multiboot2.
 ; It sets up 64-bit long mode and calls the C kernel entry point.

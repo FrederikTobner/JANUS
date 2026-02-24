@@ -32,7 +32,7 @@ static u16 screen_height = 0;
 static u8 current_fg = TTY_COLOR_WHITE;
 static u8 current_bg = TTY_COLOR_BLACK;
 
-static void scroll(void)
+static void tty_scroll(void)
 {
     // Move all lines up by one 
     for (u16 y = 0; y < screen_height - 1; y++) {
@@ -92,7 +92,7 @@ void drivers_tty_putc(char c)
 
     /* Handle scroll */
     if (cursor_y >= screen_height) {
-        scroll();
+        tty_scroll();
         cursor_y = screen_height - 1;
     }
 
@@ -126,6 +126,9 @@ void drivers_tty_clear(void)
 
 void drivers_tty_set_cursor(u16 x, u16 y)
 {
+    if(screen_width == 0 || screen_height == 0) {
+        return; // Screen size not initialized
+    }
     cursor_x = (x < screen_width) ? x : screen_width - 1;
     cursor_y = (y < screen_height) ? y : screen_height - 1;
     arch_tty_set_cursor(cursor_x, cursor_y);

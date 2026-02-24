@@ -23,16 +23,16 @@
  * Uses the shared framebuffer implementation with Terminus 16x32 font.
  */
 
+#include <arch/drivers/tty.h>
 #include <arch/shared/drivers/framebuffer.h>
-#include <drivers/tty.h>
 
-/* Framebuffer state - shared implementation */
+// Framebuffer state - shared implementation
 static framebuffer_state_t g_framebuffer_state;
 
 error_t arch_tty_init(tty_display_config_t const * config)
 {
     if (config == NULL || config->framebuffer == NULL) {
-        /* AArch64 requires framebuffer - no fallback */
+        // AArch64 requires framebuffer - no fallback
         return -1;
     }
 
@@ -65,7 +65,7 @@ void arch_tty_write_cell(u16 x, u16 y, char c, u8 foreground, u8 background)
 
 void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background)
 {
-    /* Framebuffer doesn't store character data - return defaults */
+    // Framebuffer doesn't store character data - return defaults
     (void) x;
     (void) y;
     if (c) {
@@ -81,8 +81,8 @@ void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background
 
 void arch_tty_set_cursor(u16 x, u16 y)
 {
-    /* Software cursor - for now just track position */
-    /* Could implement visible cursor by inverting colors at cursor position */
+    // Software cursor - for now just track position
+    // Could implement visible cursor by inverting colors at cursor position
     (void) x;
     (void) y;
 }

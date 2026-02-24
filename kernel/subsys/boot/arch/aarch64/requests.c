@@ -7,14 +7,14 @@ struct limine_executable_address_response {
     u64 virtual_base;
 };
 
-/* External Limine request for executable address (defined in limine_requests.c) */
+// External Limine request for executable address (defined in limine_requests.c)
 extern volatile struct {
     u64 id[4];
     u64 revision;
     struct limine_executable_address_response * response;
 } limine_executable_address_request;
 
-void boot_arch_setup_requests(struct boot_info_requests * reqs)
+void boot_arch_setup_requests(struct boot_info_requests_t * reqs)
 {
     reqs->limine_executable_address_request = (void *) (unsigned long) &limine_executable_address_request;
 }

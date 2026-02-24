@@ -40,7 +40,7 @@ Documents describing the architecture and structure of the codebase.
   - Dependency graph and subsystem isolation
   - CMake auto-detection and build flow
 
-- **[Global-Include-Hierarchy.md](Code-Organization/Global-Include-Hierarchy.md)**
+- **[Global-Include-Hierarchy.md](Code-Organization/Global-Include-Directory.md)**
   - Header file organization (public vs internal)
   - Include path structure and namespacing
   - Architecture-specific headers (Tier 1/2/3)
@@ -83,6 +83,5 @@ When adding or modifying code:
 1. **Review Core Principles** first to understand the project's philosophy
 2. **Follow naming conventions** from Terminology.md
 3. **Organize code** according to Module-Structure.md
-4. **Design APIs** following API-Design.md guidelines
-5. **Format code** using `.clang-format` (see Coding-Style.md)
-6. **Document code** according to Documentation-Style.md
+4. **Format code** using `.clang-format` (see Coding-Style.md)
+5. **Document code** according to Documentation-Style.md

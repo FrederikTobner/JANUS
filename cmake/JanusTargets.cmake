@@ -473,12 +473,12 @@ function(janus_add_run_targets)
             COMMENT "Boots JANUS GRUB ISO (Multiboot2 - educational)"
         )
 
-        # Direct kernel load (not supported - QEMU requires Multiboot1)
+        # Direct kernel load (not supported - QEMU requires Multiboot1 for -kernel, and our Multiboot2 kernel is not compatible)
         add_custom_target(run-elf
             COMMAND ${CMAKE_COMMAND} -E echo "Note: QEMU -kernel only supports Multiboot1, not Multiboot2."
             COMMAND ${CMAKE_COMMAND} -E echo "Use 'ninja run' to boot via ISO instead."
             COMMAND ${CMAKE_COMMAND} -E false
-            DEPENDS kernel.elf
+            DEPENDS kernel-multiboot2.elf
             USES_TERMINAL
             COMMENT "Direct kernel boot not supported (QEMU requires Multiboot1)"
         )

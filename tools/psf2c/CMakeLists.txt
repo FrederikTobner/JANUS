@@ -1,5 +1,3 @@
-# Tools are built with the host compiler, not the cross-compiler
-# This allows them to run on the build machine
 cmake_minimum_required(VERSION 3.20)
 project(PSF2C VERSION 0.1.0 LANGUAGES C)
 

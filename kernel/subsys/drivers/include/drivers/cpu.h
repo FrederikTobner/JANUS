@@ -28,24 +28,32 @@
 #include <arch/drivers/cpu.h>
 #include <janus/attributes.h>
 
-static __always_inline void cpu_halt(void)
+static __always_inline void drivers_cpu_halt(void)
 {
     arch_cpu_halt();
 }
 
-static __always_inline __noreturn void drivers_cpu_halt_forever(void)
-{
-    arch_cpu_halt_forever();
-}
-
-static __always_inline void cpu_disable_interrupts(void)
+static __always_inline void drivers_cpu_disable_interrupts(void)
 {
     arch_cpu_disable_interrupts();
 }
 
-static __always_inline void cpu_enable_interrupts(void)
+static __always_inline void drivers_cpu_enable_interrupts(void)
 {
     arch_cpu_enable_interrupts();
 }
+/**
+ * @brief Disable interrupts and halt forever.
+ *
+ * This function never returns and is used for unrecoverable errors.
+ */
+static __always_inline __noreturn void drivers_cpu_halt_forever(void)
+{
+    arch_cpu_disable_interrupts();
+    for (;;) {
+        arch_cpu_halt();
+    }
+}
+
 
 #endif /* DRIVERS_CPU_H */

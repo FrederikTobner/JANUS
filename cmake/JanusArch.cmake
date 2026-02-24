@@ -41,16 +41,6 @@ function(janus_add_arch_subsys NAME)
 
     set(ARCH_BASE "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
-    # Convert sources to absolute paths
-    set(ABS_SOURCES "")
-    foreach(src ${ARCH_SOURCES})
-        if(IS_ABSOLUTE "${src}")
-            list(APPEND ABS_SOURCES "${src}")
-        else()
-            list(APPEND ABS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${src}")
-        endif()
-    endforeach()
-
     # Export arch sources to parent janus_add_subsys() via global property
     set_property(GLOBAL PROPERTY "JANUS_ARCH_SOURCES_${NAME}" "${ABS_SOURCES}")
     
@@ -62,7 +52,6 @@ function(janus_add_arch_subsys NAME)
         "${CMAKE_CURRENT_SOURCE_DIR}/internal"         # <arch/internal/drivers/*.h>
     )
 
-    message(STATUS "  [${NAME}] Arch sources (${JANUS_TARGET_ARCH}): ${ABS_SOURCES}")
     set(ARCH_LIB_NAME "${NAME}_arch")
     add_library(${ARCH_LIB_NAME} STATIC ${ARG_SOURCES})
     target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMMON_FLAGS})

@@ -1,22 +1,29 @@
 # The Multiboot2 Header
 
-Before we dive deeper, let’s clear up some boot jargon.
+Before we dive deeper, let’s first clear up some boot jargon.
 When your PC is powered on, multiple software layers will be traversed to get your kernel running.
 The first layer is called the firmware.
-It is the code burned into your motherboard and the first thing that runs when you hit the power button.
-There are two main types of firmware on modern Computers.
+It is the code, that is burned into your motherboard and the first thing that runs after you press the power button on a PC.
+Firmware on modern computers is categorized into two distinct main types. 
 The older BIOS (Basic Input Output System) and the more modern UEFI (Unified Extensible Firmware Interface).
 
-The second layer is the boot loader. The boot loader is a small program loaded by the firmware. Its job is to find your kernel and hand over control.
+The second layer is the boot loader. 
+The boot loader is a small program loaded by the firmware. 
+Its job is to find your kernel and hand over control.
 
-The last layer is your kernel itself. This is the operating system code we will be writing in this book.
+The last layer is your kernel itself. 
+This is the operating system code we will be writing in this book.
 
 They way how we transfer control from the bootloader to our kernel is defined by the boot sequence standard.
-It defines how the kernel should be structured so that the bootloader can find and load it correctly and what information the bootloader will provide to the kernel when it is loaded. Additionally it defines the machine state the kernel can expect when it is loaded.
+It defines how the kernel should be structured so that the bootloader can find and load it correctly and what information the bootloader will provide to the kernel when it is loaded. 
+Additionally it defines the state of the machine, that the kernel can expect, after it is loaded.
 
 [!side]
 **Aside: Why "Multiboot"?**
-Back in the 90s, every OS had its own weird boot protocol. Want to boot Linux? Use LILO. Want FreeBSD? Different loader. GRUB said "enough of this nonsense" and created Multiboot—a universal protocol. Now any OS that implements it can boot from GRUB.
+Back in the 90s, every OS had its own weird boot protocol. 
+Want to boot Linux? Use LILO. Want FreeBSD? Different loader. 
+GRUB said "enough of this nonsense" and created Multiboot—a universal protocol. 
+Now any OS that implements it can boot using GRUB.
 [/!side]
 
 We will be using the Multiboot2 standard in this book.
@@ -102,7 +109,7 @@ Two magic numbers, two different jobs. The bootloader magic (`0x36d76289`) is wh
 Now let's build the Multiboot2 header in assembly.
 
 ```x86asm-diff
-file: kernel/boot/multiboot.asm
+file: kernel/_start/x86_64/multiboot2/header.asm
 replace: entire file
 ---
 +section .multiboot
@@ -112,7 +119,7 @@ replace: entire file
 The `.multiboot` section gets its own special spot at the start of our kernel binary. The `align 8` ensures everything starts on an 8-byte boundary—Multiboot2 is picky about alignment, and misaligned headers mean GRUB ignores you completely.
 
 ```x86asm-diff
-file: kernel/boot/multiboot.asm
+file: kernel/_start/x86_64/multiboot2/header.asm
 after: align 8
 ---
  align 8
@@ -130,7 +137,7 @@ If it doesn't find it, GRUB will refuse to load our kernel.
 The architecture field tells GRUB what CPU mode we expect: `0` means i386 protected mode (32-bit).
 
 ```x86asm-diff
-file: kernel/boot/multiboot.asm
+file: kernel/_start/x86_64/multiboot2/header.asm
 after: Architecture definition
 ---
      dd 0
@@ -149,7 +156,7 @@ The checksum is like a parity bit for the entire header. It catches corruption f
 Ask GRUB for memory information we'll need later:
 
 ```x86asm-diff
-file: boot/multiboot.asm
+file: kernel/_start/x86_64/multiboot2/header.asm
 after: kernel/boot definition
 ---
      dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
@@ -172,7 +179,7 @@ This tag requests that GRUB provides us with memory map information when it load
 Every Multiboot2 header must end with this tag:
 
 ```x86asm-diff
-file: kernel/boot/multiboot.asm
+file: kernel/_start/x86_64/multiboot2/header.asm
 after: info_request_end label
 ---
  info_request_end:

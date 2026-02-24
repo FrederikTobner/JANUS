@@ -9,6 +9,8 @@ JANUS supports two target architectures:
 - **x86_64** (default) - Standard PC/server architecture
 - **aarch64** - ARM64 architecture (QEMU virt machine only, hardware support requires DTB parsing)
 
+**Note:** When switching architectures, delete the build directory first: `rm -rf build`
+
 Set the target architecture when configuring CMake:
 
 ```bash

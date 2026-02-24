@@ -178,12 +178,6 @@ after: checking the multiboot info
 +  vga_text_write_string("hello world\n");
 ```
 
-[!side]
-If you notice that the comment block above `kernel_main()` claims we’re in “32-bit protected mode with paging disabled”: that was true earlier in the project.
-At the moment, `boot.asm` has already switched us into long mode and enabled paging before it calls into C.
-The code is right; the comment will need to catch up.
-[/!side]
-
 ## TODO
 
 - [ ] Decide whether we want to rely on GRUB’s text mode, or explicitly request a text mode / framebuffer in Multiboot2 and implement the corresponding output path.

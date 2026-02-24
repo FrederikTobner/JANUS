@@ -12,9 +12,7 @@ else()
     message(FATAL_ERROR "Unable to detect underlying system")
 endif()
 
-# Target architecture (x86_64 or aarch64)
 set(JANUS_TARGET_PLATFORM "elf")
-
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(JANUS_COMPILER_CLANG TRUE)
@@ -43,6 +41,10 @@ endif()
 
 # Export compile commands for clangd/IDE support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
+
+# Generate build timestamp
+string(TIMESTAMP JANUS_BUILD_DATE "%Y-%m-%d")
+string(TIMESTAMP JANUS_BUILD_TIME "%H:%M:%S")
 
 # Common compiler flags for all kernel code
 set(JANUS_COMMON_FLAGS

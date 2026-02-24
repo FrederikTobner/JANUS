@@ -22,6 +22,9 @@ Every design decision should be understandable and well-documented. Code serves 
 
 Following Linux kernel and LLVM design patterns, JANUS is built as a collection of independent, well-defined modules. Each module has clear boundaries, explicit dependencies, and can be understood in isolation.
 
+
+## Coding Standards
+
 ### Memory Access Explicitness
 
 **Prefer explicit pointer arithmetic over array indexing for multi-dimensional data structures.**

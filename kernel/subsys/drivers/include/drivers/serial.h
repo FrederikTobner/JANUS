@@ -41,7 +41,7 @@
  * @param kernel_virt_base Virtual base address of the kernel image.
  * @return 0 on success, negative error code on failure.
  */
-static __always_inline error_t drivers_serial_init(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base)
+static __always_inline error_t drivers_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
 {
     return arch_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
 }

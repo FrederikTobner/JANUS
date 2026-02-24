@@ -2,13 +2,6 @@
 
 We have source files. We have a linker script. But manually assembling and linking everything is tedious and error-prone. Time to automate.
 
-> **The Crux: Why Not Just a Shell Script?**
->
-> You could write a bash script: `running nasm on our assembly files, clang on our C files, and then use ld to create the ELF file`. It would work! For about a week. Then you add a new source file and forget to update the script. Or you want debug builds vs. release builds. Or you work on multiple systems with different compilers, linkers or a different underlying build system, like Make instead of Ninja. Shell scripts don't scale well in that regard.
-> CMake handles dependency tracking, parallel builds, cross-platform differences, and allows you to change the underlying build system.
-> For that reason it is called a meta build system. It's the industry standard for good reason.
-> Newer meta build systems like Meson and Bazel exist, but CMake is still the most widely used when working with C. Therefore, we'll use it for JANUS.
-
 [!side]
 The Linux kernel uses Makefiles directly. We use CMake because it's easier to learn and more portable.
 [/!side]
@@ -17,12 +10,16 @@ JANUS utilizes a modular CMake structure where each component is self-contained:
 
 ```
 build system/
-├── CMakeLists.txt (root)           # Orchestrates everything
-├── cmake/
-│   ├── JanusPlatform.cmake       # Compiler detection, flags
-│   └── JanusHelpers.cmake        # Helper functions
-├── boot/CMakeLists.txt            # Boot module
-└── kernel/CMakeLists.txt          # Final kernel executable
+├── CMakeLists.txt (root)            # Orchestrates everything
+├── cmake/                           # CMake modules
+│   ├── JanusPlatform.cmake          # Compiler detection, flags
+│   └── JanusHelpers.cmake           # Helper functions
+└── kernel/CMakeLists.txt            # Orchestrates kernel build
+    ├── lib/                         # Reusable libraries
+    ├── kmain                        # Main kernel code
+    │    ├── CMakeLists.txt          # Builds kernel.elf
+    │    └── include/boot/           # Boot-specific headers
+    └── subsys                       # Subsystems like memory management, drivers, boot
 ```
 
 **Why modular?** Each module builds independently. Change one file in `boot/`, only that library rebuilds. The kernel just re-links. Fast incremental builds.
