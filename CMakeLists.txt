@@ -18,6 +18,7 @@ if(NOT JANUS_TARGET_ARCH STREQUAL "x86_64" AND NOT JANUS_TARGET_ARCH STREQUAL "a
     message(FATAL_ERROR "Invalid JANUS_TARGET_ARCH: ${JANUS_TARGET_ARCH}. Must be 'x86_64' or 'aarch64'.")
 endif()
 
+message("Target arch: ${JANUS_TARGET_ARCH}")
 
 # Enable appropriate assembler based on target architecture
 if(JANUS_TARGET_ARCH STREQUAL "x86_64")

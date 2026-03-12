@@ -1,6 +1,8 @@
 # JANUS Platform Detection and Configuration
 # Defines platform-specific settings and common compiler flags
 
+include_guard(GLOBAL)
+
 # Detect host platform
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(JANUS_HOST_LINUX TRUE)
@@ -25,9 +27,9 @@ endif()
 
 # Cross-compilation setup for aarch64
 if(JANUS_TARGET_ARCH STREQUAL "aarch64")
-   Include(${CMAKE_SOURCE_DIR}/cmake/arch/aarch64/JanusPlatform.cmake) 
+    include(${CMAKE_SOURCE_DIR}/cmake/arch/aarch64/JanusPlatform.cmake) 
 elseif(JANUS_TARGET_ARCH STREQUAL "x86_64")
-    Include(${CMAKE_SOURCE_DIR}/cmake/arch/x86_64/JanusPlatform.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/arch/x86_64/JanusPlatform.cmake)
     # Boot protocols to include in kernel (both by default for x86_64)
     set(JANUS_BOOT_PROTOCOLS "multiboot2;limine" CACHE STRING "Boot protocols to support (semicolon-separated)")
 else()

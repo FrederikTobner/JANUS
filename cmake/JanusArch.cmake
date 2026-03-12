@@ -62,7 +62,7 @@ function(janus_add_arch_subsys NAME)
         "${CMAKE_CURRENT_SOURCE_DIR}/../include"         # <arch/include/drivers/*.h>
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/internal"         # <arch/internal/drivers/*.h>
-        "${CMAKE_CURRENT_SOURCE_DIR}/../../include"         # <drivrs/include/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../include"         # <drivers/include/*.h>
     )
     # Link dependencies (only lib allowed, not other subsystems)
     if(ARG_DEPENDENCIES)

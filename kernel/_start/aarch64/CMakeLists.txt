@@ -25,9 +25,9 @@ target_compile_options(_start_limine PRIVATE ${JANUS_COMMON_FLAGS} ${CMAKE_ASM_F
 
 # Build kernel-limine.elf with Limine linker script
 include(JanusKernel)
-janus_link_kernel(
+janus_add_kernel(
     TARGET kernel-limine.elf
     LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-    LIBRARIES drivers boot
+    DEPENDENCIES drivers boot
     OBJECTS _start_limine _start_limine_requests kmain
 )

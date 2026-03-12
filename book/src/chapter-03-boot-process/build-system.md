@@ -485,7 +485,7 @@ cmake -B build -G Ninja
 ninja -C build
 ```
 
-This will produce the `build/kernel.elf`file a bootable ELF executable.
+This will produce the `build/kernel-multiboot2.elf`file a bootable ELF executable.
 But in order to actually boot it, we need to package it into a ISO image.
 
 [!side]
@@ -500,13 +500,13 @@ ISO images are named after the ISO 9660 standard that specifies the file system 
         ┌───────────────┼───────────────┐
         │               │               │
         ▼               ▼               ▼
-   multiboot.asm   boot.asm           main.c
+   header.asm       entry.asm         main.c
         │               │               │
         ▼               ▼               ▼
-      [NASM]           [NASM]          [Clang]
+      [NASM]          [NASM]         [Clang]
         │               │               │
         ▼               ▼               ▼
-   multiboot.o      boot.o           *.o files
+   multiboot.o       boot.o         *.o files
         │               │               │
         └───────┬───────┴───────┬───────┘
                 │               │
@@ -519,8 +519,7 @@ ISO images are named after the ISO 9660 standard that specifies the file system 
                    (linker.ld)
                         │
                         ▼
-                  kernel.elf ✓
-                (Bootable!)
+             kernel-mutliboot2.elf ✓
 ```
 
 > **TODO: Hand-drawn illustration idea**

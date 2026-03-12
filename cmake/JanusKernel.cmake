@@ -16,19 +16,19 @@ endif()
 # Supports building multiple kernel binaries for different boot protocols.
 #
 # Usage:
-#   janus_link_kernel(
+#   janus_add_kernel(
 #       TARGET kernel-limine.elf        # Optional, defaults to kernel.elf
 #       LINKER_SCRIPT path/to/link.ld
-#       LIBRARIES arch drivers          # Static libraries
+#       DEPENDENCIES dep1 dep2
 #       OBJECTS boot init               # Object libraries
 #   )
 #
-function(janus_link_kernel)
+function(janus_add_kernel)
     cmake_parse_arguments(
         ARG
         ""
         "TARGET;LINKER_SCRIPT"
-        "LIBRARIES;OBJECTS"
+        "DEPENDENCIES;OBJECTS"
         ${ARGN}
     )
 
@@ -53,9 +53,9 @@ function(janus_link_kernel)
     # Create kernel executable from object libraries
     add_executable(${ARG_TARGET} ${_object_sources})
 
-    # Link static libraries
-    if(ARG_LIBRARIES)
-        target_link_libraries(${ARG_TARGET} PRIVATE ${ARG_LIBRARIES})
+    # Link dependencies with kernel executable
+    if(ARG_DEPENDENCIES)
+            target_link_libraries(${ARG_TARGET} PRIVATE ${ARG_DEPENDENCIES})
     endif()
 
     # Include directories
@@ -65,7 +65,6 @@ function(janus_link_kernel)
             ${CMAKE_BINARY_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/subsys/drivers/include
             ${CMAKE_SOURCE_DIR}/kernel/subsys/boot/include
-            ${CMAKE_SOURCE_DIR}/kernel/arch/include
     )
 
     # Custom linker flags with linker script
