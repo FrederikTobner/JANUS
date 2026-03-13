@@ -32,13 +32,9 @@
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-/* -------------------------- Boot Protocol Magic -------------------------- */
-
 /// Limine magic value passed by our entry point (identifies Limine boot)
 /// This is "LIMINE\0\0" encoded as a u64
 #define LIMINE_BOOTLOADER_MAGIC 0x4C494D494E450000ULL
-
-/* -------------------------- Internal Structures -------------------------- */
 
 /// Limine base revision (protocol version)
 struct limine_base_revision {
@@ -57,8 +53,6 @@ struct limine_hhdm_response {
     u64 revision;
     u64 offset;
 };
-
-/* -------------------------- Memory Map -------------------------- */
 
 /// Memory map entry types
 #define LIMINE_MEMMAP_USABLE                 0
@@ -83,8 +77,6 @@ struct limine_memmap_response {
     u64 entry_count;
     struct limine_memmap_entry ** entries;
 };
-
-/* -------------------------- Executable Address -------------------------- */
 
 /// Executable address response - provides kernel physical/virtual base addresses
 struct limine_executable_address_response {

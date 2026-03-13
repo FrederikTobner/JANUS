@@ -1,0 +1,43 @@
+name: Build
+
+on:
+  pull_request:
+    branches: ["main", "master"]
+
+jobs:
+  build:
+    name: ${{ matrix.arch }}-${{ matrix.compiler }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
+        compiler: [gcc, clang]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake ninja-build
+
+      - name: Install compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "gcc" ] && [ "${{ matrix.arch }}" = "aarch64" ]; then
+            sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu
+          elif [ "${{ matrix.compiler }}" = "clang" ]; then
+            sudo apt-get install -y --no-install-recommends clang llvm
+          fi
+
+      - name: Install Assembler
+        if: matrix.arch == 'x86_64'
+        run: sudo apt-get install -y --no-install-recommends nasm
+
+      - name: Install Compiler suitable for aarch64
+        if: matrix.arch == 'aarch64'
+        run: sudo apt-get install -y --no-install-recommends binutils-aarch64-linux-gnu
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.arch }}-${{ matrix.compiler }} -D CMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }}
