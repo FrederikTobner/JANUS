@@ -17,7 +17,6 @@ elseif(JANUS_COMPILER_GCC)
     set(JANUS_ARCH_FLAGS
         -m64
         -march=x86-64
-        -mcmodel=kernel # Required for kernel code that may be >4GB in size
         -mno-red-zone
     )
 else()

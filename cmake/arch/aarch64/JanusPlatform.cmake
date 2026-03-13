@@ -10,14 +10,12 @@ if(JANUS_COMPILER_CLANG)
         --target=aarch64-elf
         -march=armv8-a
         -mgeneral-regs-only
-        -mcmodel=kernel # Required for kernel code that may be >4GB in size
     )
 elseif(JANUS_COMPILER_GCC)
     # GCC aarch64
     set(JANUS_ARCH_FLAGS
         -march=armv8-a
         -mgeneral-regs-only
-        -mcmodel=kernel # Required for kernel code that may be >4GB in size
     )
 else()
     message(FATAL_ERROR "Unsupported compiler for aarch64: ${CMAKE_C_COMPILER_ID}")
