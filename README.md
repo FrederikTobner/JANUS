@@ -7,25 +7,27 @@ JANUS (Just ANother Unix-like System) is an educational operating system kernel 
 Building the kernel
 
 ```bash
-# x86_64 (default)
+# Using presets (recommended):
+cmake --preset x86_64-gcc        # or x86_64-clang, aarch64-gcc, aarch64-clang
+cmake --build --preset x86_64-gcc
+
+# Or manually (defaults to x86_64 with system compiler):
 cmake -B build -G Ninja
 ninja -C build
-
-# aarch64
-cmake -B build -DJANUS_TARGET_ARCH=aarch64 -G Ninja
-ninja -C build
 ```
+
+Available presets: `x86_64-gcc`, `x86_64-clang`, `aarch64-gcc`, `aarch64-clang`
 
 Creating a bootable ISO
 
 ```bash
-ninja -C build iso
+ninja -C build iso         # or: cmake --build --preset <preset> --target iso
 ```
 
 Running in QEMU
 
 ```bash
-ninja -C build run
+ninja -C build run         # or: cmake --build --preset <preset> --target run
 ```
 
 See [Documentation/Setup.md](Documentation/Setup.md) for detailed installation instructions.

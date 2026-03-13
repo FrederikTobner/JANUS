@@ -6,22 +6,19 @@
 # GAS (GNU Assembler) is used instead of NASM for aarch64 assembly.
 
 # Limine requests in portable C (shared across architectures)
-enable_language(ASM)
-
 add_library(_start_limine_requests OBJECT
     ${CMAKE_SOURCE_DIR}/kernel/_start/common/limine_requests.c
 )
 target_include_directories(_start_limine_requests PRIVATE
     ${CMAKE_SOURCE_DIR}/kernel/include
 )
-target_compile_options(_start_limine_requests PRIVATE ${JANUS_COMMON_FLAGS})
+target_compile_options(_start_limine_requests PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 
 # aarch64 specific Limine entry point (GAS assembly)
 add_library(_start_limine OBJECT
     limine/entry.S
 )
-
-target_compile_options(_start_limine PRIVATE ${JANUS_COMMON_FLAGS} ${CMAKE_ASM_FLAGS})
+target_compile_options(_start_limine PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 
 # Build kernel-limine.elf with Limine linker script
 include(JanusKernel)

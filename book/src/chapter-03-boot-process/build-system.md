@@ -54,7 +54,7 @@ Which is neat, but they require runtime support that we don't have in a freestan
 
 > **Implementation detail:**
 >
-> JanusPlatform.cmake sets these flags in variables like `JANUS_COMMON_FLAGS`, `JANUS_DEBUG_FLAGS`, etc. The helper functions in JanusHelpers.cmake apply them to targets automatically. This keeps platform-specific logic centralized—if you port to ARM later, you only change one file.
+> JanusPlatform.cmake sets these flags in variables like `JANUS_COMPILE_OPTIONS_COMMON`, `JANUS_COMPILE_OPTIONS_DEBUG`, etc. The helper functions in JanusHelpers.cmake apply them to targets automatically. This keeps platform-specific logic centralized—if you port to ARM later, you only change one file.
 >
 > For now, let's create a minimal `JanusPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
 
@@ -101,7 +101,7 @@ after: entire file
 + set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
 + 
 + if(JANUS_COMPILER_CLANG)
-+     set(JANUS_COMMON_FLAGS
++     set(JANUS_COMPILE_OPTIONS_COMMON
 +         -target x86_64-elf
 +         -nostdlib
 +         -ffreestanding
@@ -117,7 +117,7 @@ after: entire file
 +         -Wpointer-arith
 +     )
 + else()
-+     set(JANUS_COMMON_FLAGS
++     set(JANUS_COMPILE_OPTIONS_COMMON
 +         -nostdlib
 +         -ffreestanding
 +         -fno-builtin
@@ -133,7 +133,7 @@ after: entire file
 +     )
 + endif()
 + 
-+ set(JANUS_DEBUG_FLAGS
++ set(JANUS_COMPILE_OPTIONS_DEBUG
 +     -g3
 +     -gdwarf-4
 +     -O0
@@ -141,12 +141,12 @@ after: entire file
 + 
 + )
 + 
-+ set(JANUS_RELEASE_FLAGS
++ set(JANUS_COMPILE_OPTIONS_RELEASE
 +     -O2
 +     -DNDEBUG
 + )
 + 
-+ set(JANUS_MINSIZEREL_FLAGS
++ set(JANUS_COMPILE_OPTIONS_MINSIZEREL
 +     -Os
 +     -DNDEBUG
 + )
@@ -217,14 +217,14 @@ replace: entire file
 +          target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
 +      endif()
 +  
-+      target_compile_options(${NAME} PRIVATE ${JANUS_COMMON_FLAGS})
++      target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 +      
 +      if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-+          target_compile_options(${NAME} PRIVATE ${JANUS_DEBUG_FLAGS})
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
 +      elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-+          target_compile_options(${NAME} PRIVATE ${JANUS_RELEASE_FLAGS})
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
 +      elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-+          target_compile_options(${NAME} PRIVATE ${JANUS_MINSIZEREL_FLAGS})
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
 +      endif()
 +  
 +      message(STATUS "  Added library: ${NAME}")
@@ -278,14 +278,14 @@ replace: entire file
 +          target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
 +      endif()
 +  
-+      target_compile_options(${NAME} PRIVATE ${JANUS_COMMON_FLAGS})
++      target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 +      
 +      if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-+          target_compile_options(${NAME} PRIVATE ${JANUS_DEBUG_FLAGS})
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
 +      elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-+          target_compile_options(${NAME} PRIVATE ${JANUS_RELEASE_FLAGS})
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
 +      elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-+          target_compile_options(${NAME} PRIVATE ${JANUS_MINSIZEREL_FLAGS})
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
 +      endif()
 +  
 +      message(STATUS "  Added module: ${NAME}")
@@ -331,13 +331,13 @@ replace: entire file
 +              ${CMAKE_BINARY_DIR}/include
 +      )
 +  
-+      target_compile_options(kernel.elf PRIVATE ${JANUS_COMMON_FLAGS})
++      target_compile_options(kernel.elf PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 +      if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-+          target_compile_options(kernel.elf PRIVATE ${JANUS_DEBUG_FLAGS})
++          target_compile_options(kernel.elf PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
 +      elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-+          target_compile_options(kernel.elf PRIVATE ${JANUS_RELEASE_FLAGS})
++          target_compile_options(kernel.elf PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
 +      elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-+          target_compile_options(kernel.elf PRIVATE ${JANUS_MINSIZEREL_FLAGS})
++          target_compile_options(kernel.elf PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
 +      endif()
 +  
 +      set_target_properties(kernel.elf PROPERTIES

@@ -67,9 +67,14 @@ function(janus_add_kernel)
             ${CMAKE_SOURCE_DIR}/kernel/subsys/boot/include
     )
 
-    # Custom linker flags with linker script
+    # Linker flags — use target_link_options to APPEND to (not replace) global flags
+    # This preserves CMAKE_EXE_LINKER_FLAGS set by toolchain files (e.g. --target, -fuse-ld)
+    target_link_options(${ARG_TARGET} PRIVATE
+        -T ${ARG_LINKER_SCRIPT}
+        -nostdlib
+        -static
+    )
     set_target_properties(${ARG_TARGET} PROPERTIES
-        LINK_FLAGS "-T ${ARG_LINKER_SCRIPT} -nostdlib -static"
         LINK_DEPENDS "${ARG_LINKER_SCRIPT}"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     )

@@ -22,7 +22,7 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
     target_include_directories(_start_limine_requests PRIVATE
         ${CMAKE_SOURCE_DIR}/kernel/include
     )
-    target_compile_options(_start_limine_requests PRIVATE ${JANUS_COMMON_FLAGS})
+    target_compile_options(_start_limine_requests PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 
     # x86_64 specific Limine entry point (assembly)
     add_library(_start_limine OBJECT

@@ -54,7 +54,7 @@ function(janus_add_arch_subsys NAME)
 
     set(ARCH_LIB_NAME "${NAME}_arch")
     add_library(${ARCH_LIB_NAME} STATIC ${ARG_SOURCES})
-    target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMMON_FLAGS})
+    target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
     target_include_directories(${ARCH_LIB_NAME} 
     PUBLIC 
         "${CMAKE_CURRENT_SOURCE_DIR}/include"          # <arch/impl/drivers/*.h>
@@ -70,10 +70,10 @@ function(janus_add_arch_subsys NAME)
     endif()
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_DEBUG_FLAGS})
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_RELEASE_FLAGS})
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
     elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_MINSIZEREL_FLAGS})
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
     endif()
 endfunction()

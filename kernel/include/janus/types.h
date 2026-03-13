@@ -31,15 +31,8 @@
 typedef __u64 phys_addr_t; ///< Physical memory address
 typedef __u64 virt_addr_t; ///< Virtual memory address
 
-// Page frame number (physical page identifier)
-typedef __u64 pfn_t; ///< Page frame number
-
 // Process and thread identifiers
 typedef __s32 pid_t; ///< Process ID
-typedef __s32 tid_t; ///< Thread ID
-
-// Device number
-typedef __u32 dev_t; ///< Device number
 
 // Generic error type for kernel operations
 typedef __s32 error_t; ///< Error code (negative = error, 0 = success, positive = info)

@@ -88,14 +88,14 @@ function(janus_add_subsys NAME)
     endif()
 
     # Apply compiler flags
-    target_compile_options(${NAME} PRIVATE ${JANUS_COMMON_FLAGS})
+    target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
     
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(${NAME} PRIVATE ${JANUS_DEBUG_FLAGS})
+        target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
     elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        target_compile_options(${NAME} PRIVATE ${JANUS_RELEASE_FLAGS})
+        target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
     elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        target_compile_options(${NAME} PRIVATE ${JANUS_MINSIZEREL_FLAGS})
+        target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
     endif()
 
 endfunction()

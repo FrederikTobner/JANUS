@@ -9,22 +9,42 @@ JANUS supports two target architectures:
 - **x86_64** (default) - Standard PC/server architecture
 - **aarch64** - ARM64 architecture (QEMU virt machine only, hardware support requires DTB parsing)
 
-**Note:** When switching architectures, delete the build directory first: `rm -rf build`
+### Using CMake Presets (Recommended)
 
-Set the target architecture when configuring CMake:
+The project provides presets for all supported compiler/architecture combinations:
 
 ```bash
-# x86_64 (default)
-cmake -B build -DJANUS_TARGET_ARCH=x86_64 -G Ninja
-
-# aarch64
-cmake -B build -DJANUS_TARGET_ARCH=aarch64 -G Ninja
+cmake --preset x86_64-gcc       # x86_64 with GCC
+cmake --preset x86_64-clang     # x86_64 with Clang
+cmake --preset aarch64-gcc      # aarch64 with GCC (cross-compile)
+cmake --preset aarch64-clang    # aarch64 with Clang (cross-compile)
 ```
 
-**Important:** When switching between architectures, you must delete and recreate the build directory to avoid CMake cache conflicts:
+Each preset uses its own build directory (`build-<preset-name>/`), so you can have
+multiple configurations at the same time without conflicts.
+
+### Using Toolchain Files Directly
 
 ```bash
-rm -rf build && cmake -B build -DJANUS_TARGET_ARCH=<arch> -G Ninja
+cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-clang.cmake
+```
+
+### Native x86_64 Build (No Preset)
+
+On an x86_64 host, you can simply run:
+
+```bash
+cmake -B build -G Ninja
+ninja -C build
+```
+
+This defaults to x86_64 with whatever system compiler CMake finds. GCC users will
+get a validation check to ensure the compiler targets the correct architecture.
+
+**Note:** When switching architectures without presets, delete the build directory first:
+
+```bash
+rm -rf build && cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/<arch>-<compiler>.cmake -G Ninja
 ```
 
 ## Required Dependencies
@@ -57,33 +77,45 @@ sudo pacman -S ninja
 
 ### Compiler (x86_64)
 
-**Clang 17 or later**
+**GCC** or **Clang**
 
-JANUS requires Clang for C17 support and cross-compilation to x86_64-elf.
+JANUS supports both GCC and Clang for x86_64 builds.
 
 ```bash
 # Debian/Ubuntu
-sudo apt install clang
+sudo apt install gcc clang
 
 # Arch Linux
-sudo pacman -S clang
+sudo pacman -S gcc clang
 ```
-
-**Why Clang?** We use Clang for its excellent cross-compilation support, consistent behavior across platforms, and superior diagnostics.
 
 ### Cross-Compiler (aarch64)
 
-**aarch64-linux-gnu-gcc**
+**aarch64-linux-gnu-gcc** and/or **Clang**
 
-For building aarch64 kernels, you need the ARM64 cross-compilation toolchain.
+For building aarch64 kernels, you need either the ARM64 GCC cross-compilation
+toolchain or Clang (which supports cross-compilation natively).
 
 ```bash
+# GCC cross-compiler
 # Debian/Ubuntu
 sudo apt install gcc-aarch64-linux-gnu
 
 # Arch Linux
 sudo pacman -S aarch64-linux-gnu-gcc
 ```
+
+```bash
+# Clang (needs GNU cross-binutils for linking)
+# Debian/Ubuntu
+sudo apt install clang llvm gcc-aarch64-linux-gnu
+
+# Arch Linux
+sudo pacman -S clang llvm aarch64-linux-gnu-gcc
+```
+
+**Note:** Even when using Clang for aarch64, you need `aarch64-linux-gnu-ld` and
+`aarch64-linux-gnu-objcopy` from the GNU cross-binutils package.
 
 ### Assembler
 
@@ -168,27 +200,41 @@ sudo pacman -S grub xorriso mtools
 
 ## Quick Start
 
-### Building for x86_64
+### Building with Presets (Recommended)
 
 ```bash
-# Configure and build
-rm -rf build
-cmake -B build -DJANUS_TARGET_ARCH=x86_64 -G Ninja
+# x86_64 with GCC
+cmake --preset x86_64-gcc
+cmake --build --preset x86_64-gcc
+
+# x86_64 with Clang
+cmake --preset x86_64-clang
+cmake --build --preset x86_64-clang
+
+# aarch64 with GCC (cross-compile)
+cmake --preset aarch64-gcc
+cmake --build --preset aarch64-gcc
+
+# aarch64 with Clang (cross-compile)
+cmake --preset aarch64-clang
+cmake --build --preset aarch64-clang
+
+# Run in QEMU
+cmake --build --preset <preset> --target run
+```
+
+### Building without Presets
+
+```bash
+# x86_64 (default, uses system compiler)
+cmake -B build -G Ninja
+ninja -C build
+
+# aarch64 with toolchain file
+cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-gcc.cmake
 ninja -C build
 
 # Run in QEMU
-ninja -C build run
-```
-
-### Building for aarch64
-
-```bash
-# Configure and build
-rm -rf build
-cmake -B build -DJANUS_TARGET_ARCH=aarch64 -G Ninja
-ninja -C build
-
-# Run in QEMU (virt machine)
 ninja -C build run
 ```
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The [`include/janus/`](../../include/janus/) directory contains **truly global** headers that are used across many modules and don't belong to any single module.
+The [`include/janus/`](../../kernel/include/janus/) directory contains **truly global** headers that are used across many subsystems and kernel libraries and don't belong to any single module.
 
 > **Rule**: If a header is only used by a couple of kernel modules, keep it in a kernel library. Only promote to global if it's genuinely cross-cutting.
 
@@ -24,4 +24,3 @@ Headers that define fundamental kernel-wide concepts:
 For functionality used by many kernel modules we are using the `/kernel/lib` directory.
 Kernel utility libraries are isolated from each other and are not allowed to depend on any other kernel libraries or kernel modules.
 They are only allowed to use our core kernel definitions from `kernel/include/janus/`.
-

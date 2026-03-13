@@ -1,0 +1,76 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "x86_64-gcc",
+            "displayName": "x86_64 (GCC)",
+            "description": "Build for x86_64 using GCC",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-${presetName}",
+            "toolchainFile": "${sourceDir}/cmake/toolchains/x86_64-gcc.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "JANUS_TARGET_ARCH": "x86_64"
+            }
+        },
+        {
+            "name": "x86_64-clang",
+            "displayName": "x86_64 (Clang)",
+            "description": "Build for x86_64 using Clang",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-${presetName}",
+            "toolchainFile": "${sourceDir}/cmake/toolchains/x86_64-clang.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "JANUS_TARGET_ARCH": "x86_64"
+            }
+        },
+        {
+            "name": "aarch64-gcc",
+            "displayName": "aarch64 (GCC)",
+            "description": "Cross-compile for aarch64 using GCC",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-${presetName}",
+            "toolchainFile": "${sourceDir}/cmake/toolchains/aarch64-gcc.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "JANUS_TARGET_ARCH": "aarch64"
+            }
+        },
+        {
+            "name": "aarch64-clang",
+            "displayName": "aarch64 (Clang)",
+            "description": "Cross-compile for aarch64 using Clang",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-${presetName}",
+            "toolchainFile": "${sourceDir}/cmake/toolchains/aarch64-clang.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "JANUS_TARGET_ARCH": "aarch64"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "x86_64-gcc",
+            "configurePreset": "x86_64-gcc"
+        },
+        {
+            "name": "x86_64-clang",
+            "configurePreset": "x86_64-clang"
+        },
+        {
+            "name": "aarch64-gcc",
+            "configurePreset": "aarch64-gcc"
+        },
+        {
+            "name": "aarch64-clang",
+            "configurePreset": "aarch64-clang"
+        }
+    ]
+}

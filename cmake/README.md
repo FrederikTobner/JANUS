@@ -4,16 +4,40 @@ CMake modules and helper functions for JANUS build system.
 
 ## Purpose
 
-Provides platform detection, cross-compilation setup, and build helper functions to simplify module CMakeLists.txt files.
+Provides toolchain files for cross-compilation, platform detection, and build helper
+functions to simplify module CMakeLists.txt files.
 
 ## Contents
 
+### toolchains/
+
+Toolchain files for each compiler/architecture combination. These are processed
+*before* `project()` and set the compiler, linker, and binutils.
+
+- `aarch64-gcc.cmake` — GCC cross-compiler for aarch64
+- `aarch64-clang.cmake` — Clang cross-compiler for aarch64
+- `x86_64-gcc.cmake` — GCC for x86_64 (native)
+- `x86_64-clang.cmake` — Clang for x86_64
+
+Usage:
+
+```bash
+cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-clang.cmake
+# Or use a preset: cmake --preset aarch64-clang
+```
+
 ### JanusPlatform.cmake
 
-- Platform and compiler detection
-- Cross-compilation toolchain setup for x86_64-elf
-- Compiler flags configuration (freestanding, no-stdlib, etc.)
-- Build type configuration (Debug, Release)
+- Host platform detection
+- Compiler ID detection and GCC/architecture validation
+- Includes arch-specific flags from `arch/<arch>/JanusPlatform.cmake`
+- Common compiler flags (freestanding, no-stdlib, warnings, etc.)
+- Build type configuration (Debug, Release, MinSizeRel)
+
+### arch/\<arch\>/JanusPlatform.cmake
+
+Architecture-specific compiler flags and boot protocol configuration. No compiler
+or linker selection — that is handled by toolchain files.
 
 ### JanusSubsys.cmake
 

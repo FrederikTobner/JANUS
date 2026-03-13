@@ -1,17 +1,19 @@
 # JANUS Platform Detection and Configuration
-# Defines platform-specific settings and common compiler flags
+# Validates toolchain, sets arch-specific flags and common compiler flags
+#
+# Expects: JANUS_TARGET_ARCH set (by toolchain file, preset, or -D flag)
+# Expects: CMAKE_C_COMPILER set (by toolchain file or CMake auto-detection)
 
 include_guard(GLOBAL)
 
-# Detect host platform
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
     set(JANUS_HOST_LINUX TRUE)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     set(JANUS_HOST_WINDOWS TRUE)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
     set(JANUS_HOST_MACOS TRUE)
 else()
-    message(FATAL_ERROR "Unable to detect underlying system")
+    message(FATAL_ERROR "Unable to detect host system: ${CMAKE_HOST_SYSTEM_NAME}")
 endif()
 
 set(JANUS_TARGET_PLATFORM "elf")
@@ -21,20 +23,13 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
 elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(JANUS_COMPILER_GCC TRUE)
 else()
-    message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}. JANUS requires Clang or GCC.")
+    message(FATAL_ERROR
+        "Unsupported compiler: ${CMAKE_C_COMPILER_ID}.\n"
+        "JANUS requires Clang or GCC.")
 endif()
 
-
-# Cross-compilation setup for aarch64
-if(JANUS_TARGET_ARCH STREQUAL "aarch64")
-    include(${CMAKE_SOURCE_DIR}/cmake/arch/aarch64/JanusPlatform.cmake) 
-elseif(JANUS_TARGET_ARCH STREQUAL "x86_64")
-    include(${CMAKE_SOURCE_DIR}/cmake/arch/x86_64/JanusPlatform.cmake)
-    # Boot protocols to include in kernel (both by default for x86_64)
-    set(JANUS_BOOT_PROTOCOLS "multiboot2;limine" CACHE STRING "Boot protocols to support (semicolon-separated)")
-else()
-    message(FATAL_ERROR "Unsupported target architecture: ${JANUS_TARGET_ARCH}")
-endif()
+# Architecture-specific configuration
+include(${CMAKE_SOURCE_DIR}/cmake/arch/${JANUS_TARGET_ARCH}/JanusPlatform.cmake)
 
 # Build type detection
 if(NOT CMAKE_BUILD_TYPE)
@@ -49,7 +44,7 @@ string(TIMESTAMP JANUS_BUILD_DATE "%Y-%m-%d")
 string(TIMESTAMP JANUS_BUILD_TIME "%H:%M:%S")
 
 # Common compiler flags for all kernel code
-set(JANUS_COMMON_FLAGS
+set(JANUS_COMPILE_OPTIONS_COMMON
     ${JANUS_ARCH_FLAGS}
     -nostdlib
     -ffreestanding
@@ -66,22 +61,21 @@ set(JANUS_COMMON_FLAGS
 )
 
 # Debug-specific flags
-set(JANUS_DEBUG_FLAGS
+set(JANUS_COMPILE_OPTIONS_DEBUG
     -g3
     -gdwarf-4
     -O0
     -DDEBUG
-
 )
 
 # Release-specific flags
-set(JANUS_RELEASE_FLAGS
+set(JANUS_COMPILE_OPTIONS_RELEASE
     -O2
     -DNDEBUG
 )
 
 # MinSizeRel flags (optimize for size)
-set(JANUS_MINSIZEREL_FLAGS
+set(JANUS_COMPILE_OPTIONS_MINSIZEREL
     -Os
     -DNDEBUG
 )

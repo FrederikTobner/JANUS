@@ -8,9 +8,15 @@ set(CMAKE_C_EXTENSIONS ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-# Target architecture: x86_64 or aarch64
+# Single project() call — loads toolchain file, assembler languages enabled per-arch below
+project(JANUS VERSION 0.1.0 LANGUAGES C)
+
+# JANUS_TARGET_ARCH: set by toolchain file, preset, or -D flag.
+# Must be checked AFTER project() because toolchain files aren't loaded until then.
 if(NOT DEFINED JANUS_TARGET_ARCH)
-    set(JANUS_TARGET_ARCH "x86_64" CACHE STRING "Target architecture (x86_64 or aarch64)" FORCE)
+    set(JANUS_TARGET_ARCH "x86_64" CACHE STRING "Target architecture (x86_64 or aarch64)")
+    message(STATUS "JANUS_TARGET_ARCH not set, defaulting to x86_64")
+    message(STATUS "For cross-compilation, use: cmake --preset <preset-name>")
 endif()
 
 # Validate target architecture
@@ -18,34 +24,30 @@ if(NOT JANUS_TARGET_ARCH STREQUAL "x86_64" AND NOT JANUS_TARGET_ARCH STREQUAL "a
     message(FATAL_ERROR "Invalid JANUS_TARGET_ARCH: ${JANUS_TARGET_ARCH}. Must be 'x86_64' or 'aarch64'.")
 endif()
 
-message("Target arch: ${JANUS_TARGET_ARCH}")
-
-# Enable appropriate assembler based on target architecture
+# Enable architecture-appropriate assembler
 if(JANUS_TARGET_ARCH STREQUAL "x86_64")
-    project(JANUS VERSION 0.1.0 LANGUAGES C ASM_NASM)
+    enable_language(ASM_NASM)
 elseif(JANUS_TARGET_ARCH STREQUAL "aarch64")
-    project(JANUS VERSION 0.1.0 LANGUAGES C ASM)
-else()
-   message(FATAL_ERROR "Unsupported target architecture: ${JANUS_TARGET_ARCH}") 
+    enable_language(ASM)
 endif()
 
+# Platform detection, flags, and compiler validation
 include(JanusPlatform)
 
 # Print build configuration
 message(STATUS "========================================")
 message(STATUS "JANUS Build Configuration")
 message(STATUS "========================================")
-message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Target Architecture: ${JANUS_TARGET_ARCH}")
-message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
+message(STATUS "Build Type:      ${CMAKE_BUILD_TYPE}")
+message(STATUS "Target Arch:     ${JANUS_TARGET_ARCH}")
+message(STATUS "Compiler:        ${CMAKE_C_COMPILER_ID} (${CMAKE_C_COMPILER})")
+message(STATUS "Linker:          ${CMAKE_LINKER}")
 if(JANUS_TARGET_ARCH STREQUAL "x86_64")
-    message(STATUS "Assembler: ${CMAKE_ASM_NASM_COMPILER} (NASM)")
+    message(STATUS "Assembler:       ${CMAKE_ASM_NASM_COMPILER} (NASM)")
 elseif(JANUS_TARGET_ARCH STREQUAL "aarch64")
-    message(STATUS "Assembler: ${CMAKE_ASM_COMPILER} (GAS)")
-else()
-    message(FATAL_ERROR "Add support for the architecture ${JANUS_TARGET_ARCH} when printing build configuration")
+    message(STATUS "Assembler:       ${CMAKE_ASM_COMPILER} (GAS)")
 endif()
-message(STATUS "Boot Protocols: ${JANUS_BOOT_PROTOCOLS}")
+message(STATUS "Boot Protocols:  ${JANUS_BOOT_PROTOCOLS}")
 message(STATUS "========================================")
 message(STATUS "Available targets:")
 message(STATUS "  ninja           - Build kernel.elf")
