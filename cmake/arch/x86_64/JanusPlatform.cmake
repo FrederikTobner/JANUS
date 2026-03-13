@@ -9,6 +9,7 @@ set(JANUS_BOOT_PROTOCOLS "multiboot2;limine" CACHE STRING
 if(JANUS_COMPILER_CLANG)
     set(JANUS_ARCH_FLAGS
         -target x86_64-elf
+        -mcmodel=kernel # Required for kernel code that may be >4GB in size
         -mno-red-zone
     )
 elseif(JANUS_COMPILER_GCC)
@@ -16,6 +17,7 @@ elseif(JANUS_COMPILER_GCC)
     set(JANUS_ARCH_FLAGS
         -m64
         -march=x86-64
+        -mcmodel=kernel # Required for kernel code that may be >4GB in size
         -mno-red-zone
     )
 else()
