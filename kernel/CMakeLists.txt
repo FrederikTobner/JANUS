@@ -1,24 +1,29 @@
+include(JanusRegistry)
+
+include(JanusLibrary)
 
 # Configure config.h from config.h.in
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/tinyos/config.h.in"
-    "${CMAKE_BINARY_DIR}/include/tinyos/config.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/janus/config.h.in"
+    "${CMAKE_BINARY_DIR}/include/janus/config.h"
     @ONLY
 )
 
-# Generate grub.cfg from template
-configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/grub.cfg.in
-    ${CMAKE_BINARY_DIR}/grub.cfg
-    @ONLY
-)
 
 # Add generated config.h to include path
 include_directories("${CMAKE_BINARY_DIR}/kernel/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# Boot module
-add_subdirectory(boot)
+# Kernel libraries - These can only include the types from our include directory
+add_subdirectory(lib)
 
-# Core kernel modules
-add_subdirectory(core)
+# Kernel subsystems 
+add_subdirectory(subsys)
 
+# Kernel initialization (protocol-agnostic)
+add_subdirectory(kmain)
+
+# Entry point (creates kernel.elf, must be last)
+add_subdirectory(_start)
+
+# Validate subsystem/library registry for dependency isolation
+janus_validate_registry()

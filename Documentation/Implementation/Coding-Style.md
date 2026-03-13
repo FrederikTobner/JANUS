@@ -1,29 +1,29 @@
-# TinyOS Coding Style Guide
+# JANUS Coding Style Guide
 
 ## Overview
 
-TinyOS uses `clang-format` to enforce consistent style. If you're coming from C++, Rust, or Zig, most of this will be familiar. We only document the non-obvious parts here - things that might surprise you or are specific to kernel development.
+JANUS uses `clang-format` to enforce consistent style.
 
 ## Multi-Dimensional Memory Access
 
 ### Pointer Arithmetic for Multi-Dimensional Data
 
-TinyOS prefers **explicit pointer arithmetic** over array indexing for multi-dimensional data structures to make memory layout and performance characteristics visible.
+JANUS prefers **explicit pointer arithmetic** over array indexing for multi-dimensional data structures to make memory layout and performance characteristics visible.
 
 ```c
 // Preferred: Explicit pointer arithmetic
-uint32_t * pixel_ptr = framebuffer + (y * pitch) + x;
+u32 * pixel_ptr = framebuffer + (y * pitch) + x;
 *pixel_ptr = color;
 
 // Also acceptable: shows the calculation clearly
-uint8_t * pixel_base = framebuffer + (y * pitch) + (x * bytes_per_pixel);
-uint8_t r = *(pixel_base + 0);
-uint8_t g = *(pixel_base + 1);
-uint8_t b = *(pixel_base + 2);
-uint8_t a = *(pixel_base + 3);
+u8 * pixel_base = framebuffer + (y * pitch) + (x * bytes_per_pixel);
+u8 r = *(pixel_base + 0);
+u8 g = *(pixel_base + 1);
+u8 b = *(pixel_base + 2);
+u8 a = *(pixel_base + 3);
 
 // Avoid: Hidden memory layout
-uint32_t color = framebuffer[y][x];  // Where's the pitch? Is this cache-friendly?
+u32 color = framebuffer[y][x];  // Where's the pitch? Is this cache-friendly?
 ```
 
 ```c
@@ -67,7 +67,7 @@ for (size_t i = 0; i < count; i++) {
 
 ### Public Structures
 
-**TinyOS uses public structure definitions rather than opaque handles.**
+**JANUS uses public structure definitions rather than opaque handles.**
 
 Opaque handles (`typedef struct foo * foo_handle_t`) hide structure definitions from callers. This pattern is common in userspace libraries for API stability, but creates significant problems in kernel development:
 
@@ -174,8 +174,6 @@ typedef struct fs_driver * fs_driver_handle_t;
 - Anything that needs stack allocation
 - Anything where you want developers to understand the layout
 
-If you find yourself typing `typedef struct foo * foo_handle_t` for a buffer or list or tree, **stop**. You're about to write bad code.
-
 ### Document Your Structures
 
 Since structures are public, document them properly:
@@ -206,22 +204,4 @@ static inline bool pte_is_present(pte_t const * pte) {
 
 // Direct manipulation when you know what you're doing
 pte->value = phys_addr | PTE_PRESENT | PTE_WRITABLE;
-```
-
-### Naming
-
-**Public structures:**
-
-```c
-typedef struct char_buffer char_buffer_t;
-void buf_init(char_buffer_t * buf, size_t capacity);
-void buf_destroy(char_buffer_t * buf);
-```
-
-**Opaque handles (rare):**
-
-```c
-typedef struct device * device_handle_t;
-device_handle_t device_create(device_type_t type);
-void device_destroy(device_handle_t handle);
 ```

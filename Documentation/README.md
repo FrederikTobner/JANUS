@@ -1,6 +1,6 @@
-# TinyOS Documentation
+# JANUS Documentation
 
-This directory contains the technical documentation for TinyOS.
+This directory contains the technical documentation for JANUS.
 
 1. **[Setup.md](Setup.md)** - Install required dependencies (CMake, Clang, NASM, LLDB, QEMU)
 
@@ -34,22 +34,18 @@ Foundational documents that define the project's philosophy and standards.
 Documents describing the architecture and structure of the codebase.
 
 - **[Module-Structure.md](Code-Organization/Module-Structure.md)**
-  - Directory hierarchy
+  - Directory hierarchy and subsystem organization
+  - Architecture code inside subsystems (three-tier model)
   - Module responsibilities and boundaries
-  - Dependency graph and build order
-  - CMake build system organization
-  - Library structure
+  - Dependency graph and subsystem isolation
+  - CMake auto-detection and build flow
 
-
-- **[Include-Hierarchy.md](Code-Organization/Include-Hierarchy.md)**
+- **[Global-Include-Hierarchy.md](Code-Organization/Global-Include-Directory.md)**
   - Header file organization (public vs internal)
-  - Include path structure
-  - Forward declarations and reducing dependencies
-  - Architecture-specific headers
+  - Include path structure and namespacing
+  - Architecture-specific headers (Tier 1/2/3)
   - CMake include directory configuration
-
-- **[Global-Include-Hierarchy.md](Code-Organization/Global-Include-Hierarchy.md)**
-  - What goes in `include/tinyos/`
+  - What goes in `include/janus/`
   - Global vs module-specific headers
   - When to promote headers to global
   - Include patterns and examples
@@ -87,6 +83,5 @@ When adding or modifying code:
 1. **Review Core Principles** first to understand the project's philosophy
 2. **Follow naming conventions** from Terminology.md
 3. **Organize code** according to Module-Structure.md
-4. **Design APIs** following API-Design.md guidelines
-5. **Format code** using `.clang-format` (see Coding-Style.md)
-6. **Document code** according to Documentation-Style.md
+4. **Format code** using `.clang-format` (see Coding-Style.md)
+5. **Document code** according to Documentation-Style.md

@@ -71,7 +71,3 @@ additional-js = ["theme/js/code-diff.js"]
 ```bash
 cargo test
 ```
-
-## License
-
-MIT

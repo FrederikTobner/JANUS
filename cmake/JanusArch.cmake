@@ -1,0 +1,79 @@
+# JANUS Architecture-Specific Subsystem Helper
+# Provides janus_add_arch_subsys() for building arch-specific driver implementations
+
+include_guard(GLOBAL)
+
+#
+# Add architecture-specific implementation for a subsystem
+#
+# Usage:
+#   janus_add_arch_subsys(<subsystem_name>
+#       SOURCES file1.c file2.c ...    # All sources (own + shared)
+#   )
+#
+# - Each arch declares ALL its sources explicitly
+# - Shared sources referenced via relative path: ../shared/...
+# - Helper exports sources back to janus_add_subsys() via global properties
+# - The main subsystem library includes both portable and arch-specific code
+#
+# Example:
+#   janus_add_arch_subsys(drivers
+#       SOURCES
+#           serial.c
+#           tty.c
+#           ../shared/framebuffer.c
+#   )
+#
+
+# Ensure platform is loaded
+if(NOT JANUS_PLATFORM_LOADED)
+    message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusSubsys.cmake")
+endif()
+
+function(janus_add_arch_subsys NAME)
+    cmake_parse_arguments(
+        ARG
+        ""
+        ""
+        "SOURCES;DEPENDENCIES"
+        ${ARGN}
+    )
+
+    set(ARCH_BASE "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
+    # Export arch sources to parent janus_add_subsys() via global property
+    set_property(GLOBAL PROPERTY "JANUS_ARCH_SOURCES_${NAME}" "${ABS_SOURCES}")
+    
+    # Export include directories for janus_add_subsys() to apply
+    set_property(GLOBAL PROPERTY "JANUS_ARCH_INCLUDES_${NAME}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"          # <arch/impl/drivers/*.h>
+    )
+    set_property(GLOBAL PROPERTY "JANUS_ARCH_PRIVATE_INCLUDES_${NAME}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/internal"         # <arch/internal/drivers/*.h>
+    )
+
+    set(ARCH_LIB_NAME "${NAME}_arch")
+    add_library(${ARCH_LIB_NAME} STATIC ${ARG_SOURCES})
+    target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
+    target_include_directories(${ARCH_LIB_NAME} 
+    PUBLIC 
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"          # <arch/impl/drivers/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/../shared/include" # <arch/shared/include/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/../include"         # <arch/include/drivers/*.h>
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/internal"         # <arch/internal/drivers/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../include"         # <drivers/include/*.h>
+    )
+    # Link dependencies (only lib allowed, not other subsystems)
+    if(ARG_DEPENDENCIES)
+        target_link_libraries(${ARCH_LIB_NAME} PUBLIC ${ARG_DEPENDENCIES})
+    endif()
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
+    elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
+    endif()
+endfunction()

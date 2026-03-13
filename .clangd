@@ -1,4 +1,4 @@
-# clangd configuration for TinyOS kernel development
+# clangd configuration for JANUS kernel development
 # This file tells clangd (LSP) how to understand our freestanding kernel code
 
 CompileFlags:
@@ -12,16 +12,7 @@ CompileFlags:
     - "-nostdlib"
     - "-fno-builtin"
     - "-std=c17"
-    
-    # Include directories for all modules (relative to project root)
-    - "-Ikernel/include"
-    - "-Ikernel/lib/memory/include"
-    - "-Ikernel/lib/buffer/include"
-    - "-Ikernel/lib/fio/include"
-    - "-Ikernel/core/include"
-    - "-Ikernel/arch/include"
-    - "-Ikernel/boot/include"
-    - "-Ikernel/mm/include"
+
  
   Remove:
     # Remove flags that confuse clangd analysis
@@ -31,12 +22,7 @@ CompileFlags:
     - "-mtune=*"
 
 Diagnostics:
-  # Don't complain about missing standard library
-  Suppress:
-    - "pp_file_not_found"
-  
   UnusedIncludes: Strict
-  MissingIncludes: None
 
 Index:
   Background: Build

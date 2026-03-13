@@ -1,6 +1,6 @@
-# Building TinyOS: The Book
+# Building JANUS: The Book
 
-This directory contains the source for the TinyOS book, written using [mdBook](https://rust-lang.github.io/mdBook/).
+This directory contains the source for the JANUS book, written using [mdBook](https://rust-lang.github.io/mdBook/).
 
 ## Building the Book
 
@@ -32,6 +32,7 @@ Then open <http://localhost:3000> in your browser.
 - `book.toml` - Book configuration
 - `src/` - Markdown source files
   - `SUMMARY.md` - Table of contents (controls chapter order)
+  - `preface.md` - Preface content
   - `chapter-01-introduction/` - Chapter 1: Introduction
   - `chapter-02-getting-started/` - Chapter 2: Getting Started
   - `chapter-03-boot-process/` - Chapter 3: The Boot Process

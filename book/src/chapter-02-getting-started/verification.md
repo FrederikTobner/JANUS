@@ -1,14 +1,12 @@
 # Verifying Your Setup
 
-Let's make sure everything actually works before we get three chapters in and discover your assembler is from 2003.
+Let's make sure everything actually works before we get three chapters in and discover your assembler is from the 90s.
 
 [!side]
 This section takes 2 minutes. Do it. Future you will thank present you.
 [/!side]
 
-## Version Check
-
-Run these commands and verify the versions:
+First, let's verify the versions of the tools we installed by running these commands:
 
 ```bash
 clang --version      # ≥ 17.0
@@ -21,8 +19,7 @@ lldb --version       # Any recent version
 
 All tools should be found and display version information.
 
-## Test: Compile Freestanding Code
-
+Now that we know the tools are installed, let's verify they work correctly for OS development.
 
 [!side]
 The `_start` symbol is the entry point for freestanding programs. The OS doesn't set this up—we do.
@@ -65,11 +62,11 @@ If this works, your compiler is correctly configured for OS development.
 >
 > It's liberating and terrifying in equal measure.
 
-Let's verify Clang can compile freestanding code for x86_64:
+You can sanity-check this further:
 
-Try adding `printf("hello\n");` to the code above and recompile. Clang will complain that `printf` is undefined. There's no C standard library here. We're on our own.
+Try adding `printf("hello\n");` to the code above and recompile. Clang will complain that `printf` is undefined. There's no C standard library here—we're on our own.
 
-This is expected! If `printf` somehow works, your environment isn't properly configured for freestanding development.
+This is expected. If `printf` somehow works, your environment isn't properly configured for freestanding development.
 
 ## Test: Assemble with NASM
 
@@ -148,8 +145,8 @@ rm -rf build CMakeLists.txt test.c test.asm test.o test_asm.o
 
 ## All Tests Pass?
 
-If all tests succeeded, you have a working TinyOS development environment. If any failed, review the error messages and consult the troubleshooting section in the previous chapter.
+If all tests succeeded, you have a working JANUS development environment. If any failed, review the error messages and consult the troubleshooting section in the previous chapter.
 
 ---
 
-**Next: [Project Setup](project-setup.md)**
+**Next: [Summary](./summary.md)**

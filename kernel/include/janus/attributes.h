@@ -1,0 +1,78 @@
+/*****************************************************************************
+ * Copyright (C) 2025 by Frederik Tobner                                     *
+ *                                                                           *
+ * This file is part of JANUS                                              *
+ *                                                                           *
+ * Permission to use, copy, modify, and distribute this software and its     *
+ * documentation under the terms of the GNU Affero General Public License is *
+ * hereby granted.                                                           *
+ * No representations are made about the suitability of this software for    *
+ * any purpose.                                                              *
+ * It is provided "as is" without express or implied warranty.               *
+ * See the <https://www.gnu.org/licenses/agpl-3.0.en.html>                   *
+ * GNU Affero General Public License                                         *
+ * License for more details.                                                 *
+ ****************************************************************************/
+
+#ifndef JANUS_COMPILER_H
+#define JANUS_COMPILER_H
+
+/**
+ * Compiler-specific attributes and macros for JANUS
+ *
+ * Provides portable compiler attributes for Clang and GCC.
+ */
+
+// Compiler detection
+#if defined(__clang__)
+#define COMPILER_CLANG 1
+#elif defined(__GNUC__)
+#define COMPILER_GCC 1
+#else
+#error "Unsupported compiler - JANUS requires Clang or GCC - Screw you MSVC!"
+#endif
+
+// Function attributes
+#define __noreturn                      __attribute__((noreturn))
+#define __packed                        __attribute__((packed))
+#define __aligned(x)                    __attribute__((aligned(x)))
+#define __unused                        __attribute__((unused))
+#define __used                          __attribute__((used))
+#define __section(s)                    __attribute__((section(s)))
+#define __weak                          __attribute__((weak))
+#define __always_inline                 __attribute__((always_inline)) inline
+#define __noinline                      __attribute__((noinline))
+#define __pure                          __attribute__((pure))
+#define __const                         __attribute__((const))
+#define __cold                          __attribute__((cold))
+#define __hot                           __attribute__((hot))
+
+// Likely/unlikely for branch prediction
+#define LIKELY(x)                       __builtin_expect(!!(x), 1)
+#define UNLIKELY(x)                     __builtin_expect(!!(x), 0)
+
+// Static assertion
+#define STATIC_ASSERT(expr, msg)        _Static_assert(expr, msg)
+
+// Array size
+#define ARRAY_SIZE(arr)                 (sizeof(arr) / sizeof((arr)[0]))
+
+// Container of macro
+#define CONTAINER_OF(ptr, type, member) ((type *) ((char *) (ptr) - offsetof(type, member)))
+
+// Min/max macros
+#define MIN(a, b)               \
+    ({                          \
+        __typeof__(a) _a = (a); \
+        __typeof__(b) _b = (b); \
+        _a < _b ? _a : _b;      \
+    })
+
+#define MAX(a, b)               \
+    ({                          \
+        __typeof__(a) _a = (a); \
+        __typeof__(b) _b = (b); \
+        _a > _b ? _a : _b;      \
+    })
+
+#endif // JANUS_COMPILER_H

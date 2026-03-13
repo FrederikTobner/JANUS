@@ -2,35 +2,32 @@
 
 We have source files. We have a linker script. But manually assembling and linking everything is tedious and error-prone. Time to automate.
 
-> **The Crux: Why Not Just a Shell Script?**
->
-> You could write a bash script: `nasm this, clang that, ld the other`. It would work! For about a week. Then you add a new source file and forget to update the script. Or you want debug builds vs. release builds. Or you work on macOS and your teammate uses Linux. Shell scripts don't scale.
->
-> CMake handles dependency tracking, parallel builds, cross-platform differences, and more. It's the industry standard for good reason.
-
 [!side]
 The Linux kernel uses Makefiles directly. We use CMake because it's easier to learn and more portable.
 [/!side]
 
-## Build System Architecture
-
-TinyOS utilizes a modular CMake structure where each component is self-contained:
+JANUS utilizes a modular CMake structure where each component is self-contained:
 
 ```
 build system/
-├── CMakeLists.txt (root)           # Orchestrates everything
-├── cmake/
-│   ├── TinyOSPlatform.cmake       # Compiler detection, flags
-│   └── TinyOSHelpers.cmake        # Helper functions
-├── boot/CMakeLists.txt            # Boot module
-└── kernel/CMakeLists.txt          # Final kernel executable
+├── CMakeLists.txt (root)            # Orchestrates everything
+├── cmake/                           # CMake modules
+│   ├── JanusPlatform.cmake          # Compiler detection, flags
+│   └── JanusHelpers.cmake           # Helper functions
+└── kernel/CMakeLists.txt            # Orchestrates kernel build
+    ├── lib/                         # Reusable libraries
+    ├── kmain                        # Main kernel code
+    │    ├── CMakeLists.txt          # Builds kernel.elf
+    │    └── include/boot/           # Boot-specific headers
+    └── subsys                       # Subsystems like memory management, drivers, boot
 ```
 
 **Why modular?** Each module builds independently. Change one file in `boot/`, only that library rebuilds. The kernel just re-links. Fast incremental builds.
+Additionally this will help to keep the complexity manageable as the project grows.
 
 ## Platform Detection
 
-Fist we will create a seperate CMake module for platform detection and compiler setup.
+First we'll create a separate CMake module for platform detection and compiler setup.
 
 This module detects your environment and sets up cross-compilation:
 
@@ -47,107 +44,319 @@ This module detects your environment and sets up cross-compilation:
 -ffreestanding          # Freestanding environment
 -mno-red-zone           # Disable red zone (x86-64 ABI quirk)
 -fno-stack-protector    # Dont setup a stack protector
+-fno-stack-protector    # Don't set up a stack protector
 ```
 
 [!side]
 Stack protectors insert canary values in order to detect buffer overflows.
-Which is neat, but they requires runtime support which we don't have in a freestanding environment.
+Which is neat, but they require runtime support that we don't have in a freestanding environment.
 [/!side]
 
 > **Implementation detail:**
 >
-> TinyOSPlatform.cmake sets these flags in variables like `TINYOS_COMMON_FLAGS`, `TINYOS_DEBUG_FLAGS`, etc. The helper functions in TinyOSHelpers.cmake apply them to targets automatically. This keeps platform-specific logic centralized—if you port to ARM later, you only change one file.
+> JanusPlatform.cmake sets these flags in variables like `JANUS_COMPILE_OPTIONS_COMMON`, `JANUS_COMPILE_OPTIONS_DEBUG`, etc. The helper functions in JanusHelpers.cmake apply them to targets automatically. This keeps platform-specific logic centralized—if you port to ARM later, you only change one file.
 >
-> For , you can create a minimal `TinyOSPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
+> For now, let's create a minimal `JanusPlatform.cmake` that just sets the flags directly with `add_compile_options()`. We'll expand it in later chapters when we add more architecture-specific code.
+
+> TODO: Make a little bit less minimal, but without adding all the complexity from the real repo.
 
 Here's a minimal platform module to get started:
 
 ```cmake-diff
-file: cmake/TinyOSPlatform.cmake
+file: cmake/JanusPlatform.cmake
 after: entire file
 ---
-+# cmake/TinyOSPlatform.cmake
-+# Minimal platform detection and compiler setup for Chapter 3
-+
-+# Kernel compile flags (apply to all targets)
-+add_compile_options(
-+    -target x86_64-elf
-+    -ffreestanding
-+    -nostdlib
-+    -mno-red-zone
-+    -fno-stack-protector
-+    -Wall -Wextra
-+)
-+
-+# Debug vs Release
-+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-+    add_compile_options(-g3 -O0)
-+else()
-+    add_compile_options(-O2)
-+endif()
++ include_guard(GLOBAL)
++ 
++ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
++     set(JANUS_HOST_LINUX TRUE)
++ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
++     set(JANUS_HOST_WINDOWS TRUE)
++ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
++     set(JANUS_HOST_MACOS TRUE)
++ else()
++     message(WARNING "Unknown host platform: ${CMAKE_SYSTEM_NAME}")
++ endif()
++ 
++ set(JANUS_TARGET_ARCH "x86_64" CACHE STRING "Target architecture")
++ set(JANUS_TARGET_PLATFORM "elf")
++ 
++ if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
++     set(JANUS_COMPILER_CLANG TRUE)
++     set(JANUS_TARGET_FLAG "-target")
++ elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
++     set(JANUS_COMPILER_GCC TRUE)
++     set(JANUS_TARGET_FLAG "--target=")
++ else()
++     message(FATAL_ERROR "Unsupported compiler: ${CMAKE_C_COMPILER_ID}. JANUS requires Clang or GCC.")
++ endif()
++ 
++ if(NOT CMAKE_BUILD_TYPE)
++     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type (Debug, Release, MinSizeRel)" FORCE)
++ endif()
++ 
++ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
++ message(STATUS "Target: ${JANUS_TARGET_ARCH}-${JANUS_TARGET_PLATFORM}")
++ 
++ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
++ 
++ if(JANUS_COMPILER_CLANG)
++     set(JANUS_COMPILE_OPTIONS_COMMON
++         -target x86_64-elf
++         -nostdlib
++         -ffreestanding
++         -fno-builtin
++         -fno-stack-protector
++         -mno-red-zone
++         -Wall
++         -Wextra
++         -Werror
++         -Wconversion
++         -Wimplicit
++         -Wcast-qual
++         -Wpointer-arith
++     )
++ else()
++     set(JANUS_COMPILE_OPTIONS_COMMON
++         -nostdlib
++         -ffreestanding
++         -fno-builtin
++         -fno-stack-protector
++         -mno-red-zone
++         -Wall
++         -Wextra
++         -Werror
++         -Wconversion
++         -Wimplicit
++         -Wcast-qual
++         -Wpointer-arith
++     )
++ endif()
++ 
++ set(JANUS_COMPILE_OPTIONS_DEBUG
++     -g3
++     -gdwarf-4
++     -O0
++     -DDEBUG
++ 
++ )
++ 
++ set(JANUS_COMPILE_OPTIONS_RELEASE
++     -O2
++     -DNDEBUG
++ )
++ 
++ set(JANUS_COMPILE_OPTIONS_MINSIZEREL
++     -Os
++     -DNDEBUG
++ )
++ 
++ set(JANUS_PLATFORM_LOADED TRUE)
 ```
 
 This applies kernel flags to everything. As the project grows, you'll refactor this into finer-grained control (some libraries might not need `-ffreestanding`, for example).
 
 ## Helper Functions
 
-Create `cmake/TinyOSHelpers.cmake` with helper functions for kernel development:
+Create `cmake/JanusHelpers.cmake` with helper functions for kernel development:
 
 ```cmake-diff
-file: cmake/TinyOSHelpers.cmake
+file: cmake/JanusHelpers.cmake
 replace: entire file
 ---
-+# cmake/TinyOSHelpers.cmake
-+
-+# Create kernel executable with custom linker script
-+function(tinyos_create_kernel)
-+    cmake_parse_arguments(
-+        ARG
-+        ""
-+        "LINKER_SCRIPT"
-+        "SOURCES;LIBRARIES"
-+        ${ARGN}
-+    )
-+    
-+    # Create the kernel executable
-+    add_executable(kernel.elf ${ARG_SOURCES})
-+    
-+    # Link with provided libraries and objects
-+    if(ARG_LIBRARIES)
-+        target_link_libraries(kernel.elf PRIVATE ${ARG_LIBRARIES})
-+    endif()
-+    
-+    # Apply linker script
-+    if(ARG_LINKER_SCRIPT)
-+        target_link_options(kernel.elf PRIVATE
-+            -T ${ARG_LINKER_SCRIPT}
-+            -nostdlib
-+            -static
-+        )
-+        # Ensure rebuild when linker script changes
-+        set_target_properties(kernel.elf PROPERTIES
-+            LINK_DEPENDS ${ARG_LINKER_SCRIPT}
-+        )
-+    endif()
-+    
-+    # Set kernel-specific flags
-+    target_compile_options(kernel.elf PRIVATE
-+        -ffreestanding
-+        -fno-stack-protector
-+        -mno-red-zone
-+    )
-+    
-+    # Include directories
-+    target_include_directories(kernel.elf PRIVATE
-+        ${CMAKE_SOURCE_DIR}/include
-+        ${CMAKE_SOURCE_DIR}/boot/include
-+    )
-+endfunction()
++  include_guard(GLOBAL)
++  
++  if(NOT JANUS_PLATFORM_LOADED)
++      message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusHelpers.cmake")
++  endif()
++  
++  #
++  # Add a kernel library with standard configuration
++  # 
++  # Usage:
++  #   janus_add_library(name
++  #       SOURCES file1.c file2.c
++  #       [DEPENDENCIES dep1 dep2]
++  #   )
++  #
++  function(janus_add_library NAME)
++      cmake_parse_arguments(
++          ARG                    # Prefix for parsed arguments
++          ""                     # Options (boolean flags)
++          ""                     # Single-value arguments
++          "SOURCES;DEPENDENCIES" # Multi-value arguments
++          ${ARGN}
++      )
++  
++      if(NOT ARG_SOURCES)
++          message(STATUS "  Added library: ${NAME} (placeholder, no sources yet)")
++          add_library(${NAME} INTERFACE)
++          
++          target_include_directories(${NAME}
++              INTERFACE
++                  ${CMAKE_CURRENT_SOURCE_DIR}/include
++                  ${CMAKE_SOURCE_DIR}/include
++          )
++          
++          if(ARG_DEPENDENCIES)
++              target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
++          endif()
++          
++          return()
++      endif()
++  
++      add_library(${NAME} STATIC ${ARG_SOURCES})
++  
++      target_include_directories(${NAME}
++          PUBLIC
++              ${CMAKE_CURRENT_SOURCE_DIR}/include
++              ${CMAKE_SOURCE_DIR}/include
++      )
++  
++      if(ARG_DEPENDENCIES)
++          target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
++      endif()
++  
++      target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
++      
++      if(CMAKE_BUILD_TYPE STREQUAL "Debug")
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
++      elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
++      elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
++      endif()
++  
++      message(STATUS "  Added library: ${NAME}")
++  endfunction()
++  
++  #
++  # Add a kernel module (like kernel, boot, arch, mm)
++  # 
++  # Usage:
++  #   janus_add_module(name
++  #       SOURCES file1.c file2.c
++  #       [DEPENDENCIES dep1 dep2]
++  #   )
++  #
++  function(janus_add_module NAME)
++      cmake_parse_arguments(
++          ARG
++          ""
++          ""
++          "SOURCES;DEPENDENCIES"
++          ${ARGN}
++      )
++  
++      # Validate required arguments
++      if(NOT ARG_SOURCES)
++          message(STATUS "  Added module: ${NAME} (placeholder, no sources yet)")
++          add_library(${NAME} INTERFACE)
++          
++          target_include_directories(${NAME}
++              INTERFACE
++                  ${CMAKE_CURRENT_SOURCE_DIR}/include
++                  ${CMAKE_SOURCE_DIR}/kernel/include
++          )
++          
++          if(ARG_DEPENDENCIES)
++              target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
++          endif()
++          
++          return()
++      endif()
++  
++      add_library(${NAME} STATIC ${ARG_SOURCES})
++  
++      target_include_directories(${NAME}
++          PUBLIC
++              ${CMAKE_CURRENT_SOURCE_DIR}/include
++              ${CMAKE_SOURCE_DIR}kernel/include
++      )
++  
++      if(ARG_DEPENDENCIES)
++          target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
++      endif()
++  
++      target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
++      
++      if(CMAKE_BUILD_TYPE STREQUAL "Debug")
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
++      elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
++      elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
++          target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
++      endif()
++  
++      message(STATUS "  Added module: ${NAME}")
++  endfunction()
++  
++  # Print JANUS build configuration summary
++  #
++  # Create the final kernel executable with custom linker script
++  # 
++  # Usage:
++  #   janus_create_kernel(
++  #       SOURCES main.c init.c
++  #       LIBRARIES lib1 lib2
++  #       LINKER_SCRIPT path/to/linker.ld
++  #   )
++  #
++  function(janus_create_kernel)
++      cmake_parse_arguments(
++          ARG
++          ""
++          "LINKER_SCRIPT"
++          "SOURCES;LIBRARIES"
++          ${ARGN}
++      )
++  
++      if(NOT ARG_SOURCES)
++          message(FATAL_ERROR "janus_create_kernel: SOURCES required")
++      endif()
++      if(NOT ARG_LINKER_SCRIPT)
++          message(FATAL_ERROR "janus_create_kernel: LINKER_SCRIPT required")
++      endif()
++  
++      add_executable(kernel.elf ${ARG_SOURCES})
++  
++      if(ARG_LIBRARIES)
++          target_link_libraries(kernel.elf PRIVATE ${ARG_LIBRARIES})
++      endif()
++  
++      target_include_directories(kernel.elf
++          PRIVATE
++              ${CMAKE_CURRENT_SOURCE_DIR}/include
++              ${CMAKE_SOURCE_DIR}/kernel/include
++              ${CMAKE_BINARY_DIR}/include
++      )
++  
++      target_compile_options(kernel.elf PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
++      if(CMAKE_BUILD_TYPE STREQUAL "Debug")
++          target_compile_options(kernel.elf PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
++      elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
++          target_compile_options(kernel.elf PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
++      elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
++          target_compile_options(kernel.elf PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
++      endif()
++  
++      set_target_properties(kernel.elf PROPERTIES
++          LINK_FLAGS "-T ${ARG_LINKER_SCRIPT} -nostdlib -static"
++          LINK_DEPENDS "${ARG_LINKER_SCRIPT}"
++          RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
++      )
++  
++      message(STATUS "  Created kernel executable: kernel.elf")
++      message(STATUS "    Linker script: ${ARG_LINKER_SCRIPT}")
++      message(STATUS "    Libraries: ${ARG_LIBRARIES}")
++  endfunction()
 ```
+
+> TODO: Consider adding the create_lib  and create_module later, since they are currently not needed.
 
 Key functions:
 
-**`tinyos_create_kernel(SOURCES ... LIBRARIES ... LINKER_SCRIPT ...)`**
+**`janus_create_kernel(SOURCES ... LIBRARIES ... LINKER_SCRIPT ...)`**
 
 - Creates final `kernel.elf` executable
 - Links all libraries and boot objects
@@ -158,41 +367,27 @@ Key functions:
 
 Before diving into the root build script, let's create a configuration header template. This is a neat CMake trick: you create a `.in` file with placeholders that CMake fills in at build time.
 
-Create `include/tinyos/config.h.in`:
+Create `include/janus/config.h.in`:
 
 ```cmake-diff
-file: include/tinyos/config.h.in
+file: include/janus/config.h.in
 after: entire file
 ---
-+/**
-+ * @file config.h
-+ * @brief TinyOS build configuration (generated from config.h.in by CMake)
-+ * 
-+ * This file is automatically generated during the build process.
-+ * DO NOT EDIT THIS FILE DIRECTLY - edit config.h.in instead.
-+ */
++#ifndef JANUS_CONFIG_H
++#define JANUS_CONFIG_H
 +
-+#ifndef TINYOS_CONFIG_H
-+#define TINYOS_CONFIG_H
++#define JANUS_PROJECT_NAME     "@PROJECT_NAME@"
++#define JANUS_VERSION_MAJOR    @PROJECT_VERSION_MAJOR@
++#define JANUS_VERSION_MINOR    @PROJECT_VERSION_MINOR@
++#define JANUS_VERSION_PATCH    @PROJECT_VERSION_PATCH@
++#define JANUS_VERSION_STRING   "@PROJECT_VERSION@"
 +
-+/*
-+ * Project Information
-+ */
-+#define TINYOS_PROJECT_NAME     "@PROJECT_NAME@"
-+#define TINYOS_VERSION_MAJOR    @PROJECT_VERSION_MAJOR@
-+#define TINYOS_VERSION_MINOR    @PROJECT_VERSION_MINOR@
-+#define TINYOS_VERSION_PATCH    @PROJECT_VERSION_PATCH@
-+#define TINYOS_VERSION_STRING   "@PROJECT_VERSION@"
-+
-+/*
-+ * Build Information
-+ */
-+#define TINYOS_BUILD_TYPE       "@CMAKE_BUILD_TYPE@"
-+#define TINYOS_BUILD_DATE       "@TINYOS_BUILD_DATE@"
-+#define TINYOS_BUILD_TIME       "@TINYOS_BUILD_TIME@"
++#define JANUS_BUILD_TYPE       "@CMAKE_BUILD_TYPE@"
++#define JANUS_BUILD_DATE       "@JANUS_BUILD_DATE@"
++#define JANUS_BUILD_TIME       "@JANUS_BUILD_TIME@"
 +
 +
-+#endif /* TINYOS_CONFIG_H */
++#endif 
 ```
 
 This template uses CMake variables surrounded by `@` symbols. When you call `configure_file()`, CMake replaces them with the actual value.
@@ -201,7 +396,7 @@ The generated `config.h` lives in your build directory and gets included automat
 
 > **Why not just hardcode values?**
 >
-> Because they'd go stale. Every time you bump the version or switch between debug/release builds, you'd manually edit a header. With templates, CMake keeps everything synchronized automatically. Change `project(TinyOS VERSION 0.2.0)` and your kernel instantly knows its new version number.
+> Because they'd go stale. Every time you bump the version or switch between debug/release builds, you'd manually edit a header. With templates, CMake keeps everything synchronized automatically. Change `project(JANUS VERSION 0.2.0)` and your kernel instantly knows its new version number.
 
 ## Building the Kernel
 
@@ -211,39 +406,35 @@ Now create the root `CMakeLists.txt` that generates the config header and orches
 file: CMakeLists.txt
 replace: entire file
 ---
-+# CMakeLists.txt (root)
 +cmake_minimum_required(VERSION 3.20)
-+project(TinyOS VERSION 0.1.0 LANGUAGES ASM_NASM C)
++project(JANUS VERSION 0.1.0 LANGUAGES ASM_NASM C)
 +
 +set(CMAKE_C_STANDARD 17)
 +set(CMAKE_C_STANDARD_REQUIRED ON)
 +set(CMAKE_C_EXTENSIONS ON)  # Allow GNU extensions
 +
-+# Add our CMake modules to the search path
 +list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 +
-+# Include platform detection and helpers
-+include(TinyOSPlatform)
-+include(TinyOSHelpers)
++include(JanusPlatform)
++include(JanusHelpers)
 +
-+# Generate build timestamp
-+string(TIMESTAMP TINYOS_BUILD_DATE "%Y-%m-%d")
-+string(TIMESTAMP TINYOS_BUILD_TIME "%H:%M:%S")
++string(TIMESTAMP JANUS_BUILD_DATE "%Y-%m-%d")
++string(TIMESTAMP JANUS_BUILD_TIME "%H:%M:%S")
 +
 +add_subdirectory(kernel)
 ```
 
-Lets also print the build cnfiguration afterwards:
+Let's also print the build configuration summary in the root `CMakeLists.txt`, to make it easier to spot any misconfigurations:
 
 ```cmake-diff
 file: CMakeLists.txt
-after: project(TinyOS VERSION 0.1.0 LANGUAGES C ASM_NASM)
+after: project(JANUS VERSION 0.1.0 LANGUAGES C ASM_NASM)
 ---
 cmake_minimum_required(VERSION 3.20)
-project(TinyOS VERSION 0.1.0 LANGUAGES C ASM_NASM)
+project(JANUS VERSION 0.1.0 LANGUAGES C ASM_NASM)
 
 +message(STATUS "========================================")
-+message(STATUS "TinyOS Build Configuration")
++message(STATUS "JANUS Build Configuration")
 +message(STATUS "========================================")
 +message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 +message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
@@ -258,8 +449,8 @@ file: kernel/CMakeLists.txt
 replace: entire file
 ---
 configure_file(
-    "${CMAKE_SOURCE_DIR}/include/tinyos/config.h.in"
-    "${CMAKE_BINARY_DIR}/include/tinyos/config.h"
+    "${CMAKE_SOURCE_DIR}/include/janus/config.h.in"
+    "${CMAKE_BINARY_DIR}/include/janus/config.h"
     @ONLY
 )
 
@@ -294,7 +485,7 @@ cmake -B build -G Ninja
 ninja -C build
 ```
 
-This will produce the `build/kernel.elf` - a bootable ELF executable.
+This will produce the `build/kernel-multiboot2.elf`file a bootable ELF executable.
 But in order to actually boot it, we need to package it into a ISO image.
 
 [!side]
@@ -309,18 +500,18 @@ ISO images are named after the ISO 9660 standard that specifies the file system 
         ┌───────────────┼───────────────┐
         │               │               │
         ▼               ▼               ▼
-   multiboot.asm   boot.asm        main.c, lib/*.c
+   header.asm       entry.asm         main.c
         │               │               │
         ▼               ▼               ▼
-     [NASM]          [NASM]         [Clang]
+      [NASM]          [NASM]         [Clang]
         │               │               │
         ▼               ▼               ▼
-   multiboot.o      boot.o           *.o files
+   multiboot.o       boot.o         *.o files
         │               │               │
         └───────┬───────┴───────┬───────┘
                 │               │
                 ▼               ▼
-            boot.a          lib*.a
+             boot.a          lib*.a
                 │               │
                 └───────┬───────┘
                         ▼
@@ -328,8 +519,7 @@ ISO images are named after the ISO 9660 standard that specifies the file system 
                    (linker.ld)
                         │
                         ▼
-                  kernel.elf ✓
-                (Bootable!)
+             kernel-mutliboot2.elf ✓
 ```
 
 > **TODO: Hand-drawn illustration idea**
@@ -356,8 +546,8 @@ statically linked, with debug_info, not stripped
 > **New to ELF?**
 >
 > ELF (Executable and Linkable Format) is the standard object file format on Unix-like systems (Linux, BSD, etc.).
-> Like PE on Windows or Mach-O on macOs it has evolved from the assembler output format (.out) and later the common object file format (.coff).
->It's a container that holds:
+> Like PE on Windows or Mach-O on macOS, it evolved from the assembler output format (.out) and later the common object file format (.coff).
+> It's a container that holds:
 >
 > - **Machine code** (your compiled program)
 > - **Section headers** (where different parts of code/data live)

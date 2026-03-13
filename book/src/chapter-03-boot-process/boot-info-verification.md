@@ -1,4 +1,4 @@
-# Boot info verification
+# Boot Info Verification
 
 Before we dive deeper into the creation of our kernel and start using the data GRUB handed us, there's something we should have done already but glossed over: **actually checking that Multiboot info is valid**.
 This is needed to ensure that we can use the data in it later. This data can include:
@@ -18,12 +18,12 @@ This is a pattern you'll see throughout kernel development: trust nothing, verif
 
 Right now, we're trusting that GRUB gave us good data in `magic` and `info`. That's... optimistic. What if GRUB didn't boot us? What if something went wrong? What if we're running on different hardware that uses a different bootloader?
 
-Let's add proper validation before the kernels entry point starts using this data.
+Let's add proper validation before the kernel's entry point starts using this data.
 
 First we verify we were loaded by a Multiboot2-compliant bootloader. If not we will just halt the system for now since we can't print any error message at this point.
 
 ```c-diff
-file: kernel/main.c
+file: kernel/kmain/main.c
 after: after function entry point
 ---
 void kernel_main(uint32_t magic, void * info)
@@ -42,7 +42,7 @@ void kernel_main(uint32_t magic, void * info)
 Then we ensure that the multiboot info pointer is valid. If not we will simply halt the system as well.
 
 ```c-diff
-file: kernel/main.c
+file: kernel/kmain/main.c
 after: after magic number verification
 ---
               __asm__ volatile("cli; hlt");
@@ -61,43 +61,10 @@ after: after magic number verification
 
 ## Verification
 
-Now lets start qemu in debug mode and use lldb to have a look at the flow of the program.
-First we need to recompile, then create a iso run qemu in debug mode and connect to it using lldb.
+Now let's start QEMU in debug mode and use LLDB to look at the flow of the program.
+First we need to recompile, then create an ISO image, run QEMU in debug mode, and connect to it using LLDB.
 
 > TODO: Show program flow. Introduce frame variable.
-
-## After bug discovery
-
-## What Went Wrong?
-
-GRUB by default starts in 32bit protected mode and we need to handle the transition to 64 bit.
-
-## Lessons Learned
-
-This is a valuable lesson in OS development:
-
-* **Use a debugger!** What looks like "it works" might be "it's stuck in a halt loop."
-* **Calling conventions matter.** You can't just call functions—you have to pass arguments correctly.
-* **GRUB2 is helpful.** Modern GRUB with Multiboot2 handles mode transitions automatically.
-* **Read the ABI spec.** System V AMD64 ABI defines how to call functions on x86-64.
-
-> **Why Learn the Mode Transition if GRUB Does It?**
->
-> You might wonder: "GRUB2 already transitions to 64-bit mode. Why learn how it works?"
->
-> Because **understanding the transition teaches you fundamental OS concepts** you'll need later:
->
-> * CPU operating modes and their constraints
-> * Page table structure and virtual memory setup
-> * Control registers (CR0, CR3, CR4) and MSRs
-> * The relationship between paging and long mode
-> * GDT structure and segment selectors
->
-> These concepts are essential for memory management (Chapter 5), context switching, and system calls. GRUB's convenience hides them, but you need to understand the machinery to build a real kernel.
->
-> Think of it like learning to drive a manual transmission—even if modern cars are automatic, understanding how the clutch and gears work makes you a better driver.
-
-### Retesting
 
 Open two terminals. In the first terminal, start QEMU with debugging enabled after rebuilding the project:
 
@@ -108,7 +75,7 @@ lldb build/kernel.elf
 (lldb) gdb-remote localhost:1234
 ```
 
-Open the debugger, then instruct lldb to connect to QEMU's debbiging port to check the result again.
+Open the debugger, then instruct LLDB to connect to QEMU's debugging port.
 Next we tell LLDB to pause when we enter `kernel_main`:
 
 ```
@@ -132,9 +99,7 @@ Process 1 stopped
     frame #0: 0x000000000010109f kernel.elf`kernel_main(magic=920085129, info=0x00000000001010e0) at main.c:42:15
    39   void kernel_main(uint32_t magic, struct multiboot_info * info)
    40   {
-   41       // Verify we were loaded by a Multiboot2-compliant bootloader
--> 42       if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-   43           // Can't print error yet - just halt
+-> 41       if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
 ```
 
 Let's verify GRUB passed us the correct magic number. The `$rdi` register holds the first function argument (the `magic` parameter):
@@ -152,7 +117,6 @@ Let's check the multiboot info pointer in `info` (second argument):
 ```
 
 That's a valid address pointing to the Multiboot information structure GRUB created for us.
-
 
 Let's watch the magic number check execute:
 

@@ -10,9 +10,8 @@
   - [Why Build One?](chapter-01-introduction/why-build-one.md)
   - [What We'll Build](chapter-01-introduction/what-well-build.md)
   - [Prerequisites](chapter-01-introduction/prerequisites.md)
-  - [Development Environment](chapter-01-introduction/development-environment.md)
   - [How to Use This Book](chapter-01-introduction/how-to-use.md)
-  - [Getting Started](chapter-01-introduction/getting-started.md)
+  - [Summary](chapter-01-introduction/summary.md)
 
 ---
 
@@ -21,7 +20,6 @@
 - [Chapter 2 Overview](chapter-02-getting-started/README.md)
   - [Installing Tools](chapter-02-getting-started/installing-tools.md)
   - [Verification](chapter-02-getting-started/verification.md)
-  - [Project Setup](chapter-02-getting-started/project-setup.md)
   - [Summary](chapter-02-getting-started/summary.md)
 
 ---
@@ -31,14 +29,13 @@
 - [Chapter 3 Overview](chapter-03-boot-process/README.md)
   - [Project Structure](chapter-03-boot-process/project-structure.md)
   - [The Multiboot2 Header](chapter-03-boot-process/multiboot-header.md)
-  - [Boot Entry Assembly: 32-bit](chapter-03-boot-process/boot-assembly-32bit.md)
+  - [Boot Entry Assembly](chapter-03-boot-process/boot-assembly-64bit.md)
   - [The Linker Script](chapter-03-boot-process/linker-script.md)
   - [The CMake Build System](chapter-03-boot-process/build-system.md)
   - [The Kernel Entry Point](chapter-03-boot-process/kernel-entry.md)
   - [Creating a Bootable ISO](chapter-03-boot-process/creating-bootable-iso.md)
   - [Boot info verification](chapter-03-boot-process/boot-info-verification.md)
   - [Booting Up](chapter-03-boot-process/booting-up.md)
-  - [Boot Entry Assembly: 64-bit](chapter-03-boot-process/boot-assembly-64bit.md)
   - [Summary](chapter-03-boot-process/summary.md)
 
 ---

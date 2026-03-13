@@ -1,9 +1,4 @@
 ##############################
-## Planning                 ##
-##############################
-/planning/
-
-##############################
 ## clangd                   ##
 ##############################
 .[Cc][Aa][Cc][Hh][Ee]/
@@ -16,6 +11,7 @@ compile_commands.json
 ##############################
 [Bb][Uu][Ii][Ll][Dd]/
 build/
+build-*/
 cmake-build-*/
 CMakeFiles/
 CMakeCache.txt

@@ -1,5 +1,5 @@
 [book]
-title = "Building TinyOS: A Journey in Operating System Development"
+title = "Kernel Development Demystified: Understanding Computers from the Ground Up"
 authors = ["Frederik Tobner"]
 language = "en"
 src = "src"
@@ -21,9 +21,9 @@ command = "mdbook-mermaid"
 [output.html]
 default-theme = "rust"
 preferred-dark-theme = "navy"
-git-repository-url = "https://github.com/yourusername/TinyOS"
-edit-url-template = "https://github.com/yourusername/TinyOS/edit/main/book/{path}"
-site-url = "/TinyOS/"
+git-repository-url = "https://github.com/FrederikTobner/JANUS"
+edit-url-template = "https://github.com/FrederikTobner/JANUS/edit/main/book/{path}"
+site-url = "/JANUS/"
 cname = ""
 additional-css = ["theme/side-notes.css", "theme/css/code-diff.css"]
 mathjax-support = true
