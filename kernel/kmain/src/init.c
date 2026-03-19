@@ -19,12 +19,12 @@
  * @brief Kernel initialization routines.
  *
  * Handles early kernel initialization including driver setup.
+ * All boot protocol details are accessed through the public boot context.
  */
 
-#include "janus/types.h"
 #include <kmain/init.h>
 
-#include <boot/protocol/limine.h>
+#include <boot/context.h>
 #include <drivers/serial.h>
 #include <drivers/tty.h>
 
@@ -55,21 +55,21 @@ static bool init_tty_vga(bool serial_available)
  * Used for higher-half boot (Limine) where we need to use the framebuffer
  * for text rendering since VGA memory isn't identity-mapped.
  *
- * @param frame_buffer Pointer to Limine framebuffer structure
+ * @param display Boot display info from the boot context
  * @param serial_available Whether serial output is available for logging
  * @return true if TTY was initialized successfully
  */
-static bool init_tty_framebuffer(struct limine_framebuffer const * frame_buffer, bool serial_available)
+static bool init_tty_framebuffer(boot_display_info_t const * display, bool serial_available)
 {
     tty_display_config_t config;
-    config.framebuffer = (u8 *) frame_buffer->address;
-    config.width = frame_buffer->width;
-    config.height = frame_buffer->height;
-    config.pitch = frame_buffer->pitch;
-    config.bpp = frame_buffer->bpp;
-    config.red_mask_shift = frame_buffer->red_mask_shift;
-    config.green_mask_shift = frame_buffer->green_mask_shift;
-    config.blue_mask_shift = frame_buffer->blue_mask_shift;
+    config.framebuffer = display->framebuffer;
+    config.width = display->width;
+    config.height = display->height;
+    config.pitch = display->pitch;
+    config.bpp = display->bpp;
+    config.red_mask_shift = display->red_mask_shift;
+    config.green_mask_shift = display->green_mask_shift;
+    config.blue_mask_shift = display->blue_mask_shift;
 
     if (drivers_tty_init(&config) != 0) {
         return false;
@@ -81,9 +81,9 @@ static bool init_tty_framebuffer(struct limine_framebuffer const * frame_buffer,
     return true;
 }
 
-bool kinit_serial(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
+bool kinit_serial(boot_context_t const * ctx)
 {
-    if (drivers_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base) != 0) {
+    if (drivers_serial_init(ctx->hhdm_offset, ctx->kernel_phys_base, ctx->kernel_virt_base) != 0) {
         return false;
     }
 
@@ -91,28 +91,20 @@ bool kinit_serial(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t ker
     return true;
 }
 
-bool kinit_tty(u64 hhdm_offset, void * frame_buffer_info, bool serial_available)
+bool kinit_tty(boot_context_t const * ctx, bool serial_available)
 {
-    if (hhdm_offset == 0) {
+    if (ctx->hhdm_offset == 0) {
         // Identity-mapped (Multiboot2): VGA buffer is directly accessible
         return init_tty_vga(serial_available);
     }
 
     // Higher-half mapped (Limine): Need framebuffer for text output
-    if (frame_buffer_info == NULL) {
-        if (serial_available) {
-            drivers_serial_puts("TTY skipped (Limine without framebuffer)\n");
-        }
-        return false;
-    }
-
-    struct limine_framebuffer_response const * frame_buffer_response = frame_buffer_info;
-    if (frame_buffer_response->framebuffer_count == 0 || frame_buffer_response->framebuffers == NULL) {
+    if (!ctx->has_display) {
         if (serial_available) {
             drivers_serial_puts("TTY skipped (no framebuffer available)\n");
         }
         return false;
     }
 
-    return init_tty_framebuffer(frame_buffer_response->framebuffers[0], serial_available);
+    return init_tty_framebuffer(&ctx->display, serial_available);
 }

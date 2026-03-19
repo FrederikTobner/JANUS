@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                              *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,16 +14,26 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef BOOT_VERIFY_H
-#define BOOT_VERIFY_H
-
-#include <janus/types.h>
+#ifndef KMAIN_KERNEL_DESCRIPTOR_H
+#define KMAIN_KERNEL_DESCRIPTOR_H
 
 /**
- * Verify that the boot handoff is valid for the currently supported protocols.
+ * @file kernel_descriptor.h
+ * @brief Kernel descriptor — aggregates all per-kernel singleton state
  *
- * Returns 0 on success, non-zero on failure.
+ * Built once during boot initialization in kernel_main, then passed as
+ * const pointer through the entire kernel. Immutable after init.
+ *
+ * This type is kmain-private. Subsystems receive their own slice
+ * (e.g., boot_context_t const *) — they never see kernel_descriptor_t.
+ *
+ * Future fields: memory_map, acpi_info, cpu_topology, ...
  */
-error_t boot_verify_handoff(u64 loader_magic, void * info);
 
-#endif /* BOOT_VERIFY_H */
+#include <boot/context.h>
+
+typedef struct kernel_descriptor {
+    boot_context_t boot; /**< Boot protocol information */
+} kernel_descriptor_t;
+
+#endif /* KMAIN_KERNEL_DESCRIPTOR_H */

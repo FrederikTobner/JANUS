@@ -11,6 +11,9 @@ if(JANUS_COMPILER_CLANG)
         -target x86_64-elf
         -mcmodel=kernel # Required for kernel code that may be >4GB in size
         -mno-red-zone
+        -mno-sse
+        -mno-sse2
+        -mno-mmx
     )
 elseif(JANUS_COMPILER_GCC)
     # GCC x86_64
@@ -18,6 +21,9 @@ elseif(JANUS_COMPILER_GCC)
         -m64
         -march=x86-64
         -mno-red-zone
+        -mno-sse
+        -mno-sse2
+        -mno-mmx
     )
 else()
     message(FATAL_ERROR "Unsupported compiler for x86_64: ${CMAKE_C_COMPILER_ID}")

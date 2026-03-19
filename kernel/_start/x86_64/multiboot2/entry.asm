@@ -16,6 +16,7 @@
 ; It sets up 64-bit long mode and calls the C kernel entry point.
 
 global _start_multiboot2
+extern multiboot2_stash_bootinfo
 extern kernel_main
 extern gdt64_pointer
 
@@ -120,9 +121,11 @@ long_mode_start:
     mov fs, ax
     mov gs, ax
 
-    ; RSP already set, RDI/RSI have magic/info
-    ; RDX = NULL (no framebuffer info for Multiboot2)
-    xor rdx, rdx
+    ; RSP already set, RDI/RSI have magic/info from 32-bit setup
+    ; Stash bootinfo for later use by boot_init in kernel_main
+    call multiboot2_stash_bootinfo
+
+    ; Enter kernel
     call kernel_main
 
 .hang:

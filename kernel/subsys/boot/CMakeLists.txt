@@ -1,18 +1,10 @@
-# Boot module: x86_64 + multiboot2
-# Protocol verification and boot info handling
+# Boot subsystem: protocol-agnostic core
+# Protocol implementations live in protocol/limine/ and protocol/multiboot2/
 
-file(GLOB_RECURSE BOOT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+janus_add_subsys(boot)
 
-# Build boot as static library
-janus_add_subsys(boot 
-SOURCES
-   ${BOOT_SOURCES}
-)
-
-target_include_directories(boot
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/internal
-)
+# Protocol libraries (plain add_library, not subsystems)
+add_subdirectory(protocol/limine)
+if(JANUS_TARGET_ARCH STREQUAL "x86_64")
+    add_subdirectory(protocol/multiboot2)
+endif()

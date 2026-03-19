@@ -22,7 +22,8 @@
  * - Higher-half paging (maps kernel at virtual address from ELF)
  * - A valid stack (64KB or per stack size request)
  *
- * We transition to EL1 if needed and call kernel_main with appropriate arguments.
+ * We transition to EL1 if needed and call kernel_main.
+ * Boot context is populated by boot_init inside kernel_main.
  *
  * Note: Limine request structures are defined in common/limine_requests.c
  * for portability across architectures.
@@ -30,12 +31,6 @@
 
 .global _start_limine
 .extern kernel_main
-.extern limine_hhdm_request
-.extern limine_framebuffer_request
-
-// Limine bootloader magic (passed to kernel_main for protocol detection)
-// "LIMINE\0\0" as u64 = 0x4C494D494E450000
-.equ LIMINE_MAGIC, 0x4C494D494E450000
 
 // AArch64 system register bits
 .equ DAIF_IRQ_BIT,  (1 << 7)    // IRQ mask bit
@@ -131,34 +126,10 @@ _start_limine:
     /*
      * Now running at EL1
      * Limine has already set up the stack for us
-     * Prepare arguments and call kernel_main
+     * Enter kernel_main — boot_init runs inside kernel_main
      */
-    
-    /* 
-     * Set up arguments for kernel_main(u64 loader_magic, void* info, void* fb_info)
-     * x0 = magic value (Limine magic)
-     * x1 = pointer to HHDM response (for boot_info_init to get HHDM offset)
-     * x2 = pointer to framebuffer response (for TTY framebuffer)
-     */
-    
-    // x0 = LIMINE_MAGIC
-    ldr     x0, =LIMINE_MAGIC
-    
-    /*
-     * Get HHDM response pointer from the request structure
-     * C struct layout: id[4] (32 bytes) + revision (8 bytes) + response (8 bytes)
-     * Offset to response = 32 + 8 = 40 bytes
-     */
-    adrp    x9, limine_hhdm_request
-    add     x9, x9, :lo12:limine_hhdm_request
-    ldr     x1, [x9, #40]       /* response pointer */
-    
-    // Get framebuffer response pointer from the request structure
-    adrp    x9, limine_framebuffer_request
-    add     x9, x9, :lo12:limine_framebuffer_request
-    ldr     x2, [x9, #40]       // response pointer
-    
-    // Call kernel_main
+
+    // Enter kernel 
     bl      kernel_main
 
     // If kernel_main returns, halt forever

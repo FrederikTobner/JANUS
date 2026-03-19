@@ -14,28 +14,27 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef BOOT_X86_64_MULTIBOOT2_H
-#define BOOT_X86_64_MULTIBOOT2_H
+#ifndef JANUS_MULTIBOOT2_PROTOCOL_H
+#define JANUS_MULTIBOOT2_PROTOCOL_H
 
 /**
- * @file multiboot2.h
- * @brief Multiboot2 protocol definitions
+ * @file multiboot2_protocol.h
+ * @brief Multiboot2 boot protocol type definitions
  *
- * Defines structures and constants for the Multiboot2 boot protocol.
+ * Constants and structures for the Multiboot2 protocol.
  * See: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
  */
 
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-// Multiboot2 magic value passed by bootloader in EAX
+/// Multiboot2 magic value passed by bootloader in EAX
 #define MULTIBOOT2_BOOTLOADER_MAGIC             0x36d76289
 
-// Architecture types
+/// Architecture types
 #define MULTIBOOT2_ARCHITECTURE_I386            0
 #define MULTIBOOT2_ARCHITECTURE_MIPS32          4
 
-// Tag types
 #define MULTIBOOT2_TAG_TYPE_END                 0
 #define MULTIBOOT2_TAG_TYPE_INFORMATION         1
 #define MULTIBOOT2_TAG_TYPE_ADDRESS             2
@@ -48,7 +47,6 @@
 #define MULTIBOOT2_TAG_TYPE_ENTRY_ADDRESS_EFI64 9
 #define MULTIBOOT2_TAG_TYPE_RELOCATABLE         10
 
-// Multiboot2 information tag types (from bootloader)
 #define MULTIBOOT2_TAG_BOOT_CMD_LINE            1
 #define MULTIBOOT2_TAG_BOOT_LOADER_NAME         2
 #define MULTIBOOT2_TAG_MODULE                   3
@@ -71,37 +69,28 @@
 #define MULTIBOOT2_TAG_EFI64_IH                 20
 #define MULTIBOOT2_TAG_LOAD_BASE_ADDR           21
 
-/**
- * Multiboot2 information structure header
- * This is passed to the kernel by the bootloader
- */
+/// Multiboot2 information structure header (passed by the bootloader)
 struct multiboot_info {
     u32 total_size;
     u32 reserved;
-    // Followed by tags
+    /* Followed by tags */
 } __packed;
 
-/**
- * Common tag structure
- */
+/// Common tag structure
 struct multiboot_tag {
     u32 type;
     u32 size;
 } __packed;
 
-/**
- * Basic memory information tag
- */
+/// Basic memory information tag
 struct multiboot_tag_basic_meminfo {
     u32 type;
     u32 size;
-    u32 mem_lower; // Amount of lower memory in KB
-    u32 mem_upper; // Amount of upper memory in KB
+    u32 mem_lower;
+    u32 mem_upper;
 } __packed;
 
-/**
- * Memory map entry
- */
+/// Memory map entry
 struct multiboot_mmap_entry {
     u64 addr;
     u64 len;
@@ -109,9 +98,7 @@ struct multiboot_mmap_entry {
     u32 reserved;
 } __packed;
 
-/**
- * Memory map tag
- */
+/// Memory map tag
 struct multiboot_tag_mmap {
     u32 type;
     u32 size;
@@ -120,18 +107,28 @@ struct multiboot_tag_mmap {
     struct multiboot_mmap_entry entries[];
 } __packed;
 
-/**
- * Boot command line tag
- */
+/// Framebuffer tag
+struct multiboot_tag_framebuffer {
+    u32 type;
+    u32 size;
+    u64 addr;
+    u32 pitch;
+    u32 width;
+    u32 height;
+    u8 bpp;
+    u8 fb_type;
+    u8 reserved;
+    /* Color info follows for fb_type == 1 */
+} __packed;
+
+/// Boot command line tag
 struct multiboot_tag_string {
     u32 type;
     u32 size;
     char string[];
 } __packed;
 
-/**
- * Module tag
- */
+/// Module tag
 struct multiboot_tag_module {
     u32 type;
     u32 size;
@@ -140,36 +137,23 @@ struct multiboot_tag_module {
     char cmdline[];
 } __packed;
 
-/**
- * Get the first tag from multiboot info
- * @param info Pointer to multiboot info structure
- * @return Pointer to first tag
- */
+/// Get the first tag from multiboot info
 static inline struct multiboot_tag * multiboot_first_tag(struct multiboot_info * info)
 {
     return (struct multiboot_tag *) ((u8 *) info + 8);
 }
 
-/**
- * Get the next tag
- * @param tag Current tag
- * @return Pointer to next tag
- */
+/// Get the next tag (tags are 8-byte aligned)
 static inline struct multiboot_tag * multiboot_next_tag(struct multiboot_tag * tag)
 {
-    // Tags are 8-byte aligned
     u32 size = (tag->size + 7) & ~7u;
     return (struct multiboot_tag *) ((u8 *) tag + size);
 }
 
-/**
- * Check if tag is the end tag
- * @param tag Tag to check
- * @return true if end tag, false otherwise
- */
+/// Check if tag is the end tag
 static inline bool multiboot_is_end_tag(struct multiboot_tag * tag)
 {
     return tag->type == MULTIBOOT2_TAG_TYPE_END && tag->size == 8;
 }
 
-#endif /* BOOT_X86_64_MULTIBOOT2_H */
+#endif /* JANUS_MULTIBOOT2_PROTOCOL_H */

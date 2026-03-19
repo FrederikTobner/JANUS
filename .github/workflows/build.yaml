@@ -32,7 +32,7 @@ jobs:
         if: matrix.arch == 'x86_64'
         run: sudo apt-get install -y --no-install-recommends nasm
 
-      - name: Install Compiler suitable for aarch64
+      - name: Install Binutils 
         if: matrix.arch == 'aarch64'
         run: sudo apt-get install -y --no-install-recommends binutils-aarch64-linux-gnu
 

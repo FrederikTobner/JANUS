@@ -11,6 +11,7 @@ add_library(_start_limine_requests OBJECT
 )
 target_include_directories(_start_limine_requests PRIVATE
     ${CMAKE_SOURCE_DIR}/kernel/include
+    ${CMAKE_SOURCE_DIR}/kernel/subsys/boot/protocol/limine
 )
 target_compile_options(_start_limine_requests PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 
@@ -25,6 +26,6 @@ include(JanusKernel)
 janus_add_kernel(
     TARGET kernel-limine.elf
     LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-    DEPENDENCIES drivers boot
+    DEPENDENCIES drivers boot boot_limine
     OBJECTS _start_limine _start_limine_requests kmain
 )
