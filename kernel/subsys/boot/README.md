@@ -1,65 +1,91 @@
-# JANUS Boot Module
+# JANUS Boot Subsystem
 
-Boot-protocol glue and the very earliest execution code that runs before the “normal” kernel world exists.
-
-This module is structured as `(arch, boot protocol)` implementations selected at configure time via:
-
-- `JANUS_TARGET_ARCH`
-- `JANUS_BOOT_PROTOCOL`
+Protocol-agnostic boot context definitions and protocol-specific initialization
+implementationsii.
 
 ## Responsibilities
 
-- Provide the protocol-specific entry stub (typically in assembly)
-- Do the minimum early CPU setup required to reach C code
-- Construct a minimal, stable handoff structure and call into the kernel entry point
-- Perform protocol-specific “sanity checks” (so `kernel/core` stays protocol-neutral)
+- Define the `boot_context_t` structure (public, not opaque) that captures all
+  boot-time information the kernel needs
+- Provide a common `boot_init(boot_context_t *)` entry point — each protocol
+  implements this symbol, and exactly one is linked per build configuration
+- Parse protocol-specific data (Limine responses, Multiboot2 tags) into the
+  uniform boot context
 
-## Public interface
+## Public Interface
 
 Headers live under `include/boot/`:
 
-- `handoff.h` — `struct boot_handoff`, the minimal ABI passed to `kernel_main()`
-- `protocols.h` — `boot_protocol_t` and protocol IDs
-- `verify.h` — `boot_verify_handoff()` (protocol-based validation)
-- `multiboot2.h` — Multiboot2 structures/constants (used by the Multiboot2 implementation)
+- `context.h` — `boot_context_t`, `boot_display_info_t`, `boot_protocol_t`,
+  `boot_init()` declaration, and inline address-translation helpers
 
-## Current implementation
+## Architecture
 
-Only one `(arch, protocol)` pair is implemented right now:
+The boot subsystem is an **INTERFACE library** (no compiled sources of its own).
+It provides headers only. The actual initialization code lives in the protocol
+libraries under `protocol/`, which are plain `add_library(STATIC)` targets that
+link against `boot` to inherit its include paths.
 
-- `x86_64/multiboot2/`
-  - `multiboot2.asm` — Multiboot2 header
-  - `boot.asm` — early entry / long-mode transition / calls `kernel_main(struct boot_handoff const *)`
-  - `verify.c` — Multiboot2-based implementation of `boot_verify_handoff()`
+```text
+boot (INTERFACE)          ← headers only: include/boot/context.h
+  ├── boot_limine (STATIC)     ← protocol/limine/limine_boot.c
+  └── boot_multiboot2 (STATIC) ← protocol/multiboot2/multiboot2_boot.c (x86_64 only)
+```
 
-## Directory layout
+`kernel_main` calls `boot_init(&kd.boot)` — the linker resolves this to
+whichever protocol library was linked for the active boot protocol.
+
+## Current Implementations
+
+| Protocol   | Architectures       | Entry point setup                |
+|------------|---------------------|----------------------------------|
+| Limine     | x86_64, aarch64     | Assembly calls `kernel_main` directly |
+| Multiboot2 | x86_64              | Assembly calls `multiboot2_stash_bootinfo`, then `kernel_main` |
+
+### Limine (`protocol/limine/`)
+
+- `limine_boot.c` — implements `boot_init()`: reads Limine request responses
+  (HHDM, executable address, framebuffer) and populates the boot context
+- `limine_protocol.h` — Limine protocol structures and request declarations
+
+Limine request symbols are defined in `_start/common/limine_requests.c` (shared
+across architectures).
+
+### Multiboot2 (`protocol/multiboot2/`)
+
+- `multiboot2_boot.c` — implements `boot_init()` and `multiboot2_stash_bootinfo()`:
+  the stash function saves the magic/info pointer from CPU registers (called by
+  assembly before `kernel_main`), then `boot_init()` validates and parses the
+  Multiboot2 tag list
+- `multiboot2_protocol.h` — Multiboot2 structures, tag constants, and tag
+  iteration helpers
+
+## Directory Layout
 
 ```text
 boot/
-├── CMakeLists.txt                  # selects boot/<arch>/<protocol>/
+├── CMakeLists.txt              # INTERFACE library + add_subdirectory for protocols
+├── README.md
 ├── include/
 │   └── boot/
-│       ├── multiboot2.h
-│       └── verify.h
-└── x86_64/
+│       └── context.h           # Public boot context API
+└── protocol/
+    ├── limine/
+    │   ├── CMakeLists.txt
+    │   ├── limine_boot.c       # boot_init() for Limine
+    │   └── limine_protocol.h
     └── multiboot2/
         ├── CMakeLists.txt
-        ├── boot.asm
-        ├── multiboot2.asm
-        └── verify.c
+        ├── multiboot2_boot.c   # boot_init() + multiboot2_stash_bootinfo()
+        └── multiboot2_protocol.h
 ```
 
-Note: `boot/boot.asm` and `boot/multiboot2.asm` may exist as legacy files, but the build is wired to use the per-arch/per-protocol implementation folders.
+## Adding a New Boot Protocol
 
-## Build integration
-
-`boot/CMakeLists.txt` is a selector that adds `boot/${JANUS_TARGET_ARCH}/${JANUS_BOOT_PROTOCOL}`.
-If the folder (or its `CMakeLists.txt`) does not exist, configuration fails fast with a helpful error.
-
-## Adding a new boot protocol
-
-Minimal convention:
-
-1. Create `boot/<arch>/<protocol>/` with a `CMakeLists.txt` that builds a `boot` object library.
-2. Provide a protocol-specific entry path that constructs a `struct boot_handoff`.
-3. Implement `boot_verify_handoff()` for that protocol (can start as a minimal check, then grow later).
+1. Create `protocol/<name>/` with a `CMakeLists.txt` that builds a static library
+   (e.g., `boot_<name>`) and links `PUBLIC boot`
+2. Implement `int boot_init(boot_context_t * ctx)` — populate all fields of the
+   context unconditionally (no reliance on zero-initialization)
+3. Add assembly entry point(s) under `_start/<arch>/<name>/`
+4. Wire the protocol into `cmake/boot/` so it is selectable via
+   `JANUS_BOOT_PROTOCOLS`

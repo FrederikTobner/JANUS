@@ -61,10 +61,10 @@ void multiboot2_stash_bootinfo(u64 magic, void const * info)
  * Multiboot2 is identity-mapped — the HHDM offset is 0 and kernel
  * physical/virtual bases are identical.
  *
- * @param ctx Boot context to populate
+ * @param boot_context Boot context to populate
  * @return 0 on success, non-zero on failure
  */
-int boot_init(boot_context_t * ctx)
+int boot_init(boot_context_t * boot_context)
 {
     if ((u32) g_mb2_magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
         return -1;
@@ -74,18 +74,18 @@ int boot_init(boot_context_t * ctx)
     }
 
     // Set safe defaults for ALL fields unconditionally
-    ctx->protocol = BOOT_PROTOCOL_MULTIBOOT2;
-    ctx->hhdm_offset = 0;
-    ctx->kernel_phys_base = 0;
-    ctx->kernel_virt_base = 0;
-    ctx->has_display = false;
+    boot_context->protocol = BOOT_PROTOCOL_MULTIBOOT2;
+    boot_context->hhdm_offset = 0;
+    boot_context->kernel_phys_base = 0;
+    boot_context->kernel_virt_base = 0;
+    boot_context->has_display = false;
 
     // Walk tag list looking for framebuffer
     struct multiboot_tag * tag = multiboot_first_tag((struct multiboot_info *) (phys_addr_t) g_mb2_info);
     while (!multiboot_is_end_tag(tag)) {
         if (tag->type == MULTIBOOT2_TAG_FRAMEBUFFER) {
             struct multiboot_tag_framebuffer const * framebuffer = (struct multiboot_tag_framebuffer const *) tag;
-            ctx->display = (boot_display_info_t) {
+            boot_context->display = (boot_display_info_t) {
                 .framebuffer = (u8 *) (phys_addr_t) framebuffer->addr,
                 .width = framebuffer->width,
                 .height = framebuffer->height,
@@ -95,7 +95,7 @@ int boot_init(boot_context_t * ctx)
                 .green_mask_shift = 8,
                 .blue_mask_shift = 0,
             };
-            ctx->has_display = true;
+            boot_context->has_display = true;
             break;
         }
         tag = multiboot_next_tag(tag);

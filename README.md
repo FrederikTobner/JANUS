@@ -30,17 +30,28 @@ Running in QEMU
 ninja -C build run         # or: cmake --build --preset <preset> --target run
 ```
 
-See [Documentation/Setup.md](Documentation/Setup.md) for detailed installation instructions.
+See [Setup & Dependencies](docs/src/project/setup/dependencies.md) for detailed installation instructions.
+
+## Documentation
+
+The project documentation lives in [`docs/`](docs/src/SUMMARY.md) as a single mdbook, organised into four parts:
+
+| Part | Purpose |
+|------|---------|
+| **Wiki** | OS theory — hardware, boot, memory, tooling |
+| **Tutorials** | Hands-on walkthroughs tied to the concepts |
+| **Reference** | JANUS architecture, subsystems, design decisions |
+| **Project** | Coding style, terminology, build setup, philosophy |
 
 ## Project Structure
 
-The project is structure is inspired by Linux and LLVM, with a clear separation of concerns.
-See [Documentation/Code-Organization/Module-Structure.md](Documentation/Code-Organization/Module-Structure.md) for a detailed explanation of the module structure and design principles.
+The project structure is inspired by Linux and LLVM, with a clear separation of concerns.
+See [Module Structure](docs/src/reference/architecture/module-structure.md) for a detailed explanation of the module layout and design principles.
 
 ### Architecture-specific Code
 
 Architecture-specific code lives **inside each subsystem** that needs it.
-For a detailed explanation of the rationale behind this design and the supported patterns, see [Documentation/Code-Organization/Arch-Layer-Structure.md](Documentation/Code-Organization/Arch-Layer-Structure.md).
+See [Layer Model](docs/src/reference/architecture/layer-model.md) for the rationale behind this design and the supported patterns.
 
 ## License
 

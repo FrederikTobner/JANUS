@@ -1,0 +1,40 @@
+[book]
+title = "JANUS Documentation"
+authors = ["Frederik Tobner"]
+language = "en"
+src = "src"
+description = "Documentation for the JANUS operating system"
+
+[build]
+build-dir = "build"
+create-missing = true
+
+[preprocessor.side-notes]
+command = "mdbook-side-notes"
+
+[preprocessor.code-diff]
+command = "mdbook-code-diff"
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/FrederikTobner/JANUS"
+edit-url-template = "https://github.com/FrederikTobner/JANUS/edit/main/docs/{path}"
+site-url = "/JANUS/"
+additional-css = ["theme/side-notes.css", "theme/css/code-diff.css"]
+mathjax-support = true
+additional-js = ["additional-js/mermaid/mermaid.min.js", "additional-js/mermaid/mermaid-init.js", "theme/js/code-diff.js"]
+
+[output.html.search]
+enable = true
+limit-results = 30
+use-boolean-and = true
+expand = true
+heading-split-level = 3
+
+[output.html.fold]
+enable = true
+level = 1

@@ -41,20 +41,20 @@
  * - For Multiboot2: boot info has been stashed via multiboot2_stash_bootinfo
  *
  * Allocates kernel_descriptor_t on the stack, populates it via boot_init,
- * then passes the boot context slice to each subsystem initializer.
+ * then passes the boot boot_context slice to each subsystem initializer.
  */
 __noreturn void kernel_main(void)
 {
-    kernel_descriptor_t kd;
-    if (boot_init(&kd.boot) != 0) {
+    kernel_descriptor_t descriptor;
+    if (boot_init(&descriptor.boot) != 0) {
         drivers_cpu_halt_forever();
     }
 
-    boot_context_t const * ctx = &kd.boot;
+    boot_context_t const * boot_context = &descriptor.boot;
 
     // Initialize drivers
-    bool serial_available = kinit_serial(ctx);
-    bool tty_available = kinit_tty(ctx, serial_available);
+    bool serial_available = kinit_serial(boot_context);
+    bool tty_available = kinit_tty(boot_context, serial_available);
 
     // Print greeting
     kbanner_print(serial_available, tty_available);

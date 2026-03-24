@@ -81,9 +81,9 @@ static bool init_tty_framebuffer(boot_display_info_t const * display, bool seria
     return true;
 }
 
-bool kinit_serial(boot_context_t const * ctx)
+bool kinit_serial(boot_context_t const * boot_context)
 {
-    if (drivers_serial_init(ctx->hhdm_offset, ctx->kernel_phys_base, ctx->kernel_virt_base) != 0) {
+    if (drivers_serial_init(boot_context->hhdm_offset, boot_context->kernel_phys_base, boot_context->kernel_virt_base) != 0) {
         return false;
     }
 
@@ -91,20 +91,20 @@ bool kinit_serial(boot_context_t const * ctx)
     return true;
 }
 
-bool kinit_tty(boot_context_t const * ctx, bool serial_available)
+bool kinit_tty(boot_context_t const * boot_context, bool serial_available)
 {
-    if (ctx->hhdm_offset == 0) {
+    if (boot_context->hhdm_offset == 0) {
         // Identity-mapped (Multiboot2): VGA buffer is directly accessible
         return init_tty_vga(serial_available);
     }
 
     // Higher-half mapped (Limine): Need framebuffer for text output
-    if (!ctx->has_display) {
+    if (!boot_context->has_display) {
         if (serial_available) {
             drivers_serial_puts("TTY skipped (no framebuffer available)\n");
         }
         return false;
     }
 
-    return init_tty_framebuffer(&ctx->display, serial_available);
+    return init_tty_framebuffer(&boot_context->display, serial_available);
 }
