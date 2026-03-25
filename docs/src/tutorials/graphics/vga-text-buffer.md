@@ -4,7 +4,7 @@ This tutorial implements a minimal VGA text mode driver. VGA text mode is the si
 
 ## Prerequisites
 
-A basic understanding of C and memory-mapped I/O. For hardware background, see [VGA Text Mode](../wiki/hardware/vga-text-mode.md) and [Memory-Mapped I/O](../wiki/hardware/mmio.md). The code assumes an x86_64 kernel running in long mode with the first 2 MiB identity-mapped (as established in the [mode switch tutorial](x86-64-mode-switch.md)). That identity mapping makes `0xB8000` directly accessible without additional paging work.
+A basic understanding of C and memory-mapped I/O. For hardware background, see [VGA Text Mode](../../wiki/graphics/vga-text-mode.md) and [Memory-Mapped I/O](../../wiki/io/mmio.md). The code assumes an x86_64 kernel running in long mode with the first 2 MiB identity-mapped (as established in the [mode switch tutorial](../boot/x86-64-mode-switch.md)). That identity mapping makes `0xB8000` directly accessible without additional paging work.
 
 ## The Memory Layout
 
@@ -310,4 +310,4 @@ This layering means the scrolling and cursor logic is written once and shared ac
 - **Scrolling is a software concern.** The hardware only sees a flat 4000-byte buffer; the row-shift logic is entirely ours.
 - **The hardware cursor needs explicit updates.** Four `outb` calls to the CRTC registers move the blinking underscore — without them it stays at position zero.
 - **Handle all control characters.** Newline, carriage return, tab, and backspace each require special cursor movement; only printable characters produce a visible cell write.
-- **This is x86-only.** ARM and RISC-V platforms use framebuffers or serial consoles instead. See [Framebuffers](../wiki/hardware/framebuffers.md) for the platform-independent approach.
+- **This is x86-only.** ARM and RISC-V platforms use framebuffers or serial consoles instead. See [Framebuffers](../../wiki/graphics/framebuffers.md) for the platform-independent approach.

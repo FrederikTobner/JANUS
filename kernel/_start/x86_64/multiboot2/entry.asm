@@ -12,31 +12,40 @@
 ; GNU Affero General Public License                                         
 ; License for more details.     
 
-; This code is executed immediately after GRUB/Limine transfers control via Multiboot2.
-; It sets up 64-bit long mode and calls the C kernel entry point.
+; Multiboot2 entry point for x86_64.
+;
+; Executed immediately after GRUB transfers control.  Transitions from
+; 32-bit protected mode to 64-bit long mode, then calls the C kernel.
+;
+; Page table setup lives in paging.asm for readability.
 
 global _start_multiboot2
 extern multiboot2_stash_bootinfo
 extern kernel_main
 extern gdt64_pointer
+extern setup_page_tables            ; paging.asm
+extern p4_table                     ; paging.asm
 
 ; GDT segment selectors
-%define GDT64_CODE_SEL 0x08
-%define GDT64_DATA_SEL 0x10
+%define GDT64_CODE_SEL  0x08
+%define GDT64_DATA_SEL  0x10
+
+; Control register bits
+%define CR4_PAE         (1 << 5)
+%define CR0_PAGING      (1 << 31)
+
+; EFER MSR
+%define MSR_EFER        0xC0000080
+%define EFER_LONG_MODE  (1 << 8)
 
 section .bss
 alignb 16
 stack_bottom:
-    resb 16384              ; 16 KiB stack
+    resb 16384                      ; 16 KiB stack
 stack_top:
 
-; Page tables for long mode (must be page-aligned)
-alignb 4096
-p4_table:   resb 4096
-p3_table:   resb 4096
-p2_table:   resb 4096
-
 section .text.multiboot2_entry
+; 32-bit Protected Mode
 bits 32
 
 _start_multiboot2:
@@ -46,16 +55,16 @@ _start_multiboot2:
     ; - 32-bit protected mode, paging disabled
 
     cli
-    
+
     ; Save multiboot info
-    mov edi, eax            ; magic
-    mov esi, ebx            ; info pointer
+    mov edi, eax                    ; magic
+    mov esi, ebx                    ; info pointer
 
     ; Set up stack
     mov esp, stack_top
 
     ; Set up page tables and enable long mode
-    call setup_page_tables
+    call setup_page_tables          ; paging.asm — identity-maps 4 GB
     call enable_paging
 
     ; Load 64-bit GDT
@@ -64,54 +73,34 @@ _start_multiboot2:
     ; Jump to 64-bit code
     jmp GDT64_CODE_SEL:long_mode_start
 
-; Identity-map first 2MB using 2MB huge pages
-setup_page_tables:
-    ; P4[0] -> P3
-    mov eax, p3_table
-    or eax, 0b11            ; Present + Writable
-    mov [p4_table], eax
-
-    ; P3[0] -> P2
-    mov eax, p2_table
-    or eax, 0b11
-    mov [p3_table], eax
-
-    ; P2[0] -> 0x0 (2MB huge page)
-    mov eax, 0x0
-    or eax, 0b10000011      ; Present + Writable + Huge
-    mov [p2_table], eax
-
-    ; P2[1] -> 0x200000 (second 2MB, for kernel at 1MB)
-    mov eax, 0x200000
-    or eax, 0b10000011
-    mov [p2_table + 8], eax
-
-    ret
-
+; Enable long mode by configuring PAE, EFER and paging.
+; Requires page tables already loaded into p4_table.
 enable_paging:
     ; Load P4 into CR3
     mov eax, p4_table
     mov cr3, eax
 
-    ; Enable PAE
+    ; Enable PAE (Physical Address Extension)
     mov eax, cr4
-    or eax, 1 << 5
+    or eax, CR4_PAE
     mov cr4, eax
 
-    ; Enable Long Mode in EFER
-    mov ecx, 0xC0000080
+    ; Enable Long Mode in EFER MSR
+    mov ecx, MSR_EFER
     rdmsr
-    or eax, 1 << 8
+    or eax, EFER_LONG_MODE
     wrmsr
 
     ; Enable paging
     mov eax, cr0
-    or eax, 1 << 31
+    or eax, CR0_PAGING
     mov cr0, eax
 
     ret
 
+; 64-bit Long Mode
 bits 64
+
 long_mode_start:
     ; Set up segment registers
     mov ax, GDT64_DATA_SEL

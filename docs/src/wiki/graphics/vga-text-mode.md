@@ -38,5 +38,5 @@ VGA text mode provides no hardware scroll register in the way CGA did. Scrolling
 VGA text mode is available only on x86. It is a legacy feature of the VGA standard and has no equivalent on aarch64 or other architectures. On modern UEFI systems, the firmware may not initialise a VGA text mode at all — the bootloader typically provides a graphical framebuffer instead, and the kernel renders text into pixel memory. JANUS supports both paths: VGA text mode where available (Multiboot2 on BIOS) and a software text renderer on the framebuffer (Limine on UEFI or BIOS).
 
 [!side]
-See [Framebuffers](framebuffers.md) for how pixel-based text rendering works, and [JANUS TTY Driver](../../reference/drivers/README.md) for the driver that unifies both backends.
+See [Framebuffers](framebuffers.md) for how pixel-based text rendering works, and [JANUS TTY Driver](../../project/subsystems/drivers/tty.md) for the driver that unifies both backends.
 [/!side]

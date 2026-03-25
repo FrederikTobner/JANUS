@@ -12,15 +12,17 @@ boot (INTERFACE)                ← headers only: include/boot/context.h
   └── boot_multiboot2 (STATIC)      ← protocol/multiboot2/multiboot2_boot.c
 ```
 
-[!margin]
-For a general explanation of how bootloaders and boot protocols work, see [Bootloaders](../../concepts/boot/bootloaders.md) in the Concepts section.
-[/!margin]
+[!side]
+For a general explanation of how bootloaders and boot protocols work, see [Bootloaders](../../../wiki/boot/bootloaders.md) in the Wiki.
+[/!side]
 
-## Data Flow
+## Components
 
-`kernel_main` allocates a `kernel_descriptor_t` on the stack, which embeds a `boot_context_t`. It then passes a pointer to the boot context into `boot_init()`. The protocol implementation reads firmware-provided data — Limine request responses or Multiboot2 tags — and populates every field of the context unconditionally.
-
-After `boot_init()` returns, the boot context is fully populated and the rest of the init sequence can read framebuffer dimensions, the physical memory map, and other boot-time information through its fields.
+| Component | Description |
+|-----------|-------------|
+| [Boot Context](context.md) | The `boot_context_t` structure and data flow |
+| [Limine Protocol](limine.md) | Limine request/response implementation |
+| [Multiboot2 Protocol](multiboot2.md) | Multiboot2 tag parsing implementation |
 
 ## Supported Protocols
 

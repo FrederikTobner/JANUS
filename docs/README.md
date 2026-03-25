@@ -16,7 +16,7 @@ cargo install mdbook-mermaid
 | Tool | Purpose |
 |------|---------|
 | `mdbook` | Static site generator for the book |
-| `mdbook-side-notes` | Renders `[!side]...[/!side]` and `[!margin]...[/!margin]` blocks as margin notes |
+| `mdbook-side-notes` | Renders `[!side]...[/!side]` and `[!side]...[/!side]` blocks as side notes |
 | `mdbook-code-diff` | Renders `` ```c-diff `` / `` ```ld-diff `` blocks with add/remove highlighting |
 | `mdbook-mermaid` | Renders `` ```mermaid `` blocks as diagrams |
 

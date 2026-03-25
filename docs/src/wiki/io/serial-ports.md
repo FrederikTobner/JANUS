@@ -20,6 +20,6 @@ Most emulators (QEMU, Bochs) provide virtual serial ports that redirect to the h
 
 A typical bare-metal serial initialisation sequence sets the baud rate divisor, configures the line protocol (typically 8 data bits, no parity, one stop bit — abbreviated 8N1), and enables the transmit FIFO. After that, sending a character is a matter of writing a byte to the transmit holding register once the transmit buffer has space.
 
-[!margin]
-See [JANUS serial driver](../../reference/drivers/README.md) for the concrete implementation on both x86_64 and aarch64.
-[/!margin]
+[!side]
+See [JANUS serial driver](../../project/subsystems/drivers/serial.md) for the concrete implementation on both x86_64 and aarch64.
+[/!side]

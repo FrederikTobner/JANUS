@@ -24,6 +24,6 @@ The Limine boot protocol is a newer, simpler alternative that supports both x86_
 
 Limine is firmware-agnostic — the same protocol works whether the underlying firmware is BIOS or UEFI. It handles the mode switch and page table setup internally, so the kernel starts in a significantly more comfortable environment than Multiboot2 provides.
 
-[!margin]
-See [JANUS Boot Subsystem](../../reference/boot/README.md) for how JANUS handles both protocols through a uniform `boot_init()` interface.
-[/!margin]
+[!side]
+See [JANUS Boot Subsystem](../../project/subsystems/boot/README.md) for how JANUS handles both protocols through a uniform `boot_init()` interface.
+[/!side]

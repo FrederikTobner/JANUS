@@ -84,18 +84,24 @@ int boot_init(boot_context_t * boot_context)
     struct multiboot_tag * tag = multiboot_first_tag((struct multiboot_info *) (phys_addr_t) g_mb2_info);
     while (!multiboot_is_end_tag(tag)) {
         if (tag->type == MULTIBOOT2_TAG_FRAMEBUFFER) {
-            struct multiboot_tag_framebuffer const * framebuffer = (struct multiboot_tag_framebuffer const *) tag;
-            boot_context->display = (boot_display_info_t) {
-                .framebuffer = (u8 *) (phys_addr_t) framebuffer->addr,
-                .width = framebuffer->width,
-                .height = framebuffer->height,
-                .pitch = framebuffer->pitch,
-                .bpp = framebuffer->bpp,
-                .red_mask_shift = 16,
-                .green_mask_shift = 8,
-                .blue_mask_shift = 0,
-            };
-            boot_context->has_display = true;
+            struct multiboot_tag_framebuffer const * fb = (struct multiboot_tag_framebuffer const *) tag;
+
+            // Only use a direct-color (RGB) framebuffer.
+            // EGA text mode (fb_type 2) and indexed colour (fb_type 0)
+            // are not usable as a linear framebuffer.
+            if (fb->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB) {
+                boot_context->display = (boot_display_info_t) {
+                    .framebuffer = (u8 *) (phys_addr_t) fb->addr,
+                    .width = fb->width,
+                    .height = fb->height,
+                    .pitch = fb->pitch,
+                    .bpp = fb->bpp,
+                    .red_mask_shift = fb->red_field_position,
+                    .green_mask_shift = fb->green_field_position,
+                    .blue_mask_shift = fb->blue_field_position,
+                };
+                boot_context->has_display = true;
+            }
             break;
         }
         tag = multiboot_next_tag(tag);

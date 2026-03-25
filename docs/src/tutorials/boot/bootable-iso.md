@@ -4,7 +4,7 @@ This tutorial walks through turning a bare-metal kernel ELF into a bootable ISO 
 
 ## Prerequisites
 
-A working kernel ELF that speaks Multiboot2 (has a valid header and a `_start` entry point). The [Multiboot2](../wiki/boot/multiboot2.md) concept page covers the protocol. The following host tools must be installed:
+A working kernel ELF that speaks Multiboot2 (has a valid header and a `_start` entry point). The [Multiboot2](../../wiki/boot/multiboot2.md) concept page covers the protocol. The following host tools must be installed:
 
 - `grub-mkrescue` (package `grub-pc-bin` on Debian, `grub` on Arch)
 - `xorriso` — the back-end that `grub-mkrescue` uses to create the ISO 9660 image
@@ -106,8 +106,8 @@ add_custom_target(debug
 ```
 
 - `USES_TERMINAL` ensures `ninja run` shows QEMU's serial output in the build terminal instead of buffering it.
-- `-serial stdio` redirects the virtual COM1 to the host terminal — see [Serial Port Driver](serial-port-driver.md).
-- `-s -S` enables the GDB stub and pauses the CPU at startup — see [Debugging a Kernel with LLDB](kernel-debugging-lldb.md).
+- `-serial stdio` redirects the virtual COM1 to the host terminal — see [Serial Port Driver](../io/serial-port-driver.md).
+- `-s -S` enables the GDB stub and pauses the CPU at startup — see [Debugging a Kernel with LLDB](../debugging/kernel-debugging-lldb.md).
 
 Usage:
 

@@ -31,8 +31,9 @@
 /**
  * @brief Initialize TTY with VGA text mode.
  *
- * Used for identity-mapped boot (Multiboot2) where VGA buffer is directly
- * accessible at 0xB8000.
+ * Fallback for identity-mapped boot (Multiboot2) when no graphical
+ * framebuffer is available.  VGA buffer must be directly accessible
+ * at 0xB8000.
  *
  * @param serial_available Whether serial output is available for logging
  * @return true if TTY was initialized successfully
@@ -52,8 +53,9 @@ static bool init_tty_vga(bool serial_available)
 /**
  * @brief Initialize TTY with framebuffer mode.
  *
- * Used for higher-half boot (Limine) where we need to use the framebuffer
- * for text rendering since VGA memory isn't identity-mapped.
+ * Used when the bootloader provides a graphical framebuffer (Limine,
+ * or Multiboot2 with a framebuffer header tag).  The framebuffer
+ * address must already be accessible (identity-mapped or via HHDM).
  *
  * @param display Boot display info from the boot context
  * @param serial_available Whether serial output is available for logging
@@ -93,18 +95,19 @@ bool kinit_serial(boot_context_t const * boot_context)
 
 bool kinit_tty(boot_context_t const * boot_context, bool serial_available)
 {
+    // Prefer framebuffer when available (works for both Multiboot2 and Limine)
+    if (boot_context->has_display) {
+        return init_tty_framebuffer(&boot_context->display, serial_available);
+    }
+
+    // Fallback: VGA text mode (identity-mapped Multiboot2 without framebuffer)
     if (boot_context->hhdm_offset == 0) {
-        // Identity-mapped (Multiboot2): VGA buffer is directly accessible
         return init_tty_vga(serial_available);
     }
 
-    // Higher-half mapped (Limine): Need framebuffer for text output
-    if (!boot_context->has_display) {
-        if (serial_available) {
-            drivers_serial_puts("TTY skipped (no framebuffer available)\n");
-        }
-        return false;
+    // No display available
+    if (serial_available) {
+        drivers_serial_puts("TTY skipped (no framebuffer available)\n");
     }
-
-    return init_tty_framebuffer(&boot_context->display, serial_available);
+    return false;
 }

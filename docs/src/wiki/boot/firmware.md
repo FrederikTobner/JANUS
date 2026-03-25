@@ -22,6 +22,6 @@ Most modern machines ship with UEFI firmware. Many also include a Compatibility 
 
 An OS kernel typically does not interact with firmware directly — that responsibility falls to the bootloader. However, the firmware determines what information is available at boot time: the memory map format, the framebuffer setup mechanism, and the address at which the kernel is loaded. Boot protocols like Multiboot2 and Limine abstract over these firmware differences, providing a uniform interface that the kernel can consume regardless of whether the underlying firmware is BIOS or UEFI.
 
-[!margin]
+[!side]
 See [Bootloaders](bootloaders.md) for how bootloaders build on firmware services to load and configure the kernel.
-[/!margin]
+[/!side]

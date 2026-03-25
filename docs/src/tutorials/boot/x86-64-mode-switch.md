@@ -4,7 +4,7 @@ This tutorial walks through the x86_64 mode switch — the sequence of steps a M
 
 ## Prerequisites
 
-The reader should be comfortable with basic x86 assembly (NASM syntax) and understand what registers, the stack, and memory-mapped structures are. Familiarity with the Multiboot2 entry state is helpful — see [Multiboot2](../concepts/boot/multiboot2.md) for the full specification. The concepts behind paging are covered in [Virtual Memory](../concepts/memory/virtual-memory.md).
+The reader should be comfortable with basic x86 assembly (NASM syntax) and understand what registers, the stack, and memory-mapped structures are. Familiarity with the Multiboot2 entry state is helpful — see [Multiboot2](../../wiki/boot/multiboot2.md) for the full specification. The concepts behind paging are covered in [Virtual Memory](../../wiki/memory/virtual-memory.md).
 
 ## Starting Point
 

@@ -54,6 +54,6 @@ After loading the kernel, the bootloader places a boot information structure at 
 
 The kernel walks the tag list starting from `EBX`, advancing by each tag's size (rounded up to 8-byte alignment) until it encounters the end tag.
 
-[!margin]
-See [Bootloaders](bootloaders.md) for how Multiboot2 compares to the Limine protocol, and [JANUS Boot Subsystem](../../reference/boot/README.md) for how JANUS parses both protocols into a uniform `boot_context_t`.
-[/!margin]
+[!side]
+See [Bootloaders](bootloaders.md) for how Multiboot2 compares to the Limine protocol, and [JANUS Boot Subsystem](../../project/subsystems/boot/README.md) for how JANUS parses both protocols into a uniform `boot_context_t`.
+[/!side]

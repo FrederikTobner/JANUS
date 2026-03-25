@@ -24,6 +24,6 @@ During early kernel initialisation, the framebuffer is typically the only graphi
 
 This approach is straightforward but has significant limitations: there is no hardware cursor, no scrolling support, and no text-mode conveniences. The kernel must implement all of these in software. It is, however, portable — it works identically on x86_64 and aarch64, provided the bootloader supplies a framebuffer.
 
-[!margin]
-See [JANUS TTY driver](../../reference/drivers/README.md) for how JANUS renders text into the boot framebuffer.
-[/!margin]
+[!side]
+See [JANUS TTY driver](../../project/subsystems/drivers/tty.md) for how JANUS renders text into the boot framebuffer.
+[/!side]

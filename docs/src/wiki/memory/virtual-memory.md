@@ -24,6 +24,6 @@ Walking four levels of page tables for every memory access would be prohibitivel
 
 A common convention in OS design is to map the kernel into the upper portion of the virtual address space (the "higher half") and reserve the lower portion for user-space programs. On x86_64 with 48-bit canonical addresses, the kernel typically occupies addresses starting at `0xFFFF800000000000` or higher. This arrangement allows user-space page tables to differ per process while the kernel mapping remains the same across all address spaces.
 
-[!margin]
+[!side]
 See [Physical Memory](physical-memory.md) for how the underlying physical frames are managed.
-[/!margin]
+[/!side]

@@ -43,6 +43,7 @@ if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
     add_library(_start_multiboot2 OBJECT
         multiboot2/entry.asm
         multiboot2/header.asm
+        multiboot2/paging.asm
     )
     
     # Build kernel-multiboot2.elf with Multiboot2 linker script

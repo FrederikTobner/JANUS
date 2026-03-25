@@ -4,7 +4,7 @@ This tutorial walks through a complete LLDB debugging session against a kernel r
 
 ## Prerequisites
 
-LLDB and QEMU must be installed (see [Dependencies](../project/setup/dependencies.md)). Familiarity with the Multiboot2 entry state helps — see [Multiboot2](../concepts/boot/multiboot2.md). For a quick command reference, see [LLDB](../concepts/tools/lldb.md).
+LLDB and QEMU must be installed (see [Dependencies](../../project/setup/dependencies.md)). Familiarity with the Multiboot2 entry state helps — see [Multiboot2](../../wiki/boot/multiboot2.md). For a quick command reference, see [LLDB](../../project/tooling/lldb.md).
 
 ## The Setup
 

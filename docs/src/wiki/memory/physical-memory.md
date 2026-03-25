@@ -18,6 +18,6 @@ A physical memory allocator — the PMM — tracks which frames are free and whi
 
 A physical address identifies a byte in the machine's physical address space. In a system with paging enabled, the CPU does not use physical addresses directly — it translates virtual addresses through the page tables to arrive at physical addresses. The kernel must maintain the ability to convert between the two, typically through a direct map (a region of virtual address space that is identity-mapped or offset-mapped to all of physical memory).
 
-[!margin]
+[!side]
 See [Virtual Memory](virtual-memory.md) for how paging and address translation work.
-[/!margin]
+[/!side]

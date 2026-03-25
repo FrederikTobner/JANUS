@@ -4,7 +4,7 @@ This tutorial implements a minimal COM1 serial driver for x86_64. Serial output 
 
 ## Prerequisites
 
-Familiarity with C and basic x86 concepts (I/O ports, inline assembly). For background on UART hardware, see [Serial Ports](../wiki/hardware/serial-ports.md). The code assumes the kernel is already booting in 64-bit long mode with a working C entry point.
+Familiarity with C and basic x86 concepts (I/O ports, inline assembly). For background on UART hardware, see [Serial Ports](../../wiki/io/serial-ports.md). The code assumes the kernel is already booting in 64-bit long mode with a working C entry point.
 
 ## Port I/O Primitives
 

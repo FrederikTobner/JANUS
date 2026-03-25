@@ -4,7 +4,7 @@ This tutorial builds a linker script for an x86_64 kernel from scratch. The link
 
 ## Prerequisites
 
-Basic familiarity with ELF sections (`.text`, `.data`, `.bss`) and the concept of a linker. Understanding why the kernel loads at 1 MiB helps — see [Firmware](../concepts/boot/firmware.md) and [Multiboot2](../concepts/boot/multiboot2.md) for context.
+Basic familiarity with ELF sections (`.text`, `.data`, `.bss`) and the concept of a linker. Understanding why the kernel loads at 1 MiB helps — see [Firmware](../../wiki/boot/firmware.md) and [Multiboot2](../../wiki/boot/multiboot2.md) for context.
 
 ## Why a Custom Linker Script?
 

@@ -1,9 +1,14 @@
 # JANUS Project
 
-This site collects the conventions, standards, and setup instructions for anyone working on or contributing to JANUS.
+This section documents everything specific to JANUS: the kernel architecture, subsystem design, developer tooling, and conventions for anyone working on or contributing to the project.
 
+Because JANUS already ships Doxygen-annotated source code, the subsystem reference deliberately stays at the architectural level. It describes the high-level design, the module boundaries, and the data flow between subsystems, rather than duplicating the function-level documentation that lives in the code itself.
+
+- **Architecture** covers the layer model, the module structure, and the three-tier include hierarchy that governs how subsystems expose their APIs.
+- **Subsystems** documents each kernel subsystem — boot, kernel main, and drivers — with per-component reference pages.
+- **Tooling** provides practical cheat sheets for LLDB, CMake, and QEMU.
 - **Contributing** covers the coding style, naming conventions, and terminology used throughout the codebase.
 - **Principles** documents the core technical philosophy and standards that guide design decisions.
 - **Setup** walks through the required dependencies and build instructions for getting a development environment running.
 
-For the actual kernel architecture and implementation details, see the [Reference](../reference/introduction.md) section. For general OS concepts, see the [Concepts](../concepts/introduction.md) section.
+For general OS concepts, see the [Wiki](../wiki/introduction.md) section.

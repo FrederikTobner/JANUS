@@ -107,6 +107,11 @@ struct multiboot_tag_mmap {
     struct multiboot_mmap_entry entries[];
 } __packed;
 
+/// Framebuffer type constants (fb_type field)
+#define MULTIBOOT2_FRAMEBUFFER_TYPE_INDEXED  0
+#define MULTIBOOT2_FRAMEBUFFER_TYPE_RGB      1
+#define MULTIBOOT2_FRAMEBUFFER_TYPE_EGA_TEXT 2
+
 /// Framebuffer tag
 struct multiboot_tag_framebuffer {
     u32 type;
@@ -118,7 +123,13 @@ struct multiboot_tag_framebuffer {
     u8 bpp;
     u8 fb_type;
     u8 reserved;
-    /* Color info follows for fb_type == 1 */
+    /* Color info — only valid when fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB */
+    u8 red_field_position;
+    u8 red_mask_size;
+    u8 green_field_position;
+    u8 green_mask_size;
+    u8 blue_field_position;
+    u8 blue_mask_size;
 } __packed;
 
 /// Boot command line tag
