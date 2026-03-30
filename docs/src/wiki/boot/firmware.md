@@ -29,4 +29,4 @@ See [Bootloaders](bootloaders.md) for how bootloaders build on firmware services
 [/!side]
 
 An OS kernel typically does not interact with firmware directly. This is responsibility of the bootloader.
-However, the firmware determines what information is available at boot time: the memory map format, the framebuffer setup mechanism, and the address at which the kernel is loaded. Boot protocols like [Multiboot2](multiboot2.md) and Limine abstract over these firmware differences, providing a uniform interface that the kernel can consume regardless of whether the underlying firmware is BIOS or UEFI.
+However, the firmware determines what information is available at boot time: the memory map format, the framebuffer setup mechanism, and the address at which the kernel is loaded. Boot protocols like [Multiboot2](protocols/multiboot2.md) and Limine abstract over these firmware differences, providing a uniform interface that the kernel can consume regardless of whether the underlying firmware is BIOS or UEFI.

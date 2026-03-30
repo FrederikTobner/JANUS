@@ -51,14 +51,17 @@ SECTIONS {
 
 GRUB scans the first 32 KiB for the Multiboot2 magic. The header section must appear first, 8-byte aligned:
 
-```ld
-SECTIONS {
-    . = 0x100000;
+```ld-diff
+file: linker.ld
+after: location counter
+---
+ SECTIONS {
+     . = 0x100000;
 
-    .multiboot ALIGN(8) : {
-        *(.multiboot)
-    }
-}
++    .multiboot ALIGN(8) : {
++        *(.multiboot)
++    }
+ }
 ```
 
 `*(.multiboot)` pulls in the `.multiboot` input section from every object file. The wildcard `*` is necessary because the linker does not know which object file contains it. `ALIGN(8)` is a Multiboot2 requirement.
@@ -67,11 +70,18 @@ SECTIONS {
 
 Executable code goes into `.text`, page-aligned so we can later mark it executable but non-writable:
 
-```ld
-    .text ALIGN(4K) : {
-        *(.text)
-        *(.text.*)
-    }
+```ld-diff
+file: linker.ld
+after: .multiboot section
+---
+     .multiboot ALIGN(8) : {
+         *(.multiboot)
+     }
+
++    .text ALIGN(4K) : {
++        *(.text)
++        *(.text.*)
++    }
 ```
 
 The `.text.*` pattern catches compiler-generated subsections like `.text.unlikely` (cold code) or `.text.startup`.
@@ -80,11 +90,19 @@ The `.text.*` pattern catches compiler-generated subsections like `.text.unlikel
 
 String literals, `const` globals, and jump tables live in `.rodata`:
 
-```ld
-    .rodata ALIGN(4K) : {
-        *(.rodata)
-        *(.rodata.*)
-    }
+```ld-diff
+file: linker.ld
+after: .text section
+---
+     .text ALIGN(4K) : {
+         *(.text)
+         *(.text.*)
+     }
+
++    .rodata ALIGN(4K) : {
++        *(.rodata)
++        *(.rodata.*)
++    }
 ```
 
 Page-aligning this section separately from `.text` lets us map it as readable but not executable — a useful security property even in kernel space.
@@ -93,11 +111,19 @@ Page-aligning this section separately from `.text` lets us map it as readable bu
 
 Global and static variables with compile-time initialisers go into `.data`:
 
-```ld
-    .data ALIGN(4K) : {
-        *(.data)
-        *(.data.*)
-    }
+```ld-diff
+file: linker.ld
+after: .rodata section
+---
+     .rodata ALIGN(4K) : {
+         *(.rodata)
+         *(.rodata.*)
+     }
+
++    .data ALIGN(4K) : {
++        *(.data)
++        *(.data.*)
++    }
 ```
 
 These values are stored in the ELF binary and loaded into memory by the bootloader.
@@ -106,12 +132,20 @@ These values are stored in the ELF binary and loaded into memory by the bootload
 
 BSS holds variables that are zero-initialised. They take no space in the binary itself — the bootloader zeroes the region at load time:
 
-```ld
-    .bss ALIGN(4K) : {
-        *(COMMON)
-        *(.bss)
-        *(.bss.*)
-    }
+```ld-diff
+file: linker.ld
+after: .data section
+---
+     .data ALIGN(4K) : {
+         *(.data)
+         *(.data.*)
+     }
+
++    .bss ALIGN(4K) : {
++        *(COMMON)
++        *(.bss)
++        *(.bss.*)
++    }
 ```
 
 `COMMON` collects tentative C definitions (globals declared without an initialiser in multiple translation units). Including it here ensures they end up in the zeroed region rather than floating unplaced.
@@ -120,10 +154,20 @@ BSS holds variables that are zero-initialised. They take no space in the binary 
 
 Expose the kernel's memory footprint to C so that a future memory allocator knows where free memory begins:
 
-```ld
-    kernel_start = 0x100000;
-    kernel_end   = .;
-    kernel_size  = kernel_end - kernel_start;
+```ld-diff
+file: linker.ld
+after: .bss section
+---
+     .bss ALIGN(4K) : {
+         *(COMMON)
+         *(.bss)
+         *(.bss.*)
+     }
+
++    kernel_start = 0x100000;
++    kernel_end   = .;
++    kernel_size  = kernel_end - kernel_start;
+ }
 ```
 
 Use them in C via `extern`:

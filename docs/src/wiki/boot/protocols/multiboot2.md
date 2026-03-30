@@ -2,6 +2,10 @@
 
 Multiboot2 is a boot protocol specification maintained by the GNU project. It defines the contract between a bootloader and an operating system kernel: how the kernel advertises its requirements, what machine state the bootloader establishes before transferring control, and how boot-time information is communicated.
 
+[!side]
+See [Bootloaders](bootloaders.md) for how Multiboot2 compares to the Limine protocol, and [JANUS Boot Subsystem](../../project/subsystems/boot/README.md) for how JANUS parses both protocols into a uniform `boot_context_t`.
+[/!side]
+
 The protocol is widely supported on x86 machines. GRUB is the canonical implementation, but any Multiboot2-compliant bootloader can load a conforming kernel.
 
 ## The Header
@@ -53,7 +57,3 @@ After loading the kernel, the bootloader places a boot information structure at 
 | 15 | ACPI RSDP (new) |
 
 The kernel walks the tag list starting from `EBX`, advancing by each tag's size (rounded up to 8-byte alignment) until it encounters the end tag.
-
-[!side]
-See [Bootloaders](bootloaders.md) for how Multiboot2 compares to the Limine protocol, and [JANUS Boot Subsystem](../../project/subsystems/boot/README.md) for how JANUS parses both protocols into a uniform `boot_context_t`.
-[/!side]

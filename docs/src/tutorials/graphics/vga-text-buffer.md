@@ -87,52 +87,86 @@ static u8  vga_color  = 0x07;   /* light grey on black */
 
 ## Initialisation and Clear
 
-Initialisation resets the cursor and fills every cell with spaces. We also provide a separate clear function that preserves the current colour:
+Initialisation resets the cursor to the top-left corner and sets the default colour:
 
-```c
-void vga_text_init(void) {
-    vga_row    = 0;
-    vga_column = 0;
-    vga_color  = vga_entry_color(7, 0);
-    vga_text_clear();
-}
+```c-diff
+file: drivers/vga_text.c
+after: driver state
+---
+ static u8  vga_color  = 0x07;   /* light grey on black */
 
-void vga_text_clear(void) {
-    for (u16 y = 0; y < VGA_TEXT_HEIGHT; y++) {
-        for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
-            vga_buffer[y * VGA_TEXT_WIDTH + x] = vga_entry(' ', vga_color);
-        }
-    }
-    vga_row    = 0;
-    vga_column = 0;
-}
++void vga_text_init(void) {
++    vga_row    = 0;
++    vga_column = 0;
++    vga_color  = vga_entry_color(7, 0);
++    vga_text_clear();
++}
+```
+
+The clear function fills every cell with a space in the current colour, then resets the cursor position. It is called from `vga_text_init` but can also be used independently:
+
+```c-diff
+file: drivers/vga_text.c
+after: vga_text_init()
+---
+ }
+
++void vga_text_clear(void) {
++    for (u16 y = 0; y < VGA_TEXT_HEIGHT; y++) {
++        for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
++            vga_buffer[y * VGA_TEXT_WIDTH + x] = vga_entry(' ', vga_color);
++        }
++    }
++    vga_row    = 0;
++    vga_column = 0;
++}
 ```
 
 ## Scrolling
 
-When the cursor moves past the last row, every row shifts up by one and the bottom row is cleared. This is a software-only operation — the VGA hardware has no built-in scroll:
+When the cursor moves past the last row, every row shifts up by one and the bottom row is cleared. This is a software-only operation — the VGA hardware has no built-in scroll.
 
-```c
-static void vga_text_scroll_if_needed(void) {
-    if (vga_row < VGA_TEXT_HEIGHT)
-        return;
+The function begins with an early-out guard — if the cursor is still within bounds, there is nothing to do:
 
-    /* shift every row up by one */
-    for (u16 y = 1; y < VGA_TEXT_HEIGHT; y++) {
-        for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
-            vga_buffer[(y - 1) * VGA_TEXT_WIDTH + x] =
-                vga_buffer[y * VGA_TEXT_WIDTH + x];
-        }
-    }
+```c-diff
+file: drivers/vga_text.c
+after: vga_text_clear()
+---
+     vga_column = 0;
+ }
 
-    /* blank the last row */
-    for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
-        vga_buffer[(VGA_TEXT_HEIGHT - 1) * VGA_TEXT_WIDTH + x] =
-            vga_entry(' ', vga_color);
-    }
++static void vga_text_scroll_if_needed(void) {
++    if (vga_row < VGA_TEXT_HEIGHT)
++        return;
+```
 
-    vga_row = VGA_TEXT_HEIGHT - 1;
-}
+When scrolling is needed, copy every row up by one. Each cell at $(x, y)$ receives the value from $(x, y+1)$:
+
+```c-diff
+file: drivers/vga_text.c
+after: early return guard
+---
++    for (u16 y = 1; y < VGA_TEXT_HEIGHT; y++) {
++        for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
++            vga_buffer[(y - 1) * VGA_TEXT_WIDTH + x] =
++                vga_buffer[y * VGA_TEXT_WIDTH + x];
++        }
++    }
+```
+
+The top 24 rows now hold the content that was in rows 1–24. Fill the newly exposed bottom row with spaces and clamp the cursor:
+
+```c-diff
+file: drivers/vga_text.c
+after: row shift loop
+---
++    for (u16 x = 0; x < VGA_TEXT_WIDTH; x++) {
++        vga_buffer[(VGA_TEXT_HEIGHT - 1) * VGA_TEXT_WIDTH + x] =
++            vga_entry(' ', vga_color);
++    }
++
++    vga_row = VGA_TEXT_HEIGHT - 1;
++}
 ```
 
 [!side]
@@ -166,45 +200,80 @@ This is the approach JANUS actually uses in its TTY driver — the shared scroll
 
 ## Writing Characters
 
-`vga_text_putc` handles four control characters: newline (`\n`), carriage return (`\r`), tab (`\t`), and backspace (`\b`). Everything else is a printable character written at the current cursor position. Line wrapping and scrolling are checked after every character:
+`vga_text_putc` handles control characters first, then printable characters. Start with the function signature and the newline / carriage return cases — a newline moves to the start of the next line, a carriage return returns to column zero on the same line:
 
-```c
-void vga_text_putc(char c) {
-    if (c == '\n') {
-        vga_column = 0;
-        vga_row++;
-    } else if (c == '\r') {
-        vga_column = 0;
-    } else if (c == '\t') {
-        /* advance to the next 8-column tab stop */
-        vga_column = (vga_column + 8) & ~7;
-    } else if (c == '\b') {
-        if (vga_column > 0)
-            vga_column--;
-    } else {
-        vga_buffer[vga_row * VGA_TEXT_WIDTH + vga_column] =
-            vga_entry((unsigned char)c, vga_color);
-        vga_column++;
-    }
+```c-diff
+file: drivers/vga_text.c
+after: vga_text_scroll_if_needed()
+---
+     vga_row = VGA_TEXT_HEIGHT - 1;
+ }
 
-    /* line wrap */
-    if (vga_column >= VGA_TEXT_WIDTH) {
-        vga_column = 0;
-        vga_row++;
-    }
-
-    /* scroll if needed */
-    vga_text_scroll_if_needed();
-}
-
-void vga_text_write_string(const char *str) {
-    for (int i = 0; str[i] != '\0'; i++) {
-        vga_text_putc(str[i]);
-    }
-}
++void vga_text_putc(char c) {
++    if (c == '\n') {
++        vga_column = 0;
++        vga_row++;
++    } else if (c == '\r') {
++        vga_column = 0;
 ```
 
-The tab-stop arithmetic `(col + 8) & ~7` rounds up to the next multiple of 8. Backspace moves the cursor left but does not erase the character — a full destructive backspace would additionally write a space at the new position. Line wrapping is automatic: when `vga_column` reaches 80, the cursor drops to the next row.
+Tab advances the cursor to the next 8-column stop. The expression `(col + 8) & ~7` rounds up to the nearest multiple of 8. Backspace moves the cursor left by one but does not erase the character — a full destructive backspace would additionally write a space:
+
+```c-diff
+file: drivers/vga_text.c
+after: newline and carriage return
+---
++    } else if (c == '\t') {
++        vga_column = (vga_column + 8) & ~7;
++    } else if (c == '\b') {
++        if (vga_column > 0)
++            vga_column--;
+```
+
+Any character that is not a recognised control character is printable. Write it to the buffer at the current position and advance the cursor:
+
+```c-diff
+file: drivers/vga_text.c
+after: tab and backspace
+---
++    } else {
++        vga_buffer[vga_row * VGA_TEXT_WIDTH + vga_column] =
++            vga_entry((unsigned char)c, vga_color);
++        vga_column++;
++    }
+```
+
+After every character, check whether the cursor has moved past the edge of the screen. If it has, wrap to the next line and scroll if necessary:
+
+```c-diff
+file: drivers/vga_text.c
+after: printable character write
+---
++    if (vga_column >= VGA_TEXT_WIDTH) {
++        vga_column = 0;
++        vga_row++;
++    }
++
++    vga_text_scroll_if_needed();
++}
+```
+
+A convenience wrapper sends a null-terminated string one character at a time:
+
+```c-diff
+file: drivers/vga_text.c
+after: vga_text_putc()
+---
+ }
+
++void vga_text_write_string(const char *str) {
++    for (int i = 0; str[i] != '\0'; i++) {
++        vga_text_putc(str[i]);
++    }
++}
+```
+
+The tab-stop arithmetic `(col + 8) & ~7` rounds up to the next multiple of 8. Line wrapping is automatic: when `vga_column` reaches 80, the cursor drops to the next row.
 
 ## Hardware Cursor
 
@@ -220,6 +289,10 @@ static inline void outb(u16 port, u8 value) {
 
 With that in hand, updating the hardware cursor is four port writes — select the low-byte register (`0x0F`), write the low byte, select the high-byte register (`0x0E`), write the high byte:
 
+[!side]
+The CRTC registers are a vestige of the original IBM CGA adapter. Register `0x0E` holds the upper 8 bits of the cursor address and `0x0F` holds the lower 8 bits. The linear address is simply row × 80 + column.
+[/!side]
+
 ```c
 #define VGA_CRTC_INDEX 0x3D4
 #define VGA_CRTC_DATA  0x3D5
@@ -234,10 +307,6 @@ void vga_set_cursor(u16 x, u16 y) {
 ```
 
 Call `vga_set_cursor(vga_column, vga_row)` at the end of `vga_text_putc` and `vga_text_clear` so the blinking underscore always tracks the write position. Without these calls the cursor stays at position zero regardless of where text is being printed.
-
-[!side]
-The CRTC registers are a vestige of the original IBM CGA adapter. Register `0x0E` holds the upper 8 bits of the cursor address and `0x0F` holds the lower 8 bits. The linear address is simply row × 80 + column.
-[/!side]
 
 ## Changing Colours
 

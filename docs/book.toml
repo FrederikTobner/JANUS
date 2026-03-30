@@ -24,9 +24,9 @@ preferred-dark-theme = "navy"
 git-repository-url = "https://github.com/FrederikTobner/JANUS"
 edit-url-template = "https://github.com/FrederikTobner/JANUS/edit/main/docs/{path}"
 site-url = "/JANUS/"
-additional-css = ["theme/side-notes.css", "theme/css/code-diff.css"]
+additional-css = ["theme/side-notes.css", "theme/css/code-diff.css", "theme/css/parts.css"]
 mathjax-support = true
-additional-js = ["additional-js/mermaid/mermaid.min.js", "additional-js/mermaid/mermaid-init.js", "theme/js/code-diff.js"]
+additional-js = ["additional-js/mermaid/mermaid.min.js", "additional-js/mermaid/mermaid-init.js", "theme/js/code-diff.js", "theme/js/parts-accordion.js"]
 
 [output.html.search]
 enable = true

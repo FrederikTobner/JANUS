@@ -1,10 +1,11 @@
 # Bootloaders
 
-A bootloader is the intermediate software that bridges firmware and the operating system kernel. The firmware knows how to initialise hardware and load a small program from disk; the bootloader uses those firmware services to locate the kernel binary, load it into memory, configure the CPU and memory environment, and transfer control to the kernel's entry point.
+A bootloader is the intermediate software that bridges firmware and the operating system kernel.
+The firmware knows how to initialise hardware and load a small program from disk; the bootloader uses those firmware services to locate the kernel binary, load it into memory, configure the CPU and memory environment, according the the boot protocol, and then transfers control to the kernel's entry point.
 
 ## Why Not Boot Directly?
 
-The firmware's native loading mechanism is rudimentary. BIOS loads exactly 512 bytes from the first disk sector. UEFI loads a PE executable from a FAT32 partition. Neither understands ELF binaries, kernel command lines, initial ramdisks, or framebuffer configuration. The bootloader fills this gap — it understands the kernel's binary format, sets up the environment the kernel expects, and passes structured information (memory map, framebuffer parameters, boot command line) to the kernel in a well-defined format.
+The firmware's native loading mechanism is rudimentary. BIOS loads exactly 512 bytes from the first disk sector. UEFI loads a PE executable from a FAT32 partition. Neither understands ELF binaries, kernel command lines, initial ramdisks, or framebuffer configuration. The bootloader fills this gap — it understands the kernel's binary format, sets up the environment the kernel expects, and passes structured information, like memory maps, framebuffer parameters, and boot command line arguments, to the kernel in a well-defined format.
 
 ## Boot Protocols
 

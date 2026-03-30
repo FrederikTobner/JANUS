@@ -60,74 +60,141 @@ Define these as macros so the intent is clear at every call site:
 
 ## Initialisation
 
-Now we write the initialisation function. `serial_init()` puts the UART into a known state: 38 400 baud, 8N1 framing, FIFO enabled. It finishes with a loopback self-test — if the UART cannot echo `0xAE` back to itself, we know the port is unusable.
+Now we write the initialisation function. `serial_init()` puts the UART into a known state step by step: silence interrupts, set the baud rate, configure the line, enable FIFOs, and finish with a loopback self-test.
 
-```c
-int serial_init(void) {
-    /* Disable all interrupts */
-    outb(SERIAL_COM1 + 1, 0x00);
+Start the function by disabling all UART interrupts so nothing fires while we reconfigure the hardware:
 
-    /* Enable DLAB (Divisor Latch Access Bit) to set baud rate */
-    outb(SERIAL_LINE_COMMAND_PORT(SERIAL_COM1), 0x80);
+```c-diff
+file: drivers/serial.c
+after: register macros
+---
+ #define SERIAL_LINE_STATUS_PORT(base)   (base + 5)
 
-    /* Set divisor to 3 → 38 400 baud (115 200 / 3) */
-    outb(SERIAL_DATA_PORT(SERIAL_COM1), 0x03);   /* low byte  */
-    outb(SERIAL_COM1 + 1, 0x00);                  /* high byte */
-
-    /* 8 data bits, no parity, one stop bit (8N1) */
-    outb(SERIAL_LINE_COMMAND_PORT(SERIAL_COM1), 0x03);
-
-    /* Enable FIFO, clear queues, 14-byte threshold */
-    outb(SERIAL_FIFO_COMMAND_PORT(SERIAL_COM1), 0xC7);
-
-    /* Mark data terminal ready, request to send, enable aux output 2 */
-    outb(SERIAL_MODEM_COMMAND_PORT(SERIAL_COM1), 0x0B);
-
-    /* Enable loopback mode for self-test */
-    outb(SERIAL_MODEM_COMMAND_PORT(SERIAL_COM1), 0x1E);
-
-    /* Send test byte */
-    outb(SERIAL_DATA_PORT(SERIAL_COM1), 0xAE);
-
-    /* Check if we get the same byte back */
-    if (inb(SERIAL_DATA_PORT(SERIAL_COM1)) != 0xAE) {
-        return 1;   /* loopback failed — port unusable */
-    }
-
-    /* Switch to normal operation (not loopback) */
-    outb(SERIAL_MODEM_COMMAND_PORT(SERIAL_COM1), 0x0F);
-
-    return 0;
-}
++int serial_init(void) {
++    outb(SERIAL_COM1 + 1, 0x00);
 ```
 
-The DLAB (Divisor Latch Access Bit) is a gate: when set, writes to offset +0 and +1 program the baud divisor instead of touching the data or interrupt registers. After writing the divisor, we clear DLAB by writing `0x03` to the Line Control register, which also configures 8N1.
+Next, enable the DLAB (Divisor Latch Access Bit). While DLAB is set, writes to offset +0 and +1 program the baud rate divisor instead of touching the data or interrupt registers:
+
+```c-diff
+file: drivers/serial.c
+after: disable interrupts
+---
++    outb(SERIAL_LINE_COMMAND_PORT(SERIAL_COM1), 0x80);
+```
+
+With DLAB active, write the 16-bit divisor across two bytes. A divisor of 3 yields 38 400 baud (the UART's base clock is 115 200 Hz):
+
+```c-diff
+file: drivers/serial.c
+after: enable DLAB
+---
++    outb(SERIAL_DATA_PORT(SERIAL_COM1), 0x03);
++    outb(SERIAL_COM1 + 1, 0x00);
+```
+
+Now configure the line: 8 data bits, no parity, one stop bit (8N1). Writing `0x03` to the Line Control register also clears DLAB, so subsequent writes to offset +0 go to the data register again:
+
+```c-diff
+file: drivers/serial.c
+after: baud divisor
+---
++    outb(SERIAL_LINE_COMMAND_PORT(SERIAL_COM1), 0x03);
+```
+
+Enable the 16-byte FIFO and clear both the transmit and receive queues. The threshold of 14 bytes means the UART will assert an interrupt when 14 bytes are buffered:
+
+```c-diff
+file: drivers/serial.c
+after: line configuration
+---
++    outb(SERIAL_FIFO_COMMAND_PORT(SERIAL_COM1), 0xC7);
+```
+
+Activate the modem control lines — Data Terminal Ready, Request To Send, and auxiliary output 2 (which gates the interrupt line on PC-compatible hardware):
+
+```c-diff
+file: drivers/serial.c
+after: FIFO
+---
++    outb(SERIAL_MODEM_COMMAND_PORT(SERIAL_COM1), 0x0B);
+```
+
+Before trusting the port, run a loopback self-test. In loopback mode the UART's transmit pin is wired internally to its receive pin. We send `0xAE` and check that the same byte comes back:
+
+```c-diff
+file: drivers/serial.c
+after: modem control
+---
++    outb(SERIAL_MODEM_COMMAND_PORT(SERIAL_COM1), 0x1E);
++    outb(SERIAL_DATA_PORT(SERIAL_COM1), 0xAE);
++
++    if (inb(SERIAL_DATA_PORT(SERIAL_COM1)) != 0xAE) {
++        return 1;
++    }
+```
+
+The self-test passed — switch the modem back to normal operation and return success:
+
+```c-diff
+file: drivers/serial.c
+after: loopback test
+---
++    outb(SERIAL_MODEM_COMMAND_PORT(SERIAL_COM1), 0x0F);
++
++    return 0;
++}
+```
 
 ## Transmitting Data
-
-Before writing a character, we must poll the Line Status register (bit 5) to confirm the transmit buffer is empty. Writing while the buffer is full would silently drop data.
-
-```c
-int serial_is_transmit_empty(void) {
-    return inb(SERIAL_LINE_STATUS_PORT(SERIAL_COM1)) & 0x20;
-}
-
-void serial_write_char(char c) {
-    while (!serial_is_transmit_empty())
-        ;
-    outb(SERIAL_DATA_PORT(SERIAL_COM1), c);
-}
-
-void serial_write_string(const char *str) {
-    for (int i = 0; str[i] != '\0'; i++) {
-        serial_write_char(str[i]);
-    }
-}
-```
 
 [!side]
 This is busy-wait polling. It is simple and reliable for early boot output. Once interrupts are available, the driver can be extended to use the UART's interrupt line instead.
 [/!side]
+
+Before writing a byte we must confirm the transmit buffer is empty by polling bit 5 of the Line Status register. Writing while the buffer is full would silently drop data:
+
+```c-diff
+file: drivers/serial.c
+after: serial_init()
+---
+     return 0;
+ }
+
++int serial_is_transmit_empty(void) {
++    return inb(SERIAL_LINE_STATUS_PORT(SERIAL_COM1)) & 0x20;
++}
+```
+
+With that guard in place, `serial_write_char` spins until the buffer drains, then pushes a single byte:
+
+```c-diff
+file: drivers/serial.c
+after: serial_is_transmit_empty()
+---
+ }
+
++void serial_write_char(char c) {
++    while (!serial_is_transmit_empty())
++        ;
++    outb(SERIAL_DATA_PORT(SERIAL_COM1), c);
++}
+```
+
+Finally, a convenience wrapper sends a null-terminated string one character at a time:
+
+```c-diff
+file: drivers/serial.c
+after: serial_write_char()
+---
+ }
+
++void serial_write_string(const char *str) {
++    for (int i = 0; str[i] != '\0'; i++) {
++        serial_write_char(str[i]);
++    }
++}
+```
 
 ## Using the Driver
 
