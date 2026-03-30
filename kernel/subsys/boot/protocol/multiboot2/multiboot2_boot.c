@@ -64,12 +64,12 @@ void multiboot2_stash_bootinfo(u64 magic, void const * info)
  * @param boot_context Boot context to populate
  * @return 0 on success, non-zero on failure
  */
-int boot_init(boot_context_t * boot_context)
+__cold int boot_init(boot_context_t * boot_context)
 {
-    if ((u32) g_mb2_magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
+    if (UNLIKELY((u32) g_mb2_magic != MULTIBOOT2_BOOTLOADER_MAGIC)) {
         return -1;
     }
-    if (g_mb2_info == NULL) {
+    if (UNLIKELY(g_mb2_info == NULL)) {
         return -1;
     }
 
@@ -78,7 +78,7 @@ int boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
-    boot_context->has_display = false;
+    boot_context->display_mode = BOOT_DISPLAY_NONE;
 
     // Walk tag list looking for framebuffer
     struct multiboot_tag * tag = multiboot_first_tag((struct multiboot_info *) (phys_addr_t) g_mb2_info);
@@ -86,10 +86,8 @@ int boot_init(boot_context_t * boot_context)
         if (tag->type == MULTIBOOT2_TAG_FRAMEBUFFER) {
             struct multiboot_tag_framebuffer const * fb = (struct multiboot_tag_framebuffer const *) tag;
 
-            // Only use a direct-color (RGB) framebuffer.
-            // EGA text mode (fb_type 2) and indexed colour (fb_type 0)
-            // are not usable as a linear framebuffer.
             if (fb->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB) {
+                // Direct-color framebuffer — usable as a linear framebuffer
                 boot_context->display = (boot_display_info_t) {
                     .framebuffer = (u8 *) (phys_addr_t) fb->addr,
                     .width = fb->width,
@@ -100,7 +98,10 @@ int boot_init(boot_context_t * boot_context)
                     .green_mask_shift = fb->green_field_position,
                     .blue_mask_shift = fb->blue_field_position,
                 };
-                boot_context->has_display = true;
+                boot_context->display_mode = BOOT_DISPLAY_FRAMEBUFFER;
+            } else if (fb->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_EGA_TEXT) {
+                // GRUB fell back to text mode — VGA hardware is present
+                boot_context->display_mode = BOOT_DISPLAY_VGA_TEXT;
             }
             break;
         }

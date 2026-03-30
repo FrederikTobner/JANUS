@@ -25,6 +25,7 @@
 
 #include <arch/drivers/tty.h>
 #include <arch/shared/drivers/framebuffer.h>
+#include <janus/attributes.h>
 
 // Framebuffer state - shared implementation
 static framebuffer_state_t g_framebuffer_state;
@@ -63,11 +64,9 @@ void arch_tty_write_cell(u16 x, u16 y, char c, u8 foreground, u8 background)
     framebuffer_draw_char(&g_framebuffer_state, x, y, c, foreground, background);
 }
 
-void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background)
+void arch_tty_read_cell(__unused u16 x, __unused u16 y, char * c, u8 * foreground, u8 * background)
 {
     // Framebuffer doesn't store character data - return defaults
-    (void) x;
-    (void) y;
     if (c) {
         *c = ' ';
     }
@@ -79,10 +78,8 @@ void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background
     }
 }
 
-void arch_tty_set_cursor(u16 x, u16 y)
+void arch_tty_set_cursor(__unused u16 x, __unused u16 y)
 {
     // Software cursor - for now just track position
     // Could implement visible cursor by inverting colors at cursor position
-    (void) x;
-    (void) y;
 }

@@ -21,4 +21,8 @@ A shared framebuffer renderer (`arch/shared/framebuffer.c`) handles the pixel-le
 
 ## Display Mode Selection
 
-During `kinit_tty()`, the init sequence checks whether the boot context contains a valid framebuffer. If a framebuffer is present, the TTY is initialised in framebuffer mode; otherwise it falls back to VGA text mode (x86_64 only, when the HHDM offset is zero — indicating a legacy BIOS boot without address translation).
+During `kinit_tty()`, the init sequence dispatches on the boot context's `display_mode` field — a three-valued enum set by the boot protocol implementation:
+
+- **`BOOT_DISPLAY_FRAMEBUFFER`** — initialises the framebuffer text renderer. This path is used by Limine (both architectures) and by Multiboot2 when GRUB provides a linear RGB framebuffer.
+- **`BOOT_DISPLAY_VGA_TEXT`** — initialises VGA text mode at `0xB8000`. This path is only reachable on x86_64, because the Multiboot2 protocol library (the only source of this value) is never linked on aarch64.
+- **`BOOT_DISPLAY_NONE`** — no display was provided. TTY initialisation is skipped.

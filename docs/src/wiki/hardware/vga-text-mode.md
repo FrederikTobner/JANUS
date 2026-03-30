@@ -1,6 +1,9 @@
 # VGA Text Mode
 
-VGA text mode is the simplest way for a PC kernel to display characters on screen. It requires no driver initialisation, no mode setting, and no pixel-level rendering — the hardware maps an 80×25 grid of character cells directly to a region of physical memory. Write a byte into that region, and a character appears on screen.
+VGA text mode is the simplest way for a PC kernel to display characters on screen.
+It requires no driver initialisation, no mode setting, and no pixel-level rendering.
+The hardware maps an 80×25 grid of character cells directly to a region of physical memory.
+Writing a byte into that region, will make a character appear on the screen.
 
 ## The Text Buffer
 

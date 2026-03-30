@@ -25,6 +25,7 @@
  * This code is shared between architectures that use framebuffer output.
  */
 
+#include <janus/attributes.h>
 #include <janus/types.h>
 
 #include <arch/shared/drivers/terminus.h>
@@ -117,7 +118,7 @@ static inline void framebuffer_init(framebuffer_state_t * state,
  */
 static inline void framebuffer_put_pixel(framebuffer_state_t const * state, u64 x, u64 y, u32 color)
 {
-    if (x >= state->width || y >= state->height) {
+    if (UNLIKELY(x >= state->width || y >= state->height)) {
         return;
     }
 

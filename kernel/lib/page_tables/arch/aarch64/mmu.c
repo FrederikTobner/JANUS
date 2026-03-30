@@ -14,32 +14,33 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
+#include <janus/attributes.h>
 #include <janus/types.h>
 #include <page_tables/mmu.h>
 
-#define PAGE_TABLE_ENTRY_VALID            (1UL << 0)
-#define PAGE_TABLE_ENTRY_TABLE            (1UL << 1)
-#define PAGE_TABLE_ENTRY_PAGE             (1UL << 1)
-#define PAGE_TABLE_ENTRY_AF               (1UL << 10)
-#define PAGE_TABLE_ENTRY_SH_OSH           (2UL << 8)
-#define PAGE_TABLE_ENTRY_UXN              (1UL << 54)
-#define PAGE_TABLE_ENTRY_PXN              (1UL << 53)
-#define PAGE_TABLE_ENTRY_ATTR_IDX(idx)    ((u64) (idx) << 2)
-#define PAGE_TABLE_ENTRY_ADDR_MASK        0x0000FFFFFFFFF000UL
-#define PAGE_SIZE            4096UL
-#define ENTRIES_PER_TABLE    512
-#define L0_SHIFT             39
-#define L1_SHIFT             30
-#define L2_SHIFT             21
-#define L3_SHIFT             12
-#define L0_INDEX(va)         (((va) >> L0_SHIFT) & 0x1FF)
-#define L1_INDEX(va)         (((va) >> L1_SHIFT) & 0x1FF)
-#define L2_INDEX(va)         (((va) >> L2_SHIFT) & 0x1FF)
-#define L3_INDEX(va)         (((va) >> L3_SHIFT) & 0x1FF)
-#define MMIO_VIRT_BASE       0xFFFFFF0000000000UL
-#define PAGE_TABLE_POOL_SIZE 8
+#define PAGE_TABLE_ENTRY_VALID         (1UL << 0)
+#define PAGE_TABLE_ENTRY_TABLE         (1UL << 1)
+#define PAGE_TABLE_ENTRY_PAGE          (1UL << 1)
+#define PAGE_TABLE_ENTRY_AF            (1UL << 10)
+#define PAGE_TABLE_ENTRY_SH_OSH        (2UL << 8)
+#define PAGE_TABLE_ENTRY_UXN           (1UL << 54)
+#define PAGE_TABLE_ENTRY_PXN           (1UL << 53)
+#define PAGE_TABLE_ENTRY_ATTR_IDX(idx) ((u64) (idx) << 2)
+#define PAGE_TABLE_ENTRY_ADDR_MASK     0x0000FFFFFFFFF000UL
+#define PAGE_SIZE                      4096UL
+#define ENTRIES_PER_TABLE              512
+#define L0_SHIFT                       39
+#define L1_SHIFT                       30
+#define L2_SHIFT                       21
+#define L3_SHIFT                       12
+#define L0_INDEX(va)                   (((va) >> L0_SHIFT) & 0x1FF)
+#define L1_INDEX(va)                   (((va) >> L1_SHIFT) & 0x1FF)
+#define L2_INDEX(va)                   (((va) >> L2_SHIFT) & 0x1FF)
+#define L3_INDEX(va)                   (((va) >> L3_SHIFT) & 0x1FF)
+#define MMIO_VIRT_BASE                 0xFFFFFF0000000000UL
+#define PAGE_TABLE_POOL_SIZE           8
 
-static u64 page_table_pool[PAGE_TABLE_POOL_SIZE][ENTRIES_PER_TABLE] __attribute__((aligned(PAGE_SIZE)));
+static u64 page_table_pool[PAGE_TABLE_POOL_SIZE][ENTRIES_PER_TABLE] __aligned(PAGE_SIZE);
 static u32 pool_next_index;
 static u64 g_hhdm_offset;
 static u64 g_kernel_phys_base;
@@ -58,7 +59,7 @@ static virt_addr_t mmu_physical_to_virtual_address(phys_addr_t phys)
 
 static phys_addr_t mmu_alloc_page_table_phys(void)
 {
-    if (pool_next_index >= PAGE_TABLE_POOL_SIZE) {
+    if (UNLIKELY(pool_next_index >= PAGE_TABLE_POOL_SIZE)) {
         return 0;
     }
     virt_addr_t * table = page_table_pool[pool_next_index++];
@@ -76,14 +77,14 @@ static phys_addr_t * mmu_get_or_create_page_table_entry(phys_addr_t table_phys, 
         return page_table_entry;
     }
     phys_addr_t new_table_phys = mmu_alloc_page_table_phys();
-    if (new_table_phys == 0) {
+    if (UNLIKELY(new_table_phys == 0)) {
         return (phys_addr_t *) 0;
     }
     *page_table_entry = new_table_phys | PAGE_TABLE_ENTRY_VALID | PAGE_TABLE_ENTRY_TABLE;
     return page_table_entry;
 }
 
-void mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
+__cold void mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
 {
     g_hhdm_offset = hhdm_offset;
     g_kernel_phys_base = kernel_phys_base;
@@ -94,7 +95,7 @@ void mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_
 
 virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
 {
-    if (!g_initialized) {
+    if (UNLIKELY(!g_initialized)) {
         return 0;
     }
     virt_addr_t virt_addr = MMIO_VIRT_BASE + (phys_addr & 0xFFFFFFFF);
@@ -122,15 +123,9 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
         phys_addr_t l3_phys = *l2_pte & PAGE_TABLE_ENTRY_ADDR_MASK;
         virt_addr_t * l3_table = (u64 *) mmu_physical_to_virtual_address(l3_phys);
         phys_addr_t * l3_pte = &l3_table[L3_INDEX(va)];
-        *l3_pte =
-            (pa & PAGE_TABLE_ENTRY_ADDR_MASK) | 
-            PAGE_TABLE_ENTRY_VALID | 
-            PAGE_TABLE_ENTRY_PAGE | 
-            PAGE_TABLE_ENTRY_AF | 
-            PAGE_TABLE_ENTRY_SH_OSH | 
-            PAGE_TABLE_ENTRY_UXN | 
-            PAGE_TABLE_ENTRY_PXN | 
-            PAGE_TABLE_ENTRY_ATTR_IDX(1);
+        *l3_pte = (pa & PAGE_TABLE_ENTRY_ADDR_MASK) | PAGE_TABLE_ENTRY_VALID | PAGE_TABLE_ENTRY_PAGE |
+                  PAGE_TABLE_ENTRY_AF | PAGE_TABLE_ENTRY_SH_OSH | PAGE_TABLE_ENTRY_UXN | PAGE_TABLE_ENTRY_PXN |
+                  PAGE_TABLE_ENTRY_ATTR_IDX(1);
     }
     for (virt_addr_t va = virt_addr; va < virt_addr + size; va += PAGE_SIZE) {
         __asm__ volatile("tlbi vale1is, %0" ::"r"(va >> 12));

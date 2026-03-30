@@ -123,7 +123,7 @@ struct multiboot_tag_framebuffer {
     u8 bpp;
     u8 fb_type;
     u8 reserved;
-    /* Color info — only valid when fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB */
+    // Color info — only valid when the type of the framebuffer (fb_type() is MULTIBOOT2_FRAMEBUFFER_TYPE_RGB
     u8 red_field_position;
     u8 red_mask_size;
     u8 green_field_position;
@@ -149,20 +149,20 @@ struct multiboot_tag_module {
 } __packed;
 
 /// Get the first tag from multiboot info
-static inline struct multiboot_tag * multiboot_first_tag(struct multiboot_info * info)
+static inline __pure struct multiboot_tag * multiboot_first_tag(struct multiboot_info * info)
 {
     return (struct multiboot_tag *) ((u8 *) info + 8);
 }
 
-/// Get the next tag (tags are 8-byte aligned)
-static inline struct multiboot_tag * multiboot_next_tag(struct multiboot_tag * tag)
+/// Get the next tag (8-byte aligned)
+static inline __pure struct multiboot_tag * multiboot_next_tag(struct multiboot_tag * tag)
 {
     u32 size = (tag->size + 7) & ~7u;
     return (struct multiboot_tag *) ((u8 *) tag + size);
 }
 
 /// Check if tag is the end tag
-static inline bool multiboot_is_end_tag(struct multiboot_tag * tag)
+static inline __pure bool multiboot_is_end_tag(struct multiboot_tag * tag)
 {
     return tag->type == MULTIBOOT2_TAG_TYPE_END && tag->size == 8;
 }

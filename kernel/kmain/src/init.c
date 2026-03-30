@@ -31,14 +31,17 @@
 /**
  * @brief Initialize TTY with VGA text mode.
  *
- * Fallback for identity-mapped boot (Multiboot2) when no graphical
- * framebuffer is available.  VGA buffer must be directly accessible
- * at 0xB8000.
+ * Used when the bootloader confirms VGA text hardware is present
+ * (Multiboot2 EGA text mode).  The VGA buffer at 0xB8000 must be
+ * directly accessible (identity-mapped).
+ *
+ * Only reachable on x86_64 — the Multiboot2 protocol library is
+ * never linked on aarch64, so BOOT_DISPLAY_VGA_TEXT cannot appear.
  *
  * @param serial_available Whether serial output is available for logging
  * @return true if TTY was initialized successfully
  */
-static bool init_tty_vga(bool serial_available)
+static __cold bool init_tty_vga(bool serial_available)
 {
     if (drivers_tty_init(NULL) != 0) {
         return false;
@@ -61,7 +64,7 @@ static bool init_tty_vga(bool serial_available)
  * @param serial_available Whether serial output is available for logging
  * @return true if TTY was initialized successfully
  */
-static bool init_tty_framebuffer(boot_display_info_t const * display, bool serial_available)
+static __cold bool init_tty_framebuffer(boot_display_info_t const * display, bool serial_available)
 {
     tty_display_config_t config;
     config.framebuffer = display->framebuffer;
@@ -83,9 +86,10 @@ static bool init_tty_framebuffer(boot_display_info_t const * display, bool seria
     return true;
 }
 
-bool kinit_serial(boot_context_t const * boot_context)
+__cold bool kinit_serial(boot_context_t const * boot_context)
 {
-    if (drivers_serial_init(boot_context->hhdm_offset, boot_context->kernel_phys_base, boot_context->kernel_virt_base) != 0) {
+    if (drivers_serial_init(
+            boot_context->hhdm_offset, boot_context->kernel_phys_base, boot_context->kernel_virt_base) != 0) {
         return false;
     }
 
@@ -93,21 +97,22 @@ bool kinit_serial(boot_context_t const * boot_context)
     return true;
 }
 
-bool kinit_tty(boot_context_t const * boot_context, bool serial_available)
+__cold bool kinit_tty(boot_context_t const * boot_context, bool serial_available)
 {
-    // Prefer framebuffer when available (works for both Multiboot2 and Limine)
-    if (boot_context->has_display) {
+    switch (boot_context->display_mode) {
+
+    case BOOT_DISPLAY_FRAMEBUFFER:
         return init_tty_framebuffer(&boot_context->display, serial_available);
-    }
 
-    // Fallback: VGA text mode (identity-mapped Multiboot2 without framebuffer)
-    if (boot_context->hhdm_offset == 0) {
+    case BOOT_DISPLAY_VGA_TEXT:
         return init_tty_vga(serial_available);
+
+    case BOOT_DISPLAY_NONE:
+        if (serial_available) {
+            drivers_serial_puts("TTY skipped (no display available)\n");
+        }
+        return false;
     }
 
-    // No display available
-    if (serial_available) {
-        drivers_serial_puts("TTY skipped (no framebuffer available)\n");
-    }
     return false;
 }

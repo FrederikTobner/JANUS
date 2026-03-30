@@ -1,6 +1,6 @@
 # CMake
 
-CMake is a build system generator — it does not compile code itself, but produces build files for a backend like Ninja or Make. JANUS uses CMake 3.20+ with Ninja as the default backend.
+CMake is a build system generator, also sometimes called a meta-build system, meaning it does not build the project itself, but produces build files for a backend like Ninja or Make. JANUS uses CMake 3.20+ with Ninja as the default backend.
 
 ## Presets
 

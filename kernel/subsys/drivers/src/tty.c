@@ -24,6 +24,7 @@
 
 #include <arch/drivers/tty.h>
 #include <drivers/tty.h>
+#include <janus/attributes.h>
 
 static u16 cursor_x = 0;
 static u16 cursor_y = 0;
@@ -32,9 +33,9 @@ static u16 screen_height = 0;
 static u8 current_fg = TTY_COLOR_WHITE;
 static u8 current_bg = TTY_COLOR_BLACK;
 
-static void tty_scroll(void)
+static __hot void tty_scroll(void)
 {
-    // Move all lines up by one 
+    // Move all lines up by one
     for (u16 y = 0; y < screen_height - 1; y++) {
         for (u16 x = 0; x < screen_width; x++) {
             char ch;
@@ -43,13 +44,13 @@ static void tty_scroll(void)
             arch_tty_write_cell(x, y, ch, fg, bg);
         }
     }
-    // Clear last line 
+    // Clear last line
     for (u16 x = 0; x < screen_width; x++) {
         arch_tty_write_cell(x, screen_height - 1, ' ', current_fg, current_bg);
     }
 }
 
-error_t drivers_tty_init(tty_display_config_t const * config)
+__cold error_t drivers_tty_init(tty_display_config_t const * config)
 {
     error_t err = arch_tty_init(config);
     if (err != 0) {
@@ -66,7 +67,7 @@ error_t drivers_tty_init(tty_display_config_t const * config)
     return 0;
 }
 
-void drivers_tty_putc(char c)
+__hot void drivers_tty_putc(char c)
 {
     if (c == '\n') {
         cursor_x = 0;
@@ -126,7 +127,7 @@ void drivers_tty_clear(void)
 
 void drivers_tty_set_cursor(u16 x, u16 y)
 {
-    if(screen_width == 0 || screen_height == 0) {
+    if (screen_width == 0 || screen_height == 0) {
         return; // Screen size not initialized
     }
     cursor_x = (x < screen_width) ? x : screen_width - 1;

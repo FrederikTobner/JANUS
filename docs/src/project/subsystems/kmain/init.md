@@ -17,8 +17,8 @@ Initialises the serial driver using architecture-specific UART configuration. Th
 
 ### `kinit_tty`
 
-Initialises the TTY driver. Checks whether the boot context contains a valid framebuffer and selects the appropriate backend:
+Initialises the TTY driver. Dispatches on the `display_mode` field of the boot context:
 
-- **Framebuffer mode** — when `has_display` is true and a framebuffer address is available.
-- **VGA text mode** — fallback on x86_64 when no framebuffer is present and the HHDM offset is zero (indicating a legacy BIOS boot).
-- **No display** — if neither condition is met, TTY initialisation is skipped.
+- **`BOOT_DISPLAY_FRAMEBUFFER`** — a linear RGB framebuffer is available (Limine, or Multiboot2 with a framebuffer header tag). Initialises the framebuffer text renderer.
+- **`BOOT_DISPLAY_VGA_TEXT`** — the bootloader confirmed VGA text hardware is present (Multiboot2 EGA text mode on x86_64). Initialises VGA text mode at `0xB8000`.
+- **`BOOT_DISPLAY_NONE`** — no display available. TTY initialisation is skipped; serial remains the only output channel.

@@ -25,6 +25,7 @@
 
 #include <drivers/serial.h>
 #include <drivers/tty.h>
+#include <janus/attributes.h>
 #include <janus/config.h>
 
 #define JANUS_HELLO_MESSAGE                  \
@@ -34,7 +35,7 @@
     "| |_| / ___ \\| |\\  | |_| |___) |\n"   \
     " \\___/_/   \\_\\_| \\_|\\___/|____/ \n"
 
-void kbanner_print(bool serial_available, bool tty_available)
+__cold void kbanner_print(bool serial_available, bool tty_available)
 {
     if (tty_available) {
         // Green font color on black background

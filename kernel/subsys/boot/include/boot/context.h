@@ -39,6 +39,18 @@ typedef enum {
 } boot_protocol_t;
 
 /**
+ * @brief Display mode reported by the bootloader
+ *
+ * Distinguishes the three states a bootloader can leave us in:
+ * no display at all, a linear RGB framebuffer, or VGA text hardware.
+ */
+typedef enum {
+    BOOT_DISPLAY_NONE = 0,    /**< No display information provided */
+    BOOT_DISPLAY_FRAMEBUFFER, /**< Linear RGB framebuffer available */
+    BOOT_DISPLAY_VGA_TEXT,    /**< VGA text mode confirmed (Multiboot2 EGA text) */
+} boot_display_mode_t;
+
+/**
  * @brief Protocol-agnostic display information
  *
  * Normalized framebuffer data populated by the protocol implementation.
@@ -61,12 +73,12 @@ typedef struct boot_display_info {
  * Public struct per Coding-Style.md: consumers access fields directly.
  */
 typedef struct boot_context {
-    boot_protocol_t protocol;        /**< Which boot protocol was used */
-    u64 hhdm_offset;                 /**< Higher Half Direct Map offset (0 for identity-mapped) */
-    phys_addr_t kernel_phys_base;    /**< Kernel physical base address */
-    virt_addr_t kernel_virt_base;    /**< Kernel virtual base address */
-    boot_display_info_t display;     /**< Framebuffer info (valid only when has_display is true) */
-    bool has_display;                /**< Whether a framebuffer is available */
+    boot_protocol_t protocol;         /**< Which boot protocol was used */
+    u64 hhdm_offset;                  /**< Higher Half Direct Map offset (0 for identity-mapped) */
+    phys_addr_t kernel_phys_base;     /**< Kernel physical base address */
+    virt_addr_t kernel_virt_base;     /**< Kernel virtual base address */
+    boot_display_info_t display;      /**< Framebuffer info (valid only when display_mode == FRAMEBUFFER) */
+    boot_display_mode_t display_mode; /**< What kind of display the bootloader provided */
 } boot_context_t;
 
 /**
@@ -84,8 +96,7 @@ int boot_init(boot_context_t * ctx);
 /**
  * @brief Convert a kernel virtual address to physical
  */
-static __always_inline phys_addr_t boot_kernel_virt_to_phys(
-    boot_context_t const * ctx, virt_addr_t virtual_address)
+static __always_inline phys_addr_t boot_kernel_virt_to_phys(boot_context_t const * ctx, virt_addr_t virtual_address)
 {
     return virtual_address - ctx->kernel_virt_base + ctx->kernel_phys_base;
 }
@@ -93,8 +104,7 @@ static __always_inline phys_addr_t boot_kernel_virt_to_phys(
 /**
  * @brief Convert a physical address to its HHDM virtual mapping
  */
-static __always_inline void * boot_phys_to_virt(
-    boot_context_t const * ctx, phys_addr_t physical_address)
+static __always_inline void * boot_phys_to_virt(boot_context_t const * ctx, phys_addr_t physical_address)
 {
     return (void *) (physical_address + ctx->hhdm_offset);
 }

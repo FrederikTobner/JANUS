@@ -32,47 +32,91 @@
 #error "Unsupported compiler - JANUS requires Clang or GCC - Screw you MSVC!"
 #endif
 
-// Function attributes
-#define __noreturn                      __attribute__((noreturn))
-#define __packed                        __attribute__((packed))
-#define __aligned(x)                    __attribute__((aligned(x)))
-#define __unused                        __attribute__((unused))
-#define __used                          __attribute__((used))
-#define __section(s)                    __attribute__((section(s)))
-#define __weak                          __attribute__((weak))
-#define __always_inline                 __attribute__((always_inline)) inline
-#define __noinline                      __attribute__((noinline))
-#define __pure                          __attribute__((pure))
-#define __const                         __attribute__((const))
-#define __cold                          __attribute__((cold))
-#define __hot                           __attribute__((hot))
+// Function and type attributes
+
+// Indicates the function never returns to its caller (e.g. halt loops,
+// abort). Allows the compiler to omit unreachable code after the call and
+// to warn if the function *does* contain a reachable return.
+#define __noreturn               __attribute__((noreturn))
+
+// Eliminates internal padding and trailing padding from a struct or union,
+// storing members at the minimum byte offset.  Accesses to misaligned
+// fields are emitted as byte-by-byte loads/stores on targets that do not
+// support unaligned access.
+#define __packed                 __attribute__((packed))
+
+// Sets the minimum alignment (in bytes) of a variable, struct field, or
+// type.  The compiler may place the object at a *stricter* alignment, but
+// never a weaker one.
+#define __aligned(x)             __attribute__((aligned(x)))
+
+// Suppresses "unused variable/parameter/function" warnings.  The entity
+// is still emitted; only the diagnostic is silenced.
+#define __unused                 __attribute__((unused))
+
+// Tells the compiler and linker to retain the symbol even if it appears
+// unreferenced.  Prevents removal by --gc-sections and LTO.  Typical
+// use: variables or functions placed in special linker sections.
+#define __used                   __attribute__((used))
+
+// Places the variable or function in the named ELF section instead of the
+// default .text / .data / .bss.  The section must be defined by the
+// linker script or created implicitly.
+#define __section(s)             __attribute__((section(s)))
+
+// Emits a weak symbol.  A weak definition is overridden by any non-weak
+// (strong) definition at link time.  If no strong definition exists the
+// weak one is used.  Useful for providing defaults.
+#define __weak                   __attribute__((weak))
+
+// Forces the compiler to inline the function at every call site, even at
+// -O0.  A compilation error is emitted if the function cannot be inlined
+// (e.g. address taken and used indirectly).
+#define __always_inline          __attribute__((always_inline)) inline
+
+// Prevents the compiler from inlining the function regardless of
+// optimisation level or apparent profitability.
+#define __noinline               __attribute__((noinline))
+
+// Declares a function as pure: its return value depends only on its
+// arguments and on global memory, and the function has no observable side
+// effects other than its return value.  The compiler may hoist or
+// eliminate redundant calls with identical arguments when the memory they
+// read has not changed.  Reads through pointers are permitted; writes are
+// not.
+#define __pure                   __attribute__((pure))
+
+// Stricter than __pure.  The return value depends *only* on the arguments
+// — the function must not read global memory, dereference pointers, or
+// call non-const functions.  The compiler may freely reorder, merge, or
+// eliminate calls with the same argument values.
+#define __const                  __attribute__((const))
+
+// Hints that the function is unlikely to be called (error paths, one-time
+// initialisation).  The compiler may move its code to a distant text
+// section, reduce inlining aggressiveness, and optimise branch prediction
+// for the non-cold path.
+#define __cold                   __attribute__((cold))
+
+// Hints that the function is called frequently.  The compiler may place
+// it in a hot text section, increase inlining aggressiveness, and optimise
+// for the hot path in branch prediction.
+#define __hot                    __attribute__((hot))
 
 // Likely/unlikely for branch prediction
-#define LIKELY(x)                       __builtin_expect(!!(x), 1)
-#define UNLIKELY(x)                     __builtin_expect(!!(x), 0)
+#define LIKELY(x)                __builtin_expect(!!(x), 1)
+#define UNLIKELY(x)              __builtin_expect(!!(x), 0)
 
 // Static assertion
-#define STATIC_ASSERT(expr, msg)        _Static_assert(expr, msg)
+#define STATIC_ASSERT(expr, msg) _Static_assert(expr, msg)
 
 // Array size
-#define ARRAY_SIZE(arr)                 (sizeof(arr) / sizeof((arr)[0]))
+#define ARRAY_SIZE(arr)          (sizeof(arr) / sizeof((arr)[0]))
+
+// Offset of member in struct (for CONTAINER_OF)
+#define __offsetof(type, member) __builtin_offsetof(type, member)
 
 // Container of macro
-#define CONTAINER_OF(ptr, type, member) ((type *) ((char *) (ptr) - offsetof(type, member)))
-
-// Min/max macros
-#define MIN(a, b)               \
-    ({                          \
-        __typeof__(a) _a = (a); \
-        __typeof__(b) _b = (b); \
-        _a < _b ? _a : _b;      \
-    })
-
-#define MAX(a, b)               \
-    ({                          \
-        __typeof__(a) _a = (a); \
-        __typeof__(b) _b = (b); \
-        _a > _b ? _a : _b;      \
-    })
+#define CONTAINER_OF(ptr, type, member) ((type *) ((char *) (ptr) - __offsetof(type, member))
 
 #endif // JANUS_COMPILER_H

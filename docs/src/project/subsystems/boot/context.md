@@ -18,7 +18,7 @@ After `boot_init()` returns, the boot context is fully populated and the rest of
 
 The context captures:
 
-- **Framebuffer geometry** — base address, width, height, pitch, bits per pixel, and RGB colour field positions.
-- **Display availability** — `has_display` flag indicating whether a framebuffer was provided.
+- **Framebuffer geometry** — base address, width, height, pitch, bits per pixel, and RGB colour field positions (valid only when `display_mode == BOOT_DISPLAY_FRAMEBUFFER`).
+- **Display mode** — a `boot_display_mode_t` enum indicating what kind of display the bootloader provided: `NONE` (no display), `FRAMEBUFFER` (linear RGB), or `VGA_TEXT` (VGA text hardware confirmed by a Multiboot2 EGA text tag).
 - **HHDM offset** — the higher-half direct map offset, used to translate physical addresses to virtual ones.
 - **Boot protocol identity** — which protocol was used (Limine or Multiboot2).

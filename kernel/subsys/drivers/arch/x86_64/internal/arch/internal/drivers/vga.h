@@ -26,6 +26,7 @@
  */
 
 #include <arch/impl/drivers/io.h>
+#include <janus/attributes.h>
 #include <janus/types.h>
 
 #define VGA_WIDTH       80
@@ -42,7 +43,7 @@
  * @param bg Background color (0-15)
  * @return Combined character/attribute word for VGA buffer
  */
-static inline u16 vga_entry(char c, u8 fg, u8 bg)
+static inline u16 const vga_entry(char c, u8 fg, u8 bg)
 {
     u8 color = (u8) ((fg & 0x0F) | ((bg & 0x0F) << 4));
     return (u16) ((u16) (u8) c | (u16) ((u16) color << 8));

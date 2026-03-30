@@ -42,18 +42,18 @@ extern volatile struct limine_executable_address_request limine_executable_addre
  * @param boot_context Boot context to populate
  * @return 0 on success, non-zero on failure (missing required responses)
  */
-int boot_init(boot_context_t * boot_context)
+__cold int boot_init(boot_context_t * boot_context)
 {
     // Set safe defaults for ALL fields unconditionally
     boot_context->protocol = BOOT_PROTOCOL_LIMINE;
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
-    boot_context->has_display = false;
+    boot_context->display_mode = BOOT_DISPLAY_NONE;
 
     // HHDM offset is required for address translation
     struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;
-    if (hhdm == NULL) {
+    if (UNLIKELY(hhdm == NULL)) {
         return -1;
     }
     boot_context->hhdm_offset = hhdm->offset;
@@ -65,22 +65,22 @@ int boot_init(boot_context_t * boot_context)
         boot_context->kernel_virt_base = executable_address->virtual_base;
     }
 
-    // Framebuffer is optional — if not present, has_display remains false
+    // Framebuffer is optional — if not present, display_mode remains NONE
     struct limine_framebuffer_response const * framebuffer_response = limine_framebuffer_request.response;
     if (framebuffer_response != NULL && framebuffer_response->framebuffer_count > 0 &&
         framebuffer_response->framebuffers != NULL) {
-        struct limine_framebuffer const * fb = framebuffer_response->framebuffers[0];
+        struct limine_framebuffer const * primary_framebuffer = framebuffer_response->framebuffers[0];
         boot_context->display = (boot_display_info_t) {
-            .framebuffer = (u8 *) fb->address,
-            .width = fb->width,
-            .height = fb->height,
-            .pitch = fb->pitch,
-            .bpp = fb->bpp,
-            .red_mask_shift = fb->red_mask_shift,
-            .green_mask_shift = fb->green_mask_shift,
-            .blue_mask_shift = fb->blue_mask_shift,
+            .framebuffer = (u8 *) primary_framebuffer->address,
+            .width = primary_framebuffer->width,
+            .height = primary_framebuffer->height,
+            .pitch = primary_framebuffer->pitch,
+            .bpp = primary_framebuffer->bpp,
+            .red_mask_shift = primary_framebuffer->red_mask_shift,
+            .green_mask_shift = primary_framebuffer->green_mask_shift,
+            .blue_mask_shift = primary_framebuffer->blue_mask_shift,
         };
-        boot_context->has_display = true;
+        boot_context->display_mode = BOOT_DISPLAY_FRAMEBUFFER;
     }
 
     return 0;
