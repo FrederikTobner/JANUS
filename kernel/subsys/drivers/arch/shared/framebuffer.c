@@ -24,9 +24,10 @@
 
 #include <arch/shared/drivers/framebuffer.h>
 
-void framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
+__hot void
+framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
 {
-    if (!state->base || column >= state->text_width || row >= state->text_height) {
+    if (UNLIKELY(!state->base || column >= state->text_width || row >= state->text_height)) {
         return;
     }
 
@@ -45,12 +46,12 @@ void framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 ro
         u8 row_hi = glyph[cy * 2];
         u8 row_lo = glyph[cy * 2 + 1];
 
-        // Draw left 8 pixels 
+        // Draw left 8 pixels
         for (u8 cx = 0; cx < 8; cx++) {
             u32 color = (row_hi & (0x80 >> cx)) ? fg_color : bg_color;
             framebuffer_put_pixel(state, px + cx, py + cy, color);
         }
-        // Draw right 8 pixels 
+        // Draw right 8 pixels
         for (u8 cx = 0; cx < 8; cx++) {
             u32 color = (row_lo & (0x80 >> cx)) ? fg_color : bg_color;
             framebuffer_put_pixel(state, px + 8 + cx, py + cy, color);

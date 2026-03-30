@@ -1,24 +1,31 @@
-# drivers - Device Drivers Module
+# drivers — Device Drivers Subsystem
 
-Hardware-facing drivers that provide small, C-friendly APIs to the rest of the kernel.
+Hardware-facing drivers that provide small, C-friendly APIs to the rest of the
+kernel.
 
-The overall structure is meant to stay simple and be easy to extend: each driver lives in its own folder, and its public interface lives under `include/drivers/`.
+## Current Drivers
 
-## Current drivers
+### Serial (UART)
 
-### UART (COM1)
+- Public API: `include/drivers/serial.h`
+- Arch implementations: `arch/x86_64/serial.c`, `arch/aarch64/serial.c`
+- Notes: COM1 (`0x3F8`) on x86_64, PL011 on aarch64. Fixed baud rate.
 
-- Implementation: `uart/uart.c`
-- Public API: `include/drivers/uart.h`
-- Notes: currently targets COM1 (`0x3F8`) and uses a fixed baud rate (see header/source for details).
+### TTY (Text Terminal)
 
-### VGA text mode
+- Public API: `include/drivers/tty.h`
+- Arch implementations: `arch/x86_64/tty.c`, `arch/aarch64/tty.c`
+- Generic source: `src/tty.c`
+- Shared framebuffer renderer: `arch/shared/framebuffer.c`
+- Notes: Supports VGA text mode (x86_64 Multiboot2) and framebuffer rendering
+  (Limine on both architectures).
 
-- Implementation: `video/vga_text.c`
-- Public API: `include/drivers/vga_text.h`
-- Notes: basic 80x25 text output and scrolling.
+### CPU
 
-## Directory layout
+- Public API: `include/drivers/cpu.h`
+- Notes: Provides `drivers_cpu_halt_forever()` for fatal halts.
+
+## Directory Layout
 
 ```text
 drivers/
@@ -26,29 +33,49 @@ drivers/
 ├── README.md
 ├── include/
 │   └── drivers/
-│       ├── uart.h
-│       └── vga_text.h
-├── uart/
-│   └── uart.c
-└── video/
-      └── vga_text.c
+│       ├── cpu.h
+│       ├── serial.h
+│       └── tty.h
+├── src/
+│   └── tty.c                  # Generic TTY logic
+└── arch/
+    ├── include/
+    │   └── arch/
+    │       └── drivers/        # Tier 2 contract headers
+    ├── shared/
+    │   ├── include/
+    │   │   └── arch/
+    │   │       └── impl/
+    │   │           └── drivers/
+    │   └── framebuffer.c       # Shared framebuffer renderer
+    ├── x86_64/
+    │   ├── include/
+    │   │   └── arch/
+    │   │       └── impl/
+    │   │           └── drivers/
+    │   ├── internal/
+    │   ├── serial.c
+    │   └── tty.c
+    └── aarch64/
+        ├── include/
+        │   └── arch/
+        │       └── impl/
+        │           └── drivers/
+        ├── internal/
+        ├── serial.c
+        └── tty.c
 ```
 
-## Build integration
+## Build Integration
 
-`drivers/CMakeLists.txt` glob-collects all `*.c` files under this module and builds them into the `drivers` library.
+Uses `janus_add_subsys(drivers ...)` which automatically:
+- Detects the `arch/` folder and globs architecture-specific sources
+- Sets up three-tier include paths (Tier 1: public, Tier 2: arch contract, Tier 3: arch impl)
+- Enforces subsystem isolation (drivers cannot depend on other subsystems)
 
-Note: because this uses `file(GLOB_RECURSE ...)`, adding new source files may require re-running CMake configuration (e.g. `cmake -S . -B build`) so the new files are picked up.
+## Adding a New Driver
 
-## Dependencies
-
-- `arch` (currently for port I/O via `arch/io.h`, used by the UART driver)
-- `janus` base headers (e.g. `janus/types.h`)
-
-## Adding a new driver
-
-Minimal convention:
-
-1. Create a folder (e.g. `storage/ata.c`).
-2. Add its public header to `include/drivers/` (e.g. `include/drivers/ata.h`).
-3. Keep the API narrow and avoid leaking architecture/protocol details.
+1. Add the public header to `include/drivers/` (e.g., `include/drivers/keyboard.h`)
+2. Add architecture-specific implementations under `arch/<arch>/`
+3. Add generic (arch-independent) source to `src/` if applicable
+4. Keep the API narrow — avoid leaking hardware/protocol details

@@ -581,7 +581,7 @@ function(janus_add_debug_targets)
 
         # Direct kernel debug (bypasses Limine)
         add_custom_target(debug-elf
-            COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log (verbose): ${QEMU_DEBUG_LOG}"
+            COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log [verbose]: ${QEMU_DEBUG_LOG}"
             COMMAND qemu-system-aarch64
                 -M virt
                 -cpu cortex-a72
@@ -609,7 +609,7 @@ function(janus_add_debug_targets)
 
         # Debug GRUB ISO
         add_custom_target(debug-grub
-            COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log (verbose): ${QEMU_DEBUG_LOG}"
+            COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log [verbose]: ${QEMU_DEBUG_LOG}"
             COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${JANUS_ISO_GRUB_NAME}
                 -boot d -serial stdio -m 256M -s -S ${QEMU_DEBUG_OPTS_VERBOSE} ${QEMU_DISPLAY_ARG}
             DEPENDS iso-grub

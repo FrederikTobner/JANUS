@@ -1,66 +1,46 @@
-# mm - Memory Management Module
+# mm — Memory Management Subsystem
 
 Kernel memory management subsystem.
 
 ## Purpose
 
-Manages physical and virtual memory, page allocation, and kernel heap.
+Will manage physical and virtual memory, page allocation, and heap growth
+policy. Currently a placeholder — no sources yet.
 
 ## Planned Contents
 
 ### Physical Memory Management
+
 - Page frame allocation and freeing
 - Memory zone management (DMA, Normal, High)
 - Physical memory bitmap/buddy allocator
 
 ### Virtual Memory Management
-- Page table management (PML4, PDPT, PD, PT)
+
+- Page table management via `lib/page_tables`
 - Virtual address space creation and destruction
 - Page mapping and unmapping
 - TLB management
 
-### Kernel Heap
-- `kmalloc()` / `kfree()` - Dynamic kernel memory allocation
-- Slab allocator for fixed-size objects
-- Memory pool management
+### Heap Growth Backend
 
-## Key Components
+- Provides the page-backed heap growth callback for `lib/mem_alloc`
+- `lib/mem_alloc` (the allocation API: `kalloc` / `kfree`) lives in `kernel/lib/`
+  as a support library — this subsystem provides the backing store via
+  `kalloc_set_backend()` when it is ready
 
-```
-mm/
-├── page_frame.c      # Physical page allocator
-├── vmm.c             # Virtual memory manager
-├── kmalloc.c         # Kernel heap allocator
-└── include/mm/
-    ├── page_frame.h
-    ├── vmm.h
-    └── kmalloc.h
+## Relationship with `lib/mem_alloc`
+
+```text
+lib/mem_alloc/     ← Stable API: kalloc(), kfree() (support library)
+subsys/mm/         ← Policy: PMM, VMM, heap growth (this subsystem)
 ```
 
-## Dependencies
-
-- `types` - Type definitions
-- `memory` - Memory operations
-- `arch` - Architecture-specific page table operations
-
-## Usage Example
-
-```c
-#include <mm/page_frame.h>
-#include <mm/vmm.h>
-#include <mm/kmalloc.h>
-
-// Allocate physical page
-page_frame_t* frame = mm_alloc_page_frame();
-
-// Map virtual to physical
-mm_map_page(vaddr, frame->phys_addr, MM_FLAG_WRITABLE);
-
-// Kernel heap allocation
-void* ptr = kmalloc(1024);
-kfree(ptr);
-```
+`lib/mem_alloc` starts with a static bump allocator (no dependencies).
+Once `mm` is initialized, it injects a page-backed backend via function
+pointers — `lib/mem_alloc` never includes a subsystem header.
 
 ## Status
 
-⚠️ **Placeholder** - Implementation pending in future development phases.
+⚠️ **Placeholder** — Implementation pending. The early-boot allocator
+(`kalloc` / `kfree`) is provided by `lib/mem_alloc` independently.

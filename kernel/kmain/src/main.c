@@ -18,50 +18,43 @@
  * @file main.c
  * @brief JANUS Kernel Entry Point
  *
- * This is called by boot.asm after the bootloader transfers control.
- * The actual initialization logic is delegated to separate modules
- * for clarity.
+ * Called from the assembly entry point after minimal hardware setup.
+ * Allocates the kernel descriptor on the stack, calls boot_init to
+ * populate it, then initializes subsystems and enters the main loop.
  */
 
-#include <boot/info.h>
-#include <boot/verify.h>
+#include <boot/context.h>
 #include <drivers/cpu.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 #include <kmain/banner.h>
 #include <kmain/init.h>
+#include <kmain/kernel_descriptor.h>
 
 /**
  * @brief Main kernel entry point
  *
- * Called from boot.asm after initial setup. At this point:
- * - Stack is configured (16 KiB)
- * - CPU is in 64-bit long mode
+ * Called from the assembly entry point. At this point:
+ * - Stack is configured
+ * - CPU is in 64-bit long mode (x86_64) or EL1 (aarch64)
  * - Interrupts are disabled
- * - Paging is disabled (Multiboot2) or enabled with HHDM (Limine)
+ * - For Multiboot2: boot info has been stashed via multiboot2_stash_bootinfo
  *
- * @param loader_magic Magic value identifying the boot protocol
- * @param boot_info Boot protocol specific info (Multiboot2 info or HHDM response)
- * @param framebuffer_info Framebuffer response (Limine only, NULL for Multiboot2)
+ * Allocates kernel_descriptor_t on the stack, populates it via boot_init,
+ * then passes the boot boot_context slice to each subsystem initializer.
  */
-__noreturn void kernel_main(u64 loader_magic, void * boot_info, void * framebuffer_info)
+__noreturn void kernel_main(void)
 {
-    // Verify boot handoff
-    if (boot_verify_handoff(loader_magic, boot_info) != 0) {
+    kernel_descriptor_t descriptor;
+    if (boot_init(&descriptor.boot) != 0) {
         drivers_cpu_halt_forever();
     }
 
-    // Initialize boot info (arch setup now handled internally)
-    if (boot_info_init(loader_magic, boot_info) != 0) {
-        drivers_cpu_halt_forever();
-    }
+    boot_context_t const * boot_context = &descriptor.boot;
 
     // Initialize drivers
-    u64 hhdm_offset = boot_info_get_hhdm_offset();
-    phys_addr_t kernel_phys_base = boot_info_get_kernel_phys_base();
-    virt_addr_t kernel_virt_base = boot_info_get_kernel_virt_base();
-    bool serial_available = kinit_serial(hhdm_offset, kernel_phys_base, kernel_virt_base);
-    bool tty_available = kinit_tty(hhdm_offset, framebuffer_info, serial_available);
+    bool serial_available = kinit_serial(boot_context);
+    bool tty_available = kinit_tty(boot_context, serial_available);
 
     // Print greeting
     kbanner_print(serial_available, tty_available);

@@ -21,6 +21,7 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
     )
     target_include_directories(_start_limine_requests PRIVATE
         ${CMAKE_SOURCE_DIR}/kernel/include
+        ${CMAKE_SOURCE_DIR}/kernel/subsys/boot/protocol/limine
     )
     target_compile_options(_start_limine_requests PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 
@@ -33,7 +34,7 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
     janus_add_kernel(
         TARGET kernel-limine.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-        DEPENDENCIES drivers boot
+        DEPENDENCIES drivers boot boot_limine
         OBJECTS _start_common _start_limine _start_limine_requests kmain
     )
 endif()
@@ -42,13 +43,14 @@ if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
     add_library(_start_multiboot2 OBJECT
         multiboot2/entry.asm
         multiboot2/header.asm
+        multiboot2/paging.asm
     )
     
     # Build kernel-multiboot2.elf with Multiboot2 linker script
     janus_add_kernel(
         TARGET kernel-multiboot2.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/multiboot2/linker.ld
-        DEPENDENCIES drivers boot
+        DEPENDENCIES drivers boot boot_multiboot2
         OBJECTS _start_common _start_multiboot2 kmain
     )
 endif()

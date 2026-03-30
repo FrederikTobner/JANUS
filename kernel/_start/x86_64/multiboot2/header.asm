@@ -47,6 +47,20 @@ information_request_tag_start:
     dd 9                             ; ELF sections
 information_request_tag_end:
 
+; Framebuffer tag
+; Requests a graphical framebuffer from the bootloader.
+; If the bootloader cannot provide one, it may fall back to text mode
+; (the optional flag permits this).
+align 8
+framebuffer_tag_start:
+    dw 5                             ; type = 5 (framebuffer)
+    dw 1                             ; flags = 1 (optional)
+    dd framebuffer_tag_end - framebuffer_tag_start ; size = 20
+    dd 1024                          ; preferred width
+    dd 768                           ; preferred height
+    dd 32                            ; preferred depth (bits per pixel)
+framebuffer_tag_end:
+
 ; End tag (required)
 ; Marks the end of the Multiboot2 header
 align 8

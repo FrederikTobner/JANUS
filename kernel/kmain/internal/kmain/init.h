@@ -24,24 +24,16 @@
  * Provides functions for initializing kernel subsystems during early boot.
  */
 
+#include <boot/context.h>
 #include <janus/types.h>
 
 /**
  * @brief Initialize the serial port for debugging output.
  *
- * @param hhdm_offset The HHDM offset for physical to virtual address translation.
- *                    Pass 0 for identity-mapped boot (Multiboot2).
- *                    On x86_64 this is ignored (port I/O doesn't need HHDM).
- *                    On AArch64 this is required for MMIO access.
- * @param kernel_phys_base Physical base address of the kernel image.
- *                         On x86_64 this is ignored.
- *                         On AArch64 this is required for page table allocation.
- * @param kernel_virt_base Virtual base address of the kernel image.
- *                         On x86_64 this is ignored.
- *                         On AArch64 this is required for page table allocation.
+ * @param ctx Boot context (provides HHDM offset and kernel base addresses)
  * @return true if serial was initialized successfully
  */
-bool kinit_serial(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base);
+bool kinit_serial(boot_context_t const * ctx);
 
 /**
  * @brief Initialize the TTY subsystem.
@@ -50,11 +42,10 @@ bool kinit_serial(u64 hhdm_offset, u64 kernel_phys_base, u64 kernel_virt_base);
  * - VGA text mode for identity-mapped boot (Multiboot2)
  * - Framebuffer rendering for higher-half boot (Limine)
  *
- * @param hhdm_offset The HHDM offset (0 for identity-mapped)
- * @param fb_info Framebuffer response from Limine (NULL for Multiboot2)
+ * @param ctx Boot context (provides display info)
  * @param serial_available Whether serial is available for logging
  * @return true if TTY was initialized successfully
  */
-bool kinit_tty(u64 hhdm_offset, void * fb_info, bool serial_available);
+bool kinit_tty(boot_context_t const * ctx, bool serial_available);
 
 #endif /* KMAIN_INIT_H */

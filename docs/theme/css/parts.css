@@ -1,0 +1,66 @@
+/* ============================================================
+ *  Visual separation between book parts (Wiki / Tutorials / Project)
+ *  Works with mdbook's <li class="part-title"> sidebar elements.
+ * ============================================================ */
+
+/* ---- Part title styling ----------------------------------- */
+li.part-title {
+    font-size: 1.1em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 8px 12px 6px;
+    margin-top: 6px;
+    border-top: 2px solid var(--sidebar-separator);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: color 0.15s ease;
+}
+
+/* Chevron indicator appended by JS */
+li.part-title::after {
+    content: "▾";
+    font-size: 0.75em;
+    opacity: 0.5;
+    transition: transform 0.2s ease, opacity 0.15s ease;
+}
+
+li.part-title.collapsed::after {
+    transform: rotate(-90deg);
+}
+
+li.part-title:hover {
+    color: var(--sidebar-active);
+}
+
+li.part-title:hover::after {
+    opacity: 0.8;
+}
+
+/* Subtle tinted background for the active part title */
+li.part-title.active-part {
+    color: var(--sidebar-active);
+    background: color-mix(in srgb, var(--sidebar-active) 8%, transparent);
+    border-radius: 4px;
+}
+
+/* ---- Collapsible chapter items under each part ------------ */
+/* JS toggles .part-collapsed on siblings between part titles */
+li.chapter-item.part-collapsed,
+li.spacer.part-collapsed {
+    display: none !important;
+}
+
+/* ---- Separator variable fallback for all themes ----------- */
+:root {
+    --sidebar-separator: rgba(127, 127, 127, 0.25);
+}
+
+/* Remove the top border on the very first part title
+   (Introduction sits above it, no doubled line needed) */
+li.part-title:first-of-type {
+    border-top: none;
+}

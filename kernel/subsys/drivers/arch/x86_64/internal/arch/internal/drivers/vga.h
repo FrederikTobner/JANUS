@@ -26,6 +26,7 @@
  */
 
 #include <arch/impl/drivers/io.h>
+#include <janus/attributes.h>
 #include <janus/types.h>
 
 #define VGA_WIDTH       80
@@ -37,15 +38,15 @@
 /**
  * @brief Create a VGA text mode character entry.
  *
- * @param c  Character to display
- * @param fg Foreground color (0-15)
- * @param bg Background color (0-15)
+ * @param character  Character to display
+ * @param foreground Foreground color (0-15)
+ * @param background Background color (0-15)
  * @return Combined character/attribute word for VGA buffer
  */
-static inline u16 vga_entry(char c, u8 fg, u8 bg)
+static inline u16 vga_entry(char character, u8 foreground, u8 background)
 {
-    u8 color = (u8) ((fg & 0x0F) | ((bg & 0x0F) << 4));
-    return (u16) ((u16) (u8) c | (u16) ((u16) color << 8));
+    u8 color = (u8) ((foreground & 0x0F) | ((background & 0x0F) << 4));
+    return (u16) ((u16) (u8) character | (u16) ((u16) color << 8));
 }
 
 /**
@@ -54,14 +55,14 @@ static inline u16 vga_entry(char c, u8 fg, u8 bg)
  * @param buffer Pointer to VGA buffer
  * @param x      Column (0 to VGA_WIDTH-1)
  * @param y      Row (0 to VGA_HEIGHT-1)
- * @param c      Character to write
- * @param fg     Foreground color
- * @param bg     Background color
+ * @param character      Character to write
+ * @param foreground     Foreground color
+ * @param background     Background color
  */
-static inline void vga_write_cell(u16 volatile * buffer, u16 x, u16 y, char c, u8 fg, u8 bg)
+static inline void vga_write_cell(u16 volatile * buffer, u16 x, u16 y, char character, u8 foreground, u8 background)
 {
     if (buffer && x < VGA_WIDTH && y < VGA_HEIGHT) {
-        buffer[y * VGA_WIDTH + x] = vga_entry(c, fg, bg);
+        buffer[y * VGA_WIDTH + x] = vga_entry(character, foreground, background);
     }
 }
 
@@ -71,22 +72,23 @@ static inline void vga_write_cell(u16 volatile * buffer, u16 x, u16 y, char c, u
  * @param buffer Pointer to VGA buffer
  * @param x      Column (0 to VGA_WIDTH-1)
  * @param y      Row (0 to VGA_HEIGHT-1)
- * @param c      Output: character (may be NULL)
- * @param fg     Output: foreground color (may be NULL)
- * @param bg     Output: background color (may be NULL)
+ * @param character      Output: character (may be NULL)
+ * @param foreground     Output: foreground color (may be NULL)
+ * @param background     Output: background color (may be NULL)
  */
-static inline void vga_read_cell(u16 volatile * buffer, u16 x, u16 y, char * c, u8 * fg, u8 * bg)
+static inline void
+vga_read_cell(u16 volatile * buffer, u16 x, u16 y, char * character, u8 * foreground, u8 * background)
 {
     if (buffer && x < VGA_WIDTH && y < VGA_HEIGHT) {
         u16 entry = buffer[y * VGA_WIDTH + x];
-        if (c) {
-            *c = (char) (entry & 0xFF);
+        if (character) {
+            *character = (char) (entry & 0xFF);
         }
-        if (fg) {
-            *fg = (entry >> 8) & 0x0F;
+        if (foreground) {
+            *foreground = (entry >> 8) & 0x0F;
         }
-        if (bg) {
-            *bg = (entry >> 12) & 0x0F;
+        if (background) {
+            *background = (entry >> 12) & 0x0F;
         }
     }
 }
