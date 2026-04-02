@@ -25,64 +25,6 @@
 static bool g_serial_active = false;
 static bool g_tty_active = false;
 
-/**
- * @brief Initialize TTY with VGA text mode.
- *
- * Used when the bootloader confirms VGA text hardware is present
- * (Multiboot2 EGA text mode).  The VGA buffer at 0xB8000 must be
- * directly accessible (identity-mapped).
- *
- * Only reachable on x86_64 — the Multiboot2 protocol library is
- * never linked on aarch64, so BOOT_DISPLAY_VGA_TEXT cannot appear.
- *
- * @param serial_available Whether serial output is available for logging
- * @return true if TTY was initialized successfully
- */
-static __cold bool init_tty_vga(bool serial_available)
-{
-    if (drivers_tty_init(NULL) != 0) {
-        return false;
-    }
-
-    if (serial_available) {
-        drivers_serial_puts("TTY driver initialized (VGA text mode)\n");
-    }
-    return true;
-}
-
-/**
- * @brief Initialize TTY with framebuffer mode.
- *
- * Used when the bootloader provides a graphical framebuffer (Limine,
- * or Multiboot2 with a framebuffer header tag).  The framebuffer
- * address must already be accessible (identity-mapped or via HHDM).
- *
- * @param display Boot display info from the boot context
- * @param serial_available Whether serial output is available for logging
- * @return true if TTY was initialized successfully
- */
-static __cold bool init_tty_framebuffer(boot_display_info_t const * display, bool serial_available)
-{
-    tty_display_config_t config;
-    config.framebuffer = display->framebuffer;
-    config.width = display->width;
-    config.height = display->height;
-    config.pitch = display->pitch;
-    config.bpp = display->bpp;
-    config.red_mask_shift = display->red_mask_shift;
-    config.green_mask_shift = display->green_mask_shift;
-    config.blue_mask_shift = display->blue_mask_shift;
-
-    if (drivers_tty_init(&config) != 0) {
-        return false;
-    }
-
-    if (serial_available) {
-        drivers_serial_puts("TTY driver initialized (framebuffer mode)\n");
-    }
-    return true;
-}
-
 static __cold bool init_serial(boot_context_t const * boot_context)
 {
     if (drivers_serial_init(
@@ -96,13 +38,18 @@ static __cold bool init_serial(boot_context_t const * boot_context)
 
 static __cold bool init_tty(boot_context_t const * boot_context, bool serial_available)
 {
+    display_info_t const * display = NULL;
+
     switch (boot_context->display_mode) {
 
     case BOOT_DISPLAY_FRAMEBUFFER:
-        return init_tty_framebuffer(&boot_context->display, serial_available);
+        display = &boot_context->display;
+        break;
 
     case BOOT_DISPLAY_VGA_TEXT:
-        return init_tty_vga(serial_available);
+        // Pass non-NULL with framebuffer == NULL → TTY selects VGA text mode
+        display = &boot_context->display;
+        break;
 
     case BOOT_DISPLAY_NONE:
         if (serial_available) {
@@ -111,7 +58,14 @@ static __cold bool init_tty(boot_context_t const * boot_context, bool serial_ava
         return false;
     }
 
-    return false;
+    if (drivers_tty_init(display) != 0) {
+        return false;
+    }
+
+    if (serial_available) {
+        drivers_serial_puts("TTY driver initialized\n");
+    }
+    return true;
 }
 
 static void console_putc(char c, __unused void * ctx)

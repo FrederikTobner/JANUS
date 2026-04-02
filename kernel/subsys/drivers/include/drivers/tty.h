@@ -33,6 +33,7 @@
 #ifndef DRIVERS_TTY_H
 #define DRIVERS_TTY_H
 
+#include <display/display.h>
 #include <janus/types.h>
 
 /** TTY text colors (portable subset) */
@@ -56,31 +57,13 @@ typedef enum {
 } tty_color_t;
 
 /**
- * @brief Display configuration for TTY initialization.
- *
- * This structure describes the display backend to use.
- * For VGA text mode, set framebuffer to NULL.
- * For graphical framebuffer, provide the framebuffer details.
- */
-typedef struct {
-    void * framebuffer;  /**< Framebuffer address (NULL for VGA text mode) */
-    u64 width;           /**< Width in pixels (framebuffer) or ignored (VGA) */
-    u64 height;          /**< Height in pixels (framebuffer) or ignored (VGA) */
-    u64 pitch;           /**< Bytes per row (framebuffer) or ignored (VGA) */
-    u16 bpp;             /**< Bits per pixel (framebuffer) or ignored (VGA) */
-    u8 red_mask_shift;   /**< Red channel bit position */
-    u8 green_mask_shift; /**< Green channel bit position */
-    u8 blue_mask_shift;  /**< Blue channel bit position */
-} tty_display_config_t;
-
-/**
  * @brief Initialize the TTY.
  * @param config Display configuration. If NULL, uses VGA text mode (x86_64 only).
  *               If config->framebuffer is NULL, uses VGA text mode.
  *               If config->framebuffer is set, uses framebuffer text rendering.
  * @return 0 on success, negative error code if not available.
  */
-error_t drivers_tty_init(tty_display_config_t const * config);
+error_t drivers_tty_init(display_info_t const * config);
 
 /**
  * @brief Write a single character at cursor position.

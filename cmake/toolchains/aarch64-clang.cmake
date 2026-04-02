@@ -23,5 +23,5 @@ find_program(CMAKE_OBJCOPY aarch64-linux-gnu-objcopy REQUIRED)
 # Tell Clang which linker to use when it drives linking
 set(CMAKE_EXE_LINKER_FLAGS_INIT "--target=aarch64-elf -fuse-ld=${CMAKE_LINKER}")
 
-# Prevent CMake from testing the compiler with a full program
+# Prevent CMake from testing the compiler with a program
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)

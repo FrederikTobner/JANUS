@@ -26,6 +26,7 @@
  * consumers access fields directly.
  */
 
+#include <display/display.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 
@@ -51,22 +52,6 @@ typedef enum {
 } boot_display_mode_t;
 
 /**
- * @brief Protocol-agnostic display information
- *
- * Normalized framebuffer data populated by the protocol implementation.
- */
-typedef struct boot_display_info {
-    u8 * framebuffer;    /**< Linear framebuffer base address */
-    u64 width;           /**< Horizontal resolution in pixels */
-    u64 height;          /**< Vertical resolution in pixels */
-    u64 pitch;           /**< Bytes per scanline */
-    u16 bpp;             /**< Bits per pixel */
-    u8 red_mask_shift;   /**< Red component bit position */
-    u8 green_mask_shift; /**< Green component bit position */
-    u8 blue_mask_shift;  /**< Blue component bit position */
-} boot_display_info_t;
-
-/**
  * @brief Boot context — populated once during init, immutable after
  *
  * Contains all boot-protocol-derived information needed by the kernel.
@@ -77,7 +62,7 @@ typedef struct boot_context {
     u64 hhdm_offset;                  /**< Higher Half Direct Map offset (0 for identity-mapped) */
     phys_addr_t kernel_phys_base;     /**< Kernel physical base address */
     virt_addr_t kernel_virt_base;     /**< Kernel virtual base address */
-    boot_display_info_t display;      /**< Framebuffer info (valid only when display_mode == FRAMEBUFFER) */
+    display_info_t display;           /**< Framebuffer info (valid only when display_mode == FRAMEBUFFER) */
     boot_display_mode_t display_mode; /**< What kind of display the bootloader provided */
 } boot_context_t;
 

@@ -50,7 +50,7 @@ static __hot void tty_scroll(void)
     }
 }
 
-__cold error_t drivers_tty_init(tty_display_config_t const * config)
+__cold error_t drivers_tty_init(display_info_t const * config)
 {
     error_t err = arch_tty_init(config);
     if (err != 0) {

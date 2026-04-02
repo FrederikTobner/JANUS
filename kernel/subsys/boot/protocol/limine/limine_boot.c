@@ -70,7 +70,7 @@ __cold int boot_init(boot_context_t * boot_context)
     if (framebuffer_response != NULL && framebuffer_response->framebuffer_count > 0 &&
         framebuffer_response->framebuffers != NULL) {
         struct limine_framebuffer const * primary_framebuffer = framebuffer_response->framebuffers[0];
-        boot_context->display = (boot_display_info_t) {
+        boot_context->display = (display_info_t) {
             .framebuffer = (u8 *) primary_framebuffer->address,
             .width = primary_framebuffer->width,
             .height = primary_framebuffer->height,

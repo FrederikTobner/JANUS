@@ -44,7 +44,7 @@ jobs:
 
       - name: Install ISO tools
         run: |
-          sudo apt-get install -y --no-install-recommends xorriso mtools limine
+          sudo apt-get install -y --no-install-recommends xorriso mtools
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             sudo apt-get install -y --no-install-recommends grub-pc-bin grub-common
           fi

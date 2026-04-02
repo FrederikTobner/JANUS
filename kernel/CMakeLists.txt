@@ -1,6 +1,6 @@
-include(JanusRegistry)
+include(Registry)
 
-include(JanusLibrary)
+include(kernel/Library)
 
 # Configure config.h from config.h.in
 configure_file(

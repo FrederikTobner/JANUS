@@ -6,5 +6,6 @@ janus_add_arch_subsys(drivers
         tty.c
         ../shared/framebuffer.c
     DEPENDENCIES
+        display
         page_tables
 )

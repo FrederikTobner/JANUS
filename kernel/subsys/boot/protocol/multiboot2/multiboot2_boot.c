@@ -88,7 +88,7 @@ __cold int boot_init(boot_context_t * boot_context)
 
             if (framebuffer_tag->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB) {
                 // Direct-color framebuffer, usable with the framebuffer driver
-                boot_context->display = (boot_display_info_t) {
+                boot_context->display = (display_info_t) {
                     .framebuffer = (u8 *) (phys_addr_t) framebuffer_tag->addr,
                     .width = framebuffer_tag->width,
                     .height = framebuffer_tag->height,

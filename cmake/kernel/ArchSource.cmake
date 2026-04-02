@@ -1,10 +1,10 @@
-# JANUS Architecture-Specific Subsystem Helper
+# JANUS Architecture-Specific Source Helper
 # Provides janus_add_arch_subsys() for building arch-specific driver implementations
 
 include_guard(GLOBAL)
 
 #
-# Add architecture-specific implementation for a subsystem
+# Add architecture-specific implementation for a subsystem or kernel library
 #
 # Usage:
 #   janus_add_arch_subsys(<subsystem_name>
@@ -27,7 +27,7 @@ include_guard(GLOBAL)
 
 # Ensure platform is loaded
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusSubsys.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/ArchSource.cmake")
 endif()
 
 function(janus_add_arch_subsys NAME)
@@ -54,7 +54,6 @@ function(janus_add_arch_subsys NAME)
 
     set(ARCH_LIB_NAME "${NAME}_arch")
     add_library(${ARCH_LIB_NAME} STATIC ${ARG_SOURCES})
-    target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
     target_include_directories(${ARCH_LIB_NAME} 
     PUBLIC 
         "${CMAKE_CURRENT_SOURCE_DIR}/include"          # <arch/impl/drivers/*.h>
@@ -69,11 +68,6 @@ function(janus_add_arch_subsys NAME)
         target_link_libraries(${ARCH_LIB_NAME} PUBLIC ${ARG_DEPENDENCIES})
     endif()
 
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
-    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
-    elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        target_compile_options(${ARCH_LIB_NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
-    endif()
+    # Apply compiler flags
+    janus_apply_compile_flags(${ARCH_LIB_NAME})
 endfunction()

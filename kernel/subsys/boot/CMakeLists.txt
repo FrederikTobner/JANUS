@@ -1,7 +1,10 @@
 # Boot subsystem: protocol-agnostic core
 # Protocol implementations live in protocol/limine/ and protocol/multiboot2/
 
-janus_add_subsys(boot)
+janus_add_subsys(boot
+    DEPENDENCIES
+        display
+)
 
 # Protocol libraries (plain add_library, not subsystems)
 add_subdirectory(protocol/limine)

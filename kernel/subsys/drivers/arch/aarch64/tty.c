@@ -30,7 +30,7 @@
 // Framebuffer state - shared implementation
 static framebuffer_state_t g_framebuffer_state;
 
-error_t arch_tty_init(tty_display_config_t const * config)
+error_t arch_tty_init(display_info_t const * config)
 {
     if (config == NULL || config->framebuffer == NULL) {
         // AArch64 requires framebuffer - no fallback

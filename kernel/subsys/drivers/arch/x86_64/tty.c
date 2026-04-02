@@ -44,7 +44,7 @@ static u16 volatile * g_vga_buffer = NULL;
 /* Framebuffer state */
 static framebuffer_state_t g_framebuffer_state;
 
-error_t arch_tty_init(tty_display_config_t const * config)
+error_t arch_tty_init(display_info_t const * config)
 {
     if (config == NULL || config->framebuffer == NULL) {
         /* VGA text mode - only works with identity-mapped memory */

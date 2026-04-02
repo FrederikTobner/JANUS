@@ -32,7 +32,7 @@
  * @param config Display configuration (framebuffer or VGA).
  * @return 0 on success, negative error code on failure.
  */
-error_t arch_tty_init(tty_display_config_t const * config);
+error_t arch_tty_init(display_info_t const * config);
 
 /**
  * @brief Get display dimensions.

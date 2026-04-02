@@ -6,6 +6,7 @@ janus_add_subsys(drivers
     SOURCES 
         ${DRIVER_SOURCES}
     DEPENDENCIES
+        display
         page_tables
 )
 

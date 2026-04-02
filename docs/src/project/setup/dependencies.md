@@ -85,18 +85,13 @@ sudo pacman -S qemu-system-aarch64    # Arch Linux
 
 ## Bootloader Tools
 
-**Limine** and **xorriso** are required to create bootable ISO images using the Limine protocol:
+**Limine** is fetched automatically by CMake via `FetchContent` — no manual installation needed.
+
+**xorriso** and **mtools** are required to create bootable ISO images:
 
 ```bash
 sudo apt install xorriso mtools       # Debian/Ubuntu
-sudo pacman -S limine xorriso mtools  # Arch Linux
-```
-
-On Debian/Ubuntu, Limine must be built from source:
-
-```bash
-git clone https://github.com/limine-bootloader/limine.git
-cd limine && make install
+sudo pacman -S xorriso mtools          # Arch Linux
 ```
 
 **GRUB** and **xorriso** are needed for Multiboot2 ISO images (x86_64 only):
