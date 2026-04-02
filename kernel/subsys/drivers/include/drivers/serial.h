@@ -41,17 +41,29 @@
  * @param kernel_virt_base Virtual base address of the kernel image.
  * @return 0 on success, negative error code on failure.
  */
-static __always_inline error_t drivers_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
+static __always_inline error_t drivers_serial_init(u64 hhdm_offset,
+                                                   phys_addr_t kernel_phys_base,
+                                                   virt_addr_t kernel_virt_base)
 {
     return arch_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
 }
 
 /**
- * @brief Write a single character (blocking).
+ * @brief Write a single character (blocking) with CR+LF conversion.
+ *
+ * Bare '\n' is automatically preceded by '\r' so that serial
+ * terminals receive the expected CR+LF line ending.
+ *
  * @param c The character to write.
  */
 static __always_inline void drivers_serial_putc(char c)
 {
+    if (c == '\n') {
+        while (!arch_serial_tx_ready()) {
+            /* Wait for transmit buffer to be ready */
+        }
+        arch_serial_write('\r');
+    }
     while (!arch_serial_tx_ready()) {
         /* Wait for transmit buffer to be ready */
     }
@@ -59,15 +71,15 @@ static __always_inline void drivers_serial_putc(char c)
 }
 
 /**
- * @brief Write a null-terminated string with CR+LF conversion.
+ * @brief Write a null-terminated string (blocking).
+ *
+ * CR+LF conversion is handled by drivers_serial_putc.
+ *
  * @param str The string to write.
  */
 static __always_inline void drivers_serial_puts(char const * str)
 {
     while (*str) {
-        if (*str == '\n') {
-            drivers_serial_putc('\r'); /* CR+LF for serial terminals */
-        }
         drivers_serial_putc(*str++);
     }
 }

@@ -103,7 +103,7 @@ function(janus_find_limine)
             "                 git clone --depth 1 https://github.com/limine-bootloader/limine.git\n"
             "                 cd limine && make && sudo make install\n"
             "\n"
-            "Alternative: Use 'ninja iso-grub' for GRUB-based ISO instead."
+            "Alternative: Use 'ninja iso-multiboot2' for GRUB-based ISO instead."
         )
     endif()
 
@@ -157,15 +157,15 @@ function(janus_add_iso_targets)
 
     if(JANUS_TARGET_ARCH STREQUAL "aarch64")
         # aarch64: UEFI-only ISO (no BIOS on ARM)
-        add_custom_target(iso-grub
-            COMMAND ${CMAKE_COMMAND} -E echo "ERROR: GRUB ISO only available for x86_64"
+        add_custom_target(iso-multiboot2
+            COMMAND ${CMAKE_COMMAND} -E echo "ERROR: Multiboot2 ISO only available for x86_64"
             COMMAND ${CMAKE_COMMAND} -E false
-            COMMENT "GRUB ISO only available for x86_64"
+            COMMENT "Multiboot2 ISO only available for x86_64"
         )
 
         if(LIMINE_DATA_DIR AND NOT LIMINE_DATA_DIR STREQUAL "LIMINE_DATA_DIR-NOTFOUND")
             if(NOT JANUS_XORRISO_FOUND)
-                add_custom_target(iso
+                add_custom_target(iso-limine
                     COMMAND ${CMAKE_COMMAND} -E echo "ERROR: xorriso not installed."
                     COMMAND ${CMAKE_COMMAND} -E echo "Install xorriso:"
                     COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S libisoburn"
@@ -175,7 +175,7 @@ function(janus_add_iso_targets)
                 )
             else()
                 # aarch64 UEFI-only ISO with Limine
-                add_custom_target(iso
+                add_custom_target(iso-limine
                     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/iso
                     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/limine
                     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/EFI/BOOT
@@ -192,7 +192,7 @@ function(janus_add_iso_targets)
                 )
             endif()
         else()
-            add_custom_target(iso
+            add_custom_target(iso-limine
                 COMMAND ${CMAKE_COMMAND} -E echo "ERROR: Limine bootloader not installed."
                 COMMAND ${CMAKE_COMMAND} -E echo "Install Limine:"
                 COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S limine"
@@ -201,6 +201,9 @@ function(janus_add_iso_targets)
                 COMMENT "Limine bootloader not installed"
             )
         endif()
+
+        # Umbrella target: build all ISOs for this platform
+        add_custom_target(iso DEPENDS iso-limine)
         return()
     endif()
 
@@ -218,7 +221,7 @@ function(janus_add_iso_targets)
     if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
         if(LIMINE_DATA_DIR AND NOT LIMINE_DATA_DIR STREQUAL "LIMINE_DATA_DIR-NOTFOUND")
             if(NOT JANUS_XORRISO_FOUND)
-                add_custom_target(iso
+                add_custom_target(iso-limine
                     COMMAND ${CMAKE_COMMAND} -E echo "ERROR: xorriso not installed."
                     COMMAND ${CMAKE_COMMAND} -E echo "Install xorriso:"
                     COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S libisoburn"
@@ -227,7 +230,7 @@ function(janus_add_iso_targets)
                     COMMENT "xorriso not installed"
                 )
             else()
-                add_custom_target(iso
+                add_custom_target(iso-limine
                     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/iso
                     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/boot/limine
                     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso/EFI/BOOT
@@ -249,7 +252,7 @@ function(janus_add_iso_targets)
             endif()
         else()
             # Limine not found - provide helpful error
-            add_custom_target(iso
+            add_custom_target(iso-limine
                 COMMAND ${CMAKE_COMMAND} -E echo "ERROR: Limine bootloader not installed."
                 COMMAND ${CMAKE_COMMAND} -E echo "Install Limine:"
                 COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S limine"
@@ -257,7 +260,7 @@ function(janus_add_iso_targets)
                 COMMAND ${CMAKE_COMMAND} -E echo "    git clone --depth 1 https://github.com/limine-bootloader/limine.git"
                 COMMAND ${CMAKE_COMMAND} -E echo "    cd limine && make && sudo make install"
                 COMMAND ${CMAKE_COMMAND} -E echo ""
-                COMMAND ${CMAKE_COMMAND} -E echo "Alternative: Use 'ninja iso-grub' for GRUB-based ISO"
+                COMMAND ${CMAKE_COMMAND} -E echo "Alternative: Use 'ninja iso-multiboot2' for GRUB-based ISO"
                 COMMAND ${CMAKE_COMMAND} -E false
                 COMMENT "Limine bootloader not installed"
             )
@@ -269,7 +272,7 @@ function(janus_add_iso_targets)
     # Secondary ISO: GRUB bootloader with Multiboot2
     if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
         if(NOT JANUS_GRUB_MKRESCUE_FOUND)
-            add_custom_target(iso-grub
+            add_custom_target(iso-multiboot2
                 COMMAND ${CMAKE_COMMAND} -E echo "ERROR: grub-mkrescue not installed."
                 COMMAND ${CMAKE_COMMAND} -E echo "Install GRUB tools:"
                 COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S grub"
@@ -278,7 +281,7 @@ function(janus_add_iso_targets)
                 COMMENT "grub-mkrescue not installed"
             )
         else()
-            add_custom_target(iso-grub
+            add_custom_target(iso-multiboot2
                 COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/iso-grub
                 COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/iso-grub/boot/grub
                 COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kernel-multiboot2.elf> ${CMAKE_BINARY_DIR}/iso-grub/boot/kernel.elf
@@ -289,12 +292,19 @@ function(janus_add_iso_targets)
             )
         endif()
     else()
-        add_custom_target(iso-grub
-            COMMAND ${CMAKE_COMMAND} -E echo "ERROR: GRUB ISO requires 'multiboot2' in JANUS_BOOT_PROTOCOLS"
+        add_custom_target(iso-multiboot2
+            COMMAND ${CMAKE_COMMAND} -E echo "ERROR: Multiboot2 ISO requires 'multiboot2' in JANUS_BOOT_PROTOCOLS"
             COMMAND ${CMAKE_COMMAND} -E false
-            COMMENT "GRUB ISO not available - multiboot2 protocol not enabled"
+            COMMENT "Multiboot2 ISO not available - multiboot2 protocol not enabled"
         )
     endif()
+
+    # Umbrella target: build all ISOs for this platform
+    set(_iso_deps)
+    foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
+        list(APPEND _iso_deps iso-${_proto})
+    endforeach()
+    add_custom_target(iso DEPENDS ${_iso_deps})
 endfunction()
 
 function(janus_add_run_targets)
@@ -304,7 +314,7 @@ function(janus_add_run_targets)
     # Check for appropriate QEMU binary
     if(NOT JANUS_QEMU_FOUND)
         if(JANUS_TARGET_ARCH STREQUAL "x86_64")
-            add_custom_target(run
+            add_custom_target(run-limine
                 COMMAND ${CMAKE_COMMAND} -E echo "ERROR: qemu-system-x86_64 not installed."
                 COMMAND ${CMAKE_COMMAND} -E echo "Install QEMU:"
                 COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S qemu-system-x86"
@@ -314,7 +324,7 @@ function(janus_add_run_targets)
                 COMMENT "QEMU not installed"
             )
         else()
-            add_custom_target(run
+            add_custom_target(run-limine
                 COMMAND ${CMAKE_COMMAND} -E echo "ERROR: qemu-system-aarch64 not installed."
                 COMMAND ${CMAKE_COMMAND} -E echo "Install QEMU:"
                 COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S qemu-system-aarch64"
@@ -324,7 +334,7 @@ function(janus_add_run_targets)
                 COMMENT "QEMU not installed"
             )
         endif()
-        add_custom_target(run-grub
+        add_custom_target(run-multiboot2
             COMMAND ${CMAKE_COMMAND} -E echo "ERROR: QEMU not installed."
             COMMAND ${CMAKE_COMMAND} -E false
             USES_TERMINAL
@@ -364,7 +374,7 @@ function(janus_add_run_targets)
             set(QEMU_DEBUG_LOG "${CMAKE_BINARY_DIR}/qemu-debug.log")
             set(QEMU_DEBUG_OPTS -d cpu_reset,guest_errors,unimp -D ${QEMU_DEBUG_LOG})
 
-            add_custom_target(run
+            add_custom_target(run-limine
                 COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log: ${QEMU_DEBUG_LOG}"
                 COMMAND qemu-system-aarch64 
                     -M virt
@@ -377,7 +387,7 @@ function(janus_add_run_targets)
                     -boot d
                     ${QEMU_DEBUG_OPTS}
                     ${QEMU_DISPLAY_ARG}
-                DEPENDS iso
+                DEPENDS iso-limine
                 USES_TERMINAL
                 COMMENT "Boots JANUS aarch64 ISO via Limine UEFI"
             )
@@ -395,12 +405,12 @@ function(janus_add_run_targets)
                     -boot d
                     ${QEMU_DEBUG_OPTS}
                     ${QEMU_DISPLAY_ARG}
-                DEPENDS iso
+                DEPENDS iso-limine
                 USES_TERMINAL
                 COMMENT "Boots JANUS aarch64 ISO via Limine UEFI"
             )
         else()
-            add_custom_target(run
+            add_custom_target(run-limine
                 COMMAND ${CMAKE_COMMAND} -E echo "ERROR: aarch64 UEFI firmware not found."
                 COMMAND ${CMAKE_COMMAND} -E echo "Install UEFI firmware:"
                 COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S edk2-aarch64"
@@ -421,19 +431,19 @@ function(janus_add_run_targets)
             )
         endif()
 
-        # GRUB not available on aarch64
-        add_custom_target(run-grub
-            COMMAND ${CMAKE_COMMAND} -E echo "ERROR: GRUB run target only available for x86_64"
+        # Multiboot2 not available on aarch64
+        add_custom_target(run-multiboot2
+            COMMAND ${CMAKE_COMMAND} -E echo "ERROR: Multiboot2 run target only available for x86_64"
             COMMAND ${CMAKE_COMMAND} -E false
             USES_TERMINAL
-            COMMENT "GRUB run target only available for x86_64"
+            COMMENT "Multiboot2 run target only available for x86_64"
         )
 
         # Direct kernel boot (bypasses Limine - for debugging only)
         add_custom_target(run-elf
             COMMAND ${CMAKE_COMMAND} -E echo "WARNING: Direct kernel boot bypasses Limine bootloader."
             COMMAND ${CMAKE_COMMAND} -E echo "         The kernel will not receive Limine protocol data."
-            COMMAND ${CMAKE_COMMAND} -E echo "         Use 'ninja run' for proper Limine boot."
+            COMMAND ${CMAKE_COMMAND} -E echo "         Use 'ninja run-limine' for proper Limine boot."
             COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log: ${QEMU_DEBUG_LOG}"
             COMMAND qemu-system-aarch64
                 -M virt
@@ -454,29 +464,29 @@ function(janus_add_run_targets)
         set(QEMU_DEBUG_OPTS -d cpu_reset,guest_errors,unimp -D ${QEMU_DEBUG_LOG})
 
         # Run Limine ISO
-        add_custom_target(run
+        add_custom_target(run-limine
             COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log: ${QEMU_DEBUG_LOG}"
             COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${JANUS_ISO_NAME} 
                 -boot d -serial stdio -m 256M ${QEMU_DEBUG_OPTS} ${QEMU_DISPLAY_ARG}
-            DEPENDS iso
+            DEPENDS iso-limine
             USES_TERMINAL
             COMMENT "Boots JANUS Limine ISO (select boot protocol from menu)"
         )
 
-        # Run GRUB ISO
-        add_custom_target(run-grub
+        # Run Multiboot2 ISO
+        add_custom_target(run-multiboot2
             COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log: ${QEMU_DEBUG_LOG}"
             COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${JANUS_ISO_GRUB_NAME}
                 -boot d -serial stdio -m 256M ${QEMU_DEBUG_OPTS} ${QEMU_DISPLAY_ARG}
-            DEPENDS iso-grub
+            DEPENDS iso-multiboot2
             USES_TERMINAL
-            COMMENT "Boots JANUS GRUB ISO (Multiboot2 - educational)"
+            COMMENT "Boots JANUS Multiboot2 ISO (GRUB - educational)"
         )
 
         # Direct kernel load (not supported - QEMU requires Multiboot1 for -kernel, and our Multiboot2 kernel is not compatible)
         add_custom_target(run-elf
             COMMAND ${CMAKE_COMMAND} -E echo "Note: QEMU -kernel only supports Multiboot1, not Multiboot2."
-            COMMAND ${CMAKE_COMMAND} -E echo "Use 'ninja run' to boot via ISO instead."
+            COMMAND ${CMAKE_COMMAND} -E echo "Use 'ninja run-limine' to boot via ISO instead."
             COMMAND ${CMAKE_COMMAND} -E false
             DEPENDS kernel-multiboot2.elf
             USES_TERMINAL
@@ -489,7 +499,7 @@ function(janus_add_run_targets)
             COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${JANUS_ISO_NAME}
                 -boot d -serial stdio -m 256M ${QEMU_DEBUG_OPTS} ${QEMU_DISPLAY_ARG}
                 -bios /usr/share/OVMF/OVMF_CODE.fd
-            DEPENDS iso
+            DEPENDS iso-limine
             USES_TERMINAL
             COMMENT "Boots JANUS ISO in UEFI mode (requires OVMF)"
         )
@@ -502,13 +512,13 @@ function(janus_add_debug_targets)
 
     # Check for appropriate QEMU binary
     if(NOT JANUS_QEMU_FOUND)
-        add_custom_target(debug
+        add_custom_target(debug-limine
             COMMAND ${CMAKE_COMMAND} -E echo "ERROR: QEMU not installed."
             COMMAND ${CMAKE_COMMAND} -E false
             USES_TERMINAL
             COMMENT "QEMU not installed"
         )
-        add_custom_target(debug-grub
+        add_custom_target(debug-multiboot2
             COMMAND ${CMAKE_COMMAND} -E echo "ERROR: QEMU not installed."
             COMMAND ${CMAKE_COMMAND} -E false
             USES_TERMINAL
@@ -541,7 +551,7 @@ function(janus_add_debug_targets)
         endif()
 
         if(AARCH64_UEFI_FIRMWARE)
-            add_custom_target(debug
+            add_custom_target(debug-limine
                 COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log : ${QEMU_DEBUG_LOG}"
                 COMMAND qemu-system-aarch64
                     -M virt
@@ -555,12 +565,12 @@ function(janus_add_debug_targets)
                     -s -S
                     ${QEMU_DEBUG_OPTS_VERBOSE}
                     ${QEMU_DISPLAY_ARG}
-                DEPENDS iso
+                DEPENDS iso-limine
                 USES_TERMINAL
                 COMMENT "Boots JANUS aarch64 ISO with GDB server on :1234"
             )
         else()
-            add_custom_target(debug
+            add_custom_target(debug-limine
                 COMMAND ${CMAKE_COMMAND} -E echo "ERROR: aarch64 UEFI firmware not found."
                 COMMAND ${CMAKE_COMMAND} -E echo "Install UEFI firmware:"
                 COMMAND ${CMAKE_COMMAND} -E echo "  Arch: sudo pacman -S edk2-aarch64"
@@ -571,12 +581,12 @@ function(janus_add_debug_targets)
             )
         endif()
 
-        # GRUB not available on aarch64
-        add_custom_target(debug-grub
-            COMMAND ${CMAKE_COMMAND} -E echo "ERROR: GRUB debug target only available for x86_64"
+        # Multiboot2 not available on aarch64
+        add_custom_target(debug-multiboot2
+            COMMAND ${CMAKE_COMMAND} -E echo "ERROR: Multiboot2 debug target only available for x86_64"
             COMMAND ${CMAKE_COMMAND} -E false
             USES_TERMINAL
-            COMMENT "GRUB debug target only available for x86_64"
+            COMMENT "Multiboot2 debug target only available for x86_64"
         )
 
         # Direct kernel debug (bypasses Limine)
@@ -598,29 +608,29 @@ function(janus_add_debug_targets)
     else()
         # x86_64: Original implementation
         # Debug Limine ISO
-        add_custom_target(debug
+        add_custom_target(debug-limine
             COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log: ${QEMU_DEBUG_LOG}"
             COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${JANUS_ISO_NAME}
                 -boot d -serial stdio -m 256M -s -S ${QEMU_DEBUG_OPTS_VERBOSE} ${QEMU_DISPLAY_ARG}
-            DEPENDS iso
+            DEPENDS iso-limine
             USES_TERMINAL
             COMMENT "Boots JANUS Limine ISO with GDB server on :1234"
         )
 
-        # Debug GRUB ISO
-        add_custom_target(debug-grub
+        # Debug Multiboot2 ISO
+        add_custom_target(debug-multiboot2
             COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log [verbose]: ${QEMU_DEBUG_LOG}"
             COMMAND qemu-system-x86_64 -cdrom ${CMAKE_BINARY_DIR}/${JANUS_ISO_GRUB_NAME}
                 -boot d -serial stdio -m 256M -s -S ${QEMU_DEBUG_OPTS_VERBOSE} ${QEMU_DISPLAY_ARG}
-            DEPENDS iso-grub
+            DEPENDS iso-multiboot2
             USES_TERMINAL
-            COMMENT "Boots JANUS GRUB ISO with GDB server on :1234 (Multiboot2 - educational)"
+            COMMENT "Boots JANUS Multiboot2 ISO with GDB server on :1234 (GRUB - educational)"
         )
 
         # Direct kernel debug (not supported)
         add_custom_target(debug-elf
             COMMAND ${CMAKE_COMMAND} -E echo "Note: QEMU -kernel only supports Multiboot1, not Multiboot2."
-            COMMAND ${CMAKE_COMMAND} -E echo "Use 'ninja debug' to boot via ISO instead."
+            COMMAND ${CMAKE_COMMAND} -E echo "Use 'ninja debug-limine' to boot via ISO instead."
             COMMAND ${CMAKE_COMMAND} -E false
             DEPENDS kernel.elf
             USES_TERMINAL

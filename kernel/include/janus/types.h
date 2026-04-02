@@ -47,7 +47,6 @@ typedef __u32 u32;
 typedef __s64 s64;
 typedef __u64 u64;
 
-// Kernel shorthands for boolean
 #ifndef __cplusplus
 typedef _Bool bool;
 #endif
@@ -57,5 +56,7 @@ typedef _Bool bool;
 
 // Null pointer definition
 #define NULL                          ((void *) 0)
+
+typedef __u64 uintptr_t;
 
 #endif /* JANUS_TYPES_H */

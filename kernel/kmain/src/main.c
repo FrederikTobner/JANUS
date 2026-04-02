@@ -26,10 +26,17 @@
 #include <boot/context.h>
 #include <drivers/cpu.h>
 #include <janus/attributes.h>
+#include <janus/config.h>
 #include <janus/types.h>
-#include <kmain/banner.h>
-#include <kmain/init.h>
+#include <kmain/console.h>
 #include <kmain/kernel_descriptor.h>
+
+#define JANUS_HELLO_MESSAGE                  \
+    "     _   _    _   _ _   _ ____  \n"     \
+    "    | | / \\  | \\ | | | | / ___|\n"    \
+    " _  | |/ _ \\ |  \\| | | | \\___ \\ \n" \
+    "| |_| / ___ \\| |\\  | |_| |___) |\n"   \
+    " \\___/_/   \\_\\_| \\_|\\___/|____/ \n"
 
 /**
  * @brief Main kernel entry point
@@ -52,12 +59,9 @@ __noreturn void kernel_main(void)
 
     boot_context_t const * boot_context = &descriptor.boot;
 
-    // Initialize drivers
-    bool serial_available = kinit_serial(boot_context);
-    bool tty_available = kinit_tty(boot_context, serial_available);
-
+    console_init(boot_context);
     // Print greeting
-    kbanner_print(serial_available, tty_available);
+    kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
 
     // Halt the CPU forever
     drivers_cpu_halt_forever();

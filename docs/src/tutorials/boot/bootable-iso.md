@@ -105,19 +105,19 @@ add_custom_target(debug
 )
 ```
 
-- `USES_TERMINAL` ensures `ninja run` shows QEMU's serial output in the build terminal instead of buffering it.
+- `USES_TERMINAL` ensures `ninja run-limine` shows QEMU's serial output in the build terminal instead of buffering it.
 - `-serial stdio` redirects the virtual COM1 to the host terminal — see [Serial Port Driver](../io/serial-port-driver.md).
 - `-s -S` enables the GDB stub and pauses the CPU at startup — see [Debugging a Kernel with LLDB](../debugging/kernel-debugging-lldb.md).
 
 Usage:
 
 ```bash
-ninja -C build run      # build + boot
-ninja -C build debug    # build + boot, paused for debugger
+ninja -C build run-limine      # build + boot
+ninja -C build debug-limine    # build + boot, paused for debugger
 ```
 
 ## Key Takeaways
 
 - **GRUB bridges the Multiboot2 gap.** QEMU cannot boot a Multiboot2 ELF directly; GRUB validates the header, loads the kernel, and enters it in 32-bit protected mode.
 - **`grub-mkrescue` produces a hybrid image.** The same ISO boots via BIOS (El Torito) and UEFI (embedded FAT EFI System Partition).
-- **CMake custom targets chain dependencies.** `run` depends on `iso`, which depends on `kernel.elf` — one command triggers the full pipeline.
+- **CMake custom targets chain dependencies.** `run-limine` depends on `iso-limine`, which depends on `kernel.elf` — one command triggers the full pipeline.

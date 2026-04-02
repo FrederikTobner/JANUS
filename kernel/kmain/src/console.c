@@ -14,19 +14,16 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file init.c
- * @brief Kernel initialization routines.
- *
- * Handles early kernel initialization including driver setup.
- * All boot protocol details are accessed through the public boot context.
- */
-
-#include <kmain/init.h>
+#include <kmain/console.h>
 
 #include <boot/context.h>
 #include <drivers/serial.h>
 #include <drivers/tty.h>
+#include <fmt/output.h>
+#include <janus/attributes.h>
+
+static bool g_serial_active = false;
+static bool g_tty_active = false;
 
 /**
  * @brief Initialize TTY with VGA text mode.
@@ -86,7 +83,7 @@ static __cold bool init_tty_framebuffer(boot_display_info_t const * display, boo
     return true;
 }
 
-__cold bool kinit_serial(boot_context_t const * boot_context)
+static __cold bool init_serial(boot_context_t const * boot_context)
 {
     if (drivers_serial_init(
             boot_context->hhdm_offset, boot_context->kernel_phys_base, boot_context->kernel_virt_base) != 0) {
@@ -97,7 +94,7 @@ __cold bool kinit_serial(boot_context_t const * boot_context)
     return true;
 }
 
-__cold bool kinit_tty(boot_context_t const * boot_context, bool serial_available)
+static __cold bool init_tty(boot_context_t const * boot_context, bool serial_available)
 {
     switch (boot_context->display_mode) {
 
@@ -115,4 +112,38 @@ __cold bool kinit_tty(boot_context_t const * boot_context, bool serial_available
     }
 
     return false;
+}
+
+static void console_putc(char c, __unused void * ctx)
+{
+    if (g_serial_active) {
+        drivers_serial_putc(c);
+    }
+    if (g_tty_active) {
+        drivers_tty_putc(c);
+    }
+}
+
+// Kernel printf wrapper
+s32 kprintf(char const * fmtstr, ...)
+{
+    va_list ap;
+    va_start(ap, fmtstr);
+    s32 ret = vfmt_to(console_putc, NULL, fmtstr, ap);
+    va_end(ap);
+    return ret;
+}
+
+// After serial/tty init, set up the output sink:
+// (This should be called after both drivers are initialized and their availability is known)
+__cold void console_init(boot_context_t const * boot_context)
+{
+    // Initialize drivers
+    bool serial_available = init_serial(boot_context);
+    bool tty_available = init_tty(boot_context, serial_available);
+    g_serial_active = serial_available;
+    g_tty_active = tty_available;
+    if (tty_available) {
+        drivers_tty_set_color(2, 0); // Green on black for TTY
+    }
 }

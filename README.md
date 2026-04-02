@@ -1,6 +1,7 @@
 # JANUS
 
 JANUS (Just ANother Unix-like System) is an educational operating system kernel written in C17 and assembly, supporting **x86_64** and **aarch64** architectures. The project focuses on low-level hardware interaction and modular, multi-architecture design.
+The kernel follows a mollithic design and is freestanding.
 
 ## Quick Start
 
@@ -18,16 +19,16 @@ ninja -C build
 
 Available presets: `x86_64-gcc`, `x86_64-clang`, `aarch64-gcc`, `aarch64-clang`
 
-Creating a bootable ISO
+Creating all bootable ISO's for the current architecture with the supported boot protocols
 
 ```bash
 ninja -C build iso         # or: cmake --build --preset <preset> --target iso
 ```
 
-Running in QEMU
+Running in QEMU using limine (both supported by x86_64 and aarch64)
 
 ```bash
-ninja -C build run         # or: cmake --build --preset <preset> --target run
+ninja -C build run-limine         # or: cmake --build --preset <preset> --target run
 ```
 
 See [Setup & Dependencies](docs/src/project/setup/dependencies.md) for detailed installation instructions.

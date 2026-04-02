@@ -65,6 +65,7 @@ function(janus_add_kernel)
             ${CMAKE_BINARY_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/subsys/drivers/include
             ${CMAKE_SOURCE_DIR}/kernel/subsys/boot/include
+            ${CMAKE_SOURCE_DIR}/kernel/lib/fmt/include
     )
 
     # Linker flags — use target_link_options to APPEND to (not replace) global flags

@@ -41,3 +41,13 @@ jobs:
 
       - name: Build
         run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }}
+
+      - name: Install ISO tools
+        run: |
+          sudo apt-get install -y --no-install-recommends xorriso mtools limine
+          if [ "${{ matrix.arch }}" = "x86_64" ]; then
+            sudo apt-get install -y --no-install-recommends grub-pc-bin grub-common
+          fi
+
+      - name: Build ISOs
+        run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }} --target iso
