@@ -32,7 +32,7 @@ static framebuffer_state_t g_framebuffer_state;
 
 error_t arch_tty_init(display_info_t const * config)
 {
-    if (config == NULL || config->framebuffer == NULL) {
+    if (config->mode != DISPLAY_MODE_FRAMEBUFFER) {
         // AArch64 requires framebuffer - no fallback
         return -1;
     }

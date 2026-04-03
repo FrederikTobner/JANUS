@@ -40,30 +40,17 @@ typedef enum {
 } boot_protocol_t;
 
 /**
- * @brief Display mode reported by the bootloader
- *
- * Distinguishes the three states a bootloader can leave us in:
- * no display at all, a linear RGB framebuffer, or VGA text hardware.
- */
-typedef enum {
-    BOOT_DISPLAY_NONE = 0,    /**< No display information provided */
-    BOOT_DISPLAY_FRAMEBUFFER, /**< Linear RGB framebuffer available */
-    BOOT_DISPLAY_VGA_TEXT,    /**< VGA text mode confirmed (Multiboot2 EGA text) */
-} boot_display_mode_t;
-
-/**
  * @brief Boot context — populated once during init, immutable after
  *
  * Contains all boot-protocol-derived information needed by the kernel.
  * Public struct per Coding-Style.md: consumers access fields directly.
  */
 typedef struct boot_context {
-    boot_protocol_t protocol;         /**< Which boot protocol was used */
-    u64 hhdm_offset;                  /**< Higher Half Direct Map offset (0 for identity-mapped) */
-    phys_addr_t kernel_phys_base;     /**< Kernel physical base address */
-    virt_addr_t kernel_virt_base;     /**< Kernel virtual base address */
-    display_info_t display;           /**< Framebuffer info (valid only when display_mode == FRAMEBUFFER) */
-    boot_display_mode_t display_mode; /**< What kind of display the bootloader provided */
+    boot_protocol_t protocol;     /**< Which boot protocol was used */
+    u64 hhdm_offset;              /**< Higher Half Direct Map offset (0 for identity-mapped) */
+    phys_addr_t kernel_phys_base; /**< Kernel physical base address */
+    virt_addr_t kernel_virt_base; /**< Kernel virtual base address */
+    display_info_t display;       /**< Display config (check display.mode for availability) */
 } boot_context_t;
 
 /**
@@ -76,22 +63,6 @@ typedef struct boot_context {
  * @param ctx Boot context to populate
  * @return 0 on success, non-zero on failure
  */
-int boot_init(boot_context_t * ctx);
-
-/**
- * @brief Convert a kernel virtual address to physical
- */
-static __always_inline phys_addr_t boot_kernel_virt_to_phys(boot_context_t const * ctx, virt_addr_t virtual_address)
-{
-    return virtual_address - ctx->kernel_virt_base + ctx->kernel_phys_base;
-}
-
-/**
- * @brief Convert a physical address to its HHDM virtual mapping
- */
-static __always_inline void * boot_phys_to_virt(boot_context_t const * ctx, phys_addr_t physical_address)
-{
-    return (void *) (physical_address + ctx->hhdm_offset);
-}
+error_t boot_init(boot_context_t * ctx);
 
 #endif /* BOOT_CONTEXT_H */

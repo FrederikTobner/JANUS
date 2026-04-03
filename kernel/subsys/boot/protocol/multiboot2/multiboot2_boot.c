@@ -64,7 +64,7 @@ void multiboot2_stash_bootinfo(u64 magic, void const * info)
  * @param boot_context Boot context to populate
  * @return 0 on success, non-zero on failure
  */
-__cold int boot_init(boot_context_t * boot_context)
+__cold error_t boot_init(boot_context_t * boot_context)
 {
     if (UNLIKELY((u32) g_mb2_magic != MULTIBOOT2_BOOTLOADER_MAGIC)) {
         return -1;
@@ -78,7 +78,7 @@ __cold int boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
-    boot_context->display_mode = BOOT_DISPLAY_NONE;
+    boot_context->display.mode = DISPLAY_MODE_NONE;
 
     // Walk tag list looking for framebuffer
     struct multiboot_tag * tag = multiboot_first_tag((struct multiboot_info *) (phys_addr_t) g_mb2_info);
@@ -89,6 +89,7 @@ __cold int boot_init(boot_context_t * boot_context)
             if (framebuffer_tag->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB) {
                 // Direct-color framebuffer, usable with the framebuffer driver
                 boot_context->display = (display_info_t) {
+                    .mode = DISPLAY_MODE_FRAMEBUFFER,
                     .framebuffer = (u8 *) (phys_addr_t) framebuffer_tag->addr,
                     .width = framebuffer_tag->width,
                     .height = framebuffer_tag->height,
@@ -98,10 +99,9 @@ __cold int boot_init(boot_context_t * boot_context)
                     .green_mask_shift = framebuffer_tag->green_field_position,
                     .blue_mask_shift = framebuffer_tag->blue_field_position,
                 };
-                boot_context->display_mode = BOOT_DISPLAY_FRAMEBUFFER;
             } else if (framebuffer_tag->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_EGA_TEXT) {
                 // Bootloader fell back to vga text mode — still usable, just with a different driver
-                boot_context->display_mode = BOOT_DISPLAY_VGA_TEXT;
+                boot_context->display.mode = DISPLAY_MODE_VGA_TEXT;
             }
             break;
         }

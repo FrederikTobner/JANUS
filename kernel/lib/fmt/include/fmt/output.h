@@ -14,6 +14,8 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
+/// @file output.h
+/// @brief Formatted output functions
 #ifndef JANUS_FMT_OUTPUT_H
 #define JANUS_FMT_OUTPUT_H
 
@@ -21,46 +23,46 @@
 #include <janus/types.h>
 #include <janus/va_arg.h>
 
-/** Output sink callback type for formatted output */
-typedef void (*fmt_putc_fn)(char c, void * ctx);
+/// Output callback type for fmt_to and vfmt_to
+typedef void (*fmt_putc_fn)(char c, void * context);
 
 /**
  * @brief Formatted output to an arbitrary sink.
  * @param putc Output callback (emits one character)
- * @param ctx Opaque context passed to putc
- * @param fmt Format string
+ * @param context Opaque context passed to putc
+ * @param format Format string
  * @param ... Arguments
  * @return Number of characters written
  */
-s32 fmt_to(fmt_putc_fn putc, void * ctx, char const * fmt, ...) __attribute__((format(printf, 3, 4)));
+s32 fmt_to(fmt_putc_fn putc, void * context, char const * format, ...) __attribute__((format(printf, 3, 4)));
 
 /**
  * @brief Formatted output to an arbitrary sink (va_list variant).
  * @param putc Output callback (emits one character)
- * @param ctx Opaque context passed to putc
- * @param fmt Format string
+ * @param context Opaque context passed to putc
+ * @param format Format string
  * @param ap va_list
  * @return Number of characters written
  */
-s32 vfmt_to(fmt_putc_fn putc, void * ctx, char const * fmt, va_list ap);
+s32 vfmt_to(fmt_putc_fn putc, void * context, char const * format, va_list ap);
 
 /**
  * @brief Printf-style formatted output to a buffer (with size limit).
- * @param buf Output buffer
+ * @param out_buffer Output buffer
  * @param buflen Buffer size
- * @param fmt Format string
+ * @param format Format string
  * @param ... Arguments
- * @return Number of characters written (excluding NUL terminator)
+ * @return Number of characters written (excluding NULL terminator)
  */
-s32 snprintf(char * buf, u64 buflen, char const * fmt, ...) __attribute__((format(printf, 3, 4)));
+s32 snprintf(char * out_buffer, u64 buflen, char const * format, ...) __attribute__((format(printf, 3, 4)));
 
 /**
  * @brief Printf-style formatted output to a buffer (no size limit).
- * @param buf Output buffer
- * @param fmt Format string
+ * @param out_buffer Output buffer
+ * @param format Format string
  * @param ... Arguments
  * @return Number of characters written (excluding NUL terminator)
  */
-s32 sprintf(char * buf, char const * fmt, ...) __attribute__((format(printf, 2, 3)));
+s32 sprintf(char * out_buffer, char const * format, ...) __attribute__((format(printf, 2, 3)));
 
 #endif /* JANUS_FMT_OUTPUT_H */

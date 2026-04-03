@@ -25,58 +25,9 @@
 static bool g_serial_active = false;
 static bool g_tty_active = false;
 
-static __cold bool init_serial(boot_context_t const * boot_context)
-{
-    if (drivers_serial_init(
-            boot_context->hhdm_offset, boot_context->kernel_phys_base, boot_context->kernel_virt_base) != 0) {
-        return false;
-    }
-
-    drivers_serial_puts("Serial driver initialized\n");
-    return true;
-}
-
-static __cold bool init_tty(boot_context_t const * boot_context, bool serial_available)
-{
-    display_info_t const * display = NULL;
-
-    switch (boot_context->display_mode) {
-
-    case BOOT_DISPLAY_FRAMEBUFFER:
-        display = &boot_context->display;
-        break;
-
-    case BOOT_DISPLAY_VGA_TEXT:
-        // Pass non-NULL with framebuffer == NULL → TTY selects VGA text mode
-        display = &boot_context->display;
-        break;
-
-    case BOOT_DISPLAY_NONE:
-        if (serial_available) {
-            drivers_serial_puts("TTY skipped (no display available)\n");
-        }
-        return false;
-    }
-
-    if (drivers_tty_init(display) != 0) {
-        return false;
-    }
-
-    if (serial_available) {
-        drivers_serial_puts("TTY driver initialized\n");
-    }
-    return true;
-}
-
-static void console_putc(char c, __unused void * ctx)
-{
-    if (g_serial_active) {
-        drivers_serial_putc(c);
-    }
-    if (g_tty_active) {
-        drivers_tty_putc(c);
-    }
-}
+static __cold bool init_serial(boot_context_t const * boot_context);
+static __cold bool init_tty(boot_context_t const * boot_context, bool serial_available);
+static void console_putc(char c, __unused void * ctx);
 
 // Kernel printf wrapper
 s32 kprintf(char const * fmtstr, ...)
@@ -99,5 +50,45 @@ __cold void console_init(boot_context_t const * boot_context)
     g_tty_active = tty_available;
     if (tty_available) {
         drivers_tty_set_color(2, 0); // Green on black for TTY
+    }
+}
+
+static __cold bool init_serial(boot_context_t const * boot_context)
+{
+    if (drivers_serial_init(
+            boot_context->hhdm_offset, boot_context->kernel_phys_base, boot_context->kernel_virt_base) != 0) {
+        return false;
+    }
+
+    drivers_serial_puts("Serial driver initialized\n");
+    return true;
+}
+
+static __cold bool init_tty(boot_context_t const * boot_context, bool serial_available)
+{
+    if (boot_context->display.mode == DISPLAY_MODE_VGA_TEXT ||
+        (boot_context->display.mode == DISPLAY_MODE_FRAMEBUFFER)) {
+        if (drivers_tty_init(&(boot_context->display)) != 0) {
+            return false;
+        }
+
+        if (serial_available) {
+            drivers_serial_puts("TTY driver initialized\n");
+        }
+        return true;
+    }
+    if (serial_available) {
+        drivers_serial_puts("No display available, skipping TTY initialization\n");
+    }
+    return false;
+}
+
+static void console_putc(char c, __unused void * ctx)
+{
+    if (g_serial_active) {
+        drivers_serial_putc(c);
+    }
+    if (g_tty_active) {
+        drivers_tty_putc(c);
     }
 }

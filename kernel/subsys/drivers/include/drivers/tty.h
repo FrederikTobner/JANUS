@@ -58,9 +58,9 @@ typedef enum {
 
 /**
  * @brief Initialize the TTY.
- * @param config Display configuration. If NULL, uses VGA text mode (x86_64 only).
- *               If config->framebuffer is NULL, uses VGA text mode.
- *               If config->framebuffer is set, uses framebuffer text rendering.
+ * @param config Display configuration. The @c mode field determines the backend:
+ *               DISPLAY_MODE_FRAMEBUFFER uses framebuffer text rendering,
+ *               DISPLAY_MODE_VGA_TEXT uses VGA hardware (x86_64 only).
  * @return 0 on success, negative error code if not available.
  */
 error_t drivers_tty_init(display_info_t const * config);

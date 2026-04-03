@@ -30,12 +30,6 @@
 #include <arch/shared/drivers/framebuffer.h>
 #include <drivers/tty.h>
 
-typedef enum {
-    DISPLAY_MODE_NONE,
-    DISPLAY_MODE_VGA,
-    DISPLAY_MODE_FRAMEBUFFER,
-} display_mode_t;
-
 static display_mode_t g_display_mode = DISPLAY_MODE_NONE;
 
 /* VGA state */
@@ -46,32 +40,35 @@ static framebuffer_state_t g_framebuffer_state;
 
 error_t arch_tty_init(display_info_t const * config)
 {
-    if (config == NULL || config->framebuffer == NULL) {
+    g_display_mode = config->mode;
+
+    switch (g_display_mode) {
+    case DISPLAY_MODE_VGA_TEXT:
         /* VGA text mode - only works with identity-mapped memory */
         g_vga_buffer = (u16 volatile *) VGA_BUFFER_PHYS;
-        g_display_mode = DISPLAY_MODE_VGA;
         return 0;
+
+    case DISPLAY_MODE_FRAMEBUFFER:
+        framebuffer_init(&g_framebuffer_state,
+                         config->framebuffer,
+                         config->width,
+                         config->height,
+                         config->pitch,
+                         config->bpp,
+                         config->red_mask_shift,
+                         config->green_mask_shift,
+                         config->blue_mask_shift);
+        return 0;
+
+    default:
+        return -1;
     }
-
-    /* Framebuffer mode */
-    framebuffer_init(&g_framebuffer_state,
-                     config->framebuffer,
-                     config->width,
-                     config->height,
-                     config->pitch,
-                     config->bpp,
-                     config->red_mask_shift,
-                     config->green_mask_shift,
-                     config->blue_mask_shift);
-
-    g_display_mode = DISPLAY_MODE_FRAMEBUFFER;
-    return 0;
 }
 
 void arch_tty_get_size(u16 * width, u16 * height)
 {
     switch (g_display_mode) {
-    case DISPLAY_MODE_VGA:
+    case DISPLAY_MODE_VGA_TEXT:
         if (width) {
             *width = VGA_WIDTH;
         }
@@ -103,7 +100,7 @@ void arch_tty_get_size(u16 * width, u16 * height)
 void arch_tty_write_cell(u16 x, u16 y, char c, u8 foreground, u8 background)
 {
     switch (g_display_mode) {
-    case DISPLAY_MODE_VGA:
+    case DISPLAY_MODE_VGA_TEXT:
         vga_write_cell(g_vga_buffer, x, y, c, foreground, background);
         break;
 
@@ -119,7 +116,7 @@ void arch_tty_write_cell(u16 x, u16 y, char c, u8 foreground, u8 background)
 void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background)
 {
     switch (g_display_mode) {
-    case DISPLAY_MODE_VGA:
+    case DISPLAY_MODE_VGA_TEXT:
         vga_read_cell(g_vga_buffer, x, y, c, foreground, background);
         break;
 
@@ -153,7 +150,7 @@ void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background
 void arch_tty_set_cursor(u16 x, u16 y)
 {
     /* Hardware cursor only available in VGA mode */
-    if (g_display_mode == DISPLAY_MODE_VGA) {
+    if (g_display_mode == DISPLAY_MODE_VGA_TEXT) {
         vga_set_cursor(x, y);
     }
     /* Framebuffer mode: no hardware cursor (could draw a software cursor) */

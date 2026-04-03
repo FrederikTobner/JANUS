@@ -30,14 +30,26 @@
 #include <janus/types.h>
 
 /**
+ * @brief Display mode reported by the bootloader
+ *
+ * Distinguishes the three states a bootloader can leave us in:
+ * no display at all, a linear RGB framebuffer, or VGA text hardware.
+ */
+typedef enum {
+    DISPLAY_MODE_NONE = 0,    /**< No display information provided */
+    DISPLAY_MODE_FRAMEBUFFER, /**< Linear RGB framebuffer available */
+    DISPLAY_MODE_VGA_TEXT,    /**< VGA text mode confirmed (Multiboot2 EGA text) */
+} display_mode_t;
+
+/**
  * @brief Display configuration
  *
- * Describes a linear RGB framebuffer.  When passed as a pointer:
- * - NULL means no display is available
- * - Non-NULL with framebuffer == NULL means VGA text mode (x86_64 only)
- * - Non-NULL with framebuffer != NULL means framebuffer mode
+ * Describes the display mode and, when in framebuffer mode, the
+ * linear RGB framebuffer parameters.  The @c mode field replaces
+ * the old convention of checking the @c framebuffer pointer for NULL.
  */
 typedef struct display_info {
+    display_mode_t mode; /**< What kind of display the bootloader provided */
     void * framebuffer;  /**< Linear framebuffer base address (NULL for VGA text mode) */
     u64 width;           /**< Horizontal resolution in pixels */
     u64 height;          /**< Vertical resolution in pixels */
