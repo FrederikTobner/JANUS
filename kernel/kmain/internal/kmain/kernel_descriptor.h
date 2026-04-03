@@ -17,23 +17,21 @@
 #ifndef KMAIN_KERNEL_DESCRIPTOR_H
 #define KMAIN_KERNEL_DESCRIPTOR_H
 
-/**
- * @file kernel_descriptor.h
- * @brief Kernel descriptor — aggregates all per-kernel singleton state
- *
- * Built once during boot initialization in kernel_main, then passed as
- * const pointer through the entire kernel. Immutable after init.
- *
- * This type is kmain-private. Subsystems receive their own slice
- * (e.g., boot_context_t const *) — they never see kernel_descriptor_t.
- *
- * Future fields: memory_map, acpi_info, cpu_topology, ...
- */
+/// @file kernel_descriptor.h
+/// @brief Kernel descriptor — aggregates all per-kernel singleton state
+///
+/// Built once during boot initialization in kernel_main, then passed as
+/// const pointer through the entire kernel. Immutable after init.
+///
+/// This type is kmain-private. Subsystems receive their own slice
+/// (e.g., boot_context_t const *) — they never see kernel_descriptor_t.
+///
+/// Future fields: memory_map, acpi_info, cpu_topology, ...
 
 #include <boot/context.h>
 
 typedef struct kernel_descriptor {
-    boot_context_t boot; /**< Boot protocol information */
+    boot_context_t boot; ///< Boot protocol information
 } kernel_descriptor_t;
 
 #endif /* KMAIN_KERNEL_DESCRIPTOR_H */

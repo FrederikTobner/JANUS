@@ -17,13 +17,11 @@
 #ifndef ARCH_SHARED_DRIVERS_FRAMEBUFFER_H
 #define ARCH_SHARED_DRIVERS_FRAMEBUFFER_H
 
-/**
- * @file framebuffer.h
- * @brief Shared framebuffer text rendering interface.
- *
- * Provides text rendering on a linear framebuffer using the Terminus 16x32 bitmap font.
- * This code is shared between architectures that use framebuffer output.
- */
+/// @file framebuffer.h
+/// @brief Shared framebuffer text rendering interface.
+///
+/// Provides text rendering on a linear framebuffer using the Terminus 16x32 bitmap font.
+/// This code is shared between architectures that use framebuffer output.
 
 #include <janus/attributes.h>
 #include <janus/types.h>
@@ -33,59 +31,53 @@
 #define FRAMEBUFFER_FONT_WIDTH  TERMINUS_WIDTH
 #define FRAMEBUFFER_FONT_HEIGHT TERMINUS_HEIGHT
 
-/**
- * @brief Framebuffer state for text rendering.
- */
+/// @brief Framebuffer state for text rendering.
 typedef struct {
-    u8 volatile * base; /**< Framebuffer base address */
-    u64 pitch;          /**< Bytes per row */
-    u64 width;          /**< Width in pixels */
-    u64 height;         /**< Height in pixels */
-    u16 bpp;            /**< Bits per pixel (24 or 32) */
-    u8 red_shift;       /**< Red channel bit position */
-    u8 green_shift;     /**< Green channel bit position */
-    u8 blue_shift;      /**< Blue channel bit position */
-    u16 text_width;     /**< Width in characters */
-    u16 text_height;    /**< Height in characters */
+    u8 volatile * base; ///< Framebuffer base address
+    u64 pitch;          ///< Bytes per row
+    u64 width;          ///< Width in pixels
+    u64 height;         ///< Height in pixels
+    u16 bpp;            ///< Bits per pixel (24 or 32)
+    u8 red_shift;       ///< Red channel bit position
+    u8 green_shift;     ///< Green channel bit position
+    u8 blue_shift;      ///< Blue channel bit position
+    u16 text_width;     ///< Width in characters
+    u16 text_height;    ///< Height in characters
 } framebuffer_state_t;
 
-/**
- * @brief Standard 16-color palette (VGA compatible).
- *
- * Maps TTY color indices (0-15) to RGB values.
- */
+/// @brief Standard 16-color palette (VGA compatible).
+///
+/// Maps TTY color indices (0-15) to RGB values.
 static u32 const framebuffer_color_palette[16] = {
-    0x000000, /* Black */
-    0x0000AA, /* Blue */
-    0x00AA00, /* Green */
-    0x00AAAA, /* Cyan */
-    0xAA0000, /* Red */
-    0xAA00AA, /* Magenta */
-    0xAA5500, /* Brown */
-    0xAAAAAA, /* Light Grey */
-    0x555555, /* Dark Grey */
-    0x5555FF, /* Light Blue */
-    0x55FF55, /* Light Green */
-    0x55FFFF, /* Light Cyan */
-    0xFF5555, /* Light Red */
-    0xFF55FF, /* Light Magenta */
-    0xFFFF55, /* Yellow */
-    0xFFFFFF, /* White */
+    0x000000, // Black
+    0x0000AA, // Blue
+    0x00AA00, // Green
+    0x00AAAA, // Cyan
+    0xAA0000, // Red
+    0xAA00AA, // Magenta
+    0xAA5500, // Brown
+    0xAAAAAA, // Light Grey
+    0x555555, // Dark Grey
+    0x5555FF, // Light Blue
+    0x55FF55, // Light Green
+    0x55FFFF, // Light Cyan
+    0xFF5555, // Light Red
+    0xFF55FF, // Light Magenta
+    0xFFFF55, // Yellow
+    0xFFFFFF, // White
 };
 
-/**
- * @brief Initialize framebuffer state from configuration.
- *
- * @param state    Framebuffer state to initialize
- * @param base     Framebuffer base address
- * @param width    Width in pixels
- * @param height   Height in pixels
- * @param pitch    Bytes per row
- * @param bpp      Bits per pixel
- * @param r_shift  Red channel bit position
- * @param g_shift  Green channel bit position
- * @param b_shift  Blue channel bit position
- */
+/// @brief Initialize framebuffer state from configuration.
+///
+/// @param state    Framebuffer state to initialize
+/// @param base     Framebuffer base address
+/// @param width    Width in pixels
+/// @param height   Height in pixels
+/// @param pitch    Bytes per row
+/// @param bpp      Bits per pixel
+/// @param r_shift  Red channel bit position
+/// @param g_shift  Green channel bit position
+/// @param b_shift  Blue channel bit position
 static inline void framebuffer_init(framebuffer_state_t * state,
                                     void * base,
                                     u64 width,
@@ -108,14 +100,12 @@ static inline void framebuffer_init(framebuffer_state_t * state,
     state->text_height = (u16) (height / FRAMEBUFFER_FONT_HEIGHT);
 }
 
-/**
- * @brief Put a single pixel on the framebuffer.
- *
- * @param state Framebuffer state
- * @param x     X coordinate (pixels)
- * @param y     Y coordinate (pixels)
- * @param color RGB color (0x00RRGGBB)
- */
+/// @brief Put a single pixel on the framebuffer.
+///
+/// @param state Framebuffer state
+/// @param x     X coordinate (pixels)
+/// @param y     Y coordinate (pixels)
+/// @param color RGB color (0x00RRGGBB)
 static inline void framebuffer_put_pixel(framebuffer_state_t const * state, u64 x, u64 y, u32 color)
 {
     if (UNLIKELY(x >= state->width || y >= state->height)) {
@@ -135,16 +125,14 @@ static inline void framebuffer_put_pixel(framebuffer_state_t const * state, u64 
     }
 }
 
-/**
- * @brief Draw a character at the specified text position.
- *
- * @param state Framebuffer state
- * @param column   Column (character position)
- * @param row   Row (character position)
- * @param c     Character to draw
- * @param foreground    Foreground color index (0-15)
- * @param background    Background color index (0-15)
- */
+/// @brief Draw a character at the specified text position.
+///
+/// @param state Framebuffer state
+/// @param column   Column (character position)
+/// @param row   Row (character position)
+/// @param c     Character to draw
+/// @param foreground    Foreground color index (0-15)
+/// @param background    Background color index (0-15)
 void framebuffer_draw_char(
     framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background);
 

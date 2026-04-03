@@ -14,13 +14,11 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file limine_boot.c
- * @brief Limine boot protocol initialization
- *
- * Reads Limine request responses and populates the boot context.
- * Called from kernel_main via the common boot_init() symbol.
- */
+/// @file limine_boot.c
+/// @brief Limine boot protocol initialization
+///
+/// Reads Limine request responses and populates the boot context.
+/// Called from kernel_main via the common boot_init() symbol.
 
 #include "limine_protocol.h"
 
@@ -32,16 +30,14 @@ extern volatile struct limine_hhdm_request limine_hhdm_request;
 extern volatile struct limine_framebuffer_request limine_framebuffer_request;
 extern volatile struct limine_executable_address_request limine_executable_address_request;
 
-/**
- * @brief Initialize the boot context from Limine responses
- *
- * Reads the response pointers from each Limine request structure,
- * validates them, and populates the boot context. Sets every field
- * unconditionally to avoid uninitialized reads.
- *
- * @param boot_context Boot context to populate
- * @return 0 on success, non-zero on failure (missing required responses)
- */
+/// @brief Initialize the boot context from Limine responses
+///
+/// Reads the response pointers from each Limine request structure,
+/// validates them, and populates the boot context. Sets every field
+/// unconditionally to avoid uninitialized reads.
+///
+/// @param boot_context Boot context to populate
+/// @return 0 on success, non-zero on failure (missing required responses)
 __cold error_t boot_init(boot_context_t * boot_context)
 {
     // Set safe defaults for ALL fields unconditionally

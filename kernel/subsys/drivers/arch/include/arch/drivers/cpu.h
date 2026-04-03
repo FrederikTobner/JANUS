@@ -14,16 +14,14 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file arch/drivers/cpu.h
- * @brief CPU control architecture contract.
- *
- * This file acts as a bridge - it just includes the architecture-specific
- * implementation header. The include path determines which architecture
- * is used (set by build system).
- *
- * Include chain: <drivers/cpu.h> → <arch/drivers/cpu.h> → <arch/impl/drivers/cpu.h>
- */
+/// @file arch/drivers/cpu.h
+/// @brief CPU control architecture contract.
+///
+/// This file acts as a bridge - it just includes the architecture-specific
+/// implementation header. The include path determines which architecture
+/// is used (set by build system).
+///
+/// Include chain: <drivers/cpu.h> → <arch/drivers/cpu.h> → <arch/impl/drivers/cpu.h>
 
 #ifndef ARCH_DRIVERS_CPU_H
 #define ARCH_DRIVERS_CPU_H

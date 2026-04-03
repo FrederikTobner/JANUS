@@ -17,16 +17,14 @@
 #ifndef JANUS_LIMINE_PROTOCOL_H
 #define JANUS_LIMINE_PROTOCOL_H
 
-/**
- * @file limine_protocol.h
- * @brief Canonical Limine boot protocol type definitions
- *
- * Unified header for all Limine protocol constants, request structures,
- * and response structures. Shared between limine_requests.c (request
- * instances) and boot_limine (response parsing).
- *
- * See: https://github.com/limine-bootloader/limine/blob/trunk/PROTOCOL.md
- */
+/// @file limine_protocol.h
+/// @brief Canonical Limine boot protocol type definitions
+///
+/// Unified header for all Limine protocol constants, request structures,
+/// and response structures. Shared between limine_requests.c (request
+/// instances) and boot_limine (response parsing).
+///
+/// See: https://github.com/limine-bootloader/limine/blob/trunk/PROTOCOL.md
 
 #include <janus/types.h>
 
@@ -159,7 +157,7 @@ struct limine_framebuffer {
     u8 unused[7];
     u64 edid_size;
     void * edid;
-    /* Revision 1+ */
+    // Revision 1+
     u64 mode_count;
     struct limine_video_mode ** modes;
 };

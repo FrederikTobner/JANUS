@@ -14,12 +14,10 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file arch/impl/drivers/io.h
- * @brief x86_64 port I/O operations.
- *
- * Internal header for arch implementations within the drivers subsystem.
- */
+/// @file arch/impl/drivers/io.h
+/// @brief x86_64 port I/O operations.
+///
+/// Internal header for arch implementations within the drivers subsystem.
 
 #ifndef X86_64_IMPL_DRIVERS_IO_H
 #define X86_64_IMPL_DRIVERS_IO_H
@@ -27,23 +25,19 @@
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-/**
- * Write a byte to an I/O port.
- *
- * @param port The I/O port address.
- * @param value The byte value to write.
- */
+/// Write a byte to an I/O port.
+///
+/// @param port The I/O port address.
+/// @param value The byte value to write.
 static __always_inline void outb(u16 port, u8 value)
 {
     __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
 }
 
-/**
- * Read a byte from an I/O port.
- *
- * @param port The I/O port address.
- * @return The byte read from the port.
- */
+/// Read a byte from an I/O port.
+///
+/// @param port The I/O port address.
+/// @return The byte read from the port.
 static __always_inline u8 inb(u16 port)
 {
     u8 ret;

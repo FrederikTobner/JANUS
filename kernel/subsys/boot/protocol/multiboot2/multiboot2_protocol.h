@@ -17,13 +17,11 @@
 #ifndef JANUS_MULTIBOOT2_PROTOCOL_H
 #define JANUS_MULTIBOOT2_PROTOCOL_H
 
-/**
- * @file multiboot2_protocol.h
- * @brief Multiboot2 boot protocol type definitions
- *
- * Constants and structures for the Multiboot2 protocol.
- * See: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
- */
+/// @file multiboot2_protocol.h
+/// @brief Multiboot2 boot protocol type definitions
+///
+/// Constants and structures for the Multiboot2 protocol.
+/// See: https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html
 
 #include <janus/attributes.h>
 #include <janus/types.h>
@@ -73,7 +71,7 @@
 struct multiboot_info {
     u32 total_size;
     u32 reserved;
-    /* Followed by tags */
+    // Followed by tags
 } __packed;
 
 /// Common tag structure

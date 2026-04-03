@@ -14,17 +14,15 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file tty.c
- * @brief x86_64 TTY implementation.
- *
- * Implements arch_tty_* contract using either:
- * - VGA text mode (0xB8000) for Multiboot2/GRUB
- * - Framebuffer text rendering for Limine
- *
- * The actual VGA and framebuffer logic is delegated to separate modules
- * for clarity and maintainability.
- */
+/// @file tty.c
+/// @brief x86_64 TTY implementation.
+///
+/// Implements arch_tty_* contract using either:
+/// - VGA text mode (0xB8000) for Multiboot2/GRUB
+/// - Framebuffer text rendering for Limine
+///
+/// The actual VGA and framebuffer logic is delegated to separate modules
+/// for clarity and maintainability.
 
 #include <arch/internal/drivers/vga.h>
 #include <arch/shared/drivers/framebuffer.h>
@@ -32,10 +30,10 @@
 
 static display_mode_t g_display_mode = DISPLAY_MODE_NONE;
 
-/* VGA state */
+// VGA state
 static u16 volatile * g_vga_buffer = NULL;
 
-/* Framebuffer state */
+// Framebuffer state
 static framebuffer_state_t g_framebuffer_state;
 
 error_t arch_tty_init(display_info_t const * config)
@@ -44,7 +42,7 @@ error_t arch_tty_init(display_info_t const * config)
 
     switch (g_display_mode) {
     case DISPLAY_MODE_VGA_TEXT:
-        /* VGA text mode - only works with identity-mapped memory */
+        // VGA text mode - only works with identity-mapped memory
         g_vga_buffer = (u16 volatile *) VGA_BUFFER_PHYS;
         return 0;
 
@@ -121,7 +119,7 @@ void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background
         break;
 
     case DISPLAY_MODE_FRAMEBUFFER:
-        /* Framebuffer doesn't store character data - return defaults */
+        // Framebuffer doesn't store character data - return defaults
         if (c) {
             *c = ' ';
         }
@@ -149,9 +147,9 @@ void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background
 
 void arch_tty_set_cursor(u16 x, u16 y)
 {
-    /* Hardware cursor only available in VGA mode */
+    // Hardware cursor only available in VGA mode
     if (g_display_mode == DISPLAY_MODE_VGA_TEXT) {
         vga_set_cursor(x, y);
     }
-    /* Framebuffer mode: no hardware cursor (could draw a software cursor) */
+    // Framebuffer mode: no hardware cursor (could draw a software cursor)
 }

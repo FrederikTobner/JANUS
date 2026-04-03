@@ -14,14 +14,12 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file main.c
- * @brief JANUS Kernel Entry Point
- *
- * Called from the assembly entry point after minimal hardware setup.
- * Allocates the kernel descriptor on the stack, calls boot_init to
- * populate it, then initializes subsystems and enters the main loop.
- */
+/// @file main.c
+/// @brief JANUS Kernel Entry Point
+///
+/// Called from the assembly entry point after minimal hardware setup.
+/// Allocates the kernel descriptor on the stack, calls boot_init to
+/// populate it, then initializes subsystems and enters the main loop.
 
 #include <boot/context.h>
 #include <drivers/cpu.h>
@@ -38,18 +36,16 @@
     "| |_| / ___ \\| |\\  | |_| |___) |\n"   \
     " \\___/_/   \\_\\_| \\_|\\___/|____/ \n"
 
-/**
- * @brief Main kernel entry point
- *
- * Called from the assembly entry point. At this point:
- * - Stack is configured
- * - CPU is in 64-bit long mode (x86_64) or EL1 (aarch64)
- * - Interrupts are disabled
- * - For Multiboot2: boot info has been stashed via multiboot2_stash_bootinfo
- *
- * Allocates kernel_descriptor_t on the stack, populates it via boot_init,
- * then passes the boot boot_context slice to each subsystem initializer.
- */
+/// @brief Main kernel entry point
+///
+/// Called from the assembly entry point. At this point:
+/// - Stack is configured
+/// - CPU is in 64-bit long mode (x86_64) or EL1 (aarch64)
+/// - Interrupts are disabled
+/// - For Multiboot2: boot info has been stashed via multiboot2_stash_bootinfo
+///
+/// Allocates kernel_descriptor_t on the stack, populates it via boot_init,
+/// then passes the boot boot_context slice to each subsystem initializer.
 __noreturn void kernel_main(void)
 {
     kernel_descriptor_t descriptor;

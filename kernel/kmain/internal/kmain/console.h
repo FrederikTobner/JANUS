@@ -17,13 +17,11 @@
 #ifndef KMAIN_CONSOLE_H
 #define KMAIN_CONSOLE_H
 
-/**
- * @file console.h
- * @brief Kernel console output.
-
- *
- * Provides functions for kernel console output, including formatted printing.
- */
+/// @file console.h
+/// @brief Kernel console output.
+///
+///
+/// Provides functions for kernel console output, including formatted printing.
 
 #include <boot/context.h>
 #include <janus/types.h>

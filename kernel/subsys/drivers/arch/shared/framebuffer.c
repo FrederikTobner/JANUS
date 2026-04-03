@@ -14,13 +14,11 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file framebuffer.c
- * @brief Shared framebuffer text rendering implementation.
- *
- * Contains the character drawing logic for framebuffer-based text output.
- * This code is shared between architectures (x86_64 Limine mode, aarch64).
- */
+/// @file framebuffer.c
+/// @brief Shared framebuffer text rendering implementation.
+///
+/// Contains the character drawing logic for framebuffer-based text output.
+/// This code is shared between architectures (x86_64 Limine mode, aarch64).
 
 #include <arch/shared/drivers/framebuffer.h>
 

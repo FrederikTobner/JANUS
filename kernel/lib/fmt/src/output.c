@@ -14,10 +14,8 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file output.c
- * @brief Kernel formatted output: number/string formatting helpers (internal)
- */
+/// @file output.c
+/// @brief Kernel formatted output: number/string formatting helpers (internal)
 #include <fmt/output.h>
 #include <janus/types.h>
 #include <janus/va_arg.h>

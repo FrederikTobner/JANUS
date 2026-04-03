@@ -14,21 +14,19 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file tty.h
- * @brief Text display driver interface.
- *
- * This header contains:
- * - Public API (drivers_tty_*)
- * - Types (tty_color_t)
- *
- * Architecture contract (arch_tty_*) is in <arch/drivers/tty.h>.
- * Shared logic (cursor tracking, scrolling) is in tty.c.
- *
- * Backends:
- * - x86_64: VGA text mode (0xB8000)
- * - aarch64: Framebuffer text rendering (future)
- */
+/// @file tty.h
+/// @brief Text display driver interface.
+///
+/// This header contains:
+/// - Public API (drivers_tty_*)
+/// - Types (tty_color_t)
+///
+/// Architecture contract (arch_tty_*) is in <arch/drivers/tty.h>.
+/// Shared logic (cursor tracking, scrolling) is in tty.c.
+///
+/// Backends:
+/// - x86_64: VGA text mode (0xB8000)
+/// - aarch64: Framebuffer text rendering (future)
 
 #ifndef DRIVERS_TTY_H
 #define DRIVERS_TTY_H
@@ -36,7 +34,7 @@
 #include <display/display.h>
 #include <janus/types.h>
 
-/** TTY text colors (portable subset) */
+/// TTY text colors (portable subset)
 typedef enum {
     TTY_COLOR_BLACK = 0,
     TTY_COLOR_BLUE = 1,
@@ -56,58 +54,42 @@ typedef enum {
     TTY_COLOR_WHITE = 15,
 } tty_color_t;
 
-/**
- * @brief Initialize the TTY.
- * @param config Display configuration. The @c mode field determines the backend:
- *               DISPLAY_MODE_FRAMEBUFFER uses framebuffer text rendering,
- *               DISPLAY_MODE_VGA_TEXT uses VGA hardware (x86_64 only).
- * @return 0 on success, negative error code if not available.
- */
+/// @brief Initialize the TTY.
+/// @param config Display configuration. The @c mode field determines the backend:
+///               DISPLAY_MODE_FRAMEBUFFER uses framebuffer text rendering,
+///               DISPLAY_MODE_VGA_TEXT uses VGA hardware (x86_64 only).
+/// @return 0 on success, negative error code if not available.
 error_t drivers_tty_init(display_info_t const * config);
 
-/**
- * @brief Write a single character at cursor position.
- * @param c The character to write.
- */
+/// @brief Write a single character at cursor position.
+/// @param c The character to write.
 void drivers_tty_putc(char c);
 
-/**
- * @brief Write a null-terminated string.
- * @param str The string to write.
- */
+/// @brief Write a null-terminated string.
+/// @param str The string to write.
 void drivers_tty_puts(char const * str);
 
-/**
- * @brief Set foreground and background colors.
- * @param fg Foreground color.
- * @param bg Background color.
- */
+/// @brief Set foreground and background colors.
+/// @param fg Foreground color.
+/// @param bg Background color.
 void drivers_tty_set_color(tty_color_t fg, tty_color_t bg);
 
-/**
- * @brief Clear the screen.
- */
+/// @brief Clear the screen.
 void drivers_tty_clear(void);
 
-/**
- * @brief Set cursor position.
- * @param x Column position.
- * @param y Row position.
- */
+/// @brief Set cursor position.
+/// @param x Column position.
+/// @param y Row position.
 void drivers_tty_set_cursor(u16 x, u16 y);
 
-/**
- * @brief Get cursor position.
- * @param x Pointer to store column (may be NULL).
- * @param y Pointer to store row (may be NULL).
- */
+/// @brief Get cursor position.
+/// @param x Pointer to store column (may be NULL).
+/// @param y Pointer to store row (may be NULL).
 void drivers_tty_get_cursor(u16 * x, u16 * y);
 
-/**
- * @brief Get screen dimensions.
- * @param width Pointer to store width (may be NULL).
- * @param height Pointer to store height (may be NULL).
- */
+/// @brief Get screen dimensions.
+/// @param width Pointer to store width (may be NULL).
+/// @param height Pointer to store height (may be NULL).
 void drivers_tty_get_size(u16 * width, u16 * height);
 
 #endif /* DRIVERS_TTY_H */

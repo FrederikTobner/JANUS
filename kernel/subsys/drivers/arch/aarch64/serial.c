@@ -14,15 +14,13 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file serial.c
- * @brief AArch64 serial implementation (PL011 UART).
- *
- * Implements arch_serial_* contract from <arch/drivers/serial.h>.
- *
- * On AArch64 with Limine, the HHDM only maps RAM, not device MMIO.
- * We use mmu_map_mmio() to map the PL011 UART with device memory attributes.
- */
+/// @file serial.c
+/// @brief AArch64 serial implementation (PL011 UART).
+///
+/// Implements arch_serial_* contract from <arch/drivers/serial.h>.
+///
+/// On AArch64 with Limine, the HHDM only maps RAM, not device MMIO.
+/// We use mmu_map_mmio() to map the PL011 UART with device memory attributes.
 
 #include "janus/types.h"
 #include <arch/drivers/serial.h>
@@ -58,9 +56,7 @@
 // Virtual base address (computed at init time via MMIO mapping)
 static u64 g_pl011_base = 0;
 
-/**
- * @brief Get virtual address for a PL011 register
- */
+/// @brief Get virtual address for a PL011 register
 static inline u64 pl011_reg(u32 offset)
 {
     return g_pl011_base + offset;

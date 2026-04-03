@@ -14,13 +14,11 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file tty.c
- * @brief TTY driver — shared logic (cursor, scrolling).
- *
- * Handles cursor tracking, scrolling, and color management.
- * Calls arch_tty_* functions for hardware access.
- */
+/// @file tty.c
+/// @brief TTY driver — shared logic (cursor, scrolling).
+///
+/// Handles cursor tracking, scrolling, and color management.
+/// Calls arch_tty_* functions for hardware access.
 
 #include <arch/drivers/tty.h>
 #include <drivers/tty.h>
@@ -85,13 +83,13 @@ __hot void drivers_tty_putc(char c)
         cursor_x++;
     }
 
-    /* Handle line wrap */
+    // Handle line wrap
     if (cursor_x >= screen_width) {
         cursor_x = 0;
         cursor_y++;
     }
 
-    /* Handle scroll */
+    // Handle scroll
     if (cursor_y >= screen_height) {
         tty_scroll();
         cursor_y = screen_height - 1;

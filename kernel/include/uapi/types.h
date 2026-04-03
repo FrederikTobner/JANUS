@@ -17,17 +17,13 @@
 #ifndef UAPI_TYPES_H
 #define UAPI_TYPES_H
 
-/**
- * @file int-ll64.h
- * @brief 64-bit integer types (JANUS freestanding implementation)
- */
+/// @file int-ll64.h
+/// @brief 64-bit integer types (JANUS freestanding implementation)
 
-/**
- * @brief 64-bit integer types (JANUS freestanding implementation)
- *
- * This is JANUS's implementation of the C standard stdint.h header.
- * In freestanding mode, we provide our own using compiler builtins.
- */
+/// @brief 64-bit integer types (JANUS freestanding implementation)
+///
+/// This is JANUS's implementation of the C standard stdint.h header.
+/// In freestanding mode, we provide our own using compiler builtins.
 
 typedef __UINT8_TYPE__ __u8;
 typedef __INT8_TYPE__ __s8;
