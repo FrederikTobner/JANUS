@@ -36,18 +36,18 @@ jobs:
         if: matrix.arch == 'aarch64'
         run: sudo apt-get install -y --no-install-recommends binutils-aarch64-linux-gnu
 
-      - name: Configure
-        run: cmake --preset ${{ matrix.arch }}-${{ matrix.compiler }} -D CMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }}
-
       - name: Install ISO tools
         run: |
           sudo apt-get install -y --no-install-recommends xorriso mtools
           if [ "${{ matrix.arch }}" = "x86_64" ]; then
             sudo apt-get install -y --no-install-recommends grub-pc-bin grub-common
           fi
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.arch }}-${{ matrix.compiler }} -D CMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }}
 
       - name: Build ISOs
         run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }} --target iso
