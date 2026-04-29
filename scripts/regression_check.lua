@@ -100,6 +100,26 @@ local function nproc()
 end
 
 -- ──────────────────────────────────────────────────────────────────────
+-- Project root detection
+-- ──────────────────────────────────────────────────────────────────────
+
+--- Resolve the project root from the location of this script.
+-- The script lives at <root>/scripts/regression_check.lua, so the root
+-- is the parent of the directory that contains this file.
+local ROOT = (function()
+    local abs = capture(string.format("realpath %q 2>/dev/null", arg[0]))
+    if not abs then
+        die("cannot resolve script path from '%s'", arg[0])
+    end
+    abs = abs:match("^%s*(.-)%s*$")
+    local root = abs:match("^(.*)/[^/]+/[^/]+$")  -- strip /scripts/<name>.lua
+    if not root or root == "" then
+        die("cannot derive project root from script path '%s'", abs)
+    end
+    return root
+end)()
+
+-- ──────────────────────────────────────────────────────────────────────
 -- Argument parsing
 -- ──────────────────────────────────────────────────────────────────────
 
@@ -166,7 +186,7 @@ end
 
 --- Discover all configure preset names from CMakePresets.json.
 local function discover_presets()
-    local raw = capture("cmake --list-presets=configure 2>/dev/null")
+    local raw = capture(string.format("cd %q && cmake --list-presets=configure 2>/dev/null", ROOT))
     if not raw then die("cmake --list-presets failed — is cmake installed?") end
 
     local presets = {}
@@ -273,7 +293,7 @@ local function phase_configure(preset, build_dir, log_path)
         os.execute(string.format("rm -rf %q", build_dir))
     end
 
-    local cmd = string.format("cmake --preset %s >>%q 2>&1", preset, log_path)
+    local cmd = string.format("cd %q && cmake --preset %s >>%q 2>&1", ROOT, preset, log_path)
     local ok, _ = exec(cmd)
     return ok
 end
@@ -378,7 +398,7 @@ local function main()
 
     -- Process each preset
     for i, preset in ipairs(presets) do
-        local build_dir = "build-" .. preset
+        local build_dir = ROOT .. "/build-" .. preset
         local log_path  = build_dir .. "/regression_check.log"
 
         -- Clear log

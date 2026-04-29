@@ -136,7 +136,7 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
     endforeach()
 
     # ── Write output ────────────────────────────────────────────────────────
-    set(_note "> *Generated for `${JANUS_TARGET_ARCH}` — run `cmake --preset <preset>` to regenerate for a different architecture.*\n\n")
+    set(_note "> *Generated for `${JANUS_TARGET_ARCH}` — run `cmake --preset <${JANUS_TARGET_ARCH}-preset>` to regenerate.*\n\n")
     set(_content "${_note}```mermaid\n${_d}```\n")
 
     get_filename_component(_dir "${OUTPUT_FILE}" DIRECTORY)
