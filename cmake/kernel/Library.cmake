@@ -55,6 +55,8 @@ function(janus_add_library NAME)
     # Create static library
     add_library(${NAME} STATIC ${ARG_SOURCES})
 
+    janus_register(${NAME} LIB "${ARG_DEPENDENCIES}")
+
     # Standard include directories
     target_include_directories(${NAME}
         PUBLIC

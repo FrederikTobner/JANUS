@@ -5,6 +5,8 @@ add_library(boot_limine STATIC
     limine_boot.c
 )
 
+janus_register(boot_limine PROTOCOL_LIB "boot")
+
 target_link_libraries(boot_limine PUBLIC boot)
 target_include_directories(boot_limine
     PUBLIC

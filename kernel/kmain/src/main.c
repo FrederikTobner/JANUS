@@ -53,9 +53,7 @@ __noreturn void kernel_main(void)
         drivers_cpu_halt_forever();
     }
 
-    boot_context_t const * boot_context = &descriptor.boot;
-
-    console_init(boot_context);
+    console_init(&descriptor.boot);
     // Print greeting
     kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
 

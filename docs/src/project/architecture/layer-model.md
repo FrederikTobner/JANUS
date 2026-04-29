@@ -4,25 +4,28 @@ JANUS organises its kernel code into a strict layered hierarchy. Dependencies fl
 
 ## Layers
 
-```text
-┌──────────────────────────────────────────────────────────────────────┐
-│  Entry Layer  (kernel/_start/)                                       │
-│  Creates kernel.elf. Owns the entry point (_start) and linker script.│
-├──────────────────────────────────────────────────────────────────────┤
-│  Assembly Layer  (kernel/kmain/)                                     │
-│  Final assembly point. Links all subsystems. Only module permitted   │
-│  to depend on subsystems.                                            │
-├──────────────────────────────────────────────────────────────────────┤
-│  Subsystem Layer  (kernel/subsys/*)                                  │
-│  boot, drivers, mm — each isolated, each containing its own arch/.  │
-│  Subsystems cannot depend on one another.                            │
-├──────────────────────────────────────────────────────────────────────┤
-│  Library Layer  (kernel/lib/*)                                       │
-│  Freestanding utilities. Subsystems may link against these.          │
-├──────────────────────────────────────────────────────────────────────┤
-│  Global Interface Layer  (kernel/include/janus/)                     │
-│  Type definitions, compiler attributes, build-time configuration.    │
-└──────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+  subgraph entry["Entry Layer · kernel/_start/"]
+    _start["_start\nCreates kernel.elf · owns entry point and linker script"]
+  end
+  subgraph assembly["Assembly Layer · kernel/kmain/"]
+    kmain["kmain\nComposition root · only module that may depend on subsystems"]
+  end
+  subgraph subsys["Subsystem Layer · kernel/subsys/"]
+    boot["boot"] & drivers["drivers"] & mm["mm"]
+  end
+  subgraph libs["Library Layer · kernel/lib/"]
+    fmt["fmt"] & display["display"] & page_tables["page_tables"]
+  end
+  subgraph global["Global Interface Layer · kernel/include/janus/"]
+    types["types.h"] & attributes["attributes.h"] & config["config.h"]
+  end
+
+  _start --> kmain
+  kmain --> boot & drivers & mm
+  boot & drivers & mm --> fmt & display & page_tables
+  fmt & display & page_tables --> types & attributes & config
 ```
 
 ## Key Invariants

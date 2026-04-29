@@ -80,4 +80,14 @@ function(janus_add_kernel)
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
 
+    # Register in the global registry so the diagram generator knows about it.
+    # Also include kmain from OBJECTS (the object library that provides kernel_main).
+    set(_reg_deps "${ARG_DEPENDENCIES}")
+    foreach(_obj ${ARG_OBJECTS})
+        if(_obj STREQUAL "kmain")
+            list(APPEND _reg_deps "kmain")
+        endif()
+    endforeach()
+    janus_register("${ARG_TARGET}" EXEC "${_reg_deps}")
+
 endfunction()
