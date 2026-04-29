@@ -95,7 +95,7 @@ static __always_inline s32 drivers_serial_getc(void)
 
 /// @brief Check if receive buffer has data.
 /// @return true if data available, false otherwise.
-static __always_inline bool drivvers_serial_rx_ready(void)
+static __always_inline bool drivers_serial_rx_ready(void)
 {
     return arch_serial_rx_ready();
 }
