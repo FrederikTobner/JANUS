@@ -48,13 +48,28 @@ TEST_F(PsfParseTest, RejectsTruncatedPsf1Data)
     // Arrange — PSF1 mode=0 declares 256 glyphs (charsize=8 → 2 048 bytes of
     // glyph data), but only two glyphs are supplied.
     static uint8_t const kPsf1Truncated[] = {
-        PSF1_MAGIC0, PSF1_MAGIC1,
+        PSF1_MAGIC0,
+        PSF1_MAGIC1,
         0x00, // mode (256 glyphs, no unicode table)
         0x08, // charsize (8 bytes per glyph)
         // Glyph 0
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
         // Glyph 1
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
+        0xFF,
     };
 
     // Act
@@ -67,24 +82,62 @@ TEST_F(PsfParseTest, RejectsTruncatedPsf1Data)
 /// @brief Minimal well-formed PSF2 font: 1 glyph, 8×16.
 static uint8_t const kValidPsf2[] = {
     // Magic
-    PSF2_MAGIC0, PSF2_MAGIC1, PSF2_MAGIC2, PSF2_MAGIC3,
+    PSF2_MAGIC0,
+    PSF2_MAGIC1,
+    PSF2_MAGIC2,
+    PSF2_MAGIC3,
     // Version
-    0x00, 0x00, 0x00, 0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
     // Header size = 32
-    0x20, 0x00, 0x00, 0x00,
+    0x20,
+    0x00,
+    0x00,
+    0x00,
     // Flags
-    0x00, 0x00, 0x00, 0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
     // Number of glyphs = 1
-    0x01, 0x00, 0x00, 0x00,
+    0x01,
+    0x00,
+    0x00,
+    0x00,
     // Bytes per glyph = 16
-    0x10, 0x00, 0x00, 0x00,
+    0x10,
+    0x00,
+    0x00,
+    0x00,
     // Height = 16
-    0x10, 0x00, 0x00, 0x00,
+    0x10,
+    0x00,
+    0x00,
+    0x00,
     // Width = 8
-    0x08, 0x00, 0x00, 0x00,
+    0x08,
+    0x00,
+    0x00,
+    0x00,
     // Glyph data (16 bytes)
-    0x00, 0x18, 0x3C, 0x66, 0x66, 0x7E, 0x66, 0x66,
-    0x66, 0x66, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00,
+    0x18,
+    0x3C,
+    0x66,
+    0x66,
+    0x7E,
+    0x66,
+    0x66,
+    0x66,
+    0x66,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
 };
 
 TEST_F(PsfParseTest, ParsesValidPsf2)
@@ -116,7 +169,7 @@ TEST_F(PsfParseTest, RejectsNullData)
 
 /// @brief Describes a single invalid PSF byte buffer.
 struct InvalidPsfInput {
-    char const *         name;
+    char const * name;
     std::vector<uint8_t> bytes;
 };
 
@@ -155,38 +208,58 @@ static InvalidPsfInput const kInvalidInputs[] = {
     },
     {
         "TruncatedPsf2Header",
-        {PSF2_MAGIC0, PSF2_MAGIC1, PSF2_MAGIC2, PSF2_MAGIC3,
-         0x00, 0x00, 0x00, 0x00},
+        {PSF2_MAGIC0, PSF2_MAGIC1, PSF2_MAGIC2, PSF2_MAGIC3, 0x00, 0x00, 0x00, 0x00},
     },
     {
         "TruncatedGlyphData",
         {// Magic
-         PSF2_MAGIC0, PSF2_MAGIC1, PSF2_MAGIC2, PSF2_MAGIC3,
+         PSF2_MAGIC0,
+         PSF2_MAGIC1,
+         PSF2_MAGIC2,
+         PSF2_MAGIC3,
          // Version
-         0x00, 0x00, 0x00, 0x00,
+         0x00,
+         0x00,
+         0x00,
+         0x00,
          // Header size = 32
-         0x20, 0x00, 0x00, 0x00,
+         0x20,
+         0x00,
+         0x00,
+         0x00,
          // Flags
-         0x00, 0x00, 0x00, 0x00,
+         0x00,
+         0x00,
+         0x00,
+         0x00,
          // Number of glyphs = 1
-         0x01, 0x00, 0x00, 0x00,
+         0x01,
+         0x00,
+         0x00,
+         0x00,
          // Bytes per glyph = 16
-         0x10, 0x00, 0x00, 0x00,
+         0x10,
+         0x00,
+         0x00,
+         0x00,
          // Height = 16
-         0x10, 0x00, 0x00, 0x00,
+         0x10,
+         0x00,
+         0x00,
+         0x00,
          // Width = 8
-         0x08, 0x00, 0x00, 0x00},
+         0x08,
+         0x00,
+         0x00,
+         0x00},
         // (no glyph data follows)
     },
 };
 
-INSTANTIATE_TEST_SUITE_P(
-    InvalidPsfInputs,
-    PsfInvalidInputTest,
-    ::testing::ValuesIn(kInvalidInputs),
-    [](::testing::TestParamInfo<InvalidPsfInput> const & info) {
-        return info.param.name;
-    });
+INSTANTIATE_TEST_SUITE_P(InvalidPsfInputs,
+                         PsfInvalidInputTest,
+                         ::testing::ValuesIn(kInvalidInputs),
+                         [](::testing::TestParamInfo<InvalidPsfInput> const & info) { return info.param.name; });
 
 // ---------------------------------------------------------------------------
 // psf_free edge cases

@@ -67,7 +67,7 @@ TEST_F(FileIOTest, LoadRegularFile)
     WriteFile(kTestData, sizeof(kTestData) - 1); // exclude null terminator
 
     uint8_t * data = nullptr;
-    size_t    size = 0;
+    size_t size = 0;
 
     // Act
     ASSERT_EQ(file_load(temp_file.c_str(), &data, &size), 0);
@@ -84,7 +84,7 @@ TEST_F(FileIOTest, LoadNonExistentFile)
 {
     // Arrange
     uint8_t * data = nullptr;
-    size_t    size = 0;
+    size_t size = 0;
 
     // Act
     int result = file_load("/nonexistent/path/to/file.psf", &data, &size);
@@ -127,7 +127,7 @@ TEST_F(FileIOTest, LoadEmptyFile)
     ofs.close();
 
     uint8_t * data = nullptr;
-    size_t    size = 0;
+    size_t size = 0;
 
     // Act
     int result = file_load(temp_file.c_str(), &data, &size);
@@ -145,7 +145,7 @@ TEST_F(FileIOTest, LoadGzipFile)
     }
 
     uint8_t * data = nullptr;
-    size_t    size = 0;
+    size_t size = 0;
 
     // Act
     ASSERT_EQ(file_load(kTestGzPath, &data, &size), 0);

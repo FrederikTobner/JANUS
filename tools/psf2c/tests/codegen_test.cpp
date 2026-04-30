@@ -19,8 +19,8 @@
  * @brief Tests for C header code generation.
  */
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -154,9 +154,9 @@ TEST_F(CodegenTest, IncludesJanusTypes)
 TEST_F(CodegenTest, PrintableAsciiComments)
 {
     // Arrange
-    font.width        = 8;
-    font.height       = 8;
-    font.numglyphs    = 128;
+    font.width = 8;
+    font.height = 8;
+    font.numglyphs = 128;
     font.bytesperglyph = 8;
     font.glyphs = static_cast<uint8_t *>(calloc(font.numglyphs, font.bytesperglyph));
 
@@ -191,6 +191,6 @@ TEST_F(CodegenTest, UppercasePrefixConversion)
     std::string output = GenerateOutput("myLowerCase");
 
     // Assert
-    EXPECT_THAT(output, ::testing::HasSubstr("MYLOWERCASE_WIDTH")); // macros use uppercase
+    EXPECT_THAT(output, ::testing::HasSubstr("MYLOWERCASE_WIDTH"));  // macros use uppercase
     EXPECT_THAT(output, ::testing::HasSubstr("myLowerCase_glyphs")); // array uses original case
 }
