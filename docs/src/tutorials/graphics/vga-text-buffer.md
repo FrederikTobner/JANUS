@@ -367,7 +367,7 @@ The tutorial above presents a self-contained flat driver. In the actual JANUS ke
 2. **Architecture contract** (`arch/drivers/tty.h`) — declares `arch_tty_init`, `arch_tty_write_cell`, `arch_tty_read_cell`, `arch_tty_set_cursor`, and `arch_tty_get_size`. Each architecture provides its own implementation.
 3. **x86_64 backend** (`arch/x86_64/tty.c`) — implements the contract using either VGA text mode or a framebuffer renderer, selected at init time by inspecting the boot configuration. When the bootloader provides no framebuffer (Multiboot2 on BIOS), the driver defaults to VGA text mode at `0xB8000`. When a framebuffer is available (Limine on UEFI or BIOS), it uses a software glyph renderer instead.
 
-The display mode is chosen during initialisation through a `display_info_t` struct (from `lib/display`). If its `framebuffer` pointer is `NULL`, the x86_64 backend uses VGA text mode; otherwise it switches to framebuffer rendering. This decision is made once and the rest of the kernel never needs to know which backend is active.
+The display mode is chosen during initialisation through a `display_info_t` struct (from `lib/display`). The x86_64 backend switches on the `mode` field: `DISPLAY_MODE_VGA_TEXT` selects the VGA text-mode path, `DISPLAY_MODE_FRAMEBUFFER` selects the software glyph renderer, and `DISPLAY_MODE_NONE` means no display is available. This decision is made once and the rest of the kernel never needs to know which backend is active.
 
 This layering means the scrolling and cursor logic is written once and shared across architectures, while the hardware-specific bit packing (this tutorial) is confined to a single header (`vga.h`) on x86_64.
 

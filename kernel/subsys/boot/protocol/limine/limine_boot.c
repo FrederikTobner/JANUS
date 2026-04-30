@@ -45,7 +45,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
-    boot_context->display.mode = DISPLAY_MODE_NONE;
+    boot_context->display = (display_info_t){.mode = DISPLAY_MODE_NONE};
 
     // HHDM offset is required for address translation
     struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;

@@ -114,7 +114,8 @@ s32 sprintf(char * out_buffer, char const * fmtstr, ...)
 static void buffer_putc(char c, void * context)
 {
     buffer_ctx_t * b = (buffer_ctx_t *) context;
-    if (b->position < b->max - 1) {
+    // Guard against b->max == 0: subtracting 1 from a u64 zero would underflow.
+    if (b->max > 0 && b->position < b->max - 1) {
         b->out_buffer[b->position] = c;
     }
     b->position++;

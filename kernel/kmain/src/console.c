@@ -49,7 +49,7 @@ __cold void console_init(boot_context_t const * boot_context)
     g_serial_active = serial_available;
     g_tty_active = tty_available;
     if (tty_available) {
-        drivers_tty_set_color(2, 0); // Green on black for TTY
+        drivers_tty_set_color(TTY_COLOR_GREEN, TTY_COLOR_BLACK);
     }
 }
 

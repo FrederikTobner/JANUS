@@ -14,7 +14,9 @@
 -- Colours (disabled when stdout is not a tty)
 -- ──────────────────────────────────────────────────────────────────────
 
-local use_colour = os.execute("test -t 1") -- luacheck: ignore
+local _tty_raw    = os.execute("test -t 1") -- luacheck: ignore
+-- Normalise across Lua versions: 5.3+ returns true/false; 5.1/5.2 returns 0/non-zero
+local use_colour  = (_tty_raw == true) or (_tty_raw == 0)
 
 local function sgr(code)
     if use_colour then return string.format("\27[%sm", code) end
@@ -44,7 +46,10 @@ end
 --- Execute a shell command, return (ok, exit_code).
 local function exec(cmd)
     local ok, _, code = os.execute(cmd)
-    if ok == true then return true, 0 end  -- Lua 5.3+
+    if ok == true then return true, 0 end    -- Lua 5.3+: boolean true on success
+    if type(ok) == "number" then             -- Lua 5.1/5.2: numeric 0 on success
+        return ok == 0, ok
+    end
     return false, code or 1
 end
 
@@ -124,7 +129,7 @@ end)()
 -- ──────────────────────────────────────────────────────────────────────
 
 local USAGE = [[
-Usage: lua scripts/check.lua [OPTIONS]
+Usage: lua scripts/regression_check.lua [OPTIONS]
 
 Builds the JANUS kernel and ISO images across all CMake presets.
 

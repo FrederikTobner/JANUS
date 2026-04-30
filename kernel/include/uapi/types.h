@@ -31,7 +31,7 @@ typedef __UINT16_TYPE__ __u16;
 typedef __INT16_TYPE__ __s16;
 typedef __UINT32_TYPE__ __u32;
 typedef __INT32_TYPE__ __s32;
-// Forcing 8-bit allignment for 64-bit types to avoid issues on 32-bit targets
+// Forcing 8-bit alignment for 64-bit types to avoid issues on 32-bit targets
 typedef __UINT64_TYPE__ __u64 __attribute__((aligned(8)));
 typedef __INT64_TYPE__ __s64 __attribute__((aligned(8)));
 

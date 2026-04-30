@@ -72,7 +72,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
-    boot_context->display.mode = DISPLAY_MODE_NONE;
+    boot_context->display = (display_info_t){.mode = DISPLAY_MODE_NONE};
 
     // Walk tag list looking for framebuffer
     struct multiboot_tag * tag = multiboot_first_tag((struct multiboot_info *) (phys_addr_t) g_mb2_info);
@@ -95,7 +95,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
                 };
             } else if (framebuffer_tag->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_EGA_TEXT) {
                 // Bootloader fell back to vga text mode — still usable, just with a different driver
-                boot_context->display.mode = DISPLAY_MODE_VGA_TEXT;
+                boot_context->display = (display_info_t){.mode = DISPLAY_MODE_VGA_TEXT};
             }
             break;
         }
