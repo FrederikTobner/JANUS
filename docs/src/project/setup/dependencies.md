@@ -85,18 +85,13 @@ sudo pacman -S qemu-system-aarch64    # Arch Linux
 
 ## Bootloader Tools
 
-**Limine** and **xorriso** are required to create bootable ISO images using the Limine protocol:
+**Limine** is fetched automatically by CMake via `FetchContent` — no manual installation needed.
+
+**xorriso** and **mtools** are required to create bootable ISO images:
 
 ```bash
 sudo apt install xorriso mtools       # Debian/Ubuntu
-sudo pacman -S limine xorriso mtools  # Arch Linux
-```
-
-On Debian/Ubuntu, Limine must be built from source:
-
-```bash
-git clone https://github.com/limine-bootloader/limine.git
-cd limine && make install
+sudo pacman -S xorriso mtools          # Arch Linux
 ```
 
 **GRUB** and **xorriso** are needed for Multiboot2 ISO images (x86_64 only):
@@ -149,16 +144,17 @@ rm -rf build && cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/<arch>-<c
 
 ## Build Targets
 
-| Target       | Description                                   |
-|-------------|-----------------------------------------------|
-| *(default)* | Build `kernel.elf`                             |
-| `iso`       | Create Limine ISO                              |
-| `iso-grub`  | Create GRUB ISO (x86_64 only)                  |
-| `run`       | Boot Limine ISO in QEMU                        |
-| `run-grub`  | Boot GRUB ISO in QEMU (x86_64 only)            |
-| `run-uefi`  | Boot in UEFI mode (requires OVMF)              |
-| `debug`     | Boot with GDB server on `:1234`                |
-| `debug-grub`| Boot GRUB ISO with GDB server (x86_64 only)    |
+| Target            | Description                                        |
+|-------------------|----------------------------------------------------|
+| *(default)*       | Build `kernel.elf`                                 |
+| `iso`             | Create all ISOs for this platform                  |
+| `iso-limine`      | Create Limine ISO                                  |
+| `iso-multiboot2`  | Create Multiboot2 ISO (GRUB, x86_64 only)          |
+| `run-limine`      | Boot Limine ISO in QEMU                            |
+| `run-multiboot2`  | Boot Multiboot2 ISO in QEMU (x86_64 only)          |
+| `run-uefi`        | Boot in UEFI mode (requires OVMF)                  |
+| `debug-limine`    | Boot Limine ISO with GDB server on `:1234`         |
+| `debug-multiboot2`| Boot Multiboot2 ISO with GDB server (x86_64 only)  |
 
 ## Optional: Language Server
 

@@ -1,4 +1,4 @@
-include(JanusKernel)
+include(kernel/Executable)
 
 set(_entry_dir "${CMAKE_CURRENT_SOURCE_DIR}/${JANUS_TARGET_ARCH}")
 

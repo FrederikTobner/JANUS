@@ -1,14 +1,13 @@
-# JANUS CMake Helper Functions
-# Provides reusable functions for creating kernel libraries and modules
+# JANUS Kernel Executable Helper
+# Provides janus_add_kernel() for linking kernel ELF binaries
 
 include_guard(GLOBAL)
 
 # Ensure platform is loaded
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusKernel.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/Executable.cmake")
 endif()
 
-# Print JANUS build configuration summary
 #
 # Link a kernel executable
 # 
@@ -65,6 +64,8 @@ function(janus_add_kernel)
             ${CMAKE_BINARY_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/subsys/drivers/include
             ${CMAKE_SOURCE_DIR}/kernel/subsys/boot/include
+            ${CMAKE_SOURCE_DIR}/kernel/lib/display/include
+            ${CMAKE_SOURCE_DIR}/kernel/lib/fmt/include
     )
 
     # Linker flags — use target_link_options to APPEND to (not replace) global flags
@@ -79,5 +80,14 @@ function(janus_add_kernel)
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
 
-endfunction()
+    # Register in the global registry so the diagram generator knows about it.
+    # Also include kmain from OBJECTS (the object library that provides kernel_main).
+    set(_reg_deps "${ARG_DEPENDENCIES}")
+    foreach(_obj ${ARG_OBJECTS})
+        if(_obj STREQUAL "kmain")
+            list(APPEND _reg_deps "kmain")
+        endif()
+    endforeach()
+    janus_register("${ARG_TARGET}" EXEC "${_reg_deps}")
 
+endfunction()

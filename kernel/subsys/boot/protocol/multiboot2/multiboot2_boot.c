@@ -14,17 +14,15 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file multiboot2_boot.c
- * @brief Multiboot2 boot protocol initialization
- *
- * Parses the Multiboot2 information structure and populates the boot
- * context. Called from kernel_main via the common boot_init() symbol.
- *
- * Multiboot2 passes magic/info via CPU registers (EAX/EBX). These are
- * stashed by assembly (multiboot2_stash_bootinfo) before kernel_main
- * runs. boot_init reads from the stashed values.
- */
+/// @file multiboot2_boot.c
+/// @brief Multiboot2 boot protocol initialization
+///
+/// Parses the Multiboot2 information structure and populates the boot
+/// context. Called from kernel_main via the common boot_init() symbol.
+///
+/// Multiboot2 passes magic/info via CPU registers (EAX/EBX). These are
+/// stashed by assembly (multiboot2_stash_bootinfo) before kernel_main
+/// runs. boot_init reads from the stashed values.
 
 #include "multiboot2_protocol.h"
 
@@ -36,35 +34,31 @@
 static u64 g_mb2_magic;
 static void const * g_mb2_info;
 
-/**
- * @brief Stash Multiboot2 boot info from CPU registers
- *
- * Called by assembly before kernel_main to save the magic number and
- * info pointer that Multiboot2 provides in EAX/EBX.
- *
- * @param magic Value from EAX at boot (should be MULTIBOOT2_BOOTLOADER_MAGIC)
- * @param info  Pointer to the Multiboot2 information structure
- */
+/// @brief Stash Multiboot2 boot info from CPU registers
+///
+/// Called by assembly before kernel_main to save the magic number and
+/// info pointer that Multiboot2 provides in EAX/EBX.
+///
+/// @param magic Value from EAX at boot (should be MULTIBOOT2_BOOTLOADER_MAGIC)
+/// @param info  Pointer to the Multiboot2 information structure
 void multiboot2_stash_bootinfo(u64 magic, void const * info)
 {
     g_mb2_magic = magic;
     g_mb2_info = info;
 }
 
-/**
- * @brief Initialize the boot context from Multiboot2 info
- *
- * Validates the stashed magic number, walks the tag list to extract
- * framebuffer info (if present), and populates the boot context.
- * Sets every field unconditionally to avoid uninitialized reads.
- *
- * Multiboot2 is identity-mapped — the HHDM offset is 0 and kernel
- * physical/virtual bases are identical.
- *
- * @param boot_context Boot context to populate
- * @return 0 on success, non-zero on failure
- */
-__cold int boot_init(boot_context_t * boot_context)
+/// @brief Initialize the boot context from Multiboot2 info
+///
+/// Validates the stashed magic number, walks the tag list to extract
+/// framebuffer info (if present), and populates the boot context.
+/// Sets every field unconditionally to avoid uninitialized reads.
+///
+/// Multiboot2 is identity-mapped — the HHDM offset is 0 and kernel
+/// physical/virtual bases are identical.
+///
+/// @param boot_context Boot context to populate
+/// @return 0 on success, non-zero on failure
+__cold error_t boot_init(boot_context_t * boot_context)
 {
     if (UNLIKELY((u32) g_mb2_magic != MULTIBOOT2_BOOTLOADER_MAGIC)) {
         return -1;
@@ -78,7 +72,7 @@ __cold int boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
-    boot_context->display_mode = BOOT_DISPLAY_NONE;
+    boot_context->display = (display_info_t){.mode = DISPLAY_MODE_NONE};
 
     // Walk tag list looking for framebuffer
     struct multiboot_tag * tag = multiboot_first_tag((struct multiboot_info *) (phys_addr_t) g_mb2_info);
@@ -88,7 +82,8 @@ __cold int boot_init(boot_context_t * boot_context)
 
             if (framebuffer_tag->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB) {
                 // Direct-color framebuffer, usable with the framebuffer driver
-                boot_context->display = (boot_display_info_t) {
+                boot_context->display = (display_info_t) {
+                    .mode = DISPLAY_MODE_FRAMEBUFFER,
                     .framebuffer = (u8 *) (phys_addr_t) framebuffer_tag->addr,
                     .width = framebuffer_tag->width,
                     .height = framebuffer_tag->height,
@@ -98,10 +93,9 @@ __cold int boot_init(boot_context_t * boot_context)
                     .green_mask_shift = framebuffer_tag->green_field_position,
                     .blue_mask_shift = framebuffer_tag->blue_field_position,
                 };
-                boot_context->display_mode = BOOT_DISPLAY_FRAMEBUFFER;
             } else if (framebuffer_tag->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_EGA_TEXT) {
                 // Bootloader fell back to vga text mode — still usable, just with a different driver
-                boot_context->display_mode = BOOT_DISPLAY_VGA_TEXT;
+                boot_context->display = (display_info_t){.mode = DISPLAY_MODE_VGA_TEXT};
             }
             break;
         }

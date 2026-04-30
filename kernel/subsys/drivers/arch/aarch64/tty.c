@@ -14,14 +14,12 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file tty.c
- * @brief AArch64 TTY implementation (framebuffer only).
- *
- * Implements arch_tty_* contract using framebuffer text rendering.
- * Unlike x86_64, AArch64 doesn't have VGA text mode - only framebuffer.
- * Uses the shared framebuffer implementation with Terminus 16x32 font.
- */
+/// @file tty.c
+/// @brief AArch64 TTY implementation (framebuffer only).
+///
+/// Implements arch_tty_* contract using framebuffer text rendering.
+/// Unlike x86_64, AArch64 doesn't have VGA text mode - only framebuffer.
+/// Uses the shared framebuffer implementation with Terminus 16x32 font.
 
 #include <arch/drivers/tty.h>
 #include <arch/shared/drivers/framebuffer.h>
@@ -30,9 +28,9 @@
 // Framebuffer state - shared implementation
 static framebuffer_state_t g_framebuffer_state;
 
-error_t arch_tty_init(tty_display_config_t const * config)
+error_t arch_tty_init(display_info_t const * config)
 {
-    if (config == NULL || config->framebuffer == NULL) {
+    if (config->mode != DISPLAY_MODE_FRAMEBUFFER) {
         // AArch64 requires framebuffer - no fallback
         return -1;
     }

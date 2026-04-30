@@ -17,13 +17,11 @@
 #ifndef ARCH_IMPL_DRIVERS_VGA_H
 #define ARCH_IMPL_DRIVERS_VGA_H
 
-/**
- * @file vga.h
- * @brief x86_64 VGA text mode driver.
- *
- * Provides low-level VGA text mode (0xB8000) operations.
- * Simple functions are inlined for performance.
- */
+/// @file vga.h
+/// @brief x86_64 VGA text mode driver.
+///
+/// Provides low-level VGA text mode (0xB8000) operations.
+/// Simple functions are inlined for performance.
 
 #include <arch/impl/drivers/io.h>
 #include <janus/attributes.h>
@@ -35,48 +33,43 @@
 #define VGA_CRTC_INDEX  0x3D4
 #define VGA_CRTC_DATA   0x3D5
 
-/**
- * @brief Create a VGA text mode character entry.
- *
- * @param character  Character to display
- * @param foreground Foreground color (0-15)
- * @param background Background color (0-15)
- * @return Combined character/attribute word for VGA buffer
- */
-static inline u16 vga_entry(char character, u8 foreground, u8 background)
+/// @brief Create a VGA text mode character entry.
+///
+/// @param character  Character to display
+/// @param foreground Foreground color (0-15)
+/// @param background Background color (0-15)
+/// @return Combined character/attribute word for VGA buffer
+static __always_inline u16 vga_entry(char character, u8 foreground, u8 background)
 {
     u8 color = (u8) ((foreground & 0x0F) | ((background & 0x0F) << 4));
     return (u16) ((u16) (u8) character | (u16) ((u16) color << 8));
 }
 
-/**
- * @brief Write a character to the VGA buffer.
- *
- * @param buffer Pointer to VGA buffer
- * @param x      Column (0 to VGA_WIDTH-1)
- * @param y      Row (0 to VGA_HEIGHT-1)
- * @param character      Character to write
- * @param foreground     Foreground color
- * @param background     Background color
- */
-static inline void vga_write_cell(u16 volatile * buffer, u16 x, u16 y, char character, u8 foreground, u8 background)
+/// @brief Write a character to the VGA buffer.
+///
+/// @param buffer Pointer to VGA buffer
+/// @param x      Column (0 to VGA_WIDTH-1)
+/// @param y      Row (0 to VGA_HEIGHT-1)
+/// @param character      Character to write
+/// @param foreground     Foreground color
+/// @param background     Background color
+static __always_inline void
+vga_write_cell(u16 volatile * buffer, u16 x, u16 y, char character, u8 foreground, u8 background)
 {
     if (buffer && x < VGA_WIDTH && y < VGA_HEIGHT) {
         buffer[y * VGA_WIDTH + x] = vga_entry(character, foreground, background);
     }
 }
 
-/**
- * @brief Read a character from the VGA buffer.
- *
- * @param buffer Pointer to VGA buffer
- * @param x      Column (0 to VGA_WIDTH-1)
- * @param y      Row (0 to VGA_HEIGHT-1)
- * @param character      Output: character (may be NULL)
- * @param foreground     Output: foreground color (may be NULL)
- * @param background     Output: background color (may be NULL)
- */
-static inline void
+/// @brief Read a character from the VGA buffer.
+///
+/// @param buffer Pointer to VGA buffer
+/// @param x      Column (0 to VGA_WIDTH-1)
+/// @param y      Row (0 to VGA_HEIGHT-1)
+/// @param character      Output: character (may be NULL)
+/// @param foreground     Output: foreground color (may be NULL)
+/// @param background     Output: background color (may be NULL)
+static __always_inline void
 vga_read_cell(u16 volatile * buffer, u16 x, u16 y, char * character, u8 * foreground, u8 * background)
 {
     if (buffer && x < VGA_WIDTH && y < VGA_HEIGHT) {
@@ -93,13 +86,11 @@ vga_read_cell(u16 volatile * buffer, u16 x, u16 y, char * character, u8 * foregr
     }
 }
 
-/**
- * @brief Set the VGA hardware cursor position.
- *
- * @param x Column (0 to VGA_WIDTH-1)
- * @param y Row (0 to VGA_HEIGHT-1)
- */
-static inline void vga_set_cursor(u16 x, u16 y)
+/// @brief Set the VGA hardware cursor position.
+///
+/// @param x Column (0 to VGA_WIDTH-1)
+/// @param y Row (0 to VGA_HEIGHT-1)
+static __always_inline void vga_set_cursor(u16 x, u16 y)
 {
     u16 pos = (u16) (y * VGA_WIDTH + x);
     outb(VGA_CRTC_INDEX, 0x0F);

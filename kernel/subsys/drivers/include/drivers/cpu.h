@@ -14,13 +14,11 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file cpu.h
- * @brief CPU control interface.
- *
- * Header-only driver. Architecture implementation is pulled in via
- * include path resolution: <arch/drivers/cpu.h> → <arch/impl/drivers/cpu.h>
- */
+/// @file cpu.h
+/// @brief CPU control interface.
+///
+/// Header-only driver. Architecture implementation is pulled in via
+/// include path resolution: <arch/drivers/cpu.h> → <arch/impl/drivers/cpu.h>
 
 #ifndef DRIVERS_CPU_H
 #define DRIVERS_CPU_H
@@ -42,11 +40,9 @@ static __always_inline void drivers_cpu_enable_interrupts(void)
 {
     arch_cpu_enable_interrupts();
 }
-/**
- * @brief Disable interrupts and halt forever.
- *
- * This function never returns and is used for unrecoverable errors.
- */
+/// @brief Disable interrupts and halt forever.
+///
+/// This function never returns and is used for unrecoverable errors.
 static __always_inline __noreturn void drivers_cpu_halt_forever(void)
 {
     arch_cpu_disable_interrupts();

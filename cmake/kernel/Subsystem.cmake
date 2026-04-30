@@ -1,15 +1,15 @@
-# JANUS CMake Helper Functions
-# Provides reusable functions for creating kernel libraries and modules
+# JANUS Subsystem Helper
+# Provides janus_add_subsys() for creating kernel subsystems (boot, drivers, mm)
 
 include_guard(GLOBAL)
 
 # Ensure platform is loaded
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "JanusPlatform.cmake must be included before JanusSubsys.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/Subsystem.cmake")
 endif()
 
 if(NOT JANUS_REGISTRY_LOADED)
-    message(FATAL_ERROR "JanusRegistry.cmake must be included before JanusSubsys.cmake")
+    message(FATAL_ERROR "Registry.cmake must be included before kernel/Subsystem.cmake")
 endif()
 
 #
@@ -88,14 +88,6 @@ function(janus_add_subsys NAME)
     endif()
 
     # Apply compiler flags
-    target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
-    
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
-    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-        target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
-    elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-        target_compile_options(${NAME} PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
-    endif()
+    janus_apply_compile_flags(${NAME})
 
 endfunction()

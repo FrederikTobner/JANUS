@@ -14,38 +14,20 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file banner.c
- * @brief Kernel startup banner display.
- *
- * Contains the ASCII art logo and version display routines.
- */
+#ifndef KMAIN_CONSOLE_H
+#define KMAIN_CONSOLE_H
 
-#include <kmain/banner.h>
+/// @file console.h
+/// @brief Kernel console output.
+///
+///
+/// Provides functions for kernel console output, including formatted printing.
 
-#include <drivers/serial.h>
-#include <drivers/tty.h>
-#include <janus/attributes.h>
-#include <janus/config.h>
+#include <boot/context.h>
+#include <janus/types.h>
 
-#define JANUS_HELLO_MESSAGE                  \
-    "     _   _    _   _ _   _ ____  \n"     \
-    "    | | / \\  | \\ | | | | / ___|\n"    \
-    " _  | |/ _ \\ |  \\| | | | \\___ \\ \n" \
-    "| |_| / ___ \\| |\\  | |_| |___) |\n"   \
-    " \\___/_/   \\_\\_| \\_|\\___/|____/ \n"
+s32 kprintf(char const * fmt, ...) __attribute__((format(printf, 1, 2)));
 
-__cold void kbanner_print(bool serial_available, bool tty_available)
-{
-    if (tty_available) {
-        // Green font color on black background
-        drivers_tty_set_color(2, 0);
-        drivers_tty_puts(JANUS_HELLO_MESSAGE);
-        drivers_tty_puts("\nVersion: " JANUS_VERSION_STRING "\n\n");
-    }
+void console_init(boot_context_t const * boot_context);
 
-    if (serial_available) {
-        drivers_serial_puts(JANUS_HELLO_MESSAGE);
-        drivers_serial_puts("\nVersion: " JANUS_VERSION_STRING "\n\n");
-    }
-}
+#endif // KMAIN_CONSOLE_H

@@ -17,11 +17,9 @@
 #ifndef JANUS_COMPILER_H
 #define JANUS_COMPILER_H
 
-/**
- * Compiler-specific attributes and macros for JANUS
- *
- * Provides portable compiler attributes for Clang and GCC.
- */
+/// Compiler-specific attributes and macros for JANUS
+///
+/// Provides portable compiler attributes for Clang and GCC.
 
 // Compiler detection
 #if defined(__clang__)

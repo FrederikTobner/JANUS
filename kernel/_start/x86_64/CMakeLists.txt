@@ -34,7 +34,7 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
     janus_add_kernel(
         TARGET kernel-limine.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-        DEPENDENCIES drivers boot boot_limine
+        DEPENDENCIES drivers boot fmt boot_limine
         OBJECTS _start_common _start_limine _start_limine_requests kmain
     )
 endif()
@@ -50,7 +50,7 @@ if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
     janus_add_kernel(
         TARGET kernel-multiboot2.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/multiboot2/linker.ld
-        DEPENDENCIES drivers boot boot_multiboot2
+        DEPENDENCIES drivers boot fmt boot_multiboot2
         OBJECTS _start_common _start_multiboot2 kmain
     )
 endif()

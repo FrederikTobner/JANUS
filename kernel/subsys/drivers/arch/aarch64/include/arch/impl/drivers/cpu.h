@@ -14,54 +14,44 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file arch/impl/drivers/cpu.h
- * @brief AArch64 CPU control implementation.
- *
- * Provides inline implementations of arch_cpu_* functions.
- * This header is pulled in via include path resolution.
- */
+/// @file arch/impl/drivers/cpu.h
+/// @brief AArch64 CPU control implementation.
+///
+/// Provides inline implementations of arch_cpu_* functions.
+/// This header is pulled in via include path resolution.
 
 #ifndef AARCH64_IMPL_DRIVERS_CPU_H
 #define AARCH64_IMPL_DRIVERS_CPU_H
 
 #include <janus/attributes.h>
 
-/**
- * @brief Halt the CPU until the next interrupt/event.
- *
- * Uses WFI (Wait For Interrupt) instruction on AArch64.
- */
+/// @brief Halt the CPU until the next interrupt/event.
+///
+/// Uses WFI (Wait For Interrupt) instruction on AArch64.
 static __always_inline void arch_cpu_halt(void)
 {
     __asm__ volatile("wfi");
 }
 
-/**
- * @brief Disable interrupts.
- *
- * Sets the DAIF interrupt mask bits to disable IRQ and FIQ.
- */
+/// @brief Disable interrupts.
+///
+/// Sets the DAIF interrupt mask bits to disable IRQ and FIQ.
 static __always_inline void arch_cpu_disable_interrupts(void)
 {
     __asm__ volatile("msr daifset, #0xF" ::: "memory");
 }
 
-/**
- * @brief Enable interrupts.
- *
- * Clears the DAIF interrupt mask bits to enable IRQ and FIQ.
- */
+/// @brief Enable interrupts.
+///
+/// Clears the DAIF interrupt mask bits to enable IRQ and FIQ.
 static __always_inline void arch_cpu_enable_interrupts(void)
 {
     __asm__ volatile("msr daifclr, #0xF" ::: "memory");
 }
 
-/**
- * @brief Disable interrupts and halt forever.
- *
- * This function never returns and is used for unrecoverable errors.
- */
+/// @brief Disable interrupts and halt forever.
+///
+/// This function never returns and is used for unrecoverable errors.
 static __always_inline __noreturn void arch_cpu_halt_forever(void)
 {
     arch_cpu_disable_interrupts();

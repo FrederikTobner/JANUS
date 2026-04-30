@@ -22,10 +22,10 @@ add_library(_start_limine OBJECT
 target_compile_options(_start_limine PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 
 # Build kernel-limine.elf with Limine linker script
-include(JanusKernel)
+include(kernel/Executable)
 janus_add_kernel(
     TARGET kernel-limine.elf
     LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-    DEPENDENCIES drivers boot boot_limine
+    DEPENDENCIES drivers boot fmt boot_limine
     OBJECTS _start_limine _start_limine_requests kmain
 )

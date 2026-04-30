@@ -1,6 +1,6 @@
-include(JanusRegistry)
+include(Registry)
 
-include(JanusLibrary)
+include(kernel/Library)
 
 # Configure config.h from config.h.in
 configure_file(
@@ -27,3 +27,6 @@ add_subdirectory(_start)
 
 # Validate subsystem/library registry for dependency isolation
 janus_validate_registry()
+
+# Generate dependency diagram into the docs source tree (one file per architecture)
+janus_write_mermaid_diagram("${CMAKE_SOURCE_DIR}/docs/src/generated/deps-${JANUS_TARGET_ARCH}.md")

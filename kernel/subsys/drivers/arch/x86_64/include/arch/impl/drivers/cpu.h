@@ -14,38 +14,30 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/**
- * @file arch/impl/drivers/cpu.h
- * @brief x86_64 CPU control implementation.
- *
- * Provides inline implementations of arch_cpu_* functions.
- * This header is pulled in via include path resolution.
- */
+/// @file arch/impl/drivers/cpu.h
+/// @brief x86_64 CPU control implementation.
+///
+/// Provides inline implementations of arch_cpu_* functions.
+/// This header is pulled in via include path resolution.
 
 #ifndef X86_64_IMPL_DRIVERS_CPU_H
 #define X86_64_IMPL_DRIVERS_CPU_H
 
 #include <janus/attributes.h>
 
-/**
- * @brief Halt the CPU until the next interrupt/event.
- */
+/// @brief Halt the CPU until the next interrupt/event.
 static __always_inline void arch_cpu_halt(void)
 {
     __asm__ volatile("hlt");
 }
 
-/**
- * @brief Disable interrupts.
- */
+/// @brief Disable interrupts.
 static __always_inline void arch_cpu_disable_interrupts(void)
 {
     __asm__ volatile("cli");
 }
 
-/**
- * @brief Enable interrupts.
- */
+/// @brief Enable interrupts.
 static __always_inline void arch_cpu_enable_interrupts(void)
 {
     __asm__ volatile("sti");

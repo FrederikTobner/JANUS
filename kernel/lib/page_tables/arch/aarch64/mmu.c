@@ -47,42 +47,10 @@ static u64 g_kernel_phys_base;
 static u64 g_kernel_virt_base;
 static bool g_initialized;
 
-static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt)
-{
-    return virt - g_kernel_virt_base + g_kernel_phys_base;
-}
-
-static virt_addr_t mmu_physical_to_virtual_address(phys_addr_t phys)
-{
-    return phys + g_hhdm_offset;
-}
-
-static phys_addr_t mmu_alloc_page_table_phys(void)
-{
-    if (UNLIKELY(pool_next_index >= PAGE_TABLE_POOL_SIZE)) {
-        return 0;
-    }
-    virt_addr_t * table = page_table_pool[pool_next_index++];
-    for (u32 i = 0; i < ENTRIES_PER_TABLE; i++) {
-        table[i] = 0;
-    }
-    return mmu_virtual_to_physical_address((virt_addr_t) table);
-}
-
-static phys_addr_t * mmu_get_or_create_page_table_entry(phys_addr_t table_phys, u32 index, bool is_table_level)
-{
-    virt_addr_t * table = (virt_addr_t *) mmu_physical_to_virtual_address(table_phys);
-    phys_addr_t * page_table_entry = &table[index];
-    if (!is_table_level || (*page_table_entry & PAGE_TABLE_ENTRY_VALID)) {
-        return page_table_entry;
-    }
-    phys_addr_t new_table_phys = mmu_alloc_page_table_phys();
-    if (UNLIKELY(new_table_phys == 0)) {
-        return (phys_addr_t *) 0;
-    }
-    *page_table_entry = new_table_phys | PAGE_TABLE_ENTRY_VALID | PAGE_TABLE_ENTRY_TABLE;
-    return page_table_entry;
-}
+static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt);
+static virt_addr_t mmu_physical_to_virtual_address(phys_addr_t phys);
+static phys_addr_t mmu_alloc_page_table_phys(void);
+static phys_addr_t * mmu_get_or_create_page_table_entry(phys_addr_t table_phys, u32 index, bool is_table_level);
 
 __cold void mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
 {
@@ -133,4 +101,41 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
     __asm__ volatile("dsb sy");
     __asm__ volatile("isb");
     return virt_addr;
+}
+
+static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt)
+{
+    return virt - g_kernel_virt_base + g_kernel_phys_base;
+}
+
+static virt_addr_t mmu_physical_to_virtual_address(phys_addr_t phys)
+{
+    return phys + g_hhdm_offset;
+}
+
+static phys_addr_t mmu_alloc_page_table_phys(void)
+{
+    if (UNLIKELY(pool_next_index >= PAGE_TABLE_POOL_SIZE)) {
+        return 0;
+    }
+    virt_addr_t * table = page_table_pool[pool_next_index++];
+    for (u32 i = 0; i < ENTRIES_PER_TABLE; i++) {
+        table[i] = 0;
+    }
+    return mmu_virtual_to_physical_address((virt_addr_t) table);
+}
+
+static phys_addr_t * mmu_get_or_create_page_table_entry(phys_addr_t table_phys, u32 index, bool is_table_level)
+{
+    virt_addr_t * table = (virt_addr_t *) mmu_physical_to_virtual_address(table_phys);
+    phys_addr_t * page_table_entry = &table[index];
+    if (!is_table_level || (*page_table_entry & PAGE_TABLE_ENTRY_VALID)) {
+        return page_table_entry;
+    }
+    phys_addr_t new_table_phys = mmu_alloc_page_table_phys();
+    if (UNLIKELY(new_table_phys == 0)) {
+        return (phys_addr_t *) 0;
+    }
+    *page_table_entry = new_table_phys | PAGE_TABLE_ENTRY_VALID | PAGE_TABLE_ENTRY_TABLE;
+    return page_table_entry;
 }
