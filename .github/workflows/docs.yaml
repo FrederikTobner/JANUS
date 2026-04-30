@@ -1,0 +1,66 @@
+name: Docs
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent overlapping deployments; let an in-progress deploy finish before
+# starting a new one so Pages is never left in a partial state.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      # Cache compiled binaries keyed on the preprocessor lock files.
+      # Cache hits skip `cargo install` entirely; misses rebuild and re-save.
+      - name: Cache Cargo binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin
+          key: cargo-bin-${{ runner.os }}-${{ hashFiles('docs/preprocessors/mdbook-side-notes/Cargo.lock', 'docs/preprocessors/mdbook-code-diff/Cargo.lock') }}
+
+      - name: Install mdbook and preprocessors
+        run: |
+          command -v mdbook            || cargo install mdbook
+          command -v mdbook-mermaid    || cargo install mdbook-mermaid
+          command -v mdbook-side-notes || cargo install --path docs/preprocessors/mdbook-side-notes
+          command -v mdbook-code-diff  || cargo install --path docs/preprocessors/mdbook-code-diff
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build book
+        run: cd docs && mdbook build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
