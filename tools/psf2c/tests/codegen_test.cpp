@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2025 by Frederik Tobner                                     *
+ * Copyright (C) 2026 by Frederik Tobner                                     *
  *                                                                           *
  * This file is part of JANUS.                                               *
  *                                                                           *
@@ -20,6 +20,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -72,6 +73,21 @@ class CodegenTest : public ::testing::Test
         return buffer.str();
     }
 
+    /// @brief Open the temp file, generate a header for @p font with @p prefix,
+    /// close the file, and return the full output as a string.
+    std::string GenerateOutput(char const * prefix)
+    {
+        output_file = fopen(temp_file.c_str(), "w");
+        EXPECT_NE(output_file, nullptr) << "fopen failed for: " << temp_file;
+        if (output_file == nullptr) {
+            return {};
+        }
+        codegen_write_header(output_file, &font, prefix);
+        fclose(output_file);
+        output_file = nullptr;
+        return ReadOutput();
+    }
+
     void SetupSimpleFont()
     {
         font.width = 8;
@@ -84,129 +100,97 @@ class CodegenTest : public ::testing::Test
 
 TEST_F(CodegenTest, GeneratesHeaderGuard)
 {
+    // Arrange
     SetupSimpleFont();
 
-    output_file = fopen(temp_file.c_str(), "w");
-    ASSERT_NE(output_file, nullptr);
+    // Act
+    std::string output = GenerateOutput("testfont");
 
-    codegen_write_header(output_file, &font, "testfont");
-    fclose(output_file);
-    output_file = nullptr;
-
-    std::string output = ReadOutput();
-
-    EXPECT_NE(output.find("#ifndef TESTFONT_H"), std::string::npos);
-    EXPECT_NE(output.find("#define TESTFONT_H"), std::string::npos);
-    EXPECT_NE(output.find("#endif /* TESTFONT_H */"), std::string::npos);
+    // Assert
+    EXPECT_THAT(output, ::testing::HasSubstr("#ifndef TESTFONT_H"));
+    EXPECT_THAT(output, ::testing::HasSubstr("#define TESTFONT_H"));
+    EXPECT_THAT(output, ::testing::HasSubstr("#endif /* TESTFONT_H */"));
 }
 
 TEST_F(CodegenTest, GeneratesMacros)
 {
+    // Arrange
     SetupSimpleFont();
 
-    output_file = fopen(temp_file.c_str(), "w");
-    ASSERT_NE(output_file, nullptr);
+    // Act
+    std::string output = GenerateOutput("myfont");
 
-    codegen_write_header(output_file, &font, "myfont");
-    fclose(output_file);
-    output_file = nullptr;
-
-    std::string output = ReadOutput();
-
-    EXPECT_NE(output.find("#define MYFONT_WIDTH  8"), std::string::npos);
-    EXPECT_NE(output.find("#define MYFONT_HEIGHT 16"), std::string::npos);
-    EXPECT_NE(output.find("#define MYFONT_GLYPH_COUNT 2"), std::string::npos);
-    EXPECT_NE(output.find("#define MYFONT_BYTES_PER_GLYPH 16"), std::string::npos);
+    // Assert
+    EXPECT_THAT(output, ::testing::HasSubstr("#define MYFONT_WIDTH  8"));
+    EXPECT_THAT(output, ::testing::HasSubstr("#define MYFONT_HEIGHT 16"));
+    EXPECT_THAT(output, ::testing::HasSubstr("#define MYFONT_GLYPH_COUNT 2"));
+    EXPECT_THAT(output, ::testing::HasSubstr("#define MYFONT_BYTES_PER_GLYPH 16"));
 }
 
 TEST_F(CodegenTest, GeneratesArrayDeclaration)
 {
+    // Arrange
     SetupSimpleFont();
 
-    output_file = fopen(temp_file.c_str(), "w");
-    ASSERT_NE(output_file, nullptr);
+    // Act
+    std::string output = GenerateOutput("font");
 
-    codegen_write_header(output_file, &font, "font");
-    fclose(output_file);
-    output_file = nullptr;
-
-    std::string output = ReadOutput();
-
-    EXPECT_NE(output.find("static const u8 font_glyphs[2][16]"), std::string::npos);
+    // Assert
+    EXPECT_THAT(output, ::testing::HasSubstr("static const u8 font_glyphs[2][16]"));
 }
 
 TEST_F(CodegenTest, IncludesJanusTypes)
 {
+    // Arrange
     SetupSimpleFont();
 
-    output_file = fopen(temp_file.c_str(), "w");
-    ASSERT_NE(output_file, nullptr);
+    // Act
+    std::string output = GenerateOutput("font");
 
-    codegen_write_header(output_file, &font, "font");
-    fclose(output_file);
-    output_file = nullptr;
-
-    std::string output = ReadOutput();
-
-    EXPECT_NE(output.find("#include <janus/types.h>"), std::string::npos);
+    // Assert
+    EXPECT_THAT(output, ::testing::HasSubstr("#include <janus/types.h>"));
 }
 
 TEST_F(CodegenTest, PrintableAsciiComments)
 {
-    font.width = 8;
-    font.height = 8;
-    font.numglyphs = 128;
+    // Arrange
+    font.width        = 8;
+    font.height       = 8;
+    font.numglyphs    = 128;
     font.bytesperglyph = 8;
     font.glyphs = static_cast<uint8_t *>(calloc(font.numglyphs, font.bytesperglyph));
 
-    output_file = fopen(temp_file.c_str(), "w");
-    ASSERT_NE(output_file, nullptr);
+    // Act
+    std::string output = GenerateOutput("font");
 
-    codegen_write_header(output_file, &font, "font");
-    fclose(output_file);
-    output_file = nullptr;
-
-    std::string output = ReadOutput();
-
-    // Check that printable ASCII chars have comments
-    EXPECT_NE(output.find("/* 0x20 ' ' */"), std::string::npos);    // space
-    EXPECT_NE(output.find("/* 0x41 'A' */"), std::string::npos);    // A
-    EXPECT_NE(output.find("/* 0x5C '\\\\' */"), std::string::npos); // backslash escaped
-    EXPECT_NE(output.find("/* 0x27 '\\'"), std::string::npos);      // single quote escaped
+    // Assert
+    EXPECT_THAT(output, ::testing::HasSubstr("/* 0x20 ' ' */"));    // space
+    EXPECT_THAT(output, ::testing::HasSubstr("/* 0x41 'A' */"));    // A
+    EXPECT_THAT(output, ::testing::HasSubstr("/* 0x5C '\\\\' */")); // backslash escaped
+    EXPECT_THAT(output, ::testing::HasSubstr("/* 0x27 '\\'"));      // single quote escaped
 }
 
 TEST_F(CodegenTest, NonPrintableNoCharComment)
 {
+    // Arrange
     SetupSimpleFont();
 
-    output_file = fopen(temp_file.c_str(), "w");
-    ASSERT_NE(output_file, nullptr);
+    // Act
+    std::string output = GenerateOutput("font");
 
-    codegen_write_header(output_file, &font, "font");
-    fclose(output_file);
-    output_file = nullptr;
-
-    std::string output = ReadOutput();
-
-    // Glyph 0x00 should not have a character in the comment
-    EXPECT_NE(output.find("/* 0x00 */ {"), std::string::npos);
+    // Assert — glyph 0x00 must not include a character in its comment
+    EXPECT_THAT(output, ::testing::HasSubstr("/* 0x00 */ {"));
 }
 
 TEST_F(CodegenTest, UppercasePrefixConversion)
 {
+    // Arrange
     SetupSimpleFont();
 
-    output_file = fopen(temp_file.c_str(), "w");
-    ASSERT_NE(output_file, nullptr);
+    // Act
+    std::string output = GenerateOutput("myLowerCase");
 
-    codegen_write_header(output_file, &font, "myLowerCase");
-    fclose(output_file);
-    output_file = nullptr;
-
-    std::string output = ReadOutput();
-
-    // Macros should use uppercase
-    EXPECT_NE(output.find("MYLOWERCASE_WIDTH"), std::string::npos);
-    // Array should use original case
-    EXPECT_NE(output.find("myLowerCase_glyphs"), std::string::npos);
+    // Assert
+    EXPECT_THAT(output, ::testing::HasSubstr("MYLOWERCASE_WIDTH")); // macros use uppercase
+    EXPECT_THAT(output, ::testing::HasSubstr("myLowerCase_glyphs")); // array uses original case
 }

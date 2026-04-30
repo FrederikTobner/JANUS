@@ -29,10 +29,35 @@ extern "C" {
 }
 
 // ---------------------------------------------------------------------------
-// Shared parser fixture
+// Shared fixture
 // ---------------------------------------------------------------------------
 
-static clap_arg_t const TEST_ARGS[] = {
+/// @brief Fixture shared by all parse tests.
+///
+/// Provides a fully populated parser with two required positionals, one
+/// optional positional (default "font"), one flag, and one option with a
+/// default value.  Each test builds an argv via MakeArgv() and is responsible
+/// for freeing the result with clap_result_free().
+class ClapParseTest : public ::testing::Test
+{
+  protected:
+    static clap_arg_t const kArgs[];
+    static clap_parser_t const kParser;
+
+    /// @brief Build a mutable argv vector from a list of string literals.
+    /// The returned vector is null-terminated; no strings are owned.
+    static std::vector<char *> MakeArgv(std::initializer_list<char const *> args)
+    {
+        std::vector<char *> argv;
+        for (char const * s : args) {
+            argv.push_back(const_cast<char *>(s));
+        }
+        argv.push_back(nullptr);
+        return argv;
+    }
+};
+
+clap_arg_t const ClapParseTest::kArgs[] = {
     CLAP_POSITIONAL("input", "FILE", "Input file"),
     CLAP_POSITIONAL("output", "FILE", "Output file"),
     CLAP_POSITIONAL_OPT("prefix", "STRING", "Symbol prefix", "font"),
@@ -40,215 +65,272 @@ static clap_arg_t const TEST_ARGS[] = {
     CLAP_OPTION_DEFAULT("format", 'f', "FMT", "Output format", "c"),
 };
 
-static clap_parser_t const TEST_PARSER = {
-    .name    = "test",
+clap_parser_t const ClapParseTest::kParser = {
+    .name = "test",
     .version = "1.0.0",
-    .about   = "Test parser",
-    .args    = TEST_ARGS,
-    .nargs   = (int32_t)(sizeof TEST_ARGS / sizeof *TEST_ARGS),
+    .about = "Test parser",
+    .args = ClapParseTest::kArgs,
+    .nargs = (int32_t) (sizeof ClapParseTest::kArgs / sizeof *ClapParseTest::kArgs),
 };
-
-/// Build a mutable argv vector from a list of string literals.
-/// The returned vector is null-terminated and owns no strings.
-static std::vector<char *> make_argv(std::initializer_list<char const *> args)
-{
-    std::vector<char *> argv;
-    for (char const * s : args) {
-        argv.push_back(const_cast<char *>(s));
-    }
-    argv.push_back(nullptr);
-    return argv;
-}
 
 // ---------------------------------------------------------------------------
 // Happy-path tests
 // ---------------------------------------------------------------------------
 
-TEST(ClapParse, RequiredPositionals)
+TEST_F(ClapParseTest, ParsesRequiredPositionals)
 {
-    auto argv   = make_argv({"test", "in.psf", "out.h"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "input"),  "in.psf");
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "output"), "out.h");
+    EXPECT_STREQ(clap_get(result, &kParser, "input"), "in.psf");
+    EXPECT_STREQ(clap_get(result, &kParser, "output"), "out.h");
     clap_result_free(result);
 }
 
-TEST(ClapParse, DefaultPositionalUsedWhenAbsent)
+TEST_F(ClapParseTest, UsesDefaultForAbsentOptionalPositional)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "prefix"), "font");
+    EXPECT_STREQ(clap_get(result, &kParser, "prefix"), "font");
     clap_result_free(result);
 }
 
-TEST(ClapParse, OptionalPositionalOverridesDefault)
+TEST_F(ClapParseTest, OverridesDefaultWhenOptionalPositionalProvided)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h", "myfont"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "myfont"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "prefix"), "myfont");
+    EXPECT_STREQ(clap_get(result, &kParser, "prefix"), "myfont");
     clap_result_free(result);
 }
 
-TEST(ClapParse, FlagLongForm)
+TEST_F(ClapParseTest, SetsFlagFromLongForm)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h", "--verbose"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "--verbose"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_TRUE(clap_flag(result, &TEST_PARSER, "verbose"));
+    EXPECT_TRUE(clap_flag(result, &kParser, "verbose"));
     clap_result_free(result);
 }
 
-TEST(ClapParse, FlagShortForm)
+TEST_F(ClapParseTest, SetsFlagFromShortForm)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h", "-v"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "-v"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_TRUE(clap_flag(result, &TEST_PARSER, "verbose"));
+    EXPECT_TRUE(clap_flag(result, &kParser, "verbose"));
     clap_result_free(result);
 }
 
-TEST(ClapParse, FlagAbsentByDefault)
+TEST_F(ClapParseTest, FlagIsFalseWhenAbsent)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_FALSE(clap_flag(result, &TEST_PARSER, "verbose"));
+    EXPECT_FALSE(clap_flag(result, &kParser, "verbose"));
     clap_result_free(result);
 }
 
-TEST(ClapParse, OptionLongFormEquals)
+TEST_F(ClapParseTest, ParsesOptionLongFormWithEquals)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h", "--format=bin"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "--format=bin"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "format"), "bin");
+    EXPECT_STREQ(clap_get(result, &kParser, "format"), "bin");
     clap_result_free(result);
 }
 
-TEST(ClapParse, OptionLongFormSpace)
+TEST_F(ClapParseTest, ParsesOptionLongFormWithSpace)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h", "--format", "bin"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "--format", "bin"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "format"), "bin");
+    EXPECT_STREQ(clap_get(result, &kParser, "format"), "bin");
     clap_result_free(result);
 }
 
-TEST(ClapParse, OptionDefaultUsedWhenAbsent)
+TEST_F(ClapParseTest, UsesDefaultForAbsentOption)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "format"), "c");
+    EXPECT_STREQ(clap_get(result, &kParser, "format"), "c");
     clap_result_free(result);
 }
 
-TEST(ClapParse, EndOfOptionsMarker)
+TEST_F(ClapParseTest, TreatsTokensAfterDashDashAsPositionals)
 {
-    // Tokens after "--" are treated as positionals even if they look like flags.
-    auto argv    = make_argv({"test", "in.psf", "--", "out.h"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange — "out.h" follows "--" and looks like it could be a flag start,
+    // but must be consumed as the second positional.
+    auto argv = MakeArgv({"test", "in.psf", "--", "out.h"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "input"),  "in.psf");
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "output"), "out.h");
+    EXPECT_STREQ(clap_get(result, &kParser, "input"), "in.psf");
+    EXPECT_STREQ(clap_get(result, &kParser, "output"), "out.h");
     clap_result_free(result);
 }
 
-TEST(ClapParse, OptionsAndPositionalsMixed)
+TEST_F(ClapParseTest, ParsesInterleavedPositionalsAndOptions)
 {
-    auto argv    = make_argv({"test", "in.psf", "--verbose", "out.h", "--format=bin"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    clap_result_t * result = clap_parse(&TEST_PARSER, argc, argv.data());
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "--verbose", "out.h", "--format=bin"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act
+    clap_result_t * result = clap_parse(&kParser, argc, argv.data());
+
+    // Assert
     ASSERT_NE(result, nullptr);
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "input"),  "in.psf");
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "output"), "out.h");
-    EXPECT_TRUE(clap_flag(result, &TEST_PARSER, "verbose"));
-    EXPECT_STREQ(clap_get(result, &TEST_PARSER, "format"), "bin");
+    EXPECT_STREQ(clap_get(result, &kParser, "input"), "in.psf");
+    EXPECT_STREQ(clap_get(result, &kParser, "output"), "out.h");
+    EXPECT_TRUE(clap_flag(result, &kParser, "verbose"));
+    EXPECT_STREQ(clap_get(result, &kParser, "format"), "bin");
     clap_result_free(result);
 }
 
 // ---------------------------------------------------------------------------
-// Error-path tests (death tests — clap exits on bad input)
+// Error-path tests (death tests — clap exits(1) on bad input)
 // ---------------------------------------------------------------------------
 
-TEST(ClapParseDeath, UnknownLongOption)
+/// @brief Fixture for death tests; inherits the same parser and MakeArgv helper.
+using ClapParseDeathTest = ClapParseTest;
+
+TEST_F(ClapParseDeathTest, RejectsUnknownLongOption)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h", "--unknown"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    EXPECT_EXIT(clap_parse(&TEST_PARSER, argc, argv.data()),
-                ::testing::ExitedWithCode(1), "");
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "--unknown"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act + Assert
+    EXPECT_EXIT(clap_parse(&kParser, argc, argv.data()), ::testing::ExitedWithCode(1), "unknown option");
 }
 
-TEST(ClapParseDeath, UnknownShortOption)
+TEST_F(ClapParseDeathTest, RejectsUnknownShortOption)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h", "-z"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    EXPECT_EXIT(clap_parse(&TEST_PARSER, argc, argv.data()),
-                ::testing::ExitedWithCode(1), "");
+    // Arrange
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "-z"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act + Assert
+    EXPECT_EXIT(clap_parse(&kParser, argc, argv.data()), ::testing::ExitedWithCode(1), "unknown option");
 }
 
-TEST(ClapParseDeath, MissingRequiredPositional)
+TEST_F(ClapParseDeathTest, RejectsMissingRequiredPositional)
 {
-    // Only one positional provided; "output" is required.
-    auto argv    = make_argv({"test", "in.psf"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    EXPECT_EXIT(clap_parse(&TEST_PARSER, argc, argv.data()),
-                ::testing::ExitedWithCode(1), "");
+    // Arrange — only "input" provided; "output" is required.
+    auto argv = MakeArgv({"test", "in.psf"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act + Assert
+    EXPECT_EXIT(clap_parse(&kParser, argc, argv.data()), ::testing::ExitedWithCode(1), "missing required");
 }
 
-TEST(ClapParseDeath, TooManyPositionals)
+TEST_F(ClapParseDeathTest, RejectsTooManyPositionals)
 {
-    auto argv    = make_argv({"test", "in.psf", "out.h", "prefix", "extra"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    EXPECT_EXIT(clap_parse(&TEST_PARSER, argc, argv.data()),
-                ::testing::ExitedWithCode(1), "");
+    // Arrange — four positionals provided; only three are declared.
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "prefix", "extra"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act + Assert
+    EXPECT_EXIT(clap_parse(&kParser, argc, argv.data()), ::testing::ExitedWithCode(1), "unexpected argument");
 }
 
-TEST(ClapParseDeath, ShortOptionBundledCharsRejected)
+TEST_F(ClapParseDeathTest, RejectsBundledShortOptions)
 {
-    // "-vv" must be rejected; only single-character short options are accepted.
-    auto argv    = make_argv({"test", "in.psf", "out.h", "-vv"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    EXPECT_EXIT(clap_parse(&TEST_PARSER, argc, argv.data()),
-                ::testing::ExitedWithCode(1), "");
+    // Arrange — "-vv" is not supported; only single-character short options.
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "-vv"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act + Assert
+    EXPECT_EXIT(clap_parse(&kParser, argc, argv.data()), ::testing::ExitedWithCode(1), "invalid option");
 }
 
-TEST(ClapParseDeath, ShortOptionCombinedCharsRejected)
+TEST_F(ClapParseDeathTest, RejectsCombinedShortOptions)
 {
-    // "-vf" must be rejected; multi-character short tokens are not supported.
-    auto argv    = make_argv({"test", "in.psf", "out.h", "-vf"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    EXPECT_EXIT(clap_parse(&TEST_PARSER, argc, argv.data()),
-                ::testing::ExitedWithCode(1), "");
+    // Arrange — "-vf" combines two separate flags; not supported.
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "-vf"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act + Assert
+    EXPECT_EXIT(clap_parse(&kParser, argc, argv.data()), ::testing::ExitedWithCode(1), "invalid option");
 }
 
-TEST(ClapParseDeath, OptionMissingValue)
+TEST_F(ClapParseDeathTest, RejectsOptionWithMissingValue)
 {
-    // "--format" without a following value must be rejected.
-    auto argv    = make_argv({"test", "in.psf", "out.h", "--format"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    EXPECT_EXIT(clap_parse(&TEST_PARSER, argc, argv.data()),
-                ::testing::ExitedWithCode(1), "");
+    // Arrange — "--format" with no following token.
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "--format"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act + Assert
+    EXPECT_EXIT(clap_parse(&kParser, argc, argv.data()), ::testing::ExitedWithCode(1), "requires a value");
 }
 
-TEST(ClapParseDeath, FlagDoesNotAcceptEqualsValue)
+TEST_F(ClapParseDeathTest, RejectsFlagWithEqualsValue)
 {
-    // "--verbose=yes" must be rejected; flags take no value.
-    auto argv    = make_argv({"test", "in.psf", "out.h", "--verbose=yes"});
-    int32_t argc = (int32_t)(argv.size() - 1);
-    EXPECT_EXIT(clap_parse(&TEST_PARSER, argc, argv.data()),
-                ::testing::ExitedWithCode(1), "");
+    // Arrange — "--verbose=yes" must be rejected; flags accept no value.
+    auto argv = MakeArgv({"test", "in.psf", "out.h", "--verbose=yes"});
+    int32_t argc = (int32_t) (argv.size() - 1);
+
+    // Act + Assert
+    EXPECT_EXIT(clap_parse(&kParser, argc, argv.data()), ::testing::ExitedWithCode(1), "does not accept a value");
 }

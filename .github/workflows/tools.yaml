@@ -1,0 +1,46 @@
+name: Tools
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "tools/**"
+      - ".github/workflows/tools.yaml"
+  pull_request:
+    branches: ["main", "master"]
+    paths:
+      - "tools/**"
+      - ".github/workflows/tools.yaml"
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.compiler }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake ninja-build zlib1g-dev
+
+      - name: Install compiler
+        if: matrix.compiler == 'clang'
+        run: sudo apt-get install -y --no-install-recommends clang
+
+      - name: Configure
+        run: >
+          cmake -S tools -B build-tools
+          -G Ninja
+          -D CMAKE_BUILD_TYPE=Release
+          -D CMAKE_C_COMPILER=${{ matrix.compiler }}
+          -D TOOLS_ENABLE_TESTS=ON
+
+      - name: Build
+        run: cmake --build build-tools
+
+      - name: Test
+        run: ctest --test-dir build-tools --output-on-failure
