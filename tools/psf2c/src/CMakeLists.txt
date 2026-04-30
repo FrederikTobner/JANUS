@@ -1,5 +1,7 @@
 find_package(ZLIB REQUIRED)
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../lib/clap clap-build)
+
 # Core library (for reuse in tests)
 file(GLOB PSF2C_LIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 list(FILTER PSF2C_LIB_SOURCES EXCLUDE REGEX "main\\.c$")
@@ -26,7 +28,7 @@ target_compile_options(psf2c PRIVATE
     -O2
     -std=c11
 )
-target_link_libraries(psf2c PRIVATE psf2c_lib)
+target_link_libraries(psf2c PRIVATE psf2c_lib clap)
 
 # Install target (optional)
 install(TARGETS psf2c
