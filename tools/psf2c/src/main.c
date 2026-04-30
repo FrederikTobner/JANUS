@@ -18,7 +18,7 @@
  * @file main.c
  * @brief PSF to C header converter - entry point.
  *
- * Usage: psf2c <input.psf> <output.h> [prefix] [--verbose]
+ * Usage: psf2c <input.psf> <output.h> [prefix] [OPTIONS]
  *
  * Converts PSF (PC Screen Font) files to C headers for use in the kernel.
  * Supports PSF1 and PSF2 formats, including gzip-compressed files (.psf.gz).

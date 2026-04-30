@@ -127,6 +127,9 @@ clap_result_t * clap_parse(clap_parser_t const * parser, int argc, char ** argv)
         }
 
         if (!end_of_options && token[0] == '-' && token[1] != '\0') {
+            if (token[2] != '\0') {
+                clap_die(parser, "invalid option: '%s' (short options must be a single character)", token);
+            }
             char ch = token[1];
             if (ch == 'h') {
                 clap_print_help(parser);

@@ -3,3 +3,9 @@ tools_add_lib(clap
         src/clap.c
         src/help.c
 )
+
+option(CLAP_ENABLE_TESTS "Enable tests for clap" ${TOOLS_ENABLE_TESTS})
+
+if(CLAP_ENABLE_TESTS)
+    add_subdirectory(tests)
+endif()
