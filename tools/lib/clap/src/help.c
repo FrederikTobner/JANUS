@@ -118,7 +118,7 @@ void clap_print_help(clap_parser_t const * parser)
         print_description(a->help, a->default_val);
         putchar('\n');
     }
-    print_row("      --help",    "Print help");
+    print_row("      --help", "Print help");
     print_row("      --version", "Print version information");
 
     exit(0);
