@@ -1,82 +1,73 @@
-# cmake - CMake Build Helpers
+# cmake — CMake Build Helpers
 
-CMake modules and helper functions for JANUS build system.
+CMake modules for cross-compilation toolchains, platform detection, and
+kernel build helpers.
 
-## Purpose
-
-Provides toolchain files for cross-compilation, platform detection, and build helper
-functions to simplify module CMakeLists.txt files.
-
-## Contents
-
-### toolchains/
-
-Toolchain files for each compiler/architecture combination. These are processed
-*before* `project()` and set the compiler, linker, and binutils.
-
-- `aarch64-gcc.cmake` — GCC cross-compiler for aarch64
-- `aarch64-clang.cmake` — Clang cross-compiler for aarch64
-- `x86_64-gcc.cmake` — GCC for x86_64 (native)
-- `x86_64-clang.cmake` — Clang for x86_64
-
-Usage:
-
-```bash
-cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-clang.cmake
-# Or use a preset: cmake --preset aarch64-clang
-```
-
-### JanusPlatform.cmake
-
-- Host platform detection
-- Compiler ID detection and GCC/architecture validation
-- Includes arch-specific flags from `arch/<arch>/JanusPlatform.cmake`
-- Common compiler flags (freestanding, no-stdlib, warnings, etc.)
-- Build type configuration (Debug, Release, MinSizeRel)
-
-### arch/\<arch\>/JanusPlatform.cmake
-
-Architecture-specific compiler flags and boot protocol configuration. No compiler
-or linker selection — that is handled by toolchain files.
-
-### JanusSubsys.cmake
-
-- `janus_add_subsys()` - Add a kernel subsystem with automatic arch detection
-
-**Key Features:**
-
-- **Auto-detects arch/ folders** - no manual `HAS_ARCH` flag needed
-- **Enforces subsystem isolation** - FATAL_ERROR if subsystem depends on subsystem (except kmain)
-- **Transitive includes** - PUBLIC include paths propagate automatically
-- **Globs arch sources** - .c files from `arch/<ARCH>/` are included automatically
-
-**Usage:**
-
-```cmake
-# Simple - CMake figures out the rest
-janus_add_subsys(drivers
-    SOURCES tty.c serial.c
-    DEPENDENCIES lib  # Only lib allowed, not other subsystems!
-)
-```
-
-### JanusKernel.cmake
-
-- `janus_link_kernel()` - Link kernel.elf from subsystems
-
-## Subsystem Directory Structure
-
-When a subsystem has architecture-specific code:
+## Directory Layout
 
 ```
-subsys/foo/
-├── include/foo/              # Tier 1: Public API
-├── arch/
-│   ├── include/arch/foo/     # Tier 2: Contract headers
-│   └── x86_64/
-│       ├── include/arch/impl/foo/  # Tier 3: Implementation
-│       └── *.c               # Arch source files
-└── *.c                       # Generic source files
+cmake/
+├── toolchains/          # Toolchain files (set compiler + binutils)
+├── arch/                # Per-architecture compiler flags
+├── platform/            # Platform detection and common compile flags
+├── boot/                # Boot protocol cmake helpers
+├── kernel/              # Kernel target helpers
+└── Registry.cmake       # Dependency registry + Mermaid graph generator
 ```
 
-The `janus_add_subsys()` function automatically sets up include paths for all three tiers.
+## toolchains/
+
+Toolchain files processed before `project()`. Sets the compiler, linker, and
+binutils for each architecture/compiler combination.
+
+| File | Target |
+|---|---|
+| `x86_64-gcc.cmake` | GCC, x86\_64 |
+| `x86_64-clang.cmake` | Clang, x86\_64 |
+| `aarch64-gcc.cmake` | GCC cross-compiler, AArch64 |
+| `aarch64-clang.cmake` | Clang cross-compiler, AArch64 |
+
+## platform/
+
+`Detection.cmake` — host detection, compiler validation, freestanding flags
+(`-ffreestanding`, `-nostdlib`, warnings), and build-type flags. Includes
+`arch/<arch>/JanusPlatform.cmake` for ISA-specific flags.
+
+## kernel/
+
+Helper functions for adding kernel targets.
+
+### `Library.cmake` — `janus_add_library(name SOURCES ... [DEPENDENCIES ...])`
+
+Creates a kernel library (STATIC, or INTERFACE when no sources are provided).
+Adds `include/` and global `kernel/include/` to include paths and registers the
+target in the dependency registry. To use `<asm/*.h>`, list `janus_asm` in `DEPENDENCIES`.
+
+### `Subsystem.cmake` — `janus_add_subsys(name SOURCES ... [DEPENDENCIES ...])`
+
+Creates a kernel subsystem. Automatically detects an `arch/CMakeLists.txt` and
+calls `add_subdirectory(arch)`. **Sources must be listed explicitly** — no
+globbing. Enforces subsystem isolation: a fatal error is raised if a subsystem
+depends on another subsystem (except `kmain`).
+
+### `ArchSource.cmake` — `janus_add_arch_subsys(name SOURCES ...)`
+
+Called from within `arch/CMakeLists.txt`. Creates a `${name}_arch` static
+library with the three-tier include hierarchy as PUBLIC paths. To use
+`<asm/*.h>` (e.g. Tier 3 wrappers), list `janus_asm` in `DEPENDENCIES`.
+
+### `Executable.cmake` — `janus_add_kernel(TARGET ... LINKER_SCRIPT ... DEPENDENCIES ... OBJECTS ...)`
+
+Links a kernel ELF from object libraries and dependencies. Called from
+`_start/<arch>/` to produce the final `kernel-<protocol>.elf`.
+
+## Registry.cmake
+
+Tracks all registered targets. Called after all `add_subdirectory` calls.
+
+- `janus_validate_registry()` — verify isolation rules
+- `janus_write_mermaid_diagram(output_file)` — write a Mermaid dependency
+  graph to `docs/src/generated/deps-<arch>.md`
+
+**Node shapes:** LIB → rounded rectangle, SUBSYS → rectangle, ASM → cylinder,
+PROTOCOL\_LIB → subroutine box, EXEC → hexagon.

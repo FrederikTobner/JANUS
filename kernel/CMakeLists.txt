@@ -13,6 +13,9 @@ configure_file(
 # Add generated config.h to include path
 include_directories("${CMAKE_BINARY_DIR}/kernel/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
+# Architecture abstraction layer — defines janus_asm INTERFACE target
+add_subdirectory(asm)
+
 # Kernel libraries - These can only include the types from our include directory
 add_subdirectory(lib)
 

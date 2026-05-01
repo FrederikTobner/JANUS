@@ -14,51 +14,34 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/impl/drivers/cpu.h
-/// @brief AArch64 CPU control implementation.
+/// @file asm/barriers.h
+/// @brief AArch64 memory barrier primitives.
 ///
-/// Thin wrappers that forward arch_cpu_* to the asm layer primitives.
-/// This header is pulled in via include path resolution.
+/// Raw inline-assembly wrappers for DSB, ISB, and DMB instructions.
+/// This is the only permitted site for __asm__ volatile on AArch64 for barriers.
+/// Required before IRQ, PCI, and device driver work.
 
-#ifndef AARCH64_IMPL_DRIVERS_CPU_H
-#define AARCH64_IMPL_DRIVERS_CPU_H
+#ifndef ASM_AARCH64_BARRIERS_H
+#define ASM_AARCH64_BARRIERS_H
 
-#include <asm/cpu.h>
 #include <janus/attributes.h>
 
-/// @brief Halt the CPU until the next interrupt/event.
-///
-/// Uses WFI (Wait For Interrupt) instruction on AArch64.
-static __always_inline void arch_cpu_halt(void)
+/// Data synchronisation barrier — complete all memory accesses before continuing (DSB SY).
+static __always_inline void asm_dsb(void)
 {
-    asm_cpu_wfi();
+    __asm__ volatile("dsb sy" ::: "memory");
 }
 
-/// @brief Disable interrupts.
-///
-/// Sets the DAIF interrupt mask bits to disable IRQ and FIQ.
-static __always_inline void arch_cpu_disable_interrupts(void)
+/// Instruction synchronisation barrier — flush the pipeline and refetch instructions (ISB).
+static __always_inline void asm_isb(void)
 {
-    asm_cpu_daif_set();
+    __asm__ volatile("isb" ::: "memory");
 }
 
-/// @brief Enable interrupts.
-///
-/// Clears the DAIF interrupt mask bits to enable IRQ and FIQ.
-static __always_inline void arch_cpu_enable_interrupts(void)
+/// Data memory barrier — order memory accesses without completing them (DMB SY).
+static __always_inline void asm_dmb(void)
 {
-    asm_cpu_daif_clr();
+    __asm__ volatile("dmb sy" ::: "memory");
 }
 
-/// @brief Disable interrupts and halt forever.
-///
-/// This function never returns and is used for unrecoverable errors.
-static __always_inline __noreturn void arch_cpu_halt_forever(void)
-{
-    arch_cpu_disable_interrupts();
-    for (;;) {
-        arch_cpu_halt();
-    }
-}
-
-#endif /* AARCH64_IMPL_DRIVERS_CPU_H */
+#endif /* ASM_AARCH64_BARRIERS_H */

@@ -6,5 +6,6 @@ janus_add_arch_subsys(drivers
         tty.c
         ../shared/framebuffer.c
     DEPENDENCIES
+        janus_asm
         display
 )

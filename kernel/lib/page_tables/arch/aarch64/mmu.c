@@ -14,6 +14,9 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
+#include <asm/barriers.h>
+#include <asm/regs.h>
+#include <asm/tlb.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 #include <page_tables/mmu.h>
@@ -67,8 +70,7 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
         return 0;
     }
     virt_addr_t virt_addr = MMIO_VIRT_BASE + (phys_addr & 0xFFFFFFFF);
-    u64 ttbr1;
-    __asm__ volatile("mrs %0, ttbr1_el1" : "=r"(ttbr1));
+    u64 ttbr1 = asm_read_ttbr1_el1();
     phys_addr_t l0_phys = ttbr1 & PAGE_TABLE_ENTRY_ADDR_MASK;
     phys_addr_t page_start = phys_addr & ~(PAGE_SIZE - 1);
     phys_addr_t page_end = (phys_addr + size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
@@ -96,10 +98,10 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
                   PAGE_TABLE_ENTRY_ATTR_IDX(1);
     }
     for (virt_addr_t va = virt_addr; va < virt_addr + size; va += PAGE_SIZE) {
-        __asm__ volatile("tlbi vale1is, %0" ::"r"(va >> 12));
+        asm_tlbi_vale1is(va >> 12);
     }
-    __asm__ volatile("dsb sy");
-    __asm__ volatile("isb");
+    asm_dsb();
+    asm_isb();
     return virt_addr;
 }
 

@@ -48,10 +48,10 @@ docs/
 ├── src/
 │   ├── SUMMARY.md         # Table of contents — defines the sidebar navigation
 │   ├── introduction.md    # Landing page
-│   ├── wiki/              # General OS / CS concepts (hardware, boot, memory, tools)
+│   ├── project/           # JANUS architecture, subsystems, setup, tools, philosophy
+│   ├── wiki/              # General OS / CS concepts (hardware, boot, memory)
 │   ├── tutorials/         # Hands-on, step-by-step implementation guides
-│   ├── reference/         # JANUS-specific architecture and subsystem design
-│   └── project/           # Contributing guidelines, philosophy, setup
+│   └── generated/         # Auto-generated files (dependency graphs) — do not edit
 ├── theme/                 # Custom CSS (side notes, code diffs)
 └── additional-js/         # Mermaid JS bundle
 ```
