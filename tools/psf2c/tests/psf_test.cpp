@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2025 by Frederik Tobner                                     *
+ * Copyright (C) 2026 by Frederik Tobner                                     *
  *                                                                           *
  * This file is part of JANUS.                                               *
  *                                                                           *
@@ -21,6 +21,9 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdint>
+#include <vector>
+
 extern "C" {
 #include "psf.h"
 }
@@ -36,19 +39,20 @@ class PsfParseTest : public ::testing::Test
     }
 };
 
-// Test PSF1 format parsing
-TEST_F(PsfParseTest, ParseValidPsf1)
+// ---------------------------------------------------------------------------
+// Happy-path tests
+// ---------------------------------------------------------------------------
+
+TEST_F(PsfParseTest, RejectsTruncatedPsf1Data)
 {
-    // Minimal PSF1 font: 2 glyphs, 8x8
-    // Header: magic (2 bytes) + mode + charsize
-    // Data: 2 glyphs * 8 bytes = 16 bytes
-    uint8_t psf1_data[] = {
-        // Header
+    // Arrange — PSF1 mode=0 declares 256 glyphs (charsize=8 → 2 048 bytes of
+    // glyph data), but only two glyphs are supplied.
+    static uint8_t const kPsf1Truncated[] = {
         PSF1_MAGIC0,
         PSF1_MAGIC1,
         0x00, // mode (256 glyphs, no unicode table)
-        0x08, // charsize (8 bytes per glyph = 8 rows)
-        // Glyph 0 (8 rows)
+        0x08, // charsize (8 bytes per glyph)
+        // Glyph 0
         0x00,
         0x00,
         0x00,
@@ -57,7 +61,7 @@ TEST_F(PsfParseTest, ParseValidPsf1)
         0x00,
         0x00,
         0x00,
-        // Glyph 1 (8 rows)
+        // Glyph 1
         0xFF,
         0xFF,
         0xFF,
@@ -68,82 +72,81 @@ TEST_F(PsfParseTest, ParseValidPsf1)
         0xFF,
     };
 
-    // Note: PSF1 with mode=0 expects 256 glyphs, but we only provide 2
-    // This should fail due to insufficient data
-    // Let's test with proper expectations
+    // Act
+    int result = psf_parse(kPsf1Truncated, sizeof(kPsf1Truncated), &font);
 
-    // For a valid test, we need 256 * 8 = 2048 bytes of glyph data
-    // Instead, let's test error handling for truncated data
-    EXPECT_EQ(psf_parse(psf1_data, sizeof(psf1_data), &font), -1);
+    // Assert
+    EXPECT_EQ(result, -1);
 }
 
-TEST_F(PsfParseTest, ParseValidPsf2)
+/// @brief Minimal well-formed PSF2 font: 1 glyph, 8×16.
+static uint8_t const kValidPsf2[] = {
+    // Magic
+    PSF2_MAGIC0,
+    PSF2_MAGIC1,
+    PSF2_MAGIC2,
+    PSF2_MAGIC3,
+    // Version
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    // Header size = 32
+    0x20,
+    0x00,
+    0x00,
+    0x00,
+    // Flags
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    // Number of glyphs = 1
+    0x01,
+    0x00,
+    0x00,
+    0x00,
+    // Bytes per glyph = 16
+    0x10,
+    0x00,
+    0x00,
+    0x00,
+    // Height = 16
+    0x10,
+    0x00,
+    0x00,
+    0x00,
+    // Width = 8
+    0x08,
+    0x00,
+    0x00,
+    0x00,
+    // Glyph data (16 bytes)
+    0x00,
+    0x18,
+    0x3C,
+    0x66,
+    0x66,
+    0x7E,
+    0x66,
+    0x66,
+    0x66,
+    0x66,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+};
+
+TEST_F(PsfParseTest, ParsesValidPsf2)
 {
-    // Minimal PSF2 font: 1 glyph, 8x16
-    // Header: 32 bytes
-    // Data: 1 glyph * 16 bytes = 16 bytes
-    uint8_t psf2_data[] = {
-        // Magic
-        PSF2_MAGIC0,
-        PSF2_MAGIC1,
-        PSF2_MAGIC2,
-        PSF2_MAGIC3,
-        // Version (4 bytes, little-endian)
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        // Header size (4 bytes) = 32
-        0x20,
-        0x00,
-        0x00,
-        0x00,
-        // Flags (4 bytes)
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        // Number of glyphs (4 bytes) = 1
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        // Bytes per glyph (4 bytes) = 16
-        0x10,
-        0x00,
-        0x00,
-        0x00,
-        // Height (4 bytes) = 16
-        0x10,
-        0x00,
-        0x00,
-        0x00,
-        // Width (4 bytes) = 8
-        0x08,
-        0x00,
-        0x00,
-        0x00,
-        // Glyph data (16 bytes)
-        0x00,
-        0x18,
-        0x3C,
-        0x66,
-        0x66,
-        0x7E,
-        0x66,
-        0x66,
-        0x66,
-        0x66,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-    };
+    // Act
+    int result = psf_parse(kValidPsf2, sizeof(kValidPsf2), &font);
 
-    ASSERT_EQ(psf_parse(psf2_data, sizeof(psf2_data), &font), 0);
-
+    // Assert
+    ASSERT_EQ(result, 0);
     EXPECT_EQ(font.width, 8u);
     EXPECT_EQ(font.height, 16u);
     EXPECT_EQ(font.numglyphs, 1u);
@@ -151,101 +154,134 @@ TEST_F(PsfParseTest, ParseValidPsf2)
     EXPECT_NE(font.glyphs, nullptr);
 }
 
-TEST_F(PsfParseTest, RejectsInvalidMagic)
-{
-    uint8_t invalid_data[] = {0xDE, 0xAD, 0xBE, 0xEF};
-
-    EXPECT_EQ(psf_parse(invalid_data, sizeof(invalid_data), &font), -1);
-}
-
 TEST_F(PsfParseTest, RejectsNullData)
 {
-    EXPECT_EQ(psf_parse(nullptr, 100, &font), -1);
+    // Act
+    int result = psf_parse(nullptr, 100, &font);
+
+    // Assert
+    EXPECT_EQ(result, -1);
 }
 
-TEST_F(PsfParseTest, RejectsTooSmallData)
+// ---------------------------------------------------------------------------
+// Rejection tests (parameterized)
+// ---------------------------------------------------------------------------
+
+/// @brief Describes a single invalid PSF byte buffer.
+struct InvalidPsfInput {
+    char const * name;
+    std::vector<uint8_t> bytes;
+};
+
+/// @brief Parameterized fixture for inputs that must be rejected.
+class PsfInvalidInputTest : public ::testing::TestWithParam<InvalidPsfInput>
 {
-    uint8_t tiny_data[] = {PSF2_MAGIC0, PSF2_MAGIC1};
-
-    EXPECT_EQ(psf_parse(tiny_data, sizeof(tiny_data), &font), -1);
-}
-
-TEST_F(PsfParseTest, RejectsTruncatedPsf2Header)
-{
-    // Valid magic but truncated header
-    uint8_t truncated[] = {
-        PSF2_MAGIC0,
-        PSF2_MAGIC1,
-        PSF2_MAGIC2,
-        PSF2_MAGIC3,
-        0x00,
-        0x00,
-        0x00,
-        0x00, // version only
-    };
-
-    EXPECT_EQ(psf_parse(truncated, sizeof(truncated), &font), -1);
-}
-
-TEST_F(PsfParseTest, RejectsTruncatedGlyphData)
-{
-    // Valid PSF2 header but missing glyph data
-    uint8_t psf2_no_data[] = {
-        // Magic
-        PSF2_MAGIC0,
-        PSF2_MAGIC1,
-        PSF2_MAGIC2,
-        PSF2_MAGIC3,
-        // Version
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        // Header size = 32
-        0x20,
-        0x00,
-        0x00,
-        0x00,
-        // Flags
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        // Number of glyphs = 1
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        // Bytes per glyph = 16
-        0x10,
-        0x00,
-        0x00,
-        0x00,
-        // Height = 16
-        0x10,
-        0x00,
-        0x00,
-        0x00,
-        // Width = 8
-        0x08,
-        0x00,
-        0x00,
-        0x00,
-        // No glyph data!
-    };
-
-    EXPECT_EQ(psf_parse(psf2_no_data, sizeof(psf2_no_data), &font), -1);
-}
-
-// Test psf_free with NULL
-TEST(PsfFreeTest, HandlesNull)
-{
-    psf_free(nullptr); // Should not crash
-}
-
-TEST(PsfFreeTest, HandlesNullGlyphs)
-{
+  protected:
     psf_font_t font{};
+
+    void TearDown() override
+    {
+        psf_free(&font);
+    }
+};
+
+TEST_P(PsfInvalidInputTest, ReturnsErrorCode)
+{
+    // Arrange
+    InvalidPsfInput const & param = GetParam();
+
+    // Act
+    int result = psf_parse(param.bytes.data(), param.bytes.size(), &font);
+
+    // Assert
+    EXPECT_EQ(result, -1);
+}
+
+static InvalidPsfInput const kInvalidInputs[] = {
+    {
+        "InvalidMagic",
+        {0xDE, 0xAD, 0xBE, 0xEF},
+    },
+    {
+        "TooSmall",
+        {PSF2_MAGIC0, PSF2_MAGIC1},
+    },
+    {
+        "TruncatedPsf2Header",
+        {PSF2_MAGIC0, PSF2_MAGIC1, PSF2_MAGIC2, PSF2_MAGIC3, 0x00, 0x00, 0x00, 0x00},
+    },
+    {
+        "TruncatedGlyphData",
+        {// Magic
+         PSF2_MAGIC0,
+         PSF2_MAGIC1,
+         PSF2_MAGIC2,
+         PSF2_MAGIC3,
+         // Version
+         0x00,
+         0x00,
+         0x00,
+         0x00,
+         // Header size = 32
+         0x20,
+         0x00,
+         0x00,
+         0x00,
+         // Flags
+         0x00,
+         0x00,
+         0x00,
+         0x00,
+         // Number of glyphs = 1
+         0x01,
+         0x00,
+         0x00,
+         0x00,
+         // Bytes per glyph = 16
+         0x10,
+         0x00,
+         0x00,
+         0x00,
+         // Height = 16
+         0x10,
+         0x00,
+         0x00,
+         0x00,
+         // Width = 8
+         0x08,
+         0x00,
+         0x00,
+         0x00},
+        // (no glyph data follows)
+    },
+};
+
+INSTANTIATE_TEST_SUITE_P(InvalidPsfInputs,
+                         PsfInvalidInputTest,
+                         ::testing::ValuesIn(kInvalidInputs),
+                         [](::testing::TestParamInfo<InvalidPsfInput> const & info) { return info.param.name; });
+
+// ---------------------------------------------------------------------------
+// psf_free edge cases
+// ---------------------------------------------------------------------------
+
+class PsfFreeTest : public ::testing::Test
+{
+  protected:
+    psf_font_t font{};
+};
+
+TEST_F(PsfFreeTest, HandlesNullPointer)
+{
+    // Act + Assert — must not crash
+    psf_free(nullptr);
+}
+
+TEST_F(PsfFreeTest, HandlesNullGlyphs)
+{
+    // Arrange
     font.glyphs = nullptr;
-    psf_free(&font); // Should not crash
+
+    // Act + Assert — must not crash
+    psf_free(&font);
 }

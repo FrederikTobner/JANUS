@@ -1,7 +1,16 @@
 # Dependency Graph
 
-This page visualises the relationships between all kernel targets.
-Two views are provided:
+This page visualises the relationships between all registered targets.
+Separate diagrams are provided for the kernel and for the tools:
+
+- **Kernel** — all subsystems, libraries, protocol libraries, and executables
+- **Tools** — all tool libraries and tool executables
+
+---
+
+## Kernel Targets
+
+Two views are provided for the kernel:
 
 - **Module dependencies** — which targets depend on which other targets (generated from CMake at configure time)
 - **Build artifacts** — which object files and protocol libraries are combined into each executable
@@ -51,3 +60,11 @@ graph LR
   x_entry_common2 & x_entry_mb2 & kmain & boot_multiboot2 & subsystems --> mb2
   aa_entry_limine & aa_limine_req & kmain & boot_limine & subsystems --> limine_aa64
 ```
+
+---
+
+## Tool Targets
+
+{{#include ../../generated/deps-tools.md}}
+
+> Node shapes: rounded rectangle = tool library · hexagon = tool executable

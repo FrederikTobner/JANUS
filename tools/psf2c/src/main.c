@@ -18,7 +18,7 @@
  * @file main.c
  * @brief PSF to C header converter - entry point.
  *
- * Usage: psf2c <input.psf> <output.h> [symbol_prefix]
+ * Usage: psf2c <input.psf> <output.h> [prefix] [OPTIONS]
  *
  * Converts PSF (PC Screen Font) files to C headers for use in the kernel.
  * Supports PSF1 and PSF2 formats, including gzip-compressed files (.psf.gz).
@@ -28,32 +28,36 @@
 #include "file_io.h"
 #include "psf.h"
 
+#include <clap/clap.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-static void print_usage(char const * progname)
-{
-    fprintf(stderr, "Usage: %s <input.psf> <output.h> [symbol_prefix]\n", progname);
-    fprintf(stderr, "\n");
-    fprintf(stderr, "Convert a PSF font file to a C header.\n");
-    fprintf(stderr, "Supports both raw .psf and gzip-compressed .psf.gz files.\n");
-    fprintf(stderr, "\n");
-    fprintf(stderr, "Arguments:\n");
-    fprintf(stderr, "  input.psf      Input PSF font file (PSF1 or PSF2, optionally gzipped)\n");
-    fprintf(stderr, "  output.h       Output C header file\n");
-    fprintf(stderr, "  symbol_prefix  Optional prefix for symbols (default: font)\n");
-}
+static clap_arg_t const ARGS[] = {
+    CLAP_POSITIONAL("input", "FILE", "Input PSF font file (.psf or .psf.gz)"),
+    CLAP_POSITIONAL("output", "FILE", "Output C header file"),
+    CLAP_POSITIONAL_OPT("prefix", "STRING", "Symbol prefix for generated identifiers", "font"),
+    CLAP_FLAG("verbose", 'v', "Print font information after conversion"),
+};
+
+static clap_parser_t const PARSER = {
+    .name = "psf2c",
+    .version = "0.1.0",
+    .about = "Convert a PSF font file to a C header for use in the kernel",
+    .args = ARGS,
+    .nargs = (int32_t) (sizeof ARGS / sizeof *ARGS),
+};
 
 int main(int argc, char * argv[])
 {
-    if (argc < 3) {
-        print_usage(argv[0]);
-        return 1;
-    }
+    clap_result_t * result = clap_parse(&PARSER, argc, argv);
 
-    char const * input_path = argv[1];
-    char const * output_path = argv[2];
-    char const * prefix = (argc >= 4) ? argv[3] : "font";
+    char const * input_path = clap_get(result, &PARSER, "input");
+    char const * output_path = clap_get(result, &PARSER, "output");
+    char const * prefix = clap_get(result, &PARSER, "prefix");
+    bool verbose = clap_flag(result, &PARSER, "verbose");
+
+    // Safe to free immediately: pointers remain valid (into argv or static defaults).
+    clap_result_free(result);
 
     /* Load file (with automatic gzip detection) */
     uint8_t * file_data = NULL;
@@ -70,13 +74,18 @@ int main(int argc, char * argv[])
     }
     free(file_data);
 
-    printf(
-        "Font info: %ux%u, %u glyphs, %u bytes/glyph\n", font.width, font.height, font.numglyphs, font.bytesperglyph);
+    if (verbose) {
+        printf("Font info: %ux%u, %u glyphs, %u bytes/glyph\n",
+               font.width,
+               font.height,
+               font.numglyphs,
+               font.bytesperglyph);
+    }
 
     /* Generate output */
     FILE * fp_out = fopen(output_path, "w");
     if (!fp_out) {
-        fprintf(stderr, "Error: Cannot open output file '%s'\n", output_path);
+        fprintf(stderr, "error: cannot open output file '%s'\n", output_path);
         psf_free(&font);
         return 1;
     }

@@ -10,6 +10,7 @@ target_link_libraries(psf2c_tests PRIVATE
     psf2c_lib
     GTest::gtest
     GTest::gtest_main
+    GTest::gmock
 )
 
 target_compile_options(psf2c_tests PRIVATE

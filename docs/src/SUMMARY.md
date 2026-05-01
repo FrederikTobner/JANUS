@@ -46,6 +46,16 @@
 
 ---
 
+- [Tools](project/tools/tools.md)
+  - [Philosophy](project/tools/philosophy.md)
+  - [Standards](project/tools/standards.md)
+  - [Catalog](project/tools/catalog.md)
+    - [clap](project/tools/clap.md)
+    - [psf2c](project/tools/psf2c.md)
+  - [Dependency Graph](project/tools/dependency-graph.md)
+
+---
+
 - [Contributing](project/contributing/contributing.md)
   - [Coding Style](project/contributing/coding-style.md)
   - [Terminology](project/contributing/terminology.md)
