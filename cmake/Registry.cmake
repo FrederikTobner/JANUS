@@ -53,6 +53,7 @@ endfunction()
 #   SUBSYS       → rectangle          name["label"]
 #   PROTOCOL_LIB → subroutine box     name[["label"]]
 #   EXEC         → hexagon            name{{"label"}}
+#   ASM          → cylinder           name[("label")]
 #
 # Edges are only emitted when the dependency target is itself registered, so
 # unresolved / future deps (e.g. mm → memory) silently produce no dangling edge.
@@ -62,6 +63,7 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
     set(_subsys_nodes "")
     set(_proto_nodes "")
     set(_exec_nodes "")
+    set(_asm_nodes "")
 
     foreach(name ${JANUS_REGISTRY_NAMES})
         if(NOT name)
@@ -76,6 +78,8 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
             list(APPEND _proto_nodes "${name}")
         elseif(_t STREQUAL "EXEC")
             list(APPEND _exec_nodes "${name}")
+        elseif(_t STREQUAL "ASM")
+            list(APPEND _asm_nodes "${name}")
         endif()
     endforeach()
 
@@ -117,6 +121,15 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
         foreach(_n ${_exec_nodes})
             _janus_mermaid_id("${_n}" _id)
             string(APPEND _d "    ${_id}{{\"${_n}\"}}\n")
+        endforeach()
+        string(APPEND _d "  end\n")
+    endif()
+
+    if(_asm_nodes)
+        string(APPEND _d "  subgraph asm_layer[\"ASM Layer\"]\n")
+        foreach(_n ${_asm_nodes})
+            _janus_mermaid_id("${_n}" _id)
+            string(APPEND _d "    ${_id}[(\"${_n}\")]\n")
         endforeach()
         string(APPEND _d "  end\n")
     endif()

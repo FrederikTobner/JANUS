@@ -14,51 +14,34 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/impl/drivers/cpu.h
-/// @brief AArch64 CPU control implementation.
+/// @file asm/barriers.h
+/// @brief x86_64 memory barrier primitives.
 ///
-/// Thin wrappers that forward arch_cpu_* to the asm layer primitives.
-/// This header is pulled in via include path resolution.
+/// Raw inline-assembly wrappers for MFENCE, LFENCE, and SFENCE instructions.
+/// This is the only permitted site for __asm__ volatile on x86_64 for barriers.
+/// Required before IRQ, PCI, and HDA device work.
 
-#ifndef AARCH64_IMPL_DRIVERS_CPU_H
-#define AARCH64_IMPL_DRIVERS_CPU_H
+#ifndef ASM_X86_64_BARRIERS_H
+#define ASM_X86_64_BARRIERS_H
 
-#include <asm/cpu.h>
 #include <janus/attributes.h>
 
-/// @brief Halt the CPU until the next interrupt/event.
-///
-/// Uses WFI (Wait For Interrupt) instruction on AArch64.
-static __always_inline void arch_cpu_halt(void)
+/// Full memory fence — orders all prior loads and stores (MFENCE).
+static __always_inline void asm_mfence(void)
 {
-    asm_cpu_wfi();
+    __asm__ volatile("mfence" ::: "memory");
 }
 
-/// @brief Disable interrupts.
-///
-/// Sets the DAIF interrupt mask bits to disable IRQ and FIQ.
-static __always_inline void arch_cpu_disable_interrupts(void)
+/// Load fence — orders all prior load operations (LFENCE).
+static __always_inline void asm_lfence(void)
 {
-    asm_cpu_daif_set();
+    __asm__ volatile("lfence" ::: "memory");
 }
 
-/// @brief Enable interrupts.
-///
-/// Clears the DAIF interrupt mask bits to enable IRQ and FIQ.
-static __always_inline void arch_cpu_enable_interrupts(void)
+/// Store fence — orders all prior store operations (SFENCE).
+static __always_inline void asm_sfence(void)
 {
-    asm_cpu_daif_clr();
+    __asm__ volatile("sfence" ::: "memory");
 }
 
-/// @brief Disable interrupts and halt forever.
-///
-/// This function never returns and is used for unrecoverable errors.
-static __always_inline __noreturn void arch_cpu_halt_forever(void)
-{
-    arch_cpu_disable_interrupts();
-    for (;;) {
-        arch_cpu_halt();
-    }
-}
-
-#endif /* AARCH64_IMPL_DRIVERS_CPU_H */
+#endif /* ASM_X86_64_BARRIERS_H */

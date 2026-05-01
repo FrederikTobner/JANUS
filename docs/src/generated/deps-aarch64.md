@@ -18,10 +18,19 @@ graph TD
   subgraph exec_layer["Executables"]
     kernel_limine_elf{{"kernel-limine.elf"}}
   end
+  subgraph asm_layer["ASM Layer"]
+    janus_asm[("janus_asm")]
+  end
+  display --> janus_asm
+  fmt --> janus_asm
+  page_tables --> janus_asm
+  boot --> janus_asm
   boot --> display
   boot_limine --> boot
+  drivers --> janus_asm
   drivers --> display
   drivers --> page_tables
+  kmain --> janus_asm
   kmain --> drivers
   kmain --> boot
   kmain --> fmt

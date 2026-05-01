@@ -43,19 +43,22 @@ function(janus_add_library NAME)
                 ${CMAKE_SOURCE_DIR}/include
         )
         
+        # ASM layer
+        target_link_libraries(${NAME} INTERFACE janus_asm)
+
         # Link dependencies
         if(ARG_DEPENDENCIES)
             target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
         endif()
         
-        janus_register(${NAME} LIB "${ARG_DEPENDENCIES}")
+        janus_register(${NAME} LIB "janus_asm;${ARG_DEPENDENCIES}")
         return()
     endif()
 
     # Create static library
     add_library(${NAME} STATIC ${ARG_SOURCES})
 
-    janus_register(${NAME} LIB "${ARG_DEPENDENCIES}")
+    janus_register(${NAME} LIB "janus_asm;${ARG_DEPENDENCIES}")
 
     # Standard include directories
     target_include_directories(${NAME}
@@ -63,6 +66,9 @@ function(janus_add_library NAME)
             ${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_SOURCE_DIR}/include
     )
+
+    # ASM layer
+    target_link_libraries(${NAME} PUBLIC janus_asm)
 
     # Link dependencies
     if(ARG_DEPENDENCIES)

@@ -35,7 +35,7 @@ function(janus_add_subsys NAME)
     )
 
     # Register subsystem and dependencies in global registry
-    janus_register(${NAME} SUBSYS "${ARG_DEPENDENCIES}")
+    janus_register(${NAME} SUBSYS "janus_asm;${ARG_DEPENDENCIES}")
 
     set(SUBSYS_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
     set(ALL_SOURCES ${ARG_SOURCES})
@@ -61,6 +61,8 @@ function(janus_add_subsys NAME)
             ${SUBSYS_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/include
         )
+        # ASM layer
+        target_link_libraries(${NAME} INTERFACE janus_asm)
         if(ARG_DEPENDENCIES)
             target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
         endif()
@@ -77,6 +79,9 @@ function(janus_add_subsys NAME)
             ${CMAKE_SOURCE_DIR}/kernel/include
     )
     
+    # ASM layer
+    target_link_libraries(${NAME} PUBLIC janus_asm)
+
     # Add arch-specific include directories if arch exists
     if(HAS_ARCH)
         target_link_libraries(${NAME} PUBLIC ${NAME}_arch)

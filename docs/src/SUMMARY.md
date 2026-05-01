@@ -19,6 +19,7 @@
   - [Layer Model](project/architecture/layer-model.md)
   - [Module Structure](project/architecture/module-structure.md)
   - [Include Hierarchy](project/architecture/include-hierarchy.md)
+  - [Privilege Model](project/architecture/privilege-model.md)
   - [Dependency Graph](project/architecture/dependency-graph.md)
 
 ---

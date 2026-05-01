@@ -14,51 +14,34 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/impl/drivers/cpu.h
-/// @brief AArch64 CPU control implementation.
+/// @file asm/cpu.h
+/// @brief x86_64 CPU control primitives.
 ///
-/// Thin wrappers that forward arch_cpu_* to the asm layer primitives.
-/// This header is pulled in via include path resolution.
+/// Raw inline-assembly wrappers for privileged CPU instructions.
+/// This is the only permitted site for __asm__ volatile on x86_64 for CPU control.
+/// Consumed by subsystem Tier 3 headers and kernel libraries.
 
-#ifndef AARCH64_IMPL_DRIVERS_CPU_H
-#define AARCH64_IMPL_DRIVERS_CPU_H
+#ifndef ASM_X86_64_CPU_H
+#define ASM_X86_64_CPU_H
 
-#include <asm/cpu.h>
 #include <janus/attributes.h>
 
-/// @brief Halt the CPU until the next interrupt/event.
-///
-/// Uses WFI (Wait For Interrupt) instruction on AArch64.
-static __always_inline void arch_cpu_halt(void)
+/// Halt the CPU until the next interrupt (HLT).
+static __always_inline void asm_cpu_hlt(void)
 {
-    asm_cpu_wfi();
+    __asm__ volatile("hlt");
 }
 
-/// @brief Disable interrupts.
-///
-/// Sets the DAIF interrupt mask bits to disable IRQ and FIQ.
-static __always_inline void arch_cpu_disable_interrupts(void)
+/// Disable external interrupts (CLI).
+static __always_inline void asm_cpu_cli(void)
 {
-    asm_cpu_daif_set();
+    __asm__ volatile("cli");
 }
 
-/// @brief Enable interrupts.
-///
-/// Clears the DAIF interrupt mask bits to enable IRQ and FIQ.
-static __always_inline void arch_cpu_enable_interrupts(void)
+/// Enable external interrupts (STI).
+static __always_inline void asm_cpu_sti(void)
 {
-    asm_cpu_daif_clr();
+    __asm__ volatile("sti");
 }
 
-/// @brief Disable interrupts and halt forever.
-///
-/// This function never returns and is used for unrecoverable errors.
-static __always_inline __noreturn void arch_cpu_halt_forever(void)
-{
-    arch_cpu_disable_interrupts();
-    for (;;) {
-        arch_cpu_halt();
-    }
-}
-
-#endif /* AARCH64_IMPL_DRIVERS_CPU_H */
+#endif /* ASM_X86_64_CPU_H */

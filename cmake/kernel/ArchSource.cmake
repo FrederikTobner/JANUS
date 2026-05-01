@@ -63,6 +63,8 @@ function(janus_add_arch_subsys NAME)
         "${CMAKE_CURRENT_SOURCE_DIR}/internal"         # <arch/internal/drivers/*.h>
         "${CMAKE_CURRENT_SOURCE_DIR}/../../include"         # <drivers/include/*.h>
     )
+    # ASM layer — Tier 3 headers include <asm/cpu.h> etc.
+    target_link_libraries(${ARCH_LIB_NAME} PUBLIC janus_asm)
     # Link dependencies (only lib allowed, not other subsystems)
     if(ARG_DEPENDENCIES)
         target_link_libraries(${ARCH_LIB_NAME} PUBLIC ${ARG_DEPENDENCIES})

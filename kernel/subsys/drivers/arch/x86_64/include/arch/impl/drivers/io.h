@@ -17,11 +17,12 @@
 /// @file arch/impl/drivers/io.h
 /// @brief x86_64 port I/O operations.
 ///
-/// Internal header for arch implementations within the drivers subsystem.
+/// Thin wrappers that forward outb/inb to the asm layer primitives.
 
 #ifndef X86_64_IMPL_DRIVERS_IO_H
 #define X86_64_IMPL_DRIVERS_IO_H
 
+#include <asm/io.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 
@@ -31,7 +32,7 @@
 /// @param value The byte value to write.
 static __always_inline void outb(u16 port, u8 value)
 {
-    __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
+    asm_io_outb(port, value);
 }
 
 /// Read a byte from an I/O port.
@@ -40,9 +41,7 @@ static __always_inline void outb(u16 port, u8 value)
 /// @return The byte read from the port.
 static __always_inline u8 inb(u16 port)
 {
-    u8 ret;
-    __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
-    return ret;
+    return asm_io_inb(port);
 }
 
 #endif /* X86_64_IMPL_DRIVERS_IO_H */

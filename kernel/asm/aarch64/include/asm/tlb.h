@@ -14,51 +14,37 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/impl/drivers/cpu.h
-/// @brief AArch64 CPU control implementation.
+/// @file asm/tlb.h
+/// @brief AArch64 TLB maintenance primitives.
 ///
-/// Thin wrappers that forward arch_cpu_* to the asm layer primitives.
-/// This header is pulled in via include path resolution.
+/// Raw inline-assembly wrappers for TLBI instructions.
+/// This is the only permitted site for __asm__ volatile on AArch64 for TLB ops.
+/// Consumed by kernel libraries (e.g. page_tables) that manipulate page tables.
 
-#ifndef AARCH64_IMPL_DRIVERS_CPU_H
-#define AARCH64_IMPL_DRIVERS_CPU_H
+#ifndef ASM_AARCH64_TLB_H
+#define ASM_AARCH64_TLB_H
 
-#include <asm/cpu.h>
 #include <janus/attributes.h>
+#include <janus/types.h>
 
-/// @brief Halt the CPU until the next interrupt/event.
+/// Invalidate TLB entry by VA, EL1, inner shareable (TLBI VALE1IS).
 ///
-/// Uses WFI (Wait For Interrupt) instruction on AArch64.
-static __always_inline void arch_cpu_halt(void)
+/// Invalidates the TLB entry for the given virtual page address in the current
+/// ASID, for EL1, broadcast to all CPUs in the inner-shareable domain.
+///
+/// @param va_page  Virtual address right-shifted by 12 (i.e. va >> 12).
+static __always_inline void asm_tlbi_vale1is(u64 va_page)
 {
-    asm_cpu_wfi();
+    __asm__ volatile("tlbi vale1is, %0" ::"r"(va_page) : "memory");
 }
 
-/// @brief Disable interrupts.
+/// Invalidate all TLB entries for EL1, inner shareable (TLBI VMALLE1IS).
 ///
-/// Sets the DAIF interrupt mask bits to disable IRQ and FIQ.
-static __always_inline void arch_cpu_disable_interrupts(void)
+/// Flushes all EL1 TLB entries for all ASIDs, broadcast to all CPUs in the
+/// inner-shareable domain. Use after a full page table rebuild.
+static __always_inline void asm_tlbi_vmalle1is(void)
 {
-    asm_cpu_daif_set();
+    __asm__ volatile("tlbi vmalle1is" ::: "memory");
 }
 
-/// @brief Enable interrupts.
-///
-/// Clears the DAIF interrupt mask bits to enable IRQ and FIQ.
-static __always_inline void arch_cpu_enable_interrupts(void)
-{
-    asm_cpu_daif_clr();
-}
-
-/// @brief Disable interrupts and halt forever.
-///
-/// This function never returns and is used for unrecoverable errors.
-static __always_inline __noreturn void arch_cpu_halt_forever(void)
-{
-    arch_cpu_disable_interrupts();
-    for (;;) {
-        arch_cpu_halt();
-    }
-}
-
-#endif /* AARCH64_IMPL_DRIVERS_CPU_H */
+#endif /* ASM_AARCH64_TLB_H */
