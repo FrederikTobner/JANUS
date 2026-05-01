@@ -106,8 +106,8 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
         phys_addr_t l3_phys = *l2_pte & PAGE_TABLE_ENTRY_ADDR_MASK;
         u64 * l3_table = (u64 *) mmu_physical_to_virtual_address(l3_phys);
         l3_table[L3_INDEX(va)] = (pa & PAGE_TABLE_ENTRY_ADDR_MASK) | PAGE_TABLE_ENTRY_VALID | PAGE_TABLE_ENTRY_PAGE |
-                                  PAGE_TABLE_ENTRY_AF | PAGE_TABLE_ENTRY_SH_OSH | PAGE_TABLE_ENTRY_UXN |
-                                  PAGE_TABLE_ENTRY_PXN | PAGE_TABLE_ENTRY_ATTR_IDX(1);
+                                 PAGE_TABLE_ENTRY_AF | PAGE_TABLE_ENTRY_SH_OSH | PAGE_TABLE_ENTRY_UXN |
+                                 PAGE_TABLE_ENTRY_PXN | PAGE_TABLE_ENTRY_ATTR_IDX(1);
     }
     for (virt_addr_t v = virt_addr; v < virt_addr + aligned_size; v += PAGE_SIZE) {
         asm_tlbi_vale1is(v >> 12);

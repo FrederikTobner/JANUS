@@ -41,27 +41,27 @@
 
 // --- page table entry flags ---------------------------------------------------
 
-#define PTE_PRESENT   (1UL << 0)
-#define PTE_RW        (1UL << 1)
-#define PTE_PWT       (1UL << 3)
-#define PTE_PCD       (1UL << 4) ///< Cache-disable — required for MMIO
-#define PTE_NX        (1UL << 63)
-#define PTE_ADDR_MASK 0x000FFFFFFFFFF000UL
+#define PTE_PRESENT       (1UL << 0)
+#define PTE_RW            (1UL << 1)
+#define PTE_PWT           (1UL << 3)
+#define PTE_PCD           (1UL << 4) ///< Cache-disable — required for MMIO
+#define PTE_NX            (1UL << 63)
+#define PTE_ADDR_MASK     0x000FFFFFFFFFF000UL
 
 // --- page table geometry ------------------------------------------------------
 
-#define PAGE_SIZE        4096UL
+#define PAGE_SIZE         4096UL
 #define ENTRIES_PER_TABLE 512UL
 
-#define PML4_SHIFT 39
-#define PDPT_SHIFT 30
-#define PD_SHIFT   21
-#define PT_SHIFT   12
+#define PML4_SHIFT        39
+#define PDPT_SHIFT        30
+#define PD_SHIFT          21
+#define PT_SHIFT          12
 
-#define PML4_INDEX(va) (((va) >> PML4_SHIFT) & 0x1FF)
-#define PDPT_INDEX(va) (((va) >> PDPT_SHIFT) & 0x1FF)
-#define PD_INDEX(va)   (((va) >> PD_SHIFT)   & 0x1FF)
-#define PT_INDEX(va)   (((va) >> PT_SHIFT)   & 0x1FF)
+#define PML4_INDEX(va)    (((va) >> PML4_SHIFT) & 0x1FF)
+#define PDPT_INDEX(va)    (((va) >> PDPT_SHIFT) & 0x1FF)
+#define PD_INDEX(va)      (((va) >> PD_SHIFT) & 0x1FF)
+#define PT_INDEX(va)      (((va) >> PT_SHIFT) & 0x1FF)
 
 // --- MMIO virtual address window ----------------------------------------------
 //
@@ -70,8 +70,8 @@
 // Limine places the HHDM at 0xFFFF800000000000; the kernel image typically
 // lands near 0xFFFFFFFF80000000. This window sits well clear of both.
 
-#define MMIO_VIRT_BASE 0xFFFF900000000000UL
-#define MMIO_VIRT_END  0xFFFF980000000000UL
+#define MMIO_VIRT_BASE    0xFFFF900000000000UL
+#define MMIO_VIRT_END     0xFFFF980000000000UL
 
 // --- pool configuration -------------------------------------------------------
 
@@ -125,8 +125,8 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
     phys_addr_t pml4_phys = asm_read_cr3() & PTE_ADDR_MASK;
 
     phys_addr_t page_start = phys_addr & ~(PAGE_SIZE - 1);
-    phys_addr_t page_end   = page_start + aligned_size;
-    virt_addr_t va         = virt_addr;
+    phys_addr_t page_end = page_start + aligned_size;
+    virt_addr_t va = virt_addr;
 
     for (phys_addr_t pa = page_start; pa < page_end; pa += PAGE_SIZE, va += PAGE_SIZE) {
         u64 * pml4_entry = mmu_get_or_create_entry(pml4_phys, PML4_INDEX(va), true);

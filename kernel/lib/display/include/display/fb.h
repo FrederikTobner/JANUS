@@ -35,14 +35,14 @@
 /// Constructed by the consumer (e.g. @c framebuffer_init in the drivers
 /// subsystem) from @c display_info_t. Does not own the memory it points to.
 typedef struct {
-    u8 volatile * base;  ///< Framebuffer base address
-    u64           pitch; ///< Bytes per scanline
-    u64           width; ///< Horizontal resolution in pixels
-    u64           height;///< Vertical resolution in pixels
-    u8            red_shift;   ///< Bit position of the red channel
-    u8            green_shift; ///< Bit position of the green channel
-    u8            blue_shift;  ///< Bit position of the blue channel
-    u16           bpp;   ///< Bits per pixel (24 or 32)
+    u8 volatile * base; ///< Framebuffer base address
+    u64 pitch;          ///< Bytes per scanline
+    u64 width;          ///< Horizontal resolution in pixels
+    u64 height;         ///< Vertical resolution in pixels
+    u8 red_shift;       ///< Bit position of the red channel
+    u8 green_shift;     ///< Bit position of the green channel
+    u8 blue_shift;      ///< Bit position of the blue channel
+    u16 bpp;            ///< Bits per pixel (24 or 32)
 } display_fb_t;
 
 /// @brief Write a single pixel at (x, y).
@@ -79,9 +79,7 @@ void display_fill_rect(display_fb_t const * fb, u32 x, u32 y, u32 w, u32 h, u32 
 /// @param height  Glyph height in pixels.
 /// @param fg_rgb  Foreground color as 0x00RRGGBB.
 /// @param bg_rgb  Background color as 0x00RRGGBB.
-void display_blit_glyph(display_fb_t const * fb,
-                        u32 x, u32 y,
-                        u8 const * bitmap, u32 width, u32 height,
-                        u32 fg_rgb, u32 bg_rgb);
+void display_blit_glyph(
+    display_fb_t const * fb, u32 x, u32 y, u8 const * bitmap, u32 width, u32 height, u32 fg_rgb, u32 bg_rgb);
 
 #endif /* DISPLAY_FB_H */

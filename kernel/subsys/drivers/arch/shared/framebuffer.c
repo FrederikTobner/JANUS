@@ -31,13 +31,10 @@ framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, ch
     }
 
     u32 px = (u32) column * FRAMEBUFFER_FONT_WIDTH;
-    u32 py = (u32) row    * FRAMEBUFFER_FONT_HEIGHT;
+    u32 py = (u32) row * FRAMEBUFFER_FONT_HEIGHT;
     u32 fg = framebuffer_color_palette[foreground & 0x0F];
     u32 bg = framebuffer_color_palette[background & 0x0F];
 
-    display_blit_glyph(&state->fb, px, py,
-                       terminus_glyphs[(u8) c],
-                       FRAMEBUFFER_FONT_WIDTH,
-                       FRAMEBUFFER_FONT_HEIGHT,
-                       fg, bg);
+    display_blit_glyph(
+        &state->fb, px, py, terminus_glyphs[(u8) c], FRAMEBUFFER_FONT_WIDTH, FRAMEBUFFER_FONT_HEIGHT, fg, bg);
 }

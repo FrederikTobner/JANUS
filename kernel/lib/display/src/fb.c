@@ -27,15 +27,14 @@
 static __always_inline void write_pixel(display_fb_t const * fb, u32 x, u32 y, u32 rgb)
 {
     u64 offset = (u64) y * fb->pitch + (u64) x * (fb->bpp / 8);
-    u32 pixel = (u32) (((rgb >> 16) & 0xFF) << fb->red_shift) |
-                (u32) (((rgb >>  8) & 0xFF) << fb->green_shift) |
-                (u32) (( rgb        & 0xFF) << fb->blue_shift);
+    u32 pixel = (u32) (((rgb >> 16) & 0xFF) << fb->red_shift) | (u32) (((rgb >> 8) & 0xFF) << fb->green_shift) |
+                (u32) ((rgb & 0xFF) << fb->blue_shift);
 
     if (fb->bpp == 32) {
         *((u32 volatile *) (fb->base + offset)) = pixel;
     } else {
         // 24 bpp — three individual byte writes, little-endian order.
-        fb->base[offset]     = (u8) (pixel & 0xFF);
+        fb->base[offset] = (u8) (pixel & 0xFF);
         fb->base[offset + 1] = (u8) ((pixel >> 8) & 0xFF);
         fb->base[offset + 2] = (u8) ((pixel >> 16) & 0xFF);
     }
@@ -59,7 +58,7 @@ __hot void display_fill_rect(display_fb_t const * fb, u32 x, u32 y, u32 w, u32 h
         return;
     }
     // Clip to framebuffer bounds.
-    u32 x_end = (x + w < (u32) fb->width)  ? x + w : (u32) fb->width;
+    u32 x_end = (x + w < (u32) fb->width) ? x + w : (u32) fb->width;
     u32 y_end = (y + h < (u32) fb->height) ? y + h : (u32) fb->height;
     if (x >= x_end || y >= y_end) {
         return;
@@ -71,10 +70,8 @@ __hot void display_fill_rect(display_fb_t const * fb, u32 x, u32 y, u32 w, u32 h
     }
 }
 
-__hot void display_blit_glyph(display_fb_t const * fb,
-                               u32 x, u32 y,
-                               u8 const * bitmap, u32 width, u32 height,
-                               u32 fg_rgb, u32 bg_rgb)
+__hot void display_blit_glyph(
+    display_fb_t const * fb, u32 x, u32 y, u8 const * bitmap, u32 width, u32 height, u32 fg_rgb, u32 bg_rgb)
 {
     if (UNLIKELY(!fb->base || !bitmap)) {
         return;
