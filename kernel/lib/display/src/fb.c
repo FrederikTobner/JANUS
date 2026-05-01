@@ -26,6 +26,9 @@
 
 static __always_inline void write_pixel(display_fb_t const * fb, u32 x, u32 y, u32 rgb)
 {
+    if (UNLIKELY(fb->bpp != 32 && fb->bpp != 24)) {
+        return;
+    }
     u64 offset = (u64) y * fb->pitch + (u64) x * (fb->bpp / 8);
     u32 pixel = (u32) (((rgb >> 16) & 0xFF) << fb->red_shift) | (u32) (((rgb >> 8) & 0xFF) << fb->green_shift) |
                 (u32) ((rgb & 0xFF) << fb->blue_shift);
@@ -57,9 +60,11 @@ __hot void display_fill_rect(display_fb_t const * fb, u32 x, u32 y, u32 w, u32 h
     if (UNLIKELY(!fb->base)) {
         return;
     }
-    // Clip to framebuffer bounds.
-    u32 x_end = (x + w < (u32) fb->width) ? x + w : (u32) fb->width;
-    u32 y_end = (y + h < (u32) fb->height) ? y + h : (u32) fb->height;
+    // Clip to framebuffer bounds. Compute ends in u64 to avoid overflow in x + w / y + h.
+    u64 x_limit = (u64) x + (u64) w;
+    u64 y_limit = (u64) y + (u64) h;
+    u32 x_end = (x_limit < (u64) fb->width) ? (u32) x_limit : (u32) fb->width;
+    u32 y_end = (y_limit < (u64) fb->height) ? (u32) y_limit : (u32) fb->height;
     if (x >= x_end || y >= y_end) {
         return;
     }
@@ -74,6 +79,9 @@ __hot void display_blit_glyph(
     display_fb_t const * fb, u32 x, u32 y, u8 const * bitmap, u32 width, u32 height, u32 fg_rgb, u32 bg_rgb)
 {
     if (UNLIKELY(!fb->base || !bitmap)) {
+        return;
+    }
+    if (UNLIKELY(width == 0 || width % 8 != 0)) {
         return;
     }
     u32 bytes_per_row = width / 8;

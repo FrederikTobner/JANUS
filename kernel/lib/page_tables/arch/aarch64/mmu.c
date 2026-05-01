@@ -81,7 +81,6 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
         return 0;
     }
     virt_addr_t virt_addr = mmio_virt_next;
-    mmio_virt_next += aligned_size;
 
     u64 ttbr1 = asm_read_ttbr1_el1();
     phys_addr_t l0_phys = ttbr1 & PAGE_TABLE_ENTRY_ADDR_MASK;
@@ -109,6 +108,8 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
                                  PAGE_TABLE_ENTRY_AF | PAGE_TABLE_ENTRY_SH_OSH | PAGE_TABLE_ENTRY_UXN |
                                  PAGE_TABLE_ENTRY_PXN | PAGE_TABLE_ENTRY_ATTR_IDX(1);
     }
+    // All page-table entries installed successfully — commit the VA window.
+    mmio_virt_next += aligned_size;
     for (virt_addr_t v = virt_addr; v < virt_addr + aligned_size; v += PAGE_SIZE) {
         asm_tlbi_vale1is(v >> 12);
     }

@@ -119,7 +119,6 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
         return 0;
     }
     virt_addr_t virt_addr = mmio_virt_next;
-    mmio_virt_next += aligned_size;
 
     // CR3 holds the physical address of the PML4; mask off flag bits in [11:0].
     phys_addr_t pml4_phys = asm_read_cr3() & PTE_ADDR_MASK;
@@ -153,6 +152,8 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
 
         asm_tlb_invlpg(va);
     }
+    // All page-table entries installed successfully — commit the VA window.
+    mmio_virt_next += aligned_size;
     // x86_64 INVLPG is self-serialising — no additional fence needed.
     // An MFENCE after all mappings ensures subsequent loads see the new PTEs.
     asm_mfence();
