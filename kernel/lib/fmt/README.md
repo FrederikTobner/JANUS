@@ -25,7 +25,7 @@ Width and zero-padding (`%08x`) are supported. No floating point.
 ## Usage
 
 ```c
-static void serial_putc(char c, void * ctx) { outb(0x3F8, (u8)c); }
+static void serial_putc(char c, void * ctx) { drivers_serial_putc(c); }
 
 fmt_to(serial_putc, NULL, "boot: %s v%u.%u\n", name, major, minor);
 ```

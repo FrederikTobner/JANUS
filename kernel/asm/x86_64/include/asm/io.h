@@ -33,7 +33,7 @@
 /// @param value The byte value to write.
 static __always_inline void asm_io_outb(u16 port, u8 value)
 {
-    __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
+    __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port) : "memory");
 }
 
 /// Read a byte from an I/O port.
@@ -43,7 +43,7 @@ static __always_inline void asm_io_outb(u16 port, u8 value)
 static __always_inline u8 asm_io_inb(u16 port)
 {
     u8 ret;
-    __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port));
+    __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port) : "memory");
     return ret;
 }
 

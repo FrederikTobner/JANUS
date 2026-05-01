@@ -35,13 +35,13 @@ static __always_inline void asm_cpu_hlt(void)
 /// Disable external interrupts (CLI).
 static __always_inline void asm_cpu_cli(void)
 {
-    __asm__ volatile("cli");
+    __asm__ volatile("cli" ::: "memory");
 }
 
 /// Enable external interrupts (STI).
 static __always_inline void asm_cpu_sti(void)
 {
-    __asm__ volatile("sti");
+    __asm__ volatile("sti" ::: "memory");
 }
 
 #endif /* ASM_X86_64_CPU_H */
