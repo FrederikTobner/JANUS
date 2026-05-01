@@ -26,5 +26,5 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size);
 
 ## Dependencies
 
-`janus_asm` (for `asm/barriers.h`, `asm/tlb.h`, `asm/regs.h`) — linked
-automatically by `janus_add_library`.
+`janus_asm` (for `asm/barriers.h`, `asm/tlb.h`, `asm/regs.h`) — listed
+explicitly in `DEPENDENCIES` in `lib/page_tables/CMakeLists.txt`.

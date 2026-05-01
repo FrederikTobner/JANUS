@@ -22,15 +22,10 @@ graph TD
   subgraph asm_layer["ASM Layer"]
     janus_asm[("janus_asm")]
   end
-  display --> janus_asm
-  fmt --> janus_asm
-  boot --> janus_asm
   boot --> display
   boot_limine --> boot
   boot_multiboot2 --> boot
-  drivers --> janus_asm
   drivers --> display
-  kmain --> janus_asm
   kmain --> drivers
   kmain --> boot
   kmain --> fmt

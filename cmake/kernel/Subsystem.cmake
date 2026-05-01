@@ -19,30 +19,23 @@ endif()
 #   janus_add_subsys(name
 #       SOURCES file1.c file2.c
 #       [DEPENDENCIES dep1 dep2]
-#       [NO_ASM]
 #   )
 #
 # Architecture-specific code lives in arch/ subdirectory with its own CMakeLists.txt.
 # The arch CMakeLists.txt uses janus_add_arch_subsys() to add sources explicitly.
 # Enforces subsystem isolation - subsystems cannot depend on other subsystems.
-# Use NO_ASM for top-level aggregation modules (e.g. kmain) that must not have a
-# direct edge to janus_asm in the dependency graph per the privilege model.
 #
 function(janus_add_subsys NAME)
     cmake_parse_arguments(
         ARG
-        "NO_ASM"
+        ""
         ""
         "SOURCES;DEPENDENCIES"
         ${ARGN}
     )
 
     # Register subsystem and dependencies in global registry
-    if(ARG_NO_ASM)
-        janus_register(${NAME} SUBSYS "${ARG_DEPENDENCIES}")
-    else()
-        janus_register(${NAME} SUBSYS "janus_asm;${ARG_DEPENDENCIES}")
-    endif()
+    janus_register(${NAME} SUBSYS "${ARG_DEPENDENCIES}")
 
     set(SUBSYS_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
     set(ALL_SOURCES ${ARG_SOURCES})
@@ -68,10 +61,6 @@ function(janus_add_subsys NAME)
             ${SUBSYS_DIR}/include
             ${CMAKE_SOURCE_DIR}/kernel/include
         )
-        # ASM layer (skip for NO_ASM targets like kmain)
-        if(NOT ARG_NO_ASM)
-            target_link_libraries(${NAME} INTERFACE janus_asm)
-        endif()
         if(ARG_DEPENDENCIES)
             target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
         endif()
@@ -88,11 +77,6 @@ function(janus_add_subsys NAME)
             ${CMAKE_SOURCE_DIR}/kernel/include
     )
     
-    # ASM layer (skip for NO_ASM targets like kmain)
-    if(NOT ARG_NO_ASM)
-        target_link_libraries(${NAME} PUBLIC janus_asm)
-    endif()
-
     # Add arch-specific include directories if arch exists
     if(HAS_ARCH)
         target_link_libraries(${NAME} PUBLIC ${NAME}_arch)

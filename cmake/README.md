@@ -40,8 +40,8 @@ Helper functions for adding kernel targets.
 ### `Library.cmake` — `janus_add_library(name SOURCES ... [DEPENDENCIES ...])`
 
 Creates a kernel library (STATIC, or INTERFACE when no sources are provided).
-Adds `include/` and global `kernel/include/` to include paths, links `janus_asm`,
-and registers the target in the dependency registry.
+Adds `include/` and global `kernel/include/` to include paths and registers the
+target in the dependency registry. To use `<asm/*.h>`, list `janus_asm` in `DEPENDENCIES`.
 
 ### `Subsystem.cmake` — `janus_add_subsys(name SOURCES ... [DEPENDENCIES ...])`
 
@@ -53,8 +53,8 @@ depends on another subsystem (except `kmain`).
 ### `ArchSource.cmake` — `janus_add_arch_subsys(name SOURCES ...)`
 
 Called from within `arch/CMakeLists.txt`. Creates a `${name}_arch` static
-library with the three-tier include hierarchy as PUBLIC paths. Links `janus_asm`
-so Tier 3 headers can use `#include <asm/cpu.h>` etc.
+library with the three-tier include hierarchy as PUBLIC paths. To use
+`<asm/*.h>` (e.g. Tier 3 wrappers), list `janus_asm` in `DEPENDENCIES`.
 
 ### `Executable.cmake` — `janus_add_kernel(TARGET ... LINKER_SCRIPT ... DEPENDENCIES ... OBJECTS ...)`
 

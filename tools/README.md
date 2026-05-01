@@ -17,7 +17,7 @@ in the kernel framebuffer driver. See [psf2c/README.md](psf2c/README.md).
 Declarative command-line argument parsing library for C tools.
 Provides flag, option, and positional argument parsing with auto-generated
 help output and `--version` support. Used by `psf2c` and any other JANUS
-tools that need CLI parsing. See [lib/clap/README.md](lib/clap/README.md) if available.
+tools that need CLI parsing. See [lib/clap/README.md](lib/clap/README.md).
 
 ## Building
 

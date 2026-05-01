@@ -3,9 +3,7 @@
 file(GLOB_RECURSE INIT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 
 # kmain links to subsystems - arch includes propagate automatically via PUBLIC
-# NO_ASM: kmain is a top-level aggregation module; per the privilege model it
-# must not have a direct edge to janus_asm (it only reaches asm via subsystems).
-janus_add_subsys(kmain NO_ASM SOURCES ${INIT_SOURCES}
+janus_add_subsys(kmain SOURCES ${INIT_SOURCES}
     DEPENDENCIES
         drivers
         boot
