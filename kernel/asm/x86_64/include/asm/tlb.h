@@ -14,27 +14,29 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file framebuffer.c
-/// @brief Shared framebuffer text rendering implementation.
+/// @file asm/tlb.h
+/// @brief x86_64 TLB invalidation primitives.
 ///
-/// Contains the character drawing logic for framebuffer-based text output.
-/// Pixel operations are delegated to lib/display (display_blit_glyph).
-/// This code is shared between architectures (x86_64 Limine mode, aarch64).
+/// Raw inline-assembly wrappers for INVLPG.
+/// This is the only permitted site for __asm__ volatile on x86_64 for TLB ops.
+/// Consumed by kernel libraries (e.g. page_tables) that manipulate page tables.
 
-#include <arch/shared/drivers/framebuffer.h>
+#ifndef ASM_X86_64_TLB_H
+#define ASM_X86_64_TLB_H
 
-__hot void
-framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
+#include <janus/attributes.h>
+#include <janus/types.h>
+
+/// Invalidate the TLB entry for a single virtual page (INVLPG).
+///
+/// Removes the TLB entry for the 4 KB page that contains @p va on the local
+/// CPU. On SMP systems, a shootdown IPI must be sent to remote CPUs separately
+/// (not required in JANUS at this stage — single-core only).
+///
+/// @param va  Any virtual address within the page to invalidate.
+static __always_inline void asm_tlb_invlpg(virt_addr_t va)
 {
-    if (UNLIKELY(!state->fb.base || column >= state->text_width || row >= state->text_height)) {
-        return;
-    }
-
-    u32 px = (u32) column * FRAMEBUFFER_FONT_WIDTH;
-    u32 py = (u32) row * FRAMEBUFFER_FONT_HEIGHT;
-    u32 fg = framebuffer_color_palette[foreground & 0x0F];
-    u32 bg = framebuffer_color_palette[background & 0x0F];
-
-    display_blit_glyph(
-        &state->fb, px, py, terminus_glyphs[(u8) c], FRAMEBUFFER_FONT_WIDTH, FRAMEBUFFER_FONT_HEIGHT, fg, bg);
+    __asm__ volatile("invlpg (%0)" ::"r"(va) : "memory");
 }
+
+#endif /* ASM_X86_64_TLB_H */

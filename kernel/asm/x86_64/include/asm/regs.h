@@ -14,27 +14,39 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file framebuffer.c
-/// @brief Shared framebuffer text rendering implementation.
+/// @file asm/regs.h
+/// @brief x86_64 control register access primitives.
 ///
-/// Contains the character drawing logic for framebuffer-based text output.
-/// Pixel operations are delegated to lib/display (display_blit_glyph).
-/// This code is shared between architectures (x86_64 Limine mode, aarch64).
+/// Raw inline-assembly wrappers for MOV to/from control registers.
+/// This is the only permitted site for __asm__ volatile on x86_64 for
+/// control register access.
+/// Consumed by kernel libraries (e.g. page_tables) that need to read/write
+/// the page directory base register.
 
-#include <arch/shared/drivers/framebuffer.h>
+#ifndef ASM_X86_64_REGS_H
+#define ASM_X86_64_REGS_H
 
-__hot void
-framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
+#include <janus/attributes.h>
+#include <janus/types.h>
+
+/// Read the Page Directory Base Register (CR3).
+///
+/// @return Physical address of the current PML4 table, plus PCID bits in [11:0].
+static __always_inline u64 asm_read_cr3(void)
 {
-    if (UNLIKELY(!state->fb.base || column >= state->text_width || row >= state->text_height)) {
-        return;
-    }
-
-    u32 px = (u32) column * FRAMEBUFFER_FONT_WIDTH;
-    u32 py = (u32) row * FRAMEBUFFER_FONT_HEIGHT;
-    u32 fg = framebuffer_color_palette[foreground & 0x0F];
-    u32 bg = framebuffer_color_palette[background & 0x0F];
-
-    display_blit_glyph(
-        &state->fb, px, py, terminus_glyphs[(u8) c], FRAMEBUFFER_FONT_WIDTH, FRAMEBUFFER_FONT_HEIGHT, fg, bg);
+    u64 val;
+    __asm__ volatile("mov %%cr3, %0" : "=r"(val));
+    return val;
 }
+
+/// Write the Page Directory Base Register (CR3).
+///
+/// Writing CR3 flushes all non-global TLB entries.
+///
+/// @param val Physical address of the PML4 table (must be 4 KB aligned).
+static __always_inline void asm_write_cr3(u64 val)
+{
+    __asm__ volatile("mov %0, %%cr3" ::"r"(val) : "memory");
+}
+
+#endif /* ASM_X86_64_REGS_H */

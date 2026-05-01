@@ -5,6 +5,7 @@ graph TD
   subgraph lib_layer["Library Layer"]
     display("display")
     fmt("fmt")
+    page_tables("page_tables")
   end
   subgraph subsys_layer["Subsystem Layer"]
     boot["boot"]
@@ -22,10 +23,12 @@ graph TD
   subgraph asm_layer["ASM Layer"]
     janus_asm[("janus_asm")]
   end
+  page_tables --> janus_asm
   boot --> display
   boot_limine --> boot
   boot_multiboot2 --> boot
   drivers --> display
+  drivers --> page_tables
   kmain --> drivers
   kmain --> boot
   kmain --> fmt

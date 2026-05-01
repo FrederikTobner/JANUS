@@ -41,10 +41,16 @@
 #define L2_INDEX(va)                   (((va) >> L2_SHIFT) & 0x1FF)
 #define L3_INDEX(va)                   (((va) >> L3_SHIFT) & 0x1FF)
 #define MMIO_VIRT_BASE                 0xFFFFFF0000000000UL
-#define PAGE_TABLE_POOL_SIZE           8
+#define MMIO_VIRT_END                  0xFFFFFF8000000000UL
+
+#ifndef JANUS_PAGE_TABLE_POOL_SIZE
+#define JANUS_PAGE_TABLE_POOL_SIZE 16
+#endif
+#define PAGE_TABLE_POOL_SIZE JANUS_PAGE_TABLE_POOL_SIZE
 
 static u64 page_table_pool[PAGE_TABLE_POOL_SIZE][ENTRIES_PER_TABLE] __aligned(PAGE_SIZE);
 static u32 pool_next_index;
+static virt_addr_t mmio_virt_next;
 static u64 g_hhdm_offset;
 static u64 g_kernel_phys_base;
 static u64 g_kernel_virt_base;
@@ -62,6 +68,7 @@ __cold void mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t 
     g_kernel_virt_base = kernel_virt_base;
     g_initialized = true;
     pool_next_index = 0;
+    mmio_virt_next = MMIO_VIRT_BASE;
 }
 
 virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
@@ -69,13 +76,18 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
     if (UNLIKELY(!g_initialized)) {
         return 0;
     }
-    virt_addr_t virt_addr = MMIO_VIRT_BASE + (phys_addr & 0xFFFFFFFF);
+    u64 aligned_size = (size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+    if (UNLIKELY(mmio_virt_next + aligned_size > MMIO_VIRT_END)) {
+        return 0;
+    }
+    virt_addr_t virt_addr = mmio_virt_next;
+
     u64 ttbr1 = asm_read_ttbr1_el1();
     phys_addr_t l0_phys = ttbr1 & PAGE_TABLE_ENTRY_ADDR_MASK;
     phys_addr_t page_start = phys_addr & ~(PAGE_SIZE - 1);
-    phys_addr_t page_end = (phys_addr + size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
-    for (phys_addr_t pa = page_start; pa < page_end; pa += PAGE_SIZE) {
-        virt_addr_t va = MMIO_VIRT_BASE + (pa & 0xFFFFFFFF);
+    phys_addr_t page_end = page_start + aligned_size;
+    virt_addr_t va = virt_addr;
+    for (phys_addr_t pa = page_start; pa < page_end; pa += PAGE_SIZE, va += PAGE_SIZE) {
         phys_addr_t * l0_pte = mmu_get_or_create_page_table_entry(l0_phys, L0_INDEX(va), true);
         if (!l0_pte) {
             return 0;
@@ -91,14 +103,15 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
             return 0;
         }
         phys_addr_t l3_phys = *l2_pte & PAGE_TABLE_ENTRY_ADDR_MASK;
-        virt_addr_t * l3_table = (u64 *) mmu_physical_to_virtual_address(l3_phys);
-        phys_addr_t * l3_pte = &l3_table[L3_INDEX(va)];
-        *l3_pte = (pa & PAGE_TABLE_ENTRY_ADDR_MASK) | PAGE_TABLE_ENTRY_VALID | PAGE_TABLE_ENTRY_PAGE |
-                  PAGE_TABLE_ENTRY_AF | PAGE_TABLE_ENTRY_SH_OSH | PAGE_TABLE_ENTRY_UXN | PAGE_TABLE_ENTRY_PXN |
-                  PAGE_TABLE_ENTRY_ATTR_IDX(1);
+        u64 * l3_table = (u64 *) mmu_physical_to_virtual_address(l3_phys);
+        l3_table[L3_INDEX(va)] = (pa & PAGE_TABLE_ENTRY_ADDR_MASK) | PAGE_TABLE_ENTRY_VALID | PAGE_TABLE_ENTRY_PAGE |
+                                 PAGE_TABLE_ENTRY_AF | PAGE_TABLE_ENTRY_SH_OSH | PAGE_TABLE_ENTRY_UXN |
+                                 PAGE_TABLE_ENTRY_PXN | PAGE_TABLE_ENTRY_ATTR_IDX(1);
     }
-    for (virt_addr_t va = virt_addr; va < virt_addr + size; va += PAGE_SIZE) {
-        asm_tlbi_vale1is(va >> 12);
+    // All page-table entries installed successfully — commit the VA window.
+    mmio_virt_next += aligned_size;
+    for (virt_addr_t v = virt_addr; v < virt_addr + aligned_size; v += PAGE_SIZE) {
+        asm_tlbi_vale1is(v >> 12);
     }
     asm_dsb();
     asm_isb();

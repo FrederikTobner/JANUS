@@ -9,6 +9,12 @@ configure_file(
     @ONLY
 )
 
+# Number of pre-allocated page table pages in lib/page_tables.
+# Increase if mmu_map_mmio() runs out of pool space at runtime.
+set(JANUS_PAGE_TABLE_POOL_SIZE "16" CACHE STRING
+    "Static pool size for lib/page_tables (number of 4 KB page table pages)")
+add_compile_definitions(JANUS_PAGE_TABLE_POOL_SIZE=${JANUS_PAGE_TABLE_POOL_SIZE})
+
 
 # Add generated config.h to include path
 include_directories("${CMAKE_BINARY_DIR}/kernel/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")
