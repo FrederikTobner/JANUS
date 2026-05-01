@@ -1,10 +1,29 @@
 # JANUS Development Tools
 
-This directory contains development tools and utilities for JANUS development.
-Tools are built separately from the kernel using their own CMake project.
+Development tools and utilities built separately from the kernel using their
+own CMake project.
 
 ## Tools
 
 ### psf2c
 
-Convert PSF (PC Screen Font) files to C headers for use in the kernel framebuffer driver.
+Converts PSF (PC Screen Font) files to C headers for embedding fonts directly
+in the kernel framebuffer driver. See [psf2c/README.md](psf2c/README.md).
+
+## Libraries
+
+### clap
+
+Declarative command-line argument parsing library for C tools.
+Provides flag, option, and positional argument parsing with auto-generated
+help output and `--version` support. Used by `psf2c` and any other JANUS
+tools that need CLI parsing. See [lib/clap/README.md](lib/clap/README.md) if available.
+
+## Building
+
+```bash
+cmake --preset tools-release   # or tools-debug
+cmake --build --preset tools-release
+```
+
+Binaries are placed under `tools/build/`.

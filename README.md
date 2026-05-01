@@ -34,24 +34,27 @@ See [Setup & Dependencies](docs/src/project/setup/dependencies.md) for detailed 
 
 ## Documentation
 
-The project documentation lives in [`docs/`](docs/src/SUMMARY.md) as a single mdbook, organised into four parts:
+The project documentation lives in [`docs/`](docs/src/SUMMARY.md) as a single mdbook, organised into three parts:
 
 | Part | Purpose |
 |------|---------|
+| **Project** | JANUS architecture, subsystems, design decisions, setup, tools, coding style |
 | **Wiki** | OS theory — hardware, boot, memory, tooling |
 | **Tutorials** | Hands-on walkthroughs tied to the concepts |
-| **Reference** | JANUS architecture, subsystems, design decisions |
-| **Project** | Coding style, terminology, build setup, philosophy |
 
 ## Project Structure
 
 The project structure is inspired by Linux and LLVM, with a clear separation of concerns.
-See [Module Structure](docs/src/reference/architecture/module-structure.md) for a detailed explanation of the module layout and design principles.
+See [Module Structure](docs/src/project/architecture/module-structure.md) for a detailed explanation of the module layout and design principles.
 
 ### Architecture-specific Code
 
-Architecture-specific code lives **inside each subsystem** that needs it.
-See [Layer Model](docs/src/reference/architecture/layer-model.md) for the rationale behind this design and the supported patterns.
+Architecture-specific code follows two patterns:
+
+- **Inside each subsystem** (`subsys/foo/arch/<arch>/`) for subsystem-owned hardware logic — Tier 3 headers, drivers, and protocol implementations.
+- **`kernel/asm/`** for raw hardware primitives (`__asm__ volatile`) — the only permitted location for inline assembly in kernel C code. Headers are consumed via `#include <asm/cpu.h>`, `#include <asm/barriers.h>`, etc.
+
+See [Layer Model](docs/src/project/architecture/layer-model.md) for the rationale behind this design and the [Privilege Model](docs/src/project/architecture/privilege-model.md) for the access rules.
 
 ## License
 
