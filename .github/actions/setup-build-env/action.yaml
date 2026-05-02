@@ -1,0 +1,36 @@
+name: Setup Build Environment
+description: Install base build tools, assembler, and ISO tools for kernel compilation
+
+inputs:
+  arch:
+    description: Target architecture (x86_64 or aarch64)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Update package cache
+      run: sudo apt-get update
+      shell: bash
+
+    - name: Install base build tools (cmake, ninja)
+      run: sudo apt-get install -y --no-install-recommends cmake ninja-build
+      shell: bash
+
+    - name: Install NASM assembler (x86_64 only)
+      if: inputs.arch == 'x86_64'
+      run: sudo apt-get install -y --no-install-recommends nasm
+      shell: bash
+
+    - name: Install binutils (aarch64 only)
+      if: inputs.arch == 'aarch64'
+      run: sudo apt-get install -y --no-install-recommends binutils-aarch64-linux-gnu
+      shell: bash
+
+    - name: Install ISO tools
+      run: |
+        sudo apt-get install -y --no-install-recommends xorriso mtools
+        if [ "${{ inputs.arch }}" = "x86_64" ]; then
+          sudo apt-get install -y --no-install-recommends grub-pc-bin grub-common
+        fi
+      shell: bash

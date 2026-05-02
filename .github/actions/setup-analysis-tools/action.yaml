@@ -1,0 +1,17 @@
+name: Setup Analysis Tools
+description: Install code analysis and formatting tools (clang-format-18, clang-tidy)
+
+runs:
+  using: composite
+  steps:
+    - name: Update package cache
+      run: sudo apt-get update
+      shell: bash
+
+    - name: Install clang-format-18
+      run: sudo apt-get install -y --no-install-recommends clang-format-18
+      shell: bash
+
+    - name: Install clang-tidy
+      run: sudo apt-get install -y --no-install-recommends clang-tidy
+      shell: bash

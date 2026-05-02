@@ -17,31 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake ninja-build
+      - uses: ./.github/actions/setup-build-env
+        with:
+          arch: ${{ matrix.arch }}
 
-      - name: Install compiler
-        run: |
-          if [ "${{ matrix.compiler }}" = "gcc" ] && [ "${{ matrix.arch }}" = "aarch64" ]; then
-            sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu
-          elif [ "${{ matrix.compiler }}" = "clang" ]; then
-            sudo apt-get install -y --no-install-recommends clang llvm
-          fi
-
-      - name: Install Assembler
-        if: matrix.arch == 'x86_64'
-        run: sudo apt-get install -y --no-install-recommends nasm
-
-      - name: Install Binutils 
-        if: matrix.arch == 'aarch64'
-        run: sudo apt-get install -y --no-install-recommends binutils-aarch64-linux-gnu
-
-      - name: Install ISO tools
-        run: |
-          sudo apt-get install -y --no-install-recommends xorriso mtools
-          if [ "${{ matrix.arch }}" = "x86_64" ]; then
-            sudo apt-get install -y --no-install-recommends grub-pc-bin grub-common
-          fi
+      - uses: ./.github/actions/setup-compiler
+        with:
+          arch: ${{ matrix.arch }}
+          compiler: ${{ matrix.compiler }}
 
       - name: Configure
         run: cmake --preset ${{ matrix.arch }}-${{ matrix.compiler }} -D CMAKE_BUILD_TYPE=Release
@@ -52,16 +35,16 @@ jobs:
       - name: Build ISOs
         run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }} --target iso
 
+      - uses: ./.github/actions/setup-analysis-tools
+        if: matrix.arch == 'x86_64' && matrix.compiler == 'clang'
+
       - name: Check formatting
         if: matrix.arch == 'x86_64' && matrix.compiler == 'clang'
-        run: |
-          sudo apt-get install -y --no-install-recommends clang-format-18
-          find kernel -name '*.c' -o -name '*.h' | xargs clang-format-18 --dry-run --Werror
+        run: find kernel -name '*.c' -o -name '*.h' | xargs clang-format-18 --dry-run --Werror
 
       - name: Static analysis (clang-tidy)
         if: matrix.arch == 'x86_64' && matrix.compiler == 'clang'
         run: |
-          sudo apt-get install -y --no-install-recommends clang-tidy
           jq -r '.[].file' build-x86_64-clang/compile_commands.json \
             | grep 'kernel/.*\.c$' \
             | xargs clang-tidy -p build-x86_64-clang

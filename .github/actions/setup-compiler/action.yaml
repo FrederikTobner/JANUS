@@ -1,0 +1,32 @@
+name: Setup Compiler
+description: Install target compiler (gcc, clang, or cross-compiler) based on architecture and compiler choice
+
+inputs:
+  arch:
+    description: Target architecture (x86_64 or aarch64)
+    required: true
+  compiler:
+    description: Compiler to install (gcc or clang)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Update package cache
+      run: sudo apt-get update
+      shell: bash
+
+    - name: Install GCC (x86_64)
+      if: inputs.compiler == 'gcc' && inputs.arch == 'x86_64'
+      run: sudo apt-get install -y --no-install-recommends gcc
+      shell: bash
+
+    - name: Install GCC cross-compiler (aarch64)
+      if: inputs.compiler == 'gcc' && inputs.arch == 'aarch64'
+      run: sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu
+      shell: bash
+
+    - name: Install Clang
+      if: inputs.compiler == 'clang'
+      run: sudo apt-get install -y --no-install-recommends clang llvm
+      shell: bash
