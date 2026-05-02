@@ -21,6 +21,7 @@
 #include <drivers/tty.h>
 #include <fmt/output.h>
 #include <janus/attributes.h>
+#include <janus/errno.h>
 
 static bool g_serial_active = false;
 static bool g_tty_active = false;
@@ -39,6 +40,29 @@ s32 kprintf(char const * fmtstr, ...)
     return ret;
 }
 
+s32 vkprintf(char const * fmtstr, va_list ap)
+{
+    return vfmt_to(console_putc, NULL, fmtstr, ap);
+}
+
+__cold void console_init_early(void)
+{
+    if (g_serial_active) {
+        return; // Already initialized — no-op
+    }
+    // Read address-translation parameters directly from the boot-protocol data
+    // structures. On Limine (both x86_64 and AArch64) these are populated by
+    // the bootloader before kernel_main is entered. On Multiboot2 all three
+    // are 0, which is correct (x86_64 serial uses port I/O and ignores them).
+    u64 hhdm_offset;
+    phys_addr_t kernel_phys_base;
+    virt_addr_t kernel_virt_base;
+    boot_early_params(&hhdm_offset, &kernel_phys_base, &kernel_virt_base);
+    if (drivers_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base) == JANUS_OK) {
+        g_serial_active = true;
+    }
+}
+
 // After serial/tty init, set up the output sink:
 // (This should be called after both drivers are initialized and their availability is known)
 __cold void console_init(boot_context_t const * boot_context)
@@ -55,8 +79,13 @@ __cold void console_init(boot_context_t const * boot_context)
 
 static __cold bool init_serial(boot_context_t const * boot_context)
 {
+    if (g_serial_active) {
+        // Already initialized by console_init_early() — skip re-init to
+        // avoid resetting driver state (e.g. the AArch64 MMU pool index).
+        return true;
+    }
     if (drivers_serial_init(
-            boot_context->hhdm_offset, boot_context->kernel_phys_base, boot_context->kernel_virt_base) != 0) {
+            boot_context->hhdm_offset, boot_context->kernel_phys_base, boot_context->kernel_virt_base) != JANUS_OK) {
         return false;
     }
 
@@ -68,7 +97,7 @@ static __cold bool init_tty(boot_context_t const * boot_context, bool serial_ava
 {
     if (boot_context->display.mode == DISPLAY_MODE_VGA_TEXT ||
         (boot_context->display.mode == DISPLAY_MODE_FRAMEBUFFER)) {
-        if (drivers_tty_init(&(boot_context->display)) != 0) {
+        if (drivers_tty_init(&(boot_context->display)) != JANUS_OK) {
             return false;
         }
 

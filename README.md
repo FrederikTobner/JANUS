@@ -1,13 +1,10 @@
 # JANUS
 
-<!-- Workflow status -->
-[![Build](https://img.shields.io/github/actions/workflow/status/FrederikTobner/TinyOS/build.yaml?branch=main&label=Build&logo=github)](https://github.com/FrederikTobner/TinyOS/actions/workflows/build.yaml)
-[![Tools](https://img.shields.io/github/actions/workflow/status/FrederikTobner/TinyOS/tools.yaml?branch=main&label=Tools&logo=github)](https://github.com/FrederikTobner/TinyOS/actions/workflows/tools.yaml)
-[![Docs](https://img.shields.io/github/actions/workflow/status/FrederikTobner/TinyOS/docs.yaml?branch=main&label=Docs&logo=github)](https://github.com/FrederikTobner/TinyOS/actions/workflows/docs.yaml)
-[![Doxygen](https://img.shields.io/github/actions/workflow/status/FrederikTobner/TinyOS/doxygen.yaml?branch=main&label=Doxygen&logo=github)](https://github.com/FrederikTobner/TinyOS/actions/workflows/doxygen.yaml)
-<!-- Coverage — replace URL once Codecov (or similar) is wired up in tools.yaml -->
-[![Coverage](https://img.shields.io/badge/coverage-see%20workflow-lightgrey?logo=codecov)](https://github.com/FrederikTobner/TinyOS/actions/workflows/tools.yaml)
-<!-- Project metadata -->
+[![Build](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/build.yaml?branch=main&label=Build&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/build.yaml)
+[![Tools](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/tools.yaml?branch=main&label=Tools&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/tools.yaml)
+[![Docs](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/docs.yaml?branch=main&label=Docs&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/docs.yaml)
+[![Doxygen](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/doxygen.yaml?branch=main&label=Doxygen&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/doxygen.yaml)
+[![Coverage](https://img.shields.io/badge/coverage-see%20workflow-lightgrey?logo=codecov)](https://github.com/FrederikTobner/JANUS/actions/workflows/tools.yaml)
 [![C Standard](https://img.shields.io/badge/C-C17%20freestanding-blue?logo=c)](https://en.cppreference.com/w/c/17)
 [![Architectures](https://img.shields.io/badge/arch-x86__64%20%7C%20aarch64-orange?logo=linux)](https://github.com/FrederikTobner/TinyOS)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue?logo=gnu)](LICENSE)

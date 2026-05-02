@@ -26,7 +26,7 @@
 __hot void
 framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
 {
-    if (UNLIKELY(!state->fb.base || column >= state->text_width || row >= state->text_height)) {
+    if (UNLIKELY(!state->fb || column >= state->text_width || row >= state->text_height)) {
         return;
     }
 
@@ -36,5 +36,5 @@ framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, ch
     u32 bg = framebuffer_color_palette[background & 0x0F];
 
     display_blit_glyph(
-        &state->fb, px, py, terminus_glyphs[(u8) c], FRAMEBUFFER_FONT_WIDTH, FRAMEBUFFER_FONT_HEIGHT, fg, bg);
+        state->fb, px, py, terminus_glyphs[(u8) c], FRAMEBUFFER_FONT_WIDTH, FRAMEBUFFER_FONT_HEIGHT, fg, bg);
 }

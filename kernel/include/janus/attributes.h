@@ -22,7 +22,7 @@
 /// Provides portable compiler attributes for Clang and GCC.
 
 // Compiler detection
-#if defined(__clang__)
+#ifdef __clang__
 #define COMPILER_CLANG 1
 #elif defined(__GNUC__)
 #define COMPILER_GCC 1
@@ -114,7 +114,14 @@
 // Offset of member in struct (for CONTAINER_OF)
 #define __offsetof(type, member) __builtin_offsetof(type, member)
 
-// Container of macro
-#define CONTAINER_OF(ptr, type, member) ((type *) ((char *) (ptr) - __offsetof(type, member))
+// Container of macro.
+// Uses a compound-statement (GCC/Clang extension) so that __typeof__ can
+// verify at compile time that ptr has the same type as &container->member,
+// catching accidental pointer-type mismatches early.
+#define CONTAINER_OF(ptr, type, member)                                          \
+    ({                                                                           \
+        __typeof__(((type *) 0)->member) const * __mptr = (ptr);                 \
+        (type *) ((char *) __mptr - __offsetof(type, member));                   \
+    })
 
 #endif // JANUS_COMPILER_H

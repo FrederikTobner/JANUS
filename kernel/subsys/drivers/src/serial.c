@@ -14,30 +14,46 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef KMAIN_CONSOLE_H
-#define KMAIN_CONSOLE_H
-
-/// @file console.h
-/// @brief Kernel console output.
+/// @file serial.c
+/// @brief Serial port driver — shared logic.
 ///
-///
-/// Provides functions for kernel console output, including formatted printing.
+/// Implements the out-of-line serial API declared in <drivers/serial.h>.
+/// Architecture-specific hardware access is delegated to arch_serial_*.
 
-#include <boot/context.h>
-#include <janus/types.h>
-#include <janus/va_arg.h>
+#include <arch/drivers/serial.h>
+#include <drivers/serial.h>
+#include <janus/attributes.h>
 
-s32 kprintf(char const * fmt, ...) __attribute__((format(printf, 1, 2)));
-s32 vkprintf(char const * fmt, va_list ap);
+__cold error_t drivers_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
+{
+    return arch_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
+}
 
-/// @brief Best-effort serial initialization before boot context is available.
-///
-/// Attempts to bring up serial output with zeroed address parameters.
-/// On x86_64 this always succeeds (port I/O needs no address translation).
-/// On AArch64 this may silently fail when HHDM data is not yet available.
-/// Safe to call multiple times — no-op if serial is already active.
-void console_init_early(void);
+void drivers_serial_putc(char c)
+{
+    if (c == '\n') {
+        while (!arch_serial_tx_ready()) {
+            // Wait for transmit buffer to be ready
+        }
+        arch_serial_write('\r');
+    }
+    while (!arch_serial_tx_ready()) {
+        // Wait for transmit buffer to be ready
+    }
+    arch_serial_write((u8) c);
+}
 
-void console_init(boot_context_t const * boot_context);
+void drivers_serial_puts(char const * str)
+{
+    while (*str) {
+        drivers_serial_putc(*str++);
+    }
+}
 
-#endif // KMAIN_CONSOLE_H
+s32 drivers_serial_getc(void)
+{
+    if (!arch_serial_rx_ready()) {
+        return -1;
+    }
+    return (s32) arch_serial_read();
+}

@@ -47,6 +47,19 @@ void multiboot2_stash_bootinfo(u64 magic, void const * info)
     g_mb2_info = info;
 }
 
+/// @brief Stub — Multiboot2 has no HHDM concept.
+///
+/// x86_64 serial uses port I/O and ignores all three address parameters,
+/// so returning zeros is safe and correct for early serial init.
+__cold void boot_early_params(u64 * hhdm_offset,
+                              phys_addr_t * kernel_phys_base,
+                              virt_addr_t * kernel_virt_base)
+{
+    *hhdm_offset = 0;
+    *kernel_phys_base = 0;
+    *kernel_virt_base = 0;
+}
+
 /// @brief Initialize the boot context from Multiboot2 info
 ///
 /// Validates the stashed magic number, walks the tag list to extract

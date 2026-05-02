@@ -25,9 +25,11 @@
 #include <drivers/cpu.h>
 #include <janus/attributes.h>
 #include <janus/config.h>
+#include <janus/errno.h>
 #include <janus/types.h>
 #include <kmain/console.h>
 #include <kmain/kernel_descriptor.h>
+#include <kmain/kpanic.h>
 
 #define JANUS_HELLO_MESSAGE                  \
     "     _   _    _   _ _   _ ____  \n"     \
@@ -49,8 +51,8 @@
 __noreturn void kernel_main(void)
 {
     kernel_descriptor_t descriptor;
-    if (boot_init(&descriptor.boot) != 0) {
-        drivers_cpu_halt_forever();
+    if (boot_init(&descriptor.boot) != JANUS_OK) {
+        kpanic("boot_init failed — cannot continue");
     }
 
     console_init(&descriptor.boot);

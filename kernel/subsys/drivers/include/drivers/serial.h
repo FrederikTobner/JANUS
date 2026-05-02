@@ -17,17 +17,14 @@
 /// @file serial.h
 /// @brief Serial port driver interface.
 ///
-/// This header contains:
-/// - Public API (serial_*)
-/// - Shared inline logic
-///
 /// Architecture contract (arch_serial_*) is in <arch/drivers/serial.h>.
+/// Hot-path checks (tx_ready, rx_ready) are kept inline here.
+/// All other functions are implemented out-of-line in serial.c.
 
 #ifndef DRIVERS_SERIAL_H
 #define DRIVERS_SERIAL_H
 
 #include <arch/drivers/serial.h>
-#include <janus/attributes.h>
 #include <janus/types.h>
 
 /// @brief Initialize the serial port.
@@ -37,12 +34,7 @@
 /// @param kernel_phys_base Physical base address of the kernel image.
 /// @param kernel_virt_base Virtual base address of the kernel image.
 /// @return 0 on success, negative error code on failure.
-static __always_inline error_t drivers_serial_init(u64 hhdm_offset,
-                                                   phys_addr_t kernel_phys_base,
-                                                   virt_addr_t kernel_virt_base)
-{
-    return arch_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
-}
+error_t drivers_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base);
 
 /// @brief Write a single character (blocking) with CR+LF conversion.
 ///
@@ -50,52 +42,29 @@ static __always_inline error_t drivers_serial_init(u64 hhdm_offset,
 /// terminals receive the expected CR+LF line ending.
 ///
 /// @param c The character to write.
-static __always_inline void drivers_serial_putc(char c)
-{
-    if (c == '\n') {
-        while (!arch_serial_tx_ready()) {
-            // Wait for transmit buffer to be ready
-        }
-        arch_serial_write('\r');
-    }
-    while (!arch_serial_tx_ready()) {
-        // Wait for transmit buffer to be ready
-    }
-    arch_serial_write((u8) c);
-}
+void drivers_serial_putc(char c);
 
 /// @brief Write a null-terminated string (blocking).
 ///
 /// CR+LF conversion is handled by drivers_serial_putc.
 ///
 /// @param str The string to write.
-static __always_inline void drivers_serial_puts(char const * str)
-{
-    while (*str) {
-        drivers_serial_putc(*str++);
-    }
-}
+void drivers_serial_puts(char const * str);
+
+/// @brief Read a character (non-blocking).
+/// @return The character read, or -1 if none available.
+s32 drivers_serial_getc(void);
 
 /// @brief Check if transmit buffer is ready.
 /// @return true if ready, false otherwise.
-static __always_inline bool drivers_serial_tx_ready(void)
+static inline bool drivers_serial_tx_ready(void)
 {
     return arch_serial_tx_ready();
 }
 
-/// @brief Read a character (non-blocking).
-/// @return The character read, or -1 if none available.
-static __always_inline s32 drivers_serial_getc(void)
-{
-    if (!arch_serial_rx_ready()) {
-        return -1;
-    }
-    return (s32) arch_serial_read();
-}
-
 /// @brief Check if receive buffer has data.
 /// @return true if data available, false otherwise.
-static __always_inline bool drivers_serial_rx_ready(void)
+static inline bool drivers_serial_rx_ready(void)
 {
     return arch_serial_rx_ready();
 }

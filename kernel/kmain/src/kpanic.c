@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                               *
+ * This file is part of JANUS                                                *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,30 +14,38 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef KMAIN_CONSOLE_H
-#define KMAIN_CONSOLE_H
-
-/// @file console.h
-/// @brief Kernel console output.
+/// @file kpanic.c
+/// @brief Kernel panic implementation.
 ///
-///
-/// Provides functions for kernel console output, including formatted printing.
+/// kpanic_impl() prints a banner, the source location, and the caller-supplied
+/// diagnostic message through every available output channel, then halts
+/// the CPU with interrupts disabled.
 
-#include <boot/context.h>
-#include <janus/types.h>
+#include <kmain/kpanic.h>
+
+#include <drivers/cpu.h>
+#include <janus/attributes.h>
 #include <janus/va_arg.h>
+#include <kmain/console.h>
 
-s32 kprintf(char const * fmt, ...) __attribute__((format(printf, 1, 2)));
-s32 vkprintf(char const * fmt, va_list ap);
+__cold __noreturn void kpanic_impl(char const * file, int line, char const * fmt, ...)
+{
+    // Ensure at least serial output is available, even if console_init() has
+    // not been called yet (e.g. boot_init failure). On AArch64 this may still
+    // fail silently if HHDM data was never available.
+    console_init_early();
 
-/// @brief Best-effort serial initialization before boot context is available.
-///
-/// Attempts to bring up serial output with zeroed address parameters.
-/// On x86_64 this always succeeds (port I/O needs no address translation).
-/// On AArch64 this may silently fail when HHDM data is not yet available.
-/// Safe to call multiple times — no-op if serial is already active.
-void console_init_early(void);
+    kprintf("\n\n");
+    kprintf("*** KERNEL PANIC ***\n");
+    kprintf("Location : %s:%d\n", file, line);
+    kprintf("Reason   : ");
 
-void console_init(boot_context_t const * boot_context);
+    va_list ap;
+    va_start(ap, fmt);
+    vkprintf(fmt, ap);
+    va_end(ap);
 
-#endif // KMAIN_CONSOLE_H
+    kprintf("\n\nSystem halted.\n");
+
+    drivers_cpu_halt_forever();
+}

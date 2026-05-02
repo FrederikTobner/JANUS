@@ -22,6 +22,7 @@
 #ifndef PAGE_TABLES_MMU_H
 #define PAGE_TABLES_MMU_H
 
+#include <janus/errno.h>
 #include <janus/types.h>
 
 /// Initializes the MMU subsystem with the given parameters.
@@ -29,7 +30,8 @@
 /// @param hhdm_offset The offset for the Higher Half Direct Mapping (HHDM).
 /// @param kernel_phys_base The physical base address of the kernel.
 /// @param kernel_virt_base The virtual base address of the kernel.
-void mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base);
+/// @return JANUS_OK on success, or a negative error code on failure.
+error_t mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base);
 
 /// Maps a physical MMIO region into the virtual address space.
 ///
