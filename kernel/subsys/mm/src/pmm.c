@@ -75,19 +75,19 @@ static inline phys_addr_t frame_to_phys(u64 frame)
 /// Test whether a frame is free (bit == 1)
 static inline bool pmm_is_free(u8 const * bitmap, u64 frame)
 {
-    return (bitmap[frame >> 3] & (1u << (frame & 7u))) != 0;
+    return (bitmap[frame >> 3] & (1U << (frame & 7U))) != 0;
 }
 
 /// Mark a frame free (set bit to 1)
 static inline void pmm_mark_free(u8 * bitmap, u64 frame)
 {
-    bitmap[frame >> 3] |= (u8) (1u << (frame & 7u));
+    bitmap[frame >> 3] |= (u8) (1U << (frame & 7U));
 }
 
 /// Mark a frame used (clear bit to 0)
 static inline void pmm_mark_used(u8 * bitmap, u64 frame)
 {
-    bitmap[frame >> 3] &= (u8) ~(1u << (frame & 7u));
+    bitmap[frame >> 3] &= (u8) ~(1U << (frame & 7U));
 }
 
 // ── PMM State ──────────────────────────────────────────────────────────────
