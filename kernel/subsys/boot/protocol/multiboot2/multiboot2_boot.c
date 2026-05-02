@@ -63,8 +63,7 @@ __cold void boot_early_params(u64 * hhdm_offset, phys_addr_t * kernel_phys_base,
 }
 
 /// Parse a Multiboot2 framebuffer tag and populate the display field.
-static __cold void parse_framebuffer_tag(boot_context_t * boot_context,
-                                         struct multiboot_tag_framebuffer const * fb)
+static __cold void parse_framebuffer_tag(boot_context_t * boot_context, struct multiboot_tag_framebuffer const * fb)
 {
     if (fb->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB) {
         display_info_t const fb_display = {
@@ -89,18 +88,22 @@ static __cold void parse_framebuffer_tag(boot_context_t * boot_context,
 static mem_region_type_t translate_mmap_type(u32 mb2_type)
 {
     switch (mb2_type) {
-    case MULTIBOOT2_MEMORY_AVAILABLE:        return MEM_REGION_USABLE;
-    case MULTIBOOT2_MEMORY_ACPI_RECLAIMABLE: return MEM_REGION_ACPI_RECLAIMABLE;
-    case MULTIBOOT2_MEMORY_NVS:              return MEM_REGION_ACPI_NVS;
-    case MULTIBOOT2_MEMORY_BADRAM:           return MEM_REGION_BAD;
+    case MULTIBOOT2_MEMORY_AVAILABLE:
+        return MEM_REGION_USABLE;
+    case MULTIBOOT2_MEMORY_ACPI_RECLAIMABLE:
+        return MEM_REGION_ACPI_RECLAIMABLE;
+    case MULTIBOOT2_MEMORY_NVS:
+        return MEM_REGION_ACPI_NVS;
+    case MULTIBOOT2_MEMORY_BADRAM:
+        return MEM_REGION_BAD;
     case MULTIBOOT2_MEMORY_RESERVED:
-    default:                                 return MEM_REGION_RESERVED;
+    default:
+        return MEM_REGION_RESERVED;
     }
 }
 
 /// Parse a Multiboot2 memory-map tag and populate boot_context->memmap.
-static __cold void parse_mmap_tag(boot_context_t * boot_context,
-                                   struct multiboot_tag_mmap const * mmap_tag)
+static __cold void parse_mmap_tag(boot_context_t * boot_context, struct multiboot_tag_mmap const * mmap_tag)
 {
     u32 const entry_size = mmap_tag->entry_size;
     u8 const * cursor = (u8 const *) mmap_tag->entries;
