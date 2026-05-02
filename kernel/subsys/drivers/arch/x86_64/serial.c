@@ -36,7 +36,7 @@
 #define LINE_STAT_TX_EMPTY 0x20
 #define LINE_STAT_RX_READY 0x01
 
-error_t arch_serial_init(__unused u64 hhdm_offset, __unused u64 kernel_phys_base, __unused u64 kernel_virt_base)
+__cold error_t arch_serial_init(__unused u64 hhdm_offset, __unused u64 kernel_phys_base, __unused u64 kernel_virt_base)
 {
     // x86_64 uses port I/O, not MMIO, so these parameters are unused
 

@@ -35,4 +35,9 @@ typedef __INT32_TYPE__ __s32;
 typedef __UINT64_TYPE__ __u64 __attribute__((aligned(8)));
 typedef __INT64_TYPE__ __s64 __attribute__((aligned(8)));
 
+_Static_assert(sizeof(__u8) == 1, "__u8 must be 1 byte");
+_Static_assert(sizeof(__u16) == 2, "__u16 must be 2 bytes");
+_Static_assert(sizeof(__u32) == 4, "__u32 must be 4 bytes");
+_Static_assert(sizeof(__u64) == 8, "__u64 must be 8 bytes");
+
 #endif /* UAPI_TYPES_H */

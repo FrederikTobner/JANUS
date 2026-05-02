@@ -35,9 +35,12 @@ error_t mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kern
 
 /// Maps a physical MMIO region into the virtual address space.
 ///
-/// @param phys_addr The starting physical address of the MMIO region.
-/// @param size The size of the MMIO region in bytes.
-/// @return The virtual address where the MMIO region is mapped, or 0 on failure.
-virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size);
+/// @param phys_addr  The starting physical address of the MMIO region.
+/// @param size       The size of the MMIO region in bytes.
+/// @param out_virt   On success, set to the mapped virtual address.
+/// @return JANUS_OK on success, JANUS_ENOSPC if the VA window is full,
+///         JANUS_ENOMEM if a page table allocation fails, or
+///         JANUS_EFAULT if the MMU is not yet initialized.
+error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt);
 
 #endif /* PAGE_TABLES_MMU_H */

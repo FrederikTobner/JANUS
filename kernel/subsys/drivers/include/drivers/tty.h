@@ -34,24 +34,30 @@
 #include <display/display.h>
 #include <janus/types.h>
 
-/// TTY text colors (portable subset)
+/// @brief Logical TTY text color indices (16-color ANSI-compatible palette).
+///
+/// Values are architecture-agnostic sequential indices 0–15.
+/// x86_64 VGA text mode maps these directly to hardware nibble values (same numbering).
+/// Framebuffer backends map them via @c framebuffer_color_palette[].
+/// If a future backend uses different hardware values, add an arch-specific
+/// translation function rather than changing these constants.
 typedef enum {
     TTY_COLOR_BLACK = 0,
-    TTY_COLOR_BLUE = 1,
-    TTY_COLOR_GREEN = 2,
-    TTY_COLOR_CYAN = 3,
-    TTY_COLOR_RED = 4,
-    TTY_COLOR_MAGENTA = 5,
-    TTY_COLOR_BROWN = 6,
-    TTY_COLOR_LIGHT_GREY = 7,
-    TTY_COLOR_DARK_GREY = 8,
-    TTY_COLOR_LIGHT_BLUE = 9,
-    TTY_COLOR_LIGHT_GREEN = 10,
-    TTY_COLOR_LIGHT_CYAN = 11,
-    TTY_COLOR_LIGHT_RED = 12,
-    TTY_COLOR_LIGHT_MAGENTA = 13,
-    TTY_COLOR_YELLOW = 14,
-    TTY_COLOR_WHITE = 15,
+    TTY_COLOR_BLUE,
+    TTY_COLOR_GREEN,
+    TTY_COLOR_CYAN,
+    TTY_COLOR_RED,
+    TTY_COLOR_MAGENTA,
+    TTY_COLOR_BROWN,
+    TTY_COLOR_LIGHT_GREY,
+    TTY_COLOR_DARK_GREY,
+    TTY_COLOR_LIGHT_BLUE,
+    TTY_COLOR_LIGHT_GREEN,
+    TTY_COLOR_LIGHT_CYAN,
+    TTY_COLOR_LIGHT_RED,
+    TTY_COLOR_LIGHT_MAGENTA,
+    TTY_COLOR_YELLOW,
+    TTY_COLOR_WHITE,
 } tty_color_t;
 
 /// @brief Initialize the TTY.

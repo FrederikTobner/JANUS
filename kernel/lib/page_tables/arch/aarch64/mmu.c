@@ -77,14 +77,14 @@ __cold error_t mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr
     return JANUS_OK;
 }
 
-virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
+error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt)
 {
     if (UNLIKELY(!g_mmu.initialized)) {
-        return 0;
+        return JANUS_EFAULT;
     }
     u64 aligned_size = (size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
     if (UNLIKELY(g_mmu.mmio_virt_next + aligned_size > MMIO_VIRT_END)) {
-        return 0;
+        return JANUS_ENOSPC;
     }
     virt_addr_t virt_addr = g_mmu.mmio_virt_next;
 
@@ -96,17 +96,17 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
     for (phys_addr_t pa = page_start; pa < page_end; pa += PAGE_SIZE, va += PAGE_SIZE) {
         phys_addr_t * l0_pte = mmu_get_or_create_page_table_entry(l0_phys, L0_INDEX(va), true);
         if (!l0_pte) {
-            return 0;
+            return JANUS_ENOMEM;
         }
         phys_addr_t l1_phys = *l0_pte & PAGE_TABLE_ENTRY_ADDR_MASK;
         phys_addr_t * l1_pte = mmu_get_or_create_page_table_entry(l1_phys, L1_INDEX(va), true);
         if (!l1_pte) {
-            return 0;
+            return JANUS_ENOMEM;
         }
         phys_addr_t l2_phys = *l1_pte & PAGE_TABLE_ENTRY_ADDR_MASK;
         phys_addr_t * l2_pte = mmu_get_or_create_page_table_entry(l2_phys, L2_INDEX(va), true);
         if (!l2_pte) {
-            return 0;
+            return JANUS_ENOMEM;
         }
         phys_addr_t l3_phys = *l2_pte & PAGE_TABLE_ENTRY_ADDR_MASK;
         u64 * l3_table = (u64 *) mmu_physical_to_virtual_address(l3_phys);
@@ -121,7 +121,8 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
     }
     asm_dsb();
     asm_isb();
-    return virt_addr;
+    *out_virt = virt_addr;
+    return JANUS_OK;
 }
 
 static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt)

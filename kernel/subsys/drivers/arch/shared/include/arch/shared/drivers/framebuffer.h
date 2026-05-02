@@ -24,6 +24,7 @@
 /// bitmap font. Pixel primitives are delegated to lib/display (display_fb_t).
 /// This code is shared between architectures that use framebuffer output.
 
+#include <display/display.h>
 #include <display/fb.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
@@ -66,30 +67,22 @@ static u32 const framebuffer_color_palette[16] = {
     0xFFFFFF, // White
 };
 
-/// @brief Initialize framebuffer state from configuration.
+/// @brief Initialize framebuffer state from a display_info_t descriptor.
 ///
-/// @param state    Framebuffer state to initialize
-/// @param base     Framebuffer base address
-/// @param width    Width in pixels
-/// @param height   Height in pixels
-/// @param pitch    Bytes per row
-/// @param bpp      Bits per pixel
-/// @param r_shift  Red channel bit position
-/// @param g_shift  Green channel bit position
-/// @param b_shift  Blue channel bit position
-static inline void framebuffer_init(framebuffer_state_t * state,
-                                    void * base,
-                                    u64 width,
-                                    u64 height,
-                                    u64 pitch,
-                                    u16 bpp,
-                                    u8 r_shift,
-                                    u8 g_shift,
-                                    u8 b_shift)
+/// @param state   Framebuffer state to initialize.
+/// @param info    Display configuration from the boot context.
+static inline void framebuffer_init(framebuffer_state_t * state, display_info_t const * info)
 {
-    state->fb = display_fb_init(base, width, height, pitch, bpp, r_shift, g_shift, b_shift);
-    state->text_width = (u16) (width / FRAMEBUFFER_FONT_WIDTH);
-    state->text_height = (u16) (height / FRAMEBUFFER_FONT_HEIGHT);
+    state->fb = display_fb_init(info->framebuffer,
+                                info->width,
+                                info->height,
+                                info->pitch,
+                                info->bpp,
+                                info->red_mask_shift,
+                                info->green_mask_shift,
+                                info->blue_mask_shift);
+    state->text_width = (u16) (info->width / FRAMEBUFFER_FONT_WIDTH);
+    state->text_height = (u16) (info->height / FRAMEBUFFER_FONT_HEIGHT);
 }
 
 /// @brief Draw a character at the specified text position.

@@ -115,14 +115,14 @@ __cold error_t mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr
     return JANUS_OK;
 }
 
-virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
+error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt)
 {
     if (UNLIKELY(!g_mmu.initialized)) {
-        return 0;
+        return JANUS_EFAULT;
     }
     u64 aligned_size = (size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
     if (UNLIKELY(g_mmu.mmio_virt_next + aligned_size > MMIO_VIRT_END)) {
-        return 0;
+        return JANUS_ENOSPC;
     }
     virt_addr_t virt_addr = g_mmu.mmio_virt_next;
 
@@ -136,19 +136,19 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
     for (phys_addr_t pa = page_start; pa < page_end; pa += PAGE_SIZE, va += PAGE_SIZE) {
         u64 * pml4_entry = mmu_get_or_create_entry(pml4_phys, PML4_INDEX(va), true);
         if (UNLIKELY(!pml4_entry)) {
-            return 0;
+            return JANUS_ENOMEM;
         }
         phys_addr_t pdpt_phys = *pml4_entry & PTE_ADDR_MASK;
 
         u64 * pdpt_entry = mmu_get_or_create_entry(pdpt_phys, PDPT_INDEX(va), true);
         if (UNLIKELY(!pdpt_entry)) {
-            return 0;
+            return JANUS_ENOMEM;
         }
         phys_addr_t pd_phys = *pdpt_entry & PTE_ADDR_MASK;
 
         u64 * pd_entry = mmu_get_or_create_entry(pd_phys, PD_INDEX(va), true);
         if (UNLIKELY(!pd_entry)) {
-            return 0;
+            return JANUS_ENOMEM;
         }
         phys_addr_t pt_phys = *pd_entry & PTE_ADDR_MASK;
 
@@ -163,7 +163,8 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
     // x86_64 INVLPG is self-serialising — no additional fence needed.
     // An MFENCE after all mappings ensures subsequent loads see the new PTEs.
     asm_mfence();
-    return virt_addr;
+    *out_virt = virt_addr;
+    return JANUS_OK;
 }
 
 static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt)

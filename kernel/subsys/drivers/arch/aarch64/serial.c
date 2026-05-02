@@ -63,7 +63,7 @@ static inline u64 pl011_reg(u32 offset)
     return g_pl011_base + offset;
 }
 
-error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
+__cold error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
 {
     // Initialize the MMU module for MMIO mapping.
     // This must be done before mmu_map_mmio() can be called.
@@ -74,8 +74,9 @@ error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_add
 
     // Map PL011 UART MMIO region into kernel address space.
     // The HHDM only maps RAM, so we need explicit MMIO mapping.
-    virt_addr_t mapped = mmu_map_mmio(PL011_PHYS_BASE, 0x1000);
-    if (mapped == 0) {
+    virt_addr_t mapped = 0;
+    error_t map_err = mmu_map_mmio(PL011_PHYS_BASE, 0x1000, &mapped);
+    if (map_err != JANUS_OK) {
         // Failed to map UART - fall back to framebuffer-only output
         return JANUS_ENODEV;
     }

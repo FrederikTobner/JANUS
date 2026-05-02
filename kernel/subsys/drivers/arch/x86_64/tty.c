@@ -37,7 +37,7 @@ static u16 volatile * g_vga_buffer = NULL;
 // Framebuffer state
 static framebuffer_state_t g_framebuffer_state;
 
-error_t arch_tty_init(display_info_t const * config)
+__cold error_t arch_tty_init(display_info_t const * config)
 {
     g_display_mode = config->mode;
 
@@ -48,15 +48,7 @@ error_t arch_tty_init(display_info_t const * config)
         return JANUS_OK;
 
     case DISPLAY_MODE_FRAMEBUFFER:
-        framebuffer_init(&g_framebuffer_state,
-                         config->framebuffer,
-                         config->width,
-                         config->height,
-                         config->pitch,
-                         config->bpp,
-                         config->red_mask_shift,
-                         config->green_mask_shift,
-                         config->blue_mask_shift);
+        framebuffer_init(&g_framebuffer_state, config);
         return JANUS_OK;
 
     default:

@@ -23,7 +23,7 @@
 
 #include <arch/shared/drivers/framebuffer.h>
 
-__hot void
+__cold void
 framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
 {
     if (UNLIKELY(!state->fb || column >= state->text_width || row >= state->text_height)) {

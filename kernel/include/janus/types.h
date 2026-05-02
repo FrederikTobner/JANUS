@@ -56,5 +56,9 @@ typedef _Bool bool;
 #define NULL                          ((void *) 0)
 
 typedef __u64 uintptr_t;
+typedef __u64 size_t;
+
+_Static_assert(sizeof(phys_addr_t) == 8, "phys_addr_t must be 64-bit");
+_Static_assert(sizeof(virt_addr_t) == 8, "virt_addr_t must be 64-bit");
 
 #endif /* JANUS_TYPES_H */

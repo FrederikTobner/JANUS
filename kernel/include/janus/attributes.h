@@ -108,6 +108,10 @@
 // Static assertion
 #define STATIC_ASSERT(expr, msg) _Static_assert(expr, msg)
 
+// Compile-time check — triggers a compile error when condition is true.
+// Mirrors Linux's BUILD_BUG_ON for familiarity.
+#define BUILD_BUG_ON(condition)  STATIC_ASSERT(!(condition), "BUILD_BUG_ON triggered")
+
 // Array size
 #define ARRAY_SIZE(arr)          (sizeof(arr) / sizeof((arr)[0]))
 

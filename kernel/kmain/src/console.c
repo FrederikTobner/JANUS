@@ -40,9 +40,9 @@ s32 kprintf(char const * fmtstr, ...)
     return ret;
 }
 
-s32 vkprintf(char const * fmtstr, va_list ap)
+s32 vkprintf(char const * fmtstr, va_list args)
 {
-    return vfmt_to(console_putc, NULL, fmtstr, ap);
+    return vfmt_to(console_putc, NULL, fmtstr, args);
 }
 
 __cold void console_init_early(void)

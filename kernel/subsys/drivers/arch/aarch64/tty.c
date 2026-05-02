@@ -29,22 +29,14 @@
 // Framebuffer state - shared implementation
 static framebuffer_state_t g_framebuffer_state;
 
-error_t arch_tty_init(display_info_t const * config)
+__cold error_t arch_tty_init(display_info_t const * config)
 {
     if (config->mode != DISPLAY_MODE_FRAMEBUFFER) {
         // AArch64 requires framebuffer - no fallback
         return JANUS_ENODEV;
     }
 
-    framebuffer_init(&g_framebuffer_state,
-                     config->framebuffer,
-                     config->width,
-                     config->height,
-                     config->pitch,
-                     config->bpp,
-                     config->red_mask_shift,
-                     config->green_mask_shift,
-                     config->blue_mask_shift);
+    framebuffer_init(&g_framebuffer_state, config);
     return JANUS_OK;
 }
 
