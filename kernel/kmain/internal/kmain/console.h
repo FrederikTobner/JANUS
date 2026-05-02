@@ -32,9 +32,10 @@ s32 vkprintf(char const * fmt, va_list ap);
 
 /// @brief Best-effort serial initialization before boot context is available.
 ///
-/// Attempts to bring up serial output with zeroed address parameters.
-/// On x86_64 this always succeeds (port I/O needs no address translation).
-/// On AArch64 this may silently fail when HHDM data is not yet available.
+/// Calls boot_early_params() to obtain address-translation parameters.
+/// On Multiboot2 all outputs are zero (x86_64 uses port I/O, so zero is valid).
+/// On Limine the real HHDM offset and base addresses are supplied by the bootloader.
+/// On AArch64 with Multiboot2 this may silently fail when HHDM data is not yet available.
 /// Safe to call multiple times — no-op if serial is already active.
 void console_init_early(void);
 

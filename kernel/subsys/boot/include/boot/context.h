@@ -54,7 +54,7 @@ typedef struct boot_context {
 /// The implementation must set every field unconditionally.
 ///
 /// @param ctx Boot context to populate
-/// @return 0 on success, non-zero on failure
+/// @return JANUS_OK on success, or a negative JANUS_E* error code on failure
 error_t boot_init(boot_context_t * boot_context);
 
 /// @brief Query address-translation parameters before boot_init completes.
