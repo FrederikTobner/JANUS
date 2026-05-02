@@ -1,6 +1,6 @@
 # Coding Style
 
-JANUS enforces a consistent coding style via `clang-format`. This page documents the conventions that go beyond what the formatter handles — architectural patterns, memory access style, and encapsulation policy.
+JANUS enforces a consistent coding style via `clang-format` and `clang-tidy`. Both tools are run automatically in CI on every pull request (see [CI Workflows](ci.md)). This page documents the conventions that go beyond what the formatter handles — architectural patterns, memory access style, and encapsulation policy.
 
 ## Multi-Dimensional Memory Access
 

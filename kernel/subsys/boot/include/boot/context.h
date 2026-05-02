@@ -40,11 +40,11 @@ typedef enum {
 /// Contains all boot-protocol-derived information needed by the kernel.
 /// Public struct per Coding-Style.md: consumers access fields directly.
 typedef struct boot_context {
-    boot_protocol_t protocol; ///< Which boot protocol was used
-    u64 hhdm_offset; ///< Higher Half Direct Map offset (0 for identity-mapped)
+    boot_protocol_t protocol;     ///< Which boot protocol was used
+    u64 hhdm_offset;              ///< Higher Half Direct Map offset (0 for identity-mapped)
     phys_addr_t kernel_phys_base; ///< Kernel physical base address
     virt_addr_t kernel_virt_base; ///< Kernel virtual base address
-    display_info_t display; ///< Display config (check display.mode for availability)
+    display_info_t display;       ///< Display config (check display.mode for availability)
 } boot_context_t;
 
 /// @brief Initialize boot context from the active boot protocol
@@ -55,6 +55,6 @@ typedef struct boot_context {
 ///
 /// @param ctx Boot context to populate
 /// @return 0 on success, non-zero on failure
-error_t boot_init(boot_context_t * ctx);
+error_t boot_init(boot_context_t * boot_context);
 
 #endif /* BOOT_CONTEXT_H */

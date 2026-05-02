@@ -45,7 +45,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
-    boot_context->display = (display_info_t){.mode = DISPLAY_MODE_NONE};
+    boot_context->display = (display_info_t) {.mode = DISPLAY_MODE_NONE};
 
     // HHDM offset is required for address translation
     struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;
@@ -63,8 +63,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
 
     // Framebuffer is optional — if not present, display_mode remains NONE
     struct limine_framebuffer_response const * framebuffer_response = limine_framebuffer_request.response;
-    if (framebuffer_response != NULL && framebuffer_response->framebuffer_count > 0 &&
-        framebuffer_response->framebuffers != NULL) {
+    if (framebuffer_response != NULL && framebuffer_response->framebuffer_count > 0) {
         struct limine_framebuffer const * primary_framebuffer = framebuffer_response->framebuffers[0];
         boot_context->display = (display_info_t) {
             .mode = DISPLAY_MODE_FRAMEBUFFER,

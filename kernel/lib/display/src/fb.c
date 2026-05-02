@@ -29,7 +29,7 @@ static __always_inline void write_pixel(display_fb_t const * fb, u32 x, u32 y, u
     if (UNLIKELY(fb->bpp != 32 && fb->bpp != 24)) {
         return;
     }
-    u64 offset = (u64) y * fb->pitch + (u64) x * (fb->bpp / 8);
+    u64 offset = ((u64) y * fb->pitch) + ((u64) x * (fb->bpp / 8));
     u32 pixel = (u32) (((rgb >> 16) & 0xFF) << fb->red_shift) | (u32) (((rgb >> 8) & 0xFF) << fb->green_shift) |
                 (u32) ((rgb & 0xFF) << fb->blue_shift);
 
@@ -87,11 +87,11 @@ __hot void display_blit_glyph(
     u32 bytes_per_row = width / 8;
     for (u32 row = 0; row < height; row++) {
         for (u32 byte_idx = 0; byte_idx < bytes_per_row; byte_idx++) {
-            u8 bits = bitmap[row * bytes_per_row + byte_idx];
+            u8 bits = bitmap[(row * bytes_per_row) + byte_idx];
             for (u32 bit = 0; bit < 8; bit++) {
-                u32 px = x + byte_idx * 8 + bit;
+                u32 px = x + (byte_idx * 8) + bit;
                 u32 py = y + row;
-                u32 color = (bits & (0x80u >> bit)) ? fg_rgb : bg_rgb;
+                u32 color = (bits & (0x80U >> bit)) ? fg_rgb : bg_rgb;
                 if (px < (u32) fb->width && py < (u32) fb->height) {
                     write_pixel(fb, px, py, color);
                 }

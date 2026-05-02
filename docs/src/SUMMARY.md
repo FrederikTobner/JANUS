@@ -59,6 +59,7 @@
 
 - [Contributing](project/contributing/contributing.md)
   - [Coding Style](project/contributing/coding-style.md)
+  - [CI Workflows](project/contributing/ci.md)
   - [Terminology](project/contributing/terminology.md)
 
 ---

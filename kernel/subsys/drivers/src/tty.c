@@ -37,7 +37,8 @@ static __hot void tty_scroll(void)
     for (u16 y = 0; y < screen_height - 1; y++) {
         for (u16 x = 0; x < screen_width; x++) {
             char ch;
-            u8 fg, bg;
+            u8 fg;
+            u8 bg;
             arch_tty_read_cell(x, y + 1, &ch, &fg, &bg);
             arch_tty_write_cell(x, y, ch, fg, bg);
         }

@@ -37,10 +37,51 @@ jobs:
           -G Ninja
           -D CMAKE_BUILD_TYPE=Release
           -D CMAKE_C_COMPILER=${{ matrix.compiler }}
-          -D TOOLS_ENABLE_TESTS=ON
+          -D JANUS_TOOLS_ENABLE_TESTS=ON
 
       - name: Build
         run: cmake --build build-tools
 
       - name: Test
         run: ctest --test-dir build-tools --output-on-failure
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools and coverage tooling
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake ninja-build zlib1g-dev gcovr
+
+      - name: Configure with coverage instrumentation
+        run: >
+          cmake -S tools -B build-tools-coverage
+          -G Ninja
+          -D CMAKE_BUILD_TYPE=Debug
+          -D CMAKE_C_COMPILER=gcc
+          -D JANUS_TOOLS_ENABLE_COVERAGE=ON
+
+      - name: Build
+        run: cmake --build build-tools-coverage
+
+      - name: Run tests
+        run: ctest --test-dir build-tools-coverage --output-on-failure
+
+      - name: Generate HTML coverage report
+        run: |
+          gcovr \
+            --root tools \
+            --object-directory build-tools-coverage \
+            --exclude '.*/test/.*' \
+            --exclude '.*/googletest/.*' \
+            --html-details coverage/index.html \
+            --html-title "JANUS Tools — Coverage Report" \
+            --print-summary
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30

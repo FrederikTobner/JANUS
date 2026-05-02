@@ -35,7 +35,7 @@
 #define PL011_REG_FR       0x18 // Flag Register
 #define PL011_REG_IBRD     0x24 // Integer Baud Rate Divisor
 #define PL011_REG_FBRD     0x28 // Fractional Baud Rate Divisor
-#define PL011_REG_LCR_H    0x2C // Line Control Register 
+#define PL011_REG_LCR_H    0x2C // Line Control Register
 #define PL011_REG_CR       0x30 // Control Register
 #define PL011_REG_IMSC     0x38 // Interrupt Mask Set/Clear
 
@@ -64,8 +64,8 @@ static inline u64 pl011_reg(u32 offset)
 
 error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
 {
-     // Initialize the MMU module for MMIO mapping.
-     // This must be done before mmu_map_mmio() can be called.
+    // Initialize the MMU module for MMIO mapping.
+    // This must be done before mmu_map_mmio() can be called.
     mmu_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
 
     // Map PL011 UART MMIO region into kernel address space.
