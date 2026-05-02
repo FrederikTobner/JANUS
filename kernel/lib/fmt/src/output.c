@@ -56,7 +56,7 @@ static s32 fmt_format_string(fmt_putc_fn putc, void * context, char const * str,
 /// @param putc Output callback function
 /// @param context Opaque context passed to putc
 /// @param format Format string (printf-style)
-/// @param ap va_list of arguments
+/// @param ap va_list of arguments (must be initialized by caller via va_start)
 /// @return Number of characters written
 static s32 vfmt_impl(fmt_putc_fn putc, void * context, char const * format, va_list ap);
 
@@ -72,26 +72,26 @@ typedef struct {
 /// @param context Pointer to buffer_ctx_t
 static void buffer_putc(char c, void * context);
 
-s32 fmt_to(fmt_putc_fn putc, void * context, char const * fmtstr, ...)
+s32 fmt_to(fmt_putc_fn putc, void * context, char const * format, ...)
 {
     va_list ap;
-    va_start(ap, fmtstr);
-    s32 ret = vfmt_impl(putc, context, fmtstr, ap);
+    va_start(ap, format);
+    s32 ret = vfmt_impl(putc, context, format, ap);
     va_end(ap);
     return ret;
 }
 
-s32 vfmt_to(fmt_putc_fn putc, void * context, char const * fmtstr, va_list ap)
+s32 vfmt_to(fmt_putc_fn putc, void * context, char const * format, va_list ap)
 {
-    return vfmt_impl(putc, context, fmtstr, ap);
+    return vfmt_impl(putc, context, format, ap);
 }
 
-s32 snprintf(char * out_buffer, u64 buflen, char const * fmtstr, ...)
+s32 snprintf(char * out_buffer, u64 buflen, char const * format, ...)
 {
     va_list ap;
-    va_start(ap, fmtstr);
+    va_start(ap, format);
     buffer_ctx_t bctx = {.out_buffer = out_buffer, .position = 0, .max = buflen};
-    s32 ret = vfmt_impl(buffer_putc, &bctx, fmtstr, ap);
+    s32 ret = vfmt_impl(buffer_putc, &bctx, format, ap);
     va_end(ap);
     if (buflen > 0) {
         out_buffer[(bctx.position < buflen) ? bctx.position : (buflen - 1)] = '\0';
@@ -99,13 +99,13 @@ s32 snprintf(char * out_buffer, u64 buflen, char const * fmtstr, ...)
     return ret;
 }
 
-s32 sprintf(char * out_buffer, char const * fmtstr, ...)
+s32 sprintf(char * out_buffer, char const * format, ...)
 {
     va_list ap;
-    va_start(ap, fmtstr);
+    va_start(ap, format);
     // Use a very large max for 'infinite' buffer
     buffer_ctx_t bctx = {.out_buffer = out_buffer, .position = 0, .max = (u64) -1};
-    s32 ret = vfmt_impl(buffer_putc, &bctx, fmtstr, ap);
+    s32 ret = vfmt_impl(buffer_putc, &bctx, format, ap);
     va_end(ap);
     out_buffer[bctx.position] = '\0';
     return ret;
@@ -197,6 +197,9 @@ static s32 fmt_format_string(fmt_putc_fn putc, void * context, char const * str,
     return length + padlen;
 }
 
+// NOLINTBEGIN(readability-function-size,readability-function-cognitive-complexity,clang-analyzer-valist.Uninitialized)
+// printf-style formatter is inherently complex; splitting it would harm readability.
+// clang-analyzer-valist.Uninitialized: false positive — ap is always initialized via va_start by every caller.
 static s32 vfmt_impl(fmt_putc_fn putc, void * context, char const * format, va_list ap)
 {
     s32 count = 0;
@@ -222,7 +225,7 @@ static s32 vfmt_impl(fmt_putc_fn putc, void * context, char const * format, va_l
         // Parse width
         u32 width = 0;
         while (*format >= '0' && *format <= '9') {
-            width = width * 10 + (u32) (*format++ - '0');
+            width = (width * 10) + (u32) (*format++ - '0');
         }
         // Parse length (l, ll)
         u32 longmod = 0;
@@ -255,7 +258,7 @@ static s32 vfmt_impl(fmt_putc_fn putc, void * context, char const * format, va_l
         case 'x':
         case 'X':
             {
-                upper = (ch == 'X') ? true : false;
+                upper = (ch == 'X');
                 u64 val = (longmod == 2)   ? va_arg(ap, u64)
                           : (longmod == 1) ? va_arg(ap, unsigned long)
                                            : va_arg(ap, unsigned int);
@@ -299,3 +302,4 @@ static s32 vfmt_impl(fmt_putc_fn putc, void * context, char const * format, va_l
     }
     return count;
 }
+// NOLINTEND(readability-function-size,readability-function-cognitive-complexity,clang-analyzer-valist.Uninitialized)

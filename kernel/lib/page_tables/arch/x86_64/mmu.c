@@ -160,8 +160,6 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
     return virt_addr;
 }
 
-// --- helpers ------------------------------------------------------------------
-
 static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt)
 {
     return virt - g_kernel_virt_base + g_kernel_phys_base;

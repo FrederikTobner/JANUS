@@ -1,0 +1,96 @@
+name: Doxygen
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "tools/**"
+      - "Doxyfile"
+      - ".github/workflows/doxygen.yaml"
+  pull_request:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "tools/**"
+      - "Doxyfile"
+      - ".github/workflows/doxygen.yaml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Doxygen and Graphviz
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends doxygen graphviz
+
+      - name: Generate API docs
+        run: doxygen Doxyfile
+
+      - name: Upload HTML artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doxygen-html
+          path: doxygen-out/html
+          retention-days: 30
+
+  # Publish API docs to Pages at /JANUS/api/ by merging with the mdBook output.
+  # Runs only on pushes to main so PRs never overwrite the live site.
+  publish:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin
+          key: cargo-bin-${{ runner.os }}-${{ hashFiles('docs/preprocessors/mdbook-side-notes/Cargo.lock', 'docs/preprocessors/mdbook-code-diff/Cargo.lock') }}
+
+      - name: Install mdbook and preprocessors
+        run: |
+          command -v mdbook            || cargo install mdbook
+          command -v mdbook-mermaid    || cargo install mdbook-mermaid
+          command -v mdbook-side-notes || cargo install --path docs/preprocessors/mdbook-side-notes
+          command -v mdbook-code-diff  || cargo install --path docs/preprocessors/mdbook-code-diff
+
+      - name: Build book
+        run: cd docs && mdbook build
+
+      - name: Install Doxygen and Graphviz
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends doxygen graphviz
+
+      - name: Build API docs into book output
+        run: |
+          doxygen Doxyfile
+          mkdir -p docs/build/api
+          cp -r doxygen-out/html/. docs/build/api/
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

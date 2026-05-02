@@ -1,0 +1,81 @@
+# Doxygen configuration for JANUS
+# Generated for Doxygen 1.9+ (ubuntu-latest ships ≥ 1.9.1)
+# Run: doxygen Doxyfile  (from repo root)
+# Output: doxygen-out/html/index.html
+
+#---------------------------------------------------------------------------
+# Project
+#---------------------------------------------------------------------------
+PROJECT_NAME           = "JANUS"
+PROJECT_BRIEF          = "A freestanding x86_64 / AArch64 teaching kernel"
+PROJECT_NUMBER         =
+OUTPUT_DIRECTORY       = doxygen-out
+CREATE_SUBDIRS         = NO
+
+#---------------------------------------------------------------------------
+# Input
+#---------------------------------------------------------------------------
+INPUT                  = kernel tools
+FILE_PATTERNS          = *.c *.h
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */build/* */_deps/*
+
+#---------------------------------------------------------------------------
+# Extraction
+#---------------------------------------------------------------------------
+# Only emit docs for symbols that have documentation comments.
+EXTRACT_ALL            = NO
+EXTRACT_STATIC         = YES
+EXTRACT_PRIVATE        = NO
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+INTERNAL_DOCS          = NO
+
+#---------------------------------------------------------------------------
+# Output formats
+#---------------------------------------------------------------------------
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_MAN           = NO
+GENERATE_RTF           = NO
+GENERATE_XML           = NO
+HTML_OUTPUT            = html
+
+#---------------------------------------------------------------------------
+# HTML look & feel
+#---------------------------------------------------------------------------
+HTML_COLORSTYLE        = DARK
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+
+#---------------------------------------------------------------------------
+# Source browser
+#---------------------------------------------------------------------------
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+#---------------------------------------------------------------------------
+# Call-graph / caller-graph  (requires dot from graphviz)
+#---------------------------------------------------------------------------
+HAVE_DOT               = YES
+DOT_NUM_THREADS        = 0
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+COLLABORATION_GRAPH    = NO
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = YES
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+DOT_GRAPH_MAX_NODES    = 50
+MAX_DOT_GRAPH_DEPTH    = 4
+
+#---------------------------------------------------------------------------
+# Warnings
+#---------------------------------------------------------------------------
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+QUIET                  = YES

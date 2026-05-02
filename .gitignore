@@ -34,3 +34,9 @@ compile_commands.json
 ## Visual Studio 💩         ##
 ##############################
 .[Vv][Ss][Cc][Oo][Dd][Ee]/
+
+
+##############################
+## Temporary Files          ##
+##############################
+[Pp][Ll][Aa][Nn][Nn][Ii][Nn][Gg]/

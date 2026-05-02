@@ -32,6 +32,7 @@
 #define LIMINE_COMMON_MAGIC_0 0xc7b1dd30df4c8b88ULL
 #define LIMINE_COMMON_MAGIC_1 0x0a82e883a194f07bULL
 
+// clang-format off
 /// Request region markers (scanned by Limine in the ELF binary)
 #define LIMINE_REQUESTS_START_MARKER \
     {0xf6b8f4b39de7d1aeULL, 0xfab91a6940fcb9cfULL, 0x785c6ed015d3e316ULL, 0x181e920a7852b9d9ULL}
@@ -60,6 +61,7 @@
 
 #define LIMINE_EXECUTABLE_ADDRESS_REQUEST_ID \
     {LIMINE_COMMON_MAGIC_0, LIMINE_COMMON_MAGIC_1, 0x71ba76863cc55f63ULL, 0xb2644a48c516a487ULL}
+// clang-format on
 
 /// Entry point request
 struct limine_entry_point_request {

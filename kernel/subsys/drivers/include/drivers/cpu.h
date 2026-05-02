@@ -51,5 +51,4 @@ static __always_inline __noreturn void drivers_cpu_halt_forever(void)
     }
 }
 
-
 #endif /* DRIVERS_CPU_H */

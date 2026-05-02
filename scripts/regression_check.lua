@@ -10,10 +10,7 @@
 -- @copyright Copyright (C) 2026 Frederik, TinyOS contributors
 -- @license   GNU Affero General Public License v3.0 or later
 
--- ──────────────────────────────────────────────────────────────────────
 -- Colours (disabled when stdout is not a tty)
--- ──────────────────────────────────────────────────────────────────────
-
 local _tty_raw    = os.execute("test -t 1") -- luacheck: ignore
 -- Normalise across Lua versions: 5.3+ returns true/false; 5.1/5.2 returns 0/non-zero
 local use_colour  = (_tty_raw == true) or (_tty_raw == 0)
@@ -32,10 +29,6 @@ local C = {
     cyan   = sgr("36"),
     dim    = sgr("2"),
 }
-
--- ──────────────────────────────────────────────────────────────────────
--- Helpers
--- ──────────────────────────────────────────────────────────────────────
 
 --- Print an error message and exit.
 local function die(fmt, ...)
@@ -104,10 +97,6 @@ local function nproc()
     return 4  -- safe fallback
 end
 
--- ──────────────────────────────────────────────────────────────────────
--- Project root detection
--- ──────────────────────────────────────────────────────────────────────
-
 --- Resolve the project root from the location of this script.
 -- The script lives at <root>/scripts/regression_check.lua, so the root
 -- is the parent of the directory that contains this file.
@@ -123,10 +112,6 @@ local ROOT = (function()
     end
     return root
 end)()
-
--- ──────────────────────────────────────────────────────────────────────
--- Argument parsing
--- ──────────────────────────────────────────────────────────────────────
 
 local USAGE = [[
 Usage: lua scripts/regression_check.lua [OPTIONS]
@@ -184,10 +169,6 @@ do
         i = i + 1
     end
 end
-
--- ──────────────────────────────────────────────────────────────────────
--- Preset discovery
--- ──────────────────────────────────────────────────────────────────────
 
 --- Discover all configure preset names from CMakePresets.json.
 local function discover_presets()
@@ -254,10 +235,6 @@ local function filter_presets(all_presets)
     return result
 end
 
--- ──────────────────────────────────────────────────────────────────────
--- Build phases
--- ──────────────────────────────────────────────────────────────────────
-
 --- Status line helper — overwrites the current line.
 local function status(index, total, preset, msg)
     local prefix = string.format("[%d/%d]", index, total)
@@ -313,23 +290,7 @@ local function phase_build(build_dir, target, log_path)
     return ok
 end
 
--- ──────────────────────────────────────────────────────────────────────
--- Result tracking
--- ──────────────────────────────────────────────────────────────────────
-
---[[
-    results[i] = {
-        preset    = "x86_64-gcc",
-        elapsed   = 4,
-        configure = true/false,
-        iso       = true/false/nil,
-    }
---]]
 local results = {}
-
--- ──────────────────────────────────────────────────────────────────────
--- Summary table
--- ──────────────────────────────────────────────────────────────────────
 
 local function print_summary()
     -- Column widths
@@ -386,10 +347,6 @@ local function print_summary()
 
     return fail_count
 end
-
--- ──────────────────────────────────────────────────────────────────────
--- Main
--- ──────────────────────────────────────────────────────────────────────
 
 local function main()
     io.write(string.format("%s── JANUS pre-commit check ──%s\n\n", C.bold, C.reset))

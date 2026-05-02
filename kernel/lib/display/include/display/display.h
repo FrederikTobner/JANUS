@@ -32,9 +32,9 @@
 /// Distinguishes the three states a bootloader can leave us in:
 /// no display at all, a linear RGB framebuffer, or VGA text hardware.
 typedef enum {
-    DISPLAY_MODE_NONE = 0, ///< No display information provided
+    DISPLAY_MODE_NONE = 0,    ///< No display information provided
     DISPLAY_MODE_FRAMEBUFFER, ///< Linear RGB framebuffer available
-    DISPLAY_MODE_VGA_TEXT, ///< VGA text mode confirmed (Multiboot2 EGA text)
+    DISPLAY_MODE_VGA_TEXT,    ///< VGA text mode confirmed (Multiboot2 EGA text)
 } display_mode_t;
 
 /// @brief Display configuration
@@ -44,14 +44,14 @@ typedef enum {
 /// the old convention of checking the @c framebuffer pointer for NULL.
 typedef struct display_info {
     display_mode_t mode; ///< What kind of display the bootloader provided
-    void * framebuffer; ///< Linear framebuffer base address (NULL for VGA text mode)
-    u64 width; ///< Horizontal resolution in pixels
-    u64 height; ///< Vertical resolution in pixels
-    u64 pitch; ///< Bytes per scanline
-    u16 bpp; ///< Bits per pixel
-    u8 red_mask_shift; ///< Red component bit position
+    void * framebuffer;  ///< Linear framebuffer base address (NULL for VGA text mode)
+    u64 width;           ///< Horizontal resolution in pixels
+    u64 height;          ///< Vertical resolution in pixels
+    u64 pitch;           ///< Bytes per scanline
+    u16 bpp;             ///< Bits per pixel
+    u8 red_mask_shift;   ///< Red component bit position
     u8 green_mask_shift; ///< Green component bit position
-    u8 blue_mask_shift; ///< Blue component bit position
+    u8 blue_mask_shift;  ///< Blue component bit position
 } display_info_t;
 
 #endif /* DISPLAY_DISPLAY_H */
