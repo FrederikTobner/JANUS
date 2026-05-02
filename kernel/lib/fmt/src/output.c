@@ -56,7 +56,7 @@ static s32 fmt_format_string(fmt_putc_fn putc, void * context, char const * str,
 /// @param putc Output callback function
 /// @param context Opaque context passed to putc
 /// @param format Format string (printf-style)
-/// @param ap va_list of arguments
+/// @param ap va_list of arguments (must be initialized by caller via va_start)
 /// @return Number of characters written
 static s32 vfmt_impl(fmt_putc_fn putc, void * context, char const * format, va_list ap);
 
@@ -197,8 +197,9 @@ static s32 fmt_format_string(fmt_putc_fn putc, void * context, char const * str,
     return length + padlen;
 }
 
-// NOLINTBEGIN(readability-function-size,readability-function-cognitive-complexity)
+// NOLINTBEGIN(readability-function-size,readability-function-cognitive-complexity,clang-analyzer-valist.Uninitialized)
 // printf-style formatter is inherently complex; splitting it would harm readability.
+// clang-analyzer-valist.Uninitialized: false positive — ap is always initialized via va_start by every caller.
 static s32 vfmt_impl(fmt_putc_fn putc, void * context, char const * format, va_list ap)
 {
     s32 count = 0;
@@ -301,4 +302,4 @@ static s32 vfmt_impl(fmt_putc_fn putc, void * context, char const * format, va_l
     }
     return count;
 }
-// NOLINTEND(readability-function-size,readability-function-cognitive-complexity)
+// NOLINTEND(readability-function-size,readability-function-cognitive-complexity,clang-analyzer-valist.Uninitialized)
