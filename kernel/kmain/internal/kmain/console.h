@@ -24,11 +24,7 @@
 /// Provides functions for kernel console output, including formatted printing.
 
 #include <boot/context.h>
-#include <janus/types.h>
-#include <janus/va_arg.h>
-
-s32 kprintf(char const * fmtstr, ...) __attribute__((format(printf, 1, 2)));
-s32 vkprintf(char const * fmtstr, va_list args);
+#include <kio/kio.h>
 
 /// @brief Best-effort serial initialization before boot context is available.
 ///

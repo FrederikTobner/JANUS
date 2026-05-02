@@ -61,6 +61,9 @@
 
 #define LIMINE_EXECUTABLE_ADDRESS_REQUEST_ID \
     {LIMINE_COMMON_MAGIC_0, LIMINE_COMMON_MAGIC_1, 0x71ba76863cc55f63ULL, 0xb2644a48c516a487ULL}
+
+#define LIMINE_MEMMAP_REQUEST_ID \
+    {LIMINE_COMMON_MAGIC_0, LIMINE_COMMON_MAGIC_1, 0x67cf3d9d378a806fULL, 0xe304acdfc50c3c62ULL}
 // clang-format on
 
 /// Entry point request
@@ -98,6 +101,13 @@ struct limine_executable_address_request {
     u64 id[4];
     u64 revision;
     void * response;
+};
+
+/// Memory map request — provides physical memory map
+struct limine_memmap_request {
+    u64 id[4];
+    u64 revision;
+    struct limine_memmap_response * response;
 };
 
 /// Base revision (protocol version)

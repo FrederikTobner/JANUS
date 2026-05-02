@@ -37,17 +37,8 @@
 /// The macro injects @c __FILE__ and @c __LINE__ automatically so that the
 /// panic site is always identifiable in the output.
 
-#include <janus/attributes.h>
-#include <janus/types.h>
-
-/// @brief Underlying implementation — do not call directly; use kpanic().
-///
-/// @param file  Source file name (from __FILE__)
-/// @param line  Source line number (from __LINE__)
-/// @param fmt   printf-style format string
-/// @param ...   Format arguments
-__cold __noreturn void kpanic_impl(char const * file, int line, char const * fmt, ...)
-    __attribute__((format(printf, 3, 4)));
+// kpanic_impl and the kpanic() macro are now provided by the kio core module.
+#include <kio/kio.h>
 
 /// @brief Panic with a human-readable message and halt.
 ///

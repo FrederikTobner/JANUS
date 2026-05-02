@@ -28,6 +28,10 @@
 
 #include <boot/context.h>
 
+/// Kernel image physical end — provided by the multiboot2 linker script
+/// (symbol is named kernel_end in the multiboot2 linker, not kernel_phys_end)
+extern char kernel_end[];
+
 /// Protocol-private stash — written by assembly via multiboot2_stash_bootinfo,
 /// read by boot_init. Correctness relies on write-before-read ordering,
 /// not on .bss being zeroed.
@@ -83,10 +87,12 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
+    boot_context->kernel_phys_end = (phys_addr_t) kernel_end;
+    boot_context->memmap.count = 0;
     display_info_t const none_display = {.mode = DISPLAY_MODE_NONE};
     boot_context->display = none_display;
 
-    // Walk tag list looking for framebuffer
+    // Walk tag list looking for framebuffer and memory map
     struct multiboot_tag * tag = multiboot_first_tag((struct multiboot_info *) (phys_addr_t) g_mb2_info);
     while (!multiboot_is_end_tag(tag)) {
         if (tag->type == MULTIBOOT2_TAG_FRAMEBUFFER) {
@@ -111,7 +117,41 @@ __cold error_t boot_init(boot_context_t * boot_context)
                 display_info_t const vga_display = {.mode = DISPLAY_MODE_VGA_TEXT};
                 boot_context->display = vga_display;
             }
-            break;
+        } else if (tag->type == MULTIBOOT2_TAG_MMAP) {
+            struct multiboot_tag_mmap const * mmap_tag = (struct multiboot_tag_mmap const *) tag;
+            u32 const entry_size = mmap_tag->entry_size;
+            u8 const * cursor = (u8 const *) mmap_tag->entries;
+            u8 const * const end = (u8 const *) mmap_tag + mmap_tag->size;
+
+            while (cursor + entry_size <= end && boot_context->memmap.count < BOOT_MEMMAP_MAX_ENTRIES) {
+                struct multiboot_mmap_entry const * src = (struct multiboot_mmap_entry const *) cursor;
+                u32 const idx = boot_context->memmap.count;
+                boot_context->memmap.entries[idx].base = (phys_addr_t) src->addr;
+                boot_context->memmap.entries[idx].length = src->len;
+
+                // Translate Multiboot2 memory types to mem_region_type_t
+                switch (src->type) {
+                case MULTIBOOT2_MEMORY_AVAILABLE:
+                    boot_context->memmap.entries[idx].type = MEM_REGION_USABLE;
+                    break;
+                case MULTIBOOT2_MEMORY_ACPI_RECLAIMABLE:
+                    boot_context->memmap.entries[idx].type = MEM_REGION_ACPI_RECLAIMABLE;
+                    break;
+                case MULTIBOOT2_MEMORY_NVS:
+                    boot_context->memmap.entries[idx].type = MEM_REGION_ACPI_NVS;
+                    break;
+                case MULTIBOOT2_MEMORY_BADRAM:
+                    boot_context->memmap.entries[idx].type = MEM_REGION_BAD;
+                    break;
+                case MULTIBOOT2_MEMORY_RESERVED:
+                default:
+                    boot_context->memmap.entries[idx].type = MEM_REGION_RESERVED;
+                    break;
+                }
+
+                boot_context->memmap.count++;
+                cursor += entry_size;
+            }
         }
         tag = multiboot_next_tag(tag);
     }

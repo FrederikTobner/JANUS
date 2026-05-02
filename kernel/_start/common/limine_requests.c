@@ -88,3 +88,11 @@ __used __section(".limine_requests") volatile struct limine_executable_address_r
         .revision = 0,
         .response = NULL,
 };
+
+// Memory map request - provides the physical memory map from the bootloader.
+// Required by the PMM to discover usable RAM regions.
+__used __section(".limine_requests") volatile struct limine_memmap_request limine_memmap_request = {
+    .id = LIMINE_MEMMAP_REQUEST_ID,
+    .revision = 0,
+    .response = NULL,
+};

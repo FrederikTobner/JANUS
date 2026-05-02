@@ -29,6 +29,10 @@
 extern volatile struct limine_hhdm_request limine_hhdm_request;
 extern volatile struct limine_framebuffer_request limine_framebuffer_request;
 extern volatile struct limine_executable_address_request limine_executable_address_request;
+extern volatile struct limine_memmap_request limine_memmap_request;
+
+/// Kernel image physical end — provided by the linker script
+extern char kernel_phys_end[];
 
 /// @brief Query address-translation parameters directly from Limine request structs.
 ///
@@ -62,6 +66,8 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
+    boot_context->kernel_phys_end = 0;
+    boot_context->memmap.count = 0;
     display_info_t const none_display = {.mode = DISPLAY_MODE_NONE};
     boot_context->display = none_display;
 
@@ -95,6 +101,23 @@ __cold error_t boot_init(boot_context_t * boot_context)
             .blue_mask_shift = primary_framebuffer->blue_mask_shift,
         };
         boot_context->display = fb_display;
+    }
+
+    // Physical end of the kernel image (linker-provided symbol)
+    boot_context->kernel_phys_end = (phys_addr_t) kernel_phys_end;
+
+    // Physical memory map
+    struct limine_memmap_response const * memmap_response = limine_memmap_request.response;
+    if (memmap_response != NULL) {
+        u64 const max_entries = BOOT_MEMMAP_MAX_ENTRIES;
+        u64 const n = (memmap_response->entry_count < max_entries) ? memmap_response->entry_count : max_entries;
+        for (u64 i = 0; i < n; i++) {
+            struct limine_memmap_entry const * src = memmap_response->entries[i];
+            boot_context->memmap.entries[i].base = (phys_addr_t) src->base;
+            boot_context->memmap.entries[i].length = src->length;
+            boot_context->memmap.entries[i].type = (mem_region_type_t) src->type;
+        }
+        boot_context->memmap.count = (u32) n;
     }
 
     return 0;

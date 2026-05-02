@@ -25,6 +25,9 @@ add_subdirectory(asm)
 # Kernel libraries - These can only include the types from our include directory
 add_subdirectory(lib)
 
+# Kernel core services - may use libs, must NOT depend on subsystems
+add_subdirectory(core)
+
 # Kernel subsystems 
 add_subdirectory(subsys)
 

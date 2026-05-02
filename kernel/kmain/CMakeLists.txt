@@ -8,6 +8,8 @@ janus_add_subsys(kmain SOURCES ${INIT_SOURCES}
         drivers
         boot
         fmt
+        kio
+        mm
 )
 
 # Add kmain's own include directory and generated headers

@@ -7,9 +7,13 @@ graph TD
     fmt("fmt")
     page_tables("page_tables")
   end
+  subgraph core_layer["Core Layer"]
+    kio(["kio"])
+  end
   subgraph subsys_layer["Subsystem Layer"]
     boot["boot"]
     drivers["drivers"]
+    mm["mm"]
     kmain["kmain"]
   end
   subgraph proto_layer["Protocol Libraries"]
@@ -24,22 +28,30 @@ graph TD
     janus_asm[("janus_asm")]
   end
   page_tables --> janus_asm
+  kio --> fmt
   boot --> display
   boot_limine --> boot
   boot_multiboot2 --> boot
   drivers --> display
   drivers --> page_tables
+  mm --> kio
   kmain --> drivers
   kmain --> boot
   kmain --> fmt
+  kmain --> kio
+  kmain --> mm
   kernel_limine_elf --> drivers
   kernel_limine_elf --> boot
   kernel_limine_elf --> fmt
   kernel_limine_elf --> boot_limine
+  kernel_limine_elf --> kio
+  kernel_limine_elf --> mm
   kernel_limine_elf --> kmain
   kernel_multiboot2_elf --> drivers
   kernel_multiboot2_elf --> boot
   kernel_multiboot2_elf --> fmt
   kernel_multiboot2_elf --> boot_multiboot2
+  kernel_multiboot2_elf --> kio
+  kernel_multiboot2_elf --> mm
   kernel_multiboot2_elf --> kmain
 ```
