@@ -55,8 +55,8 @@ jobs:
       - name: Check formatting
         if: matrix.arch == 'x86_64' && matrix.compiler == 'clang'
         run: |
-          sudo apt-get install -y --no-install-recommends clang-format
-          find kernel -name '*.c' -o -name '*.h' | xargs clang-format --dry-run --Werror
+          sudo apt-get install -y --no-install-recommends clang-format-18
+          find kernel -name '*.c' -o -name '*.h' | xargs clang-format-18 --dry-run --Werror
 
       - name: Static analysis (clang-tidy)
         if: matrix.arch == 'x86_64' && matrix.compiler == 'clang'

@@ -45,7 +45,8 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->hhdm_offset = 0;
     boot_context->kernel_phys_base = 0;
     boot_context->kernel_virt_base = 0;
-    boot_context->display = (display_info_t) {.mode = DISPLAY_MODE_NONE};
+    display_info_t const none_display = {.mode = DISPLAY_MODE_NONE};
+    boot_context->display = none_display;
 
     // HHDM offset is required for address translation
     struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;
@@ -65,7 +66,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
     struct limine_framebuffer_response const * framebuffer_response = limine_framebuffer_request.response;
     if (framebuffer_response != NULL && framebuffer_response->framebuffer_count > 0) {
         struct limine_framebuffer const * primary_framebuffer = framebuffer_response->framebuffers[0];
-        boot_context->display = (display_info_t) {
+        display_info_t const fb_display = {
             .mode = DISPLAY_MODE_FRAMEBUFFER,
             .framebuffer = (u8 *) primary_framebuffer->address,
             .width = primary_framebuffer->width,
@@ -76,6 +77,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
             .green_mask_shift = primary_framebuffer->green_mask_shift,
             .blue_mask_shift = primary_framebuffer->blue_mask_shift,
         };
+        boot_context->display = fb_display;
     }
 
     return 0;
