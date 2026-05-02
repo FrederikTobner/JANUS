@@ -51,9 +51,7 @@ void multiboot2_stash_bootinfo(u64 magic, void const * info)
 ///
 /// x86_64 serial uses port I/O and ignores all three address parameters,
 /// so returning zeros is safe and correct for early serial init.
-__cold void boot_early_params(u64 * hhdm_offset,
-                              phys_addr_t * kernel_phys_base,
-                              virt_addr_t * kernel_virt_base)
+__cold void boot_early_params(u64 * hhdm_offset, phys_addr_t * kernel_phys_base, virt_addr_t * kernel_virt_base)
 {
     *hhdm_offset = 0;
     *kernel_phys_base = 0;

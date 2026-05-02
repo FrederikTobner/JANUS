@@ -29,30 +29,30 @@
 /// with upstream kernel code.
 
 /// @brief Success — no error.
-#define JANUS_OK      0
+#define JANUS_OK     0
 
 /// @brief Invalid argument passed to a function.
-#define JANUS_EINVAL  (-1)
+#define JANUS_EINVAL (-1)
 
 /// @brief Out of memory or internal resource pool exhausted.
-#define JANUS_ENOMEM  (-2)
+#define JANUS_ENOMEM (-2)
 
 /// @brief Hardware I/O error or device operation failed.
-#define JANUS_EIO     (-3)
+#define JANUS_EIO    (-3)
 
 /// @brief Device not present, failed self-test, or not responding.
-#define JANUS_ENODEV  (-4)
+#define JANUS_ENODEV (-4)
 
 /// @brief Resource temporarily unavailable or already in use.
-#define JANUS_EBUSY   (-5)
+#define JANUS_EBUSY  (-5)
 
 /// @brief Invalid address or alignment error.
-#define JANUS_EFAULT  (-6)
+#define JANUS_EFAULT (-6)
 
 /// @brief Operation not supported or not implemented.
-#define JANUS_ENOSYS  (-7)
+#define JANUS_ENOSYS (-7)
 
 /// @brief Resource or address range exhausted.
-#define JANUS_ENOSPC  (-8)
+#define JANUS_ENOSPC (-8)
 
 #endif /* JANUS_ERRNO_H */

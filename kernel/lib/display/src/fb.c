@@ -41,14 +41,8 @@ static display_fb_t g_display_fb;
 // Constructor
 // --------------------------------------------------------------------------
 
-__cold display_fb_t * display_fb_init(void * base,
-                                      u64 width,
-                                      u64 height,
-                                      u64 pitch,
-                                      u16 bpp,
-                                      u8 r_shift,
-                                      u8 g_shift,
-                                      u8 b_shift)
+__cold display_fb_t *
+display_fb_init(void * base, u64 width, u64 height, u64 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift)
 {
     g_display_fb.base = (u8 volatile *) base;
     g_display_fb.width = width;

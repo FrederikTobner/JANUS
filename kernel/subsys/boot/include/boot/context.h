@@ -66,8 +66,6 @@ error_t boot_init(boot_context_t * boot_context);
 /// @param hhdm_offset      Higher Half Direct Map offset.
 /// @param kernel_phys_base Physical base address of the kernel image.
 /// @param kernel_virt_base Virtual base address of the kernel image.
-__cold void boot_early_params(u64 * hhdm_offset,
-                              phys_addr_t * kernel_phys_base,
-                              virt_addr_t * kernel_virt_base);
+__cold void boot_early_params(u64 * hhdm_offset, phys_addr_t * kernel_phys_base, virt_addr_t * kernel_virt_base);
 
 #endif /* BOOT_CONTEXT_H */

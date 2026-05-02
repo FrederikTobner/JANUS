@@ -34,9 +34,7 @@ extern volatile struct limine_executable_address_request limine_executable_addre
 ///
 /// The Limine bootloader populates the response pointers before kernel_main
 /// is entered, so this is safe to call before boot_init().
-__cold void boot_early_params(u64 * hhdm_offset,
-                              phys_addr_t * kernel_phys_base,
-                              virt_addr_t * kernel_virt_base)
+__cold void boot_early_params(u64 * hhdm_offset, phys_addr_t * kernel_phys_base, virt_addr_t * kernel_virt_base)
 {
     struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;
     *hhdm_offset = (hhdm != NULL) ? hhdm->offset : 0;

@@ -51,14 +51,8 @@ typedef struct display_fb display_fb_t;
 /// @param g_shift   Bit position of the green channel.
 /// @param b_shift   Bit position of the blue channel.
 /// @return Pointer to the initialized framebuffer handle.
-display_fb_t * display_fb_init(void * base,
-                               u64 width,
-                               u64 height,
-                               u64 pitch,
-                               u16 bpp,
-                               u8 r_shift,
-                               u8 g_shift,
-                               u8 b_shift);
+display_fb_t *
+display_fb_init(void * base, u64 width, u64 height, u64 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift);
 
 /// @brief Write a single pixel at (x, y).
 ///
