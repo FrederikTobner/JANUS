@@ -35,12 +35,13 @@
 
 /// @brief Framebuffer state for text rendering.
 ///
-/// Wraps display_fb_t with the cursor and text-grid dimensions needed by the
-/// TTY driver. Code that only writes pixels should use display_fb_t directly.
+/// Wraps a display_fb_t pointer with the cursor and text-grid dimensions
+/// needed by the TTY driver. Code that only writes pixels should use
+/// display_fb_t directly via display_put_pixel / display_fill_rect.
 typedef struct {
-    display_fb_t fb; ///< Pixel-level framebuffer handle (lib/display)
-    u16 text_width;  ///< Width in characters
-    u16 text_height; ///< Height in characters
+    display_fb_t * fb; ///< Pixel-level framebuffer handle (lib/display)
+    u16 text_width;    ///< Width in characters
+    u16 text_height;   ///< Height in characters
 } framebuffer_state_t;
 
 /// @brief Standard 16-color palette (VGA compatible).
@@ -86,14 +87,7 @@ static inline void framebuffer_init(framebuffer_state_t * state,
                                     u8 g_shift,
                                     u8 b_shift)
 {
-    state->fb.base = (u8 volatile *) base;
-    state->fb.width = width;
-    state->fb.height = height;
-    state->fb.pitch = pitch;
-    state->fb.bpp = bpp;
-    state->fb.red_shift = r_shift;
-    state->fb.green_shift = g_shift;
-    state->fb.blue_shift = b_shift;
+    state->fb = display_fb_init(base, width, height, pitch, bpp, r_shift, g_shift, b_shift);
     state->text_width = (u16) (width / FRAMEBUFFER_FONT_WIDTH);
     state->text_height = (u16) (height / FRAMEBUFFER_FONT_HEIGHT);
 }

@@ -57,7 +57,7 @@ static __always_inline void
 vga_write_cell(u16 volatile * buffer, u16 x, u16 y, char character, u8 foreground, u8 background)
 {
     if (buffer && x < VGA_WIDTH && y < VGA_HEIGHT) {
-        buffer[y * VGA_WIDTH + x] = vga_entry(character, foreground, background);
+        buffer[(y * VGA_WIDTH) + x] = vga_entry(character, foreground, background);
     }
 }
 
@@ -70,10 +70,10 @@ vga_write_cell(u16 volatile * buffer, u16 x, u16 y, char character, u8 foregroun
 /// @param foreground     Output: foreground color (may be NULL)
 /// @param background     Output: background color (may be NULL)
 static __always_inline void
-vga_read_cell(u16 volatile * buffer, u16 x, u16 y, char * character, u8 * foreground, u8 * background)
+vga_read_cell(u16 const volatile * buffer, u16 x, u16 y, char * character, u8 * foreground, u8 * background)
 {
     if (buffer && x < VGA_WIDTH && y < VGA_HEIGHT) {
-        u16 entry = buffer[y * VGA_WIDTH + x];
+        u16 entry = buffer[(y * VGA_WIDTH) + x];
         if (character) {
             *character = (char) (entry & 0xFF);
         }
@@ -92,7 +92,7 @@ vga_read_cell(u16 volatile * buffer, u16 x, u16 y, char * character, u8 * foregr
 /// @param y Row (0 to VGA_HEIGHT-1)
 static __always_inline void vga_set_cursor(u16 x, u16 y)
 {
-    u16 pos = (u16) (y * VGA_WIDTH + x);
+    u16 pos = (u16) ((y * VGA_WIDTH) + x);
     outb(VGA_CRTC_INDEX, 0x0F);
     outb(VGA_CRTC_DATA, (u8) (pos & 0xFF));
     outb(VGA_CRTC_INDEX, 0x0E);

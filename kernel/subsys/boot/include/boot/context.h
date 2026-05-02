@@ -54,7 +54,18 @@ typedef struct boot_context {
 /// The implementation must set every field unconditionally.
 ///
 /// @param ctx Boot context to populate
-/// @return 0 on success, non-zero on failure
+/// @return JANUS_OK on success, or a negative JANUS_E* error code on failure
 error_t boot_init(boot_context_t * boot_context);
+
+/// @brief Query address-translation parameters before boot_init completes.
+///
+/// Safe to call at any time — reads directly from boot-protocol data
+/// structures populated by the bootloader before kernel_main is entered.
+/// On Multiboot2 all outputs are 0 (x86_64 serial uses port I/O, 0 is valid).
+///
+/// @param hhdm_offset      Higher Half Direct Map offset.
+/// @param kernel_phys_base Physical base address of the kernel image.
+/// @param kernel_virt_base Virtual base address of the kernel image.
+__cold void boot_early_params(u64 * hhdm_offset, phys_addr_t * kernel_phys_base, virt_addr_t * kernel_virt_base);
 
 #endif /* BOOT_CONTEXT_H */

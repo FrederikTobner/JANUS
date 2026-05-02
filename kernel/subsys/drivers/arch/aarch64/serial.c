@@ -22,9 +22,10 @@
 /// On AArch64 with Limine, the HHDM only maps RAM, not device MMIO.
 /// We use mmu_map_mmio() to map the PL011 UART with device memory attributes.
 
-#include "janus/types.h"
 #include <arch/drivers/serial.h>
 #include <arch/internal/drivers/mmio.h>
+#include <janus/errno.h>
+#include <janus/types.h>
 #include <page_tables/mmu.h>
 
 // PL011 UART physical base address for QEMU virt machine
@@ -66,14 +67,17 @@ error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_add
 {
     // Initialize the MMU module for MMIO mapping.
     // This must be done before mmu_map_mmio() can be called.
-    mmu_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
+    error_t mmu_err = mmu_init(hhdm_offset, kernel_phys_base, kernel_virt_base);
+    if (mmu_err != JANUS_OK) {
+        return mmu_err;
+    }
 
     // Map PL011 UART MMIO region into kernel address space.
     // The HHDM only maps RAM, so we need explicit MMIO mapping.
     virt_addr_t mapped = mmu_map_mmio(PL011_PHYS_BASE, 0x1000);
     if (mapped == 0) {
         // Failed to map UART - fall back to framebuffer-only output
-        return -1;
+        return JANUS_ENODEV;
     }
     g_pl011_base = mapped;
 
@@ -95,7 +99,7 @@ error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_add
     // Enable UART, TX, and RX
     mmio_write32(pl011_reg(PL011_REG_CR), PL011_CR_UARTEN | PL011_CR_TXE | PL011_CR_RXE);
 
-    return 0;
+    return JANUS_OK;
 }
 
 void arch_serial_write(u8 byte)

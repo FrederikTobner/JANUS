@@ -26,24 +26,33 @@
 /// text state (e.g. the TTY driver) should build their own wrapper.
 ///
 /// Supports 24 bpp (3 bytes per pixel) and 32 bpp (4 bytes per pixel).
+///
+/// display_fb_t is an opaque handle — consumers must not access its fields
+/// directly. Use display_fb_init() to obtain a handle.
 
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-/// @brief Minimal view of a linear framebuffer — enough to write pixels.
+/// @brief Opaque framebuffer handle.
 ///
-/// Constructed by the consumer (e.g. @c framebuffer_init in the drivers
-/// subsystem) from @c display_info_t. Does not own the memory it points to.
-typedef struct {
-    u8 volatile * base; ///< Framebuffer base address
-    u64 pitch;          ///< Bytes per scanline
-    u64 width;          ///< Horizontal resolution in pixels
-    u64 height;         ///< Vertical resolution in pixels
-    u8 red_shift;       ///< Bit position of the red channel
-    u8 green_shift;     ///< Bit position of the green channel
-    u8 blue_shift;      ///< Bit position of the blue channel
-    u16 bpp;            ///< Bits per pixel (24 or 32)
-} display_fb_t;
+/// The internal layout is private to display/fb.c. Obtain a pointer via
+/// display_fb_init(); the returned pointer is valid for the lifetime of
+/// the kernel (backed by a static singleton).
+typedef struct display_fb display_fb_t;
+
+/// @brief Initialize the framebuffer handle from raw display parameters.
+///
+/// @param base      Framebuffer base address.
+/// @param width     Horizontal resolution in pixels.
+/// @param height    Vertical resolution in pixels.
+/// @param pitch     Bytes per scanline.
+/// @param bpp       Bits per pixel (24 or 32).
+/// @param r_shift   Bit position of the red channel.
+/// @param g_shift   Bit position of the green channel.
+/// @param b_shift   Bit position of the blue channel.
+/// @return Pointer to the initialized framebuffer handle.
+display_fb_t *
+display_fb_init(void * base, u64 width, u64 height, u64 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift);
 
 /// @brief Write a single pixel at (x, y).
 ///

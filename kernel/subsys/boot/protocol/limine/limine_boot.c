@@ -30,6 +30,23 @@ extern volatile struct limine_hhdm_request limine_hhdm_request;
 extern volatile struct limine_framebuffer_request limine_framebuffer_request;
 extern volatile struct limine_executable_address_request limine_executable_address_request;
 
+/// @brief Query address-translation parameters directly from Limine request structs.
+///
+/// The Limine bootloader populates the response pointers before kernel_main
+/// is entered, so this is safe to call before boot_init().
+__cold void boot_early_params(u64 * hhdm_offset, phys_addr_t * kernel_phys_base, virt_addr_t * kernel_virt_base)
+{
+    struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;
+    *hhdm_offset = (hhdm != NULL) ? hhdm->offset : 0;
+    *kernel_phys_base = 0;
+    *kernel_virt_base = 0;
+    struct limine_executable_address_response const * exe = limine_executable_address_request.response;
+    if (exe != NULL) {
+        *kernel_phys_base = exe->physical_base;
+        *kernel_virt_base = exe->virtual_base;
+    }
+}
+
 /// @brief Initialize the boot context from Limine responses
 ///
 /// Reads the response pointers from each Limine request structure,

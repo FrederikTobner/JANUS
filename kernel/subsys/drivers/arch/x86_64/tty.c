@@ -27,6 +27,7 @@
 #include <arch/internal/drivers/vga.h>
 #include <arch/shared/drivers/framebuffer.h>
 #include <drivers/tty.h>
+#include <janus/errno.h>
 
 static display_mode_t g_display_mode = DISPLAY_MODE_NONE;
 
@@ -44,7 +45,7 @@ error_t arch_tty_init(display_info_t const * config)
     case DISPLAY_MODE_VGA_TEXT:
         // VGA text mode - only works with identity-mapped memory
         g_vga_buffer = (u16 volatile *) VGA_BUFFER_PHYS;
-        return 0;
+        return JANUS_OK;
 
     case DISPLAY_MODE_FRAMEBUFFER:
         framebuffer_init(&g_framebuffer_state,
@@ -56,10 +57,10 @@ error_t arch_tty_init(display_info_t const * config)
                          config->red_mask_shift,
                          config->green_mask_shift,
                          config->blue_mask_shift);
-        return 0;
+        return JANUS_OK;
 
     default:
-        return -1;
+        return JANUS_ENODEV;
     }
 }
 

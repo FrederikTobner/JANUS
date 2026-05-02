@@ -36,6 +36,7 @@
 #include <asm/regs.h>
 #include <asm/tlb.h>
 #include <janus/attributes.h>
+#include <janus/errno.h>
 #include <janus/types.h>
 #include <page_tables/mmu.h>
 
@@ -82,13 +83,17 @@
 
 // --- module state -------------------------------------------------------------
 
-static u64 page_table_pool[PAGE_TABLE_POOL_SIZE][ENTRIES_PER_TABLE] __aligned(PAGE_SIZE);
-static u32 pool_next_index;
-static virt_addr_t mmio_virt_next;
-static u64 g_hhdm_offset;
-static u64 g_kernel_phys_base;
-static u64 g_kernel_virt_base;
-static bool g_initialized;
+typedef struct {
+    u64 hhdm_offset;
+    u64 kernel_phys_base;
+    u64 kernel_virt_base;
+    u32 pool_next;
+    virt_addr_t mmio_virt_next;
+    bool initialized;
+} mmu_state_t;
+
+static u64 g_page_table_pool[PAGE_TABLE_POOL_SIZE][ENTRIES_PER_TABLE] __aligned(PAGE_SIZE);
+static mmu_state_t g_mmu;
 
 // --- forward declarations -----------------------------------------------------
 
@@ -99,26 +104,27 @@ static u64 * mmu_get_or_create_entry(phys_addr_t table_phys, u32 index, bool is_
 
 // --- public API ---------------------------------------------------------------
 
-__cold void mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
+__cold error_t mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
 {
-    g_hhdm_offset = hhdm_offset;
-    g_kernel_phys_base = kernel_phys_base;
-    g_kernel_virt_base = kernel_virt_base;
-    g_initialized = true;
-    pool_next_index = 0;
-    mmio_virt_next = MMIO_VIRT_BASE;
+    g_mmu.hhdm_offset = hhdm_offset;
+    g_mmu.kernel_phys_base = kernel_phys_base;
+    g_mmu.kernel_virt_base = kernel_virt_base;
+    g_mmu.initialized = true;
+    g_mmu.pool_next = 0;
+    g_mmu.mmio_virt_next = MMIO_VIRT_BASE;
+    return JANUS_OK;
 }
 
 virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
 {
-    if (UNLIKELY(!g_initialized)) {
+    if (UNLIKELY(!g_mmu.initialized)) {
         return 0;
     }
     u64 aligned_size = (size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
-    if (UNLIKELY(mmio_virt_next + aligned_size > MMIO_VIRT_END)) {
+    if (UNLIKELY(g_mmu.mmio_virt_next + aligned_size > MMIO_VIRT_END)) {
         return 0;
     }
-    virt_addr_t virt_addr = mmio_virt_next;
+    virt_addr_t virt_addr = g_mmu.mmio_virt_next;
 
     // CR3 holds the physical address of the PML4; mask off flag bits in [11:0].
     phys_addr_t pml4_phys = asm_read_cr3() & PTE_ADDR_MASK;
@@ -153,7 +159,7 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
         asm_tlb_invlpg(va);
     }
     // All page-table entries installed successfully — commit the VA window.
-    mmio_virt_next += aligned_size;
+    g_mmu.mmio_virt_next += aligned_size;
     // x86_64 INVLPG is self-serialising — no additional fence needed.
     // An MFENCE after all mappings ensures subsequent loads see the new PTEs.
     asm_mfence();
@@ -162,20 +168,20 @@ virt_addr_t mmu_map_mmio(phys_addr_t phys_addr, u64 size)
 
 static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt)
 {
-    return virt - g_kernel_virt_base + g_kernel_phys_base;
+    return virt - g_mmu.kernel_virt_base + g_mmu.kernel_phys_base;
 }
 
 static virt_addr_t mmu_physical_to_virtual_address(phys_addr_t phys)
 {
-    return phys + g_hhdm_offset;
+    return phys + g_mmu.hhdm_offset;
 }
 
 static phys_addr_t mmu_alloc_page_table_phys(void)
 {
-    if (UNLIKELY(pool_next_index >= PAGE_TABLE_POOL_SIZE)) {
+    if (UNLIKELY(g_mmu.pool_next >= PAGE_TABLE_POOL_SIZE)) {
         return 0;
     }
-    u64 * table = page_table_pool[pool_next_index++];
+    u64 * table = g_page_table_pool[g_mmu.pool_next++];
     for (u32 i = 0; i < ENTRIES_PER_TABLE; i++) {
         table[i] = 0;
     }

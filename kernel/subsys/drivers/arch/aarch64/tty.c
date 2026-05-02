@@ -24,6 +24,7 @@
 #include <arch/drivers/tty.h>
 #include <arch/shared/drivers/framebuffer.h>
 #include <janus/attributes.h>
+#include <janus/errno.h>
 
 // Framebuffer state - shared implementation
 static framebuffer_state_t g_framebuffer_state;
@@ -32,7 +33,7 @@ error_t arch_tty_init(display_info_t const * config)
 {
     if (config->mode != DISPLAY_MODE_FRAMEBUFFER) {
         // AArch64 requires framebuffer - no fallback
-        return -1;
+        return JANUS_ENODEV;
     }
 
     framebuffer_init(&g_framebuffer_state,
@@ -44,7 +45,7 @@ error_t arch_tty_init(display_info_t const * config)
                      config->red_mask_shift,
                      config->green_mask_shift,
                      config->blue_mask_shift);
-    return 0;
+    return JANUS_OK;
 }
 
 void arch_tty_get_size(u16 * width, u16 * height)

@@ -21,6 +21,7 @@
 
 #include <arch/drivers/serial.h>
 #include <arch/impl/drivers/io.h>
+#include <janus/errno.h>
 
 // COM1 port addresses
 #define COM1               0x3F8
@@ -64,13 +65,13 @@ error_t arch_serial_init(__unused u64 hhdm_offset, __unused u64 kernel_phys_base
     // Test serial chip (send byte 0xAE and check if serial returns same byte)
     outb(COM1_DATA, 0xAE);
     if (inb(COM1_DATA) != 0xAE) {
-        return -1;
+        return JANUS_ENODEV;
     }
 
     // If serial is not faulty, set it in normal operation mode
     outb(COM1_MODEM_CTRL, 0x0F);
 
-    return 0;
+    return JANUS_OK;
 }
 
 bool arch_serial_tx_ready(void)

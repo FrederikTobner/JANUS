@@ -21,6 +21,41 @@
 #include <janus/attributes.h>
 
 // --------------------------------------------------------------------------
+// Struct definition (private — not exposed in fb.h)
+// --------------------------------------------------------------------------
+
+struct display_fb {
+    u8 volatile * base; ///< Framebuffer base address
+    u64 pitch;          ///< Bytes per scanline
+    u64 width;          ///< Horizontal resolution in pixels
+    u64 height;         ///< Vertical resolution in pixels
+    u8 red_shift;       ///< Bit position of the red channel
+    u8 green_shift;     ///< Bit position of the green channel
+    u8 blue_shift;      ///< Bit position of the blue channel
+    u16 bpp;            ///< Bits per pixel (24 or 32)
+};
+
+static display_fb_t g_display_fb;
+
+// --------------------------------------------------------------------------
+// Constructor
+// --------------------------------------------------------------------------
+
+__cold display_fb_t *
+display_fb_init(void * base, u64 width, u64 height, u64 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift)
+{
+    g_display_fb.base = (u8 volatile *) base;
+    g_display_fb.width = width;
+    g_display_fb.height = height;
+    g_display_fb.pitch = pitch;
+    g_display_fb.bpp = bpp;
+    g_display_fb.red_shift = r_shift;
+    g_display_fb.green_shift = g_shift;
+    g_display_fb.blue_shift = b_shift;
+    return &g_display_fb;
+}
+
+// --------------------------------------------------------------------------
 // Internal helper: write one pixel
 // --------------------------------------------------------------------------
 
