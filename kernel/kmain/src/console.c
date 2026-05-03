@@ -19,31 +19,16 @@
 #include <boot/context.h>
 #include <drivers/serial.h>
 #include <drivers/tty.h>
-#include <fmt/output.h>
 #include <janus/attributes.h>
 #include <janus/errno.h>
+#include <kio/kio.h>
 
 static bool g_serial_active = false;
 static bool g_tty_active = false;
 
 static __cold bool init_serial(boot_context_t const * boot_context);
 static __cold bool init_tty(boot_context_t const * boot_context, bool serial_available);
-static void console_putc(char c, __unused void * ctx);
-
-// Kernel printf wrapper
-s32 kprintf(char const * fmtstr, ...)
-{
-    va_list ap;
-    va_start(ap, fmtstr);
-    s32 ret = vfmt_to(console_putc, NULL, fmtstr, ap);
-    va_end(ap);
-    return ret;
-}
-
-s32 vkprintf(char const * fmtstr, va_list args)
-{
-    return vfmt_to(console_putc, NULL, fmtstr, args);
-}
+static void console_putc(char c);
 
 __cold void console_init_early(void)
 {
@@ -60,6 +45,7 @@ __cold void console_init_early(void)
     boot_early_params(&hhdm_offset, &kernel_phys_base, &kernel_virt_base);
     if (drivers_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base) == JANUS_OK) {
         g_serial_active = true;
+        kio_register_putc(console_putc);
     }
 }
 
@@ -72,6 +58,7 @@ __cold void console_init(boot_context_t const * boot_context)
     bool tty_available = init_tty(boot_context, serial_available);
     g_serial_active = serial_available;
     g_tty_active = tty_available;
+    kio_register_putc(console_putc);
     if (tty_available) {
         drivers_tty_set_color(TTY_COLOR_GREEN, TTY_COLOR_BLACK);
     }
@@ -112,7 +99,7 @@ static __cold bool init_tty(boot_context_t const * boot_context, bool serial_ava
     return false;
 }
 
-static void console_putc(char c, __unused void * ctx)
+static void console_putc(char c)
 {
     if (g_serial_active) {
         drivers_serial_putc(c);

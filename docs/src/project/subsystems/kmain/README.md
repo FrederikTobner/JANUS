@@ -15,5 +15,5 @@
 `kmain` sits between the assembly entry points (the `_start` layer) and the subsystem layer. It is the sole module that links against subsystems, enforcing a star topology where all inter-subsystem data flow is mediated through `kmain` rather than through direct subsystem-to-subsystem calls.
 
 ```text
-_start  →  kernel_main (kmain)  →  boot, drivers (subsys)  →  page_tables (lib)
+_start  →  kernel_main (kmain)  →  boot, drivers, mm (subsys) + kio (core)
 ```

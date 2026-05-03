@@ -21,6 +21,10 @@ a freestanding executable (`kernel.elf`) that can be booted by Limine or GRUB
   (shared display type), `fmt` (formatted output), `page_tables` (aarch64 MMU).
   Libraries may not depend on subsystems.
   See [lib/README.md](lib/README.md).
+* **`core/`** — Shared kernel core services used by subsystems and `kmain`
+  without introducing subsystem-to-subsystem dependencies. Current module:
+  `kio` (kernel output and panic).
+  See [core/README.md](core/README.md).
 * **`subsys/`** — The main kernel subsystems (`boot`, `drivers`, `mm`). Each
   subsystem owns its hardware state and exposes a public API. Subsystems are
   isolated from each other — only `kmain` may depend on multiple subsystems.
@@ -32,7 +36,7 @@ a freestanding executable (`kernel.elf`) that can be booted by Limine or GRUB
 ## Layer Order
 
 ```
-_start → kmain → subsys → lib → asm → include
+_start → kmain → subsys → core → lib → asm → include
 ```
 
 Each layer may only depend on layers lower in the stack.

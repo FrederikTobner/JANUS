@@ -1,0 +1,22 @@
+name: Setup mdBook
+description: Install mdBook and preprocessors with Cargo binary caching
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Cargo binaries
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin
+        key: cargo-bin-${{ runner.os }}-${{ hashFiles('docs/preprocessors/mdbook-side-notes/Cargo.lock', 'docs/preprocessors/mdbook-code-diff/Cargo.lock') }}
+
+    - name: Install mdbook and preprocessors
+      run: |
+        command -v mdbook            || cargo install mdbook
+        command -v mdbook-mermaid    || cargo install mdbook-mermaid
+        command -v mdbook-side-notes || cargo install --path docs/preprocessors/mdbook-side-notes
+        command -v mdbook-code-diff  || cargo install --path docs/preprocessors/mdbook-code-diff
+      shell: bash

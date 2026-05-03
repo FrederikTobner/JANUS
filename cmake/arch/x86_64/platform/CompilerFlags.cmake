@@ -17,9 +17,14 @@ if(JANUS_COMPILER_CLANG)
     )
 elseif(JANUS_COMPILER_GCC)
     # GCC x86_64
+    # -fno-pic/-fno-pie: Arch Linux's system GCC is configured with --enable-default-pie,
+    # but -mcmodel=kernel requires non-PIC code.
     set(JANUS_ARCH_FLAGS
         -m64
         -march=x86-64
+        -mcmodel=kernel # Required for kernel code that may be >4GB in size
+        -fno-pic
+        -fno-pie
         -mno-red-zone
         -mno-sse
         -mno-sse2

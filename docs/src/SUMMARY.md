@@ -25,10 +25,14 @@
 ---
 
 - [Subsystems](project/subsystems/subsystems.md)
+  - [Core](project/subsystems/core/README.md)
+    - [kio](project/subsystems/core/kio.md)
   - [Boot](project/subsystems/boot/README.md)
     - [Boot Context](project/subsystems/boot/context.md)
     - [Limine Protocol](project/subsystems/boot/limine.md)
     - [Multiboot2 Protocol](project/subsystems/boot/multiboot2.md)
+  - [Memory Management](project/subsystems/mm/README.md)
+    - [Physical Memory Manager](project/subsystems/mm/pmm.md)
   - [Kernel Main](project/subsystems/kmain/README.md)
     - [kernel_main](project/subsystems/kmain/main.md)
     - [Init Sequence](project/subsystems/kmain/init.md)
@@ -41,6 +45,8 @@
 ---
 
 - [Tooling](project/tooling/tooling.md)
+  - [clang-tidy](project/tooling/clang-tidy.md)
+  - [Doxygen](project/tooling/doxygen.md)
   - [LLDB](project/tooling/lldb.md)
   - [CMake](project/tooling/cmake.md)
   - [QEMU](project/tooling/qemu.md)
@@ -93,6 +99,7 @@
 ---
 
 - [I/O](wiki/io/io.md)
+  - [Kernel Output and Panic Flow](wiki/io/kernel-output-panic.md)
   - [Serial Ports](wiki/io/serial-ports.md)
   - [Memory-Mapped I/O](wiki/io/mmio.md)
 
@@ -118,6 +125,7 @@
 ---
 
 - [I/O](tutorials/io/io.md)
+  - [Wiring Kernel Output and Panic](tutorials/io/kernel-output-panic.md)
   - [Writing a Serial Port Driver](tutorials/io/serial-port-driver.md)
 
 ---

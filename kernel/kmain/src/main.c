@@ -30,6 +30,7 @@
 #include <kmain/console.h>
 #include <kmain/kernel_descriptor.h>
 #include <kmain/kpanic.h>
+#include <mm/pmm.h>
 
 #define JANUS_HELLO_MESSAGE                  \
     "     _   _    _   _ _   _ ____  \n"     \
@@ -58,6 +59,16 @@ __noreturn void kernel_main(void)
     console_init(&descriptor.boot);
     // Print greeting
     kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
+
+    // Initialize physical memory manager
+    error_t pmm_err =
+        mm_pmm_init(&descriptor.boot.memmap, descriptor.boot.kernel_phys_base, descriptor.boot.kernel_phys_end);
+    if (pmm_err != JANUS_OK) {
+        kpanic("mm_pmm_init failed: %d", pmm_err);
+    }
+    mm_pmm_stats_t pmm_stats;
+    mm_pmm_get_stats(&pmm_stats);
+    kprintf("PMM: %llu MiB free\n", pmm_stats.free_pages * 4096ULL / (1024ULL * 1024ULL));
 
     // Halt the CPU forever
     drivers_cpu_halt_forever();

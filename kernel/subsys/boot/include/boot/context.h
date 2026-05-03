@@ -24,6 +24,7 @@
 /// The boot_context_t struct is public (per Coding-Style.md) —
 /// consumers access fields directly.
 
+#include <boot/memmap.h>
 #include <display/display.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
@@ -45,6 +46,8 @@ typedef struct boot_context {
     phys_addr_t kernel_phys_base; ///< Kernel physical base address
     virt_addr_t kernel_virt_base; ///< Kernel virtual base address
     display_info_t display;       ///< Display config (check display.mode for availability)
+    phys_addr_t kernel_phys_end;  ///< Physical end address of kernel image
+    boot_memmap_t memmap;         ///< Physical memory map
 } boot_context_t;
 
 /// @brief Initialize boot context from the active boot protocol

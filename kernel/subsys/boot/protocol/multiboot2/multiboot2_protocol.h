@@ -88,6 +88,13 @@ struct multiboot_tag_basic_meminfo {
     u32 mem_upper;
 } __packed;
 
+/// Memory map entry type constants (Multiboot2 spec §3.6.8)
+#define MULTIBOOT2_MEMORY_AVAILABLE        1 ///< Usable RAM
+#define MULTIBOOT2_MEMORY_RESERVED         2 ///< Reserved — do not use
+#define MULTIBOOT2_MEMORY_ACPI_RECLAIMABLE 3 ///< ACPI tables — usable after ACPI init
+#define MULTIBOOT2_MEMORY_NVS              4 ///< ACPI NVS — must be preserved
+#define MULTIBOOT2_MEMORY_BADRAM           5 ///< Defective memory
+
 /// Memory map entry
 struct multiboot_mmap_entry {
     u64 addr;
