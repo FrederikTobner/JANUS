@@ -26,8 +26,7 @@
 /// - Static allocation (no dynamic allocation in core PMM)
 /// - All frames in the first 1 MiB are permanently reserved (DMA, BIOS, VGA)
 /// - The kernel image frames are permanently reserved
-/// - mm_pmm_alloc_page() panics on OOM rather than returning an error code,
-///   because callers in early boot cannot meaningfully handle OOM
+/// - mm_pmm_alloc_page() returns 0 on OOM (reserved physical address)
 
 #include <mm/pmm.h>
 
@@ -249,6 +248,13 @@ void mm_pmm_free_page(phys_addr_t phys)
 
 void mm_pmm_get_stats(mm_pmm_stats_t * stats)
 {
+    if (UNLIKELY(!g_pmm.initialized)) {
+        kpanic("mm_pmm_get_stats: PMM not initialized");
+    }
+    if (UNLIKELY(stats == NULL)) {
+        kpanic("mm_pmm_get_stats: NULL stats pointer");
+    }
+
     stats->total_pages = g_pmm.total_pages;
     stats->free_pages = g_pmm.free_pages;
     stats->used_pages = g_pmm.total_pages - g_pmm.free_pages;
