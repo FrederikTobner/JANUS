@@ -33,7 +33,6 @@
 /// Dependency layer (core → lib only):
 ///   kio depends on:  fmt (formatting)
 ///   kio must NOT depend on: subsystems (boot, drivers, mm, …)
-
 #include <janus/attributes.h>
 #include <janus/types.h>
 #include <janus/va_arg.h>
