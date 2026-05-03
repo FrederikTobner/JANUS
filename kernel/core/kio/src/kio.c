@@ -21,17 +21,16 @@
 /// callback. Hardware drivers register themselves via kio_register_putc();
 /// all kprintf/kpanic calls flow through that single point.
 ///
-/// kpanic halts with interrupts disabled via an inline asm loop so that it
-/// never returns, even if no output callback is registered yet.
+/// kpanic halts via an architecture-specific backend selected by CMake.
 
 #include <kio/kio.h>
 
 #include <fmt/output.h>
 #include <janus/attributes.h>
 
-// ── Output state ──────────────────────────────────────────────────────────
+__cold __noreturn void kio_halt_forever(void);
 
-/// Registered output callback — NULL until kio_register_putc() is called
+/// Registered output callback, NULL until kio_register_putc() is called.
 static kio_putc_fn g_putc = NULL;
 
 /// fmt_to sink adapter: forwards each char to the registered callback
@@ -41,8 +40,6 @@ static void kio_fmt_putc(char c, __unused void * ctx)
         g_putc(c);
     }
 }
-
-// ── Public API ─────────────────────────────────────────────────────────────
 
 void kio_register_putc(kio_putc_fn fn)
 {
@@ -82,17 +79,5 @@ __cold __noreturn void kpanic_impl(char const * file, int line, char const * fmt
     va_end(ap);
 
     kprintf("\n\nSystem halted.\n");
-
-    // Halt with interrupts disabled — architecture-independent infinite loop.
-    // We do not call drivers_cpu_halt_forever() to avoid a dependency on
-    // the drivers subsystem from the core layer.
-    for (;;) {
-#if defined(__x86_64__)
-        __asm__ volatile("cli; hlt");
-#elif defined(__aarch64__)
-        __asm__ volatile("msr daifset, #0xf; wfi");
-#else
-        __asm__ volatile("");
-#endif
-    }
+    kio_halt_forever();
 }

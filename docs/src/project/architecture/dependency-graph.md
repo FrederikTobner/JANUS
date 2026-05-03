@@ -19,7 +19,7 @@ Two views are provided for the kernel:
 
 {{#include ../../generated/deps.md}}
 
-> Node shapes: rounded rectangle = library · rectangle = subsystem · double rectangle = protocol library · hexagon = executable
+> Node shapes: rounded rectangle = library · stadium = core service · rectangle = subsystem · double rectangle = protocol library · hexagon = executable
 
 ## Build Artifacts
 

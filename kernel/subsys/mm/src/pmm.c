@@ -34,7 +34,7 @@
 #include <janus/errno.h>
 #include <kio/kio.h>
 
-// ── Constants ──────────────────────────────────────────────────────────────
+// Constants
 
 /// Page size in bytes (4 KiB)
 #define PAGE_SIZE           4096ULL
@@ -57,7 +57,7 @@
 /// Frame index of the first allocatable frame (frame 256 = 1 MiB)
 #define PMM_MIN_ALLOC_FRAME (PMM_LOW_MEMORY_END / PAGE_SIZE)
 
-// ── Internal helpers ───────────────────────────────────────────────────────
+// Internal helpers
 
 /// Convert a physical address to a frame index
 static inline u64 phys_to_frame(phys_addr_t addr)
@@ -89,9 +89,9 @@ static inline void pmm_mark_used(u8 * bitmap, u64 frame)
     bitmap[frame >> 3] &= (u8) ~(1U << (frame & 7U));
 }
 
-// ── PMM State ──────────────────────────────────────────────────────────────
+// PMM state
 
-/// Private PMM state — allocated in .bss, zero-initialized
+/// Private PMM state allocated in .bss and zero-initialized.
 typedef struct {
     u8 bitmap[PMM_BITMAP_BYTES]; ///< Allocation bitmap (1 = free, 0 = used)
     u64 total_pages;             ///< Total usable page frames
@@ -102,7 +102,7 @@ typedef struct {
 
 static pmm_state_t g_pmm;
 
-// ── Internal: mark a physical range free ──────────────────────────────────
+// Internal range marking
 
 /// Mark all page-aligned frames within [base, base+length) as free.
 /// Frames below PMM_LOW_MEMORY_END or beyond PMM_COVERAGE are skipped.
@@ -150,7 +150,7 @@ static void pmm_mark_range_used(phys_addr_t base, u64 length)
     }
 }
 
-// ── Public API ─────────────────────────────────────────────────────────────
+// Public API
 
 __cold error_t mm_pmm_init(boot_memmap_t const * memmap, phys_addr_t kernel_phys_base, phys_addr_t kernel_phys_end)
 {
@@ -170,7 +170,6 @@ __cold error_t mm_pmm_init(boot_memmap_t const * memmap, phys_addr_t kernel_phys
             pmm_mark_range_free(region->base, region->length);
         }
     }
-
     if (UNLIKELY(g_pmm.total_pages == 0)) {
         return JANUS_ENOMEM;
     }

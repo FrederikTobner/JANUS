@@ -38,9 +38,7 @@
 #include <janus/types.h>
 #include <janus/va_arg.h>
 
-// ── Output registration ────────────────────────────────────────────────────
-
-/// Output callback type — emit one character to all active output channels.
+/// Output callback type that emits one character.
 typedef void (*kio_putc_fn)(char c);
 
 /// @brief Register the kernel output callback.
@@ -49,10 +47,8 @@ typedef void (*kio_putc_fn)(char c);
 /// Subsequent calls replace the callback (e.g. upgrading from serial-only
 /// to serial + TTY).
 ///
-/// @param fn Output function — must not be NULL
+/// @param fn Output function pointer.
 void kio_register_putc(kio_putc_fn fn);
-
-// ── Formatted output ──────────────────────────────────────────────────────
 
 /// @brief Kernel printf — formatted output through the registered callback.
 ///
@@ -62,8 +58,6 @@ s32 kprintf(char const * fmtstr, ...) __attribute__((format(printf, 1, 2)));
 
 /// @brief Kernel vprintf — va_list variant of kprintf.
 s32 vkprintf(char const * fmtstr, va_list args);
-
-// ── Kernel panic ──────────────────────────────────────────────────────────
 
 /// @brief Underlying panic implementation — do not call directly; use kpanic().
 ///

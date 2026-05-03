@@ -29,6 +29,7 @@ graph TD
   end
   page_tables --> janus_asm
   kio --> fmt
+  kio --> janus_asm
   boot --> display
   boot_limine --> boot
   boot_multiboot2 --> boot

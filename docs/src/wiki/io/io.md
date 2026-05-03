@@ -10,3 +10,4 @@ Read in order.
 
 1. **[Serial Ports](serial-ports.md)** — The UART hardware, baud rate configuration, why serial output is the first thing most kernel developers bring up, and the differences between x86 port-mapped COM ports and the aarch64 PL011.
 2. **[Memory-Mapped I/O](mmio.md)** — Port-mapped vs memory-mapped I/O, `volatile`-qualified access, and the requirement to mark MMIO regions as uncacheable in the page tables.
+3. **[Kernel Output and Panic Flow](kernel-output-panic.md)** — How formatted output and panic handling are routed through JANUS (`kio` -> console callback -> drivers).
