@@ -37,6 +37,7 @@
 #include <janus/attributes.h>
 #include <janus/types.h>
 #include <janus/va_arg.h>
+#include <arch/kio/halt.h>
 
 /// Output callback type that emits one character.
 typedef void (*kio_putc_fn)(char c);
@@ -58,6 +59,14 @@ s32 kprintf(char const * fmtstr, ...) __attribute__((format(printf, 1, 2)));
 
 /// @brief Kernel vprintf — va_list variant of kprintf.
 s32 vkprintf(char const * fmtstr, va_list args);
+
+/// @brief Disable interrupts and halt forever.
+///
+/// Architecture-specific behavior is provided by the arch kio layer.
+static __always_inline __noreturn void kio_halt_forever(void)
+{
+    arch_kio_halt_forever();
+}
 
 /// @brief Underlying panic implementation — do not call directly; use kpanic().
 ///

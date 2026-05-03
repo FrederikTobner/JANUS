@@ -28,8 +28,6 @@
 #include <fmt/output.h>
 #include <janus/attributes.h>
 
-__cold __noreturn void kio_halt_forever(void);
-
 /// Registered output callback, NULL until kio_register_putc() is called.
 static kio_putc_fn g_putc = NULL;
 

@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                              *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,13 +14,21 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
+/// @file arch/impl/kio/halt.h
+/// @brief x86_64 kio halt implementation.
+
+#ifndef X86_64_IMPL_KIO_HALT_H
+#define X86_64_IMPL_KIO_HALT_H
+
 #include <asm/cpu.h>
 #include <janus/attributes.h>
 
-__cold __noreturn void kio_halt_forever(void)
+static __always_inline __noreturn void arch_kio_halt_forever(void)
 {
+    asm_cpu_cli();
     for (;;) {
-        asm_cpu_cli();
         asm_cpu_hlt();
     }
 }
+
+#endif /* X86_64_IMPL_KIO_HALT_H */

@@ -4,12 +4,6 @@ include(kernel/Core)
 
 file(GLOB_RECURSE KIO_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 
-if(JANUS_TARGET_ARCH STREQUAL "x86_64")
-    list(APPEND KIO_SOURCES arch/x86_64/halt.c)
-elseif(JANUS_TARGET_ARCH STREQUAL "aarch64")
-    list(APPEND KIO_SOURCES arch/aarch64/halt.c)
-endif()
-
 janus_add_core(kio
     SOURCES
         ${KIO_SOURCES}
@@ -17,3 +11,9 @@ janus_add_core(kio
         fmt
         janus_asm
 )
+
+    target_include_directories(kio
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/arch/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/arch/${JANUS_TARGET_ARCH}/include
+    )

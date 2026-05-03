@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                              *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,13 +14,12 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#include <asm/cpu.h>
-#include <janus/attributes.h>
+/// @file arch/kio/halt.h
+/// @brief kio halt architecture contract.
 
-__cold __noreturn void kio_halt_forever(void)
-{
-    for (;;) {
-        asm_cpu_daif_set();
-        asm_cpu_wfi();
-    }
-}
+#ifndef ARCH_KIO_HALT_H
+#define ARCH_KIO_HALT_H
+
+#include <arch/impl/kio/halt.h>
+
+#endif /* ARCH_KIO_HALT_H */
