@@ -33,10 +33,10 @@
 /// Dependency layer (core → lib only):
 ///   kio depends on:  fmt (formatting)
 ///   kio must NOT depend on: subsystems (boot, drivers, mm, …)
+#include <arch/kio/halt.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 #include <janus/va_arg.h>
-#include <arch/kio/halt.h>
 
 /// Output callback type that emits one character.
 typedef void (*kio_putc_fn)(char c);
