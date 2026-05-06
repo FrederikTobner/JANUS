@@ -14,34 +14,39 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/cpu.h
-/// @brief AArch64 CPU control primitives.
+/// @file arch/impl/asm/regs.h
+/// @brief x86_64 control register access primitives.
 ///
-/// Raw inline-assembly wrappers for privileged CPU instructions.
-/// This is the only permitted site for __asm__ volatile on AArch64 for CPU control.
-/// Consumed by subsystem Tier 3 headers and kernel libraries.
+/// Raw inline-assembly wrappers for MOV to/from control registers.
+/// This is the only permitted site for __asm__ volatile on x86_64 for
+/// control register access.
+/// Consumed by kernel libraries (e.g. page_tables) that need to read/write
+/// the page directory base register.
 
-#ifndef ASM_AARCH64_CPU_H
-#define ASM_AARCH64_CPU_H
+#ifndef X86_64_IMPL_ASM_REGS_H
+#define X86_64_IMPL_ASM_REGS_H
 
 #include <janus/attributes.h>
+#include <janus/types.h>
 
-/// Wait For Interrupt — suspend execution until an interrupt arrives (WFI).
-static __always_inline void asm_cpu_wfi(void)
+/// Read the Page Directory Base Register (CR3).
+///
+/// @return Physical address of the current PML4 table, plus PCID bits in [11:0].
+static __always_inline u64 arch_asm_impl_read_cr3(void)
 {
-    __asm__ volatile("wfi");
+    u64 val;
+    __asm__ volatile("mov %%cr3, %0" : "=r"(val));
+    return val;
 }
 
-/// Disable all interrupts by setting the DAIF mask (IRQ, FIQ, SError, Debug).
-static __always_inline void asm_cpu_daif_set(void)
+/// Write the Page Directory Base Register (CR3).
+///
+/// Writing CR3 flushes all non-global TLB entries.
+///
+/// @param val Physical address of the PML4 table (must be 4 KB aligned).
+static __always_inline void arch_asm_impl_write_cr3(u64 val)
 {
-    __asm__ volatile("msr daifset, #0xF" ::: "memory");
+    __asm__ volatile("mov %0, %%cr3" : : "r"(val) : "memory");
 }
 
-/// Enable all interrupts by clearing the DAIF mask (IRQ, FIQ, SError, Debug).
-static __always_inline void asm_cpu_daif_clr(void)
-{
-    __asm__ volatile("msr daifclr, #0xF" ::: "memory");
-}
-
-#endif /* ASM_AARCH64_CPU_H */
+#endif /* X86_64_IMPL_ASM_REGS_H */

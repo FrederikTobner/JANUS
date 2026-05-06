@@ -14,37 +14,37 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/tlb.h
-/// @brief AArch64 TLB maintenance primitives.
+/// @file arch/impl/asm/io.h
+/// @brief x86_64 port I/O primitives.
 ///
-/// Raw inline-assembly wrappers for TLBI instructions.
-/// This is the only permitted site for __asm__ volatile on AArch64 for TLB ops.
-/// Consumed by kernel libraries (e.g. page_tables) that manipulate page tables.
+/// Raw inline-assembly wrappers for IN/OUT port instructions.
+/// This is the only permitted site for __asm__ volatile on x86_64 for port I/O.
+/// Consumed by subsystem Tier 3 headers and kernel libraries.
 
-#ifndef ASM_AARCH64_TLB_H
-#define ASM_AARCH64_TLB_H
+#ifndef X86_64_IMPL_ASM_IO_H
+#define X86_64_IMPL_ASM_IO_H
 
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-/// Invalidate TLB entry by VA, EL1, inner shareable (TLBI VALE1IS).
+/// Write a byte to an I/O port.
 ///
-/// Invalidates the TLB entry for the given virtual page address in the current
-/// ASID, for EL1, broadcast to all CPUs in the inner-shareable domain.
-///
-/// @param va_page  Virtual address right-shifted by 12 (i.e. va >> 12).
-static __always_inline void asm_tlbi_vale1is(u64 va_page)
+/// @param port  The I/O port address.
+/// @param value The byte value to write.
+static __always_inline void arch_asm_impl_io_outb(u16 port, u8 value)
 {
-    __asm__ volatile("tlbi vale1is, %0" ::"r"(va_page) : "memory");
+    __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port) : "memory");
 }
 
-/// Invalidate all TLB entries for EL1, inner shareable (TLBI VMALLE1IS).
+/// Read a byte from an I/O port.
 ///
-/// Flushes all EL1 TLB entries for all ASIDs, broadcast to all CPUs in the
-/// inner-shareable domain. Use after a full page table rebuild.
-static __always_inline void asm_tlbi_vmalle1is(void)
+/// @param port The I/O port address.
+/// @return     The byte read from the port.
+static __always_inline u8 arch_asm_impl_io_inb(u16 port)
 {
-    __asm__ volatile("tlbi vmalle1is" ::: "memory");
+    u8 ret;
+    __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port) : "memory");
+    return ret;
 }
 
-#endif /* ASM_AARCH64_TLB_H */
+#endif /* X86_64_IMPL_ASM_IO_H */

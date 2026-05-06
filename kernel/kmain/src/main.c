@@ -27,9 +27,9 @@
 #include <janus/config.h>
 #include <janus/errno.h>
 #include <janus/types.h>
+#include <kio/kio.h>
 #include <kmain/console.h>
 #include <kmain/kernel_descriptor.h>
-#include <kmain/kpanic.h>
 #include <mm/pmm.h>
 
 #define JANUS_HELLO_MESSAGE                  \

@@ -14,39 +14,19 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/regs.h
-/// @brief x86_64 control register access primitives.
-///
-/// Raw inline-assembly wrappers for MOV to/from control registers.
-/// This is the only permitted site for __asm__ volatile on x86_64 for
-/// control register access.
-/// Consumed by kernel libraries (e.g. page_tables) that need to read/write
-/// the page directory base register.
+/// @file arch/impl/asm/capabilities.h
+/// @brief x86_64 asm capability flags.
 
-#ifndef ASM_X86_64_REGS_H
-#define ASM_X86_64_REGS_H
+#ifndef X86_64_IMPL_ASM_CAPABILITIES_H
+#define X86_64_IMPL_ASM_CAPABILITIES_H
 
-#include <janus/attributes.h>
-#include <janus/types.h>
+#define ASM_ARCH_X86_64             1
+#define ASM_ARCH_AARCH64            0
 
-/// Read the Page Directory Base Register (CR3).
-///
-/// @return Physical address of the current PML4 table, plus PCID bits in [11:0].
-static __always_inline u64 asm_read_cr3(void)
-{
-    u64 val;
-    __asm__ volatile("mov %%cr3, %0" : "=r"(val));
-    return val;
-}
+#define ASM_CAP_LOCAL_IRQ_CONTROL   1
+#define ASM_CAP_IDLE_WAIT_INTERRUPT 1
+#define ASM_CAP_TLB_INVALIDATE_PAGE 1
+#define ASM_CAP_PORT_IO             1
+#define ASM_CAP_ARCH_SYSREG_ACCESS  1
 
-/// Write the Page Directory Base Register (CR3).
-///
-/// Writing CR3 flushes all non-global TLB entries.
-///
-/// @param val Physical address of the PML4 table (must be 4 KB aligned).
-static __always_inline void asm_write_cr3(u64 val)
-{
-    __asm__ volatile("mov %0, %%cr3" ::"r"(val) : "memory");
-}
-
-#endif /* ASM_X86_64_REGS_H */
+#endif /* X86_64_IMPL_ASM_CAPABILITIES_H */

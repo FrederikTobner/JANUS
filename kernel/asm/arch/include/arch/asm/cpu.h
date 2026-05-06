@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS                                                *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,12 +14,27 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file kpanic.c
-/// @brief Kernel panic implementation.
-///
-/// kpanic_impl() prints a banner, the source location, and the caller-supplied
-/// diagnostic message through every available output channel, then halts
-/// the CPU with interrupts disabled.
+/// @file arch/asm/cpu.h
+/// @brief asm CPU architecture contract.
 
-// kpanic_impl() has been moved to kernel/core/kio/src/kio.c.
-// This file is intentionally empty.
+#ifndef ARCH_ASM_CPU_H
+#define ARCH_ASM_CPU_H
+
+#include <arch/impl/asm/cpu.h>
+
+static __always_inline void arch_asm_cpu_halt_once(void)
+{
+    arch_asm_impl_cpu_halt_once();
+}
+
+static __always_inline void arch_asm_irq_disable_local(void)
+{
+    arch_asm_impl_irq_disable_local();
+}
+
+static __always_inline void arch_asm_irq_enable_local(void)
+{
+    arch_asm_impl_irq_enable_local();
+}
+
+#endif /* ARCH_ASM_CPU_H */

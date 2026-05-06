@@ -14,34 +14,22 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/barriers.h
-/// @brief x86_64 memory barrier primitives.
-///
-/// Raw inline-assembly wrappers for MFENCE, LFENCE, and SFENCE instructions.
-/// This is the only permitted site for __asm__ volatile on x86_64 for barriers.
-/// Required before IRQ, PCI, and HDA device work.
+/// @file arch/asm/io.h
+/// @brief asm port I/O architecture contract.
 
-#ifndef ASM_X86_64_BARRIERS_H
-#define ASM_X86_64_BARRIERS_H
+#ifndef ARCH_ASM_IO_H
+#define ARCH_ASM_IO_H
 
-#include <janus/attributes.h>
+#include <arch/impl/asm/io.h>
 
-/// Full memory fence — orders all prior loads and stores (MFENCE).
-static __always_inline void asm_mfence(void)
+static __always_inline void arch_asm_io_outb(u16 port, u8 value)
 {
-    __asm__ volatile("mfence" ::: "memory");
+    arch_asm_impl_io_outb(port, value);
 }
 
-/// Load fence — orders all prior load operations (LFENCE).
-static __always_inline void asm_lfence(void)
+static __always_inline u8 arch_asm_io_inb(u16 port)
 {
-    __asm__ volatile("lfence" ::: "memory");
+    return arch_asm_impl_io_inb(port);
 }
 
-/// Store fence — orders all prior store operations (SFENCE).
-static __always_inline void asm_sfence(void)
-{
-    __asm__ volatile("sfence" ::: "memory");
-}
-
-#endif /* ASM_X86_64_BARRIERS_H */
+#endif /* ARCH_ASM_IO_H */

@@ -14,37 +14,47 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/io.h
-/// @brief x86_64 port I/O primitives.
-///
-/// Raw inline-assembly wrappers for IN/OUT port instructions.
-/// This is the only permitted site for __asm__ volatile on x86_64 for port I/O.
-/// Consumed by subsystem Tier 3 headers and kernel libraries.
+/// @file asm/regs.h
+/// @brief Public asm register entry point.
 
-#ifndef ASM_X86_64_IO_H
-#define ASM_X86_64_IO_H
+#ifndef ASM_REGS_H
+#define ASM_REGS_H
 
-#include <janus/attributes.h>
-#include <janus/types.h>
+#include <arch/asm/regs.h>
+#include <asm/capabilities.h>
 
-/// Write a byte to an I/O port.
-///
-/// @param port  The I/O port address.
-/// @param value The byte value to write.
-static __always_inline void asm_io_outb(u16 port, u8 value)
+#if ASM_ARCH_X86_64
+static __always_inline u64 asm_read_cr3(void)
 {
-    __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port) : "memory");
+    return arch_asm_read_cr3();
 }
 
-/// Read a byte from an I/O port.
-///
-/// @param port The I/O port address.
-/// @return     The byte read from the port.
-static __always_inline u8 asm_io_inb(u16 port)
+static __always_inline void asm_write_cr3(u64 val)
 {
-    u8 ret;
-    __asm__ volatile("inb %1, %0" : "=a"(ret) : "Nd"(port) : "memory");
-    return ret;
+    arch_asm_write_cr3(val);
+}
+#endif
+
+#if ASM_ARCH_AARCH64
+static __always_inline u64 asm_read_ttbr1_el1(void)
+{
+    return arch_asm_read_ttbr1_el1();
 }
 
-#endif /* ASM_X86_64_IO_H */
+static __always_inline void asm_write_ttbr1_el1(u64 val)
+{
+    arch_asm_write_ttbr1_el1(val);
+}
+
+static __always_inline u64 asm_read_ttbr0_el1(void)
+{
+    return arch_asm_read_ttbr0_el1();
+}
+
+static __always_inline void asm_write_ttbr0_el1(u64 val)
+{
+    arch_asm_write_ttbr0_el1(val);
+}
+#endif
+
+#endif /* ASM_REGS_H */

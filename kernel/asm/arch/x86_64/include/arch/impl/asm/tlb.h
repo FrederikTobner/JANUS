@@ -14,34 +14,29 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/cpu.h
-/// @brief x86_64 CPU control primitives.
+/// @file arch/impl/asm/tlb.h
+/// @brief x86_64 TLB invalidation primitives.
 ///
-/// Raw inline-assembly wrappers for privileged CPU instructions.
-/// This is the only permitted site for __asm__ volatile on x86_64 for CPU control.
-/// Consumed by subsystem Tier 3 headers and kernel libraries.
+/// Raw inline-assembly wrappers for INVLPG.
+/// This is the only permitted site for __asm__ volatile on x86_64 for TLB ops.
+/// Consumed by kernel libraries (e.g. page_tables) that manipulate page tables.
 
-#ifndef ASM_X86_64_CPU_H
-#define ASM_X86_64_CPU_H
+#ifndef X86_64_IMPL_ASM_TLB_H
+#define X86_64_IMPL_ASM_TLB_H
 
 #include <janus/attributes.h>
+#include <janus/types.h>
 
-/// Halt the CPU until the next interrupt (HLT).
-static __always_inline void asm_cpu_hlt(void)
+/// Invalidate the TLB entry for a single virtual page (INVLPG).
+///
+/// Removes the TLB entry for the 4 KB page that contains @p va on the local
+/// CPU. On SMP systems, a shootdown IPI must be sent to remote CPUs separately
+/// (not required in JANUS at this stage — single-core only).
+///
+/// @param va  Any virtual address within the page to invalidate.
+static __always_inline void arch_asm_impl_tlb_invalidate_page(virt_addr_t va)
 {
-    __asm__ volatile("hlt");
+    __asm__ volatile("invlpg (%0)" : : "r"(va) : "memory");
 }
 
-/// Disable external interrupts (CLI).
-static __always_inline void asm_cpu_cli(void)
-{
-    __asm__ volatile("cli" ::: "memory");
-}
-
-/// Enable external interrupts (STI).
-static __always_inline void asm_cpu_sti(void)
-{
-    __asm__ volatile("sti" ::: "memory");
-}
-
-#endif /* ASM_X86_64_CPU_H */
+#endif /* X86_64_IMPL_ASM_TLB_H */

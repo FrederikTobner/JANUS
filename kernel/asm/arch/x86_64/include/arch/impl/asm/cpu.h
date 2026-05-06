@@ -14,34 +14,34 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/barriers.h
-/// @brief AArch64 memory barrier primitives.
+/// @file arch/impl/asm/cpu.h
+/// @brief x86_64 CPU control primitives.
 ///
-/// Raw inline-assembly wrappers for DSB, ISB, and DMB instructions.
-/// This is the only permitted site for __asm__ volatile on AArch64 for barriers.
-/// Required before IRQ, PCI, and device driver work.
+/// Raw inline-assembly wrappers for privileged CPU instructions.
+/// This is the only permitted site for __asm__ volatile on x86_64 for CPU control.
+/// Consumed by subsystem Tier 3 headers and kernel libraries.
 
-#ifndef ASM_AARCH64_BARRIERS_H
-#define ASM_AARCH64_BARRIERS_H
+#ifndef X86_64_IMPL_ASM_CPU_H
+#define X86_64_IMPL_ASM_CPU_H
 
 #include <janus/attributes.h>
 
-/// Data synchronisation barrier — complete all memory accesses before continuing (DSB SY).
-static __always_inline void asm_dsb(void)
+/// Halt the CPU until the next interrupt (HLT).
+static __always_inline void arch_asm_impl_cpu_halt_once(void)
 {
-    __asm__ volatile("dsb sy" ::: "memory");
+    __asm__ volatile("hlt");
 }
 
-/// Instruction synchronisation barrier — flush the pipeline and refetch instructions (ISB).
-static __always_inline void asm_isb(void)
+/// Disable external interrupts (CLI).
+static __always_inline void arch_asm_impl_irq_disable_local(void)
 {
-    __asm__ volatile("isb" ::: "memory");
+    __asm__ volatile("cli" ::: "memory");
 }
 
-/// Data memory barrier — order memory accesses without completing them (DMB SY).
-static __always_inline void asm_dmb(void)
+/// Enable external interrupts (STI).
+static __always_inline void arch_asm_impl_irq_enable_local(void)
 {
-    __asm__ volatile("dmb sy" ::: "memory");
+    __asm__ volatile("sti" ::: "memory");
 }
 
-#endif /* ASM_AARCH64_BARRIERS_H */
+#endif /* X86_64_IMPL_ASM_CPU_H */

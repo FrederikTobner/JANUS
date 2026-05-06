@@ -14,29 +14,70 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/tlb.h
-/// @brief x86_64 TLB invalidation primitives.
-///
-/// Raw inline-assembly wrappers for INVLPG.
-/// This is the only permitted site for __asm__ volatile on x86_64 for TLB ops.
-/// Consumed by kernel libraries (e.g. page_tables) that manipulate page tables.
+/// @file asm/cpu.h
+/// @brief Public asm CPU entry point.
 
-#ifndef ASM_X86_64_TLB_H
-#define ASM_X86_64_TLB_H
+#ifndef ASM_CPU_H
+#define ASM_CPU_H
 
+#include <arch/asm/cpu.h>
+#include <asm/capabilities.h>
 #include <janus/attributes.h>
-#include <janus/types.h>
 
-/// Invalidate the TLB entry for a single virtual page (INVLPG).
-///
-/// Removes the TLB entry for the 4 KB page that contains @p va on the local
-/// CPU. On SMP systems, a shootdown IPI must be sent to remote CPUs separately
-/// (not required in JANUS at this stage — single-core only).
-///
-/// @param va  Any virtual address within the page to invalidate.
-static __always_inline void asm_tlb_invlpg(virt_addr_t va)
+static __always_inline void asm_cpu_halt_once(void)
 {
-    __asm__ volatile("invlpg (%0)" ::"r"(va) : "memory");
+    arch_asm_cpu_halt_once();
 }
 
-#endif /* ASM_X86_64_TLB_H */
+static __always_inline void asm_cpu_disable_interrupts(void)
+{
+    arch_asm_irq_disable_local();
+}
+
+static __always_inline void asm_cpu_enable_interrupts(void)
+{
+    arch_asm_irq_enable_local();
+}
+
+static __always_inline __noreturn void asm_cpu_halt_forever(void)
+{
+    asm_cpu_disable_interrupts();
+    for (;;) {
+        asm_cpu_halt_once();
+    }
+}
+
+/* Compatibility aliases for existing call sites. */
+static __always_inline void asm_cpu_hlt(void)
+{
+    asm_cpu_halt_once();
+}
+
+static __always_inline void asm_cpu_cli(void)
+{
+    asm_cpu_disable_interrupts();
+}
+
+static __always_inline void asm_cpu_sti(void)
+{
+    asm_cpu_enable_interrupts();
+}
+
+#if ASM_ARCH_AARCH64
+static __always_inline void asm_cpu_wfi(void)
+{
+    asm_cpu_halt_once();
+}
+
+static __always_inline void asm_cpu_daif_set(void)
+{
+    asm_cpu_disable_interrupts();
+}
+
+static __always_inline void asm_cpu_daif_clr(void)
+{
+    asm_cpu_enable_interrupts();
+}
+#endif
+
+#endif /* ASM_CPU_H */
