@@ -1,4 +1,5 @@
 include(Registry)
+include(kernel/Contract)
 
 include(kernel/Library)
 
@@ -39,6 +40,9 @@ add_subdirectory(_start)
 
 # Validate subsystem/library registry for dependency isolation
 janus_validate_registry()
+
+# Validate contract consumer allowlists
+janus_validate_contracts()
 
 # Generate dependency diagram into the docs source tree (one file per architecture)
 janus_write_mermaid_diagram("${CMAKE_SOURCE_DIR}/docs/src/generated/deps-${JANUS_TARGET_ARCH}.md")

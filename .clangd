@@ -1,11 +1,12 @@
 # clangd configuration for JANUS kernel development
-# This file tells clangd (LSP) how to understand our freestanding kernel code
+
+# This file tells clangd (LSP) how to analyze the JANUS kernel source code properly
 
 CompileFlags:
   Add:
     # Force C language mode (not Objective-C)
     - "-xc"
-    
+
     # Kernel-specific compiler flags
     - "--target=x86_64-elf"
     - "-ffreestanding"
@@ -13,7 +14,6 @@ CompileFlags:
     - "-fno-builtin"
     - "-std=c17"
 
- 
   Remove:
     # Remove flags that confuse clangd analysis
     - "-mno-red-zone"

@@ -14,15 +14,21 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef BOOT_MEMMAP_H
-#define BOOT_MEMMAP_H
+#ifndef CONTRACTS_MEMMAP_H
+#define CONTRACTS_MEMMAP_H
 
-/// @file memmap.h
-/// @brief Protocol-agnostic physical memory map
+/// @file contracts/memmap.h
+/// @brief Cross-subsystem contract: protocol-agnostic physical memory map
 ///
 /// Defines the canonical memory region types and the boot-time memory map
-/// structure passed from a boot protocol implementation to the kernel.
-/// All boot protocols translate their native types into these values.
+/// structure.  This header is a *contract* — it is shared across exactly the
+/// subsystems listed in kernel/contracts/CMakeLists.txt (currently: boot, mm).
+///
+/// Any other consumer must be added to the CONSUMERS list there and have its
+/// inclusion reviewed; the CMake build will reject unauthorised direct linkage.
+///
+/// All boot protocols translate their native types into these values before
+/// passing the map upward.
 
 #include <janus/types.h>
 
@@ -60,4 +66,4 @@ typedef struct {
     u32 count;                                     ///< Number of valid entries
 } boot_memmap_t;
 
-#endif /* BOOT_MEMMAP_H */
+#endif /* CONTRACTS_MEMMAP_H */

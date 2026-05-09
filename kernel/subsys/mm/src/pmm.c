@@ -150,8 +150,6 @@ static void pmm_mark_range_used(phys_addr_t base, u64 length)
     }
 }
 
-// Public API
-
 __cold error_t mm_pmm_init(boot_memmap_t const * memmap, phys_addr_t kernel_phys_base, phys_addr_t kernel_phys_end)
 {
     if (UNLIKELY(memmap == NULL)) {

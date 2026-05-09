@@ -21,8 +21,8 @@
 /// Allocates the kernel descriptor on the stack, calls boot_init to
 /// populate it, then initializes subsystems and enters the main loop.
 
+#include <asm/cpu.h>
 #include <boot/context.h>
-#include <drivers/cpu.h>
 #include <janus/attributes.h>
 #include <janus/config.h>
 #include <janus/errno.h>
@@ -32,6 +32,7 @@
 #include <kmain/kernel_descriptor.h>
 #include <mm/pmm.h>
 
+// Greeting message printed after booting has been completed and the console has ben initialized
 #define JANUS_HELLO_MESSAGE                  \
     "     _   _    _   _ _   _ ____  \n"     \
     "    | | / \\  | \\ | | | | / ___|\n"    \
@@ -71,5 +72,5 @@ __noreturn void kernel_main(void)
     kprintf("PMM: %llu MiB free\n", pmm_stats.free_pages * 4096ULL / (1024ULL * 1024ULL));
 
     // Halt the CPU forever
-    drivers_cpu_halt_forever();
+    asm_cpu_halt_forever();
 }

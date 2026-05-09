@@ -47,37 +47,4 @@ static __always_inline __noreturn void asm_cpu_halt_forever(void)
     }
 }
 
-/* Compatibility aliases for existing call sites. */
-static __always_inline void asm_cpu_hlt(void)
-{
-    asm_cpu_halt_once();
-}
-
-static __always_inline void asm_cpu_cli(void)
-{
-    asm_cpu_disable_interrupts();
-}
-
-static __always_inline void asm_cpu_sti(void)
-{
-    asm_cpu_enable_interrupts();
-}
-
-#if ASM_ARCH_AARCH64
-static __always_inline void asm_cpu_wfi(void)
-{
-    asm_cpu_halt_once();
-}
-
-static __always_inline void asm_cpu_daif_set(void)
-{
-    asm_cpu_disable_interrupts();
-}
-
-static __always_inline void asm_cpu_daif_clr(void)
-{
-    asm_cpu_enable_interrupts();
-}
-#endif
-
 #endif /* ASM_CPU_H */

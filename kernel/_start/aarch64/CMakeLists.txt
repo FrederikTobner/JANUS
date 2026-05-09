@@ -26,6 +26,6 @@ include(kernel/Executable)
 janus_add_kernel(
     TARGET kernel-limine.elf
     LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-    DEPENDENCIES drivers boot fmt boot_limine kio mm
+    DEPENDENCIES drivers boot boot_limine mm
     OBJECTS _start_limine _start_limine_requests kmain
 )
