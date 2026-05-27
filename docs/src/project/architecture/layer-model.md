@@ -27,20 +27,7 @@ graph TD
   subgraph global["Global Interface Layer · kernel/include/janus/"]
     types["types.h"] & attributes["attributes.h"] & config["config.h"]
   end
-
-  _start --> kmain
-  kmain --> boot & drivers & mm
-  kmain --> kio
-  boot & drivers & mm --> kio
-  boot & drivers & mm --> fmt & display & page_tables
-  kio --> fmt
-  kio --> janus_asm
-  fmt & display & page_tables --> janus_asm
-  boot & drivers & mm --> janus_asm
-  janus_asm --> types & attributes & config
-  fmt & display & page_tables --> types & attributes & config
-  kio --> types & attributes & config
-```
+ ```
 
 ## Key Invariants
 

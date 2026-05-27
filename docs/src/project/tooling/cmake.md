@@ -62,3 +62,4 @@ cmake --build build --verbose               # Show raw compiler commands
 ```
 
 The `compile_commands.json` generated in the build directory is consumed by clangd for IDE support. If autocomplete is broken, check that this file exists and is current.
+

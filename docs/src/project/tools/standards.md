@@ -67,3 +67,4 @@ Libraries register with `tools_add_lib()`; executables register with
 `tools_add_tool()`. Both helpers live in `tools/cmake/` and automatically
 record the target in the tools registry so that the dependency diagram is
 kept up to date at configure time.
+

@@ -11,13 +11,13 @@ If you call a hashtable a "map," you obscure the implementation. If you call a c
 Use implementation-specific names rather than abstract ones:
 
 | Instead of | Use             | Rationale |
-|-----------|-----------------|-----------|
-| String    | Character buffer | It is a buffer of characters in memory, with an explicit length and capacity. |
-| Map       | Hashtable       | The backing implementation is a hashtable; name it accordingly. |
-| Queue     | Ring buffer     | A circular buffer with head and tail pointers. |
-| List      | Linked list     | A pointer-based structure with explicit traversal cost. |
-| Binary Tree | Red-black tree | Be specific about the balancing scheme. |
-| Vector    | Dynamic array   | An array whose capacity changes at runtime. |
+|------------|-----------------|-----------|
+| String     | Character buffer| It is a buffer of characters in memory, with an explicit length and capacity. |
+| Map        | Hashtable       | The backing implementation is a hashtable; name it accordingly. |
+| Queue      | Ring buffer     | A circular buffer with head and tail pointers. |
+| List       | Linked list     | A pointer-based structure with explicit traversal cost. |
+| Binary Tree| Red-black tree  | Be specific about the balancing scheme. |
+| Vector     | Dynamic array   | An array whose capacity changes at runtime. |
 
 ## Type Naming
 

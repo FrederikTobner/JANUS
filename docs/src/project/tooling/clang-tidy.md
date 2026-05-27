@@ -44,3 +44,4 @@ clang-tidy -p build-x86_64-clang kernel/subsys/mm/src/pmm.c
 - Fix root causes rather than suppressing checks where possible.
 - Keep functions short and single-purpose to avoid readability/function-size findings.
 - Re-run `clang-format` after refactors to keep style and analysis aligned.
+
