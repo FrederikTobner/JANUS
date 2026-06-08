@@ -36,3 +36,4 @@ See [CI Workflows](../contributing/ci.md) for full job details.
 - Document public structs and invariants.
 - Keep parameter and return semantics explicit.
 - Prefer stable terminology from [Terminology](../contributing/terminology.md).
+

@@ -25,14 +25,19 @@ graph TD
   subgraph asm_layer["ASM Layer"]
     janus_asm[("janus_asm")]
   end
+  subgraph contract_layer["Contracts"]
+    janus_contract_memmap(("memmap"))
+  end
   page_tables --> janus_asm
   kio --> fmt
   kio --> janus_asm
   boot --> display
+  boot -.-> janus_contract_memmap
   boot_limine --> boot
   drivers --> display
   drivers --> page_tables
   mm --> kio
+  mm -.-> janus_contract_memmap
   kmain --> drivers
   kmain --> boot
   kmain --> fmt
@@ -40,9 +45,7 @@ graph TD
   kmain --> mm
   kernel_limine_elf --> drivers
   kernel_limine_elf --> boot
-  kernel_limine_elf --> fmt
   kernel_limine_elf --> boot_limine
-  kernel_limine_elf --> kio
   kernel_limine_elf --> mm
   kernel_limine_elf --> kmain
 ```

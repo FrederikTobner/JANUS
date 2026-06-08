@@ -49,3 +49,4 @@ tools/lib/clap/
   src/help.c            ← help and version rendering
   CMakeLists.txt
 ```
+

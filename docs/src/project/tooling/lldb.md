@@ -82,3 +82,4 @@ The repository's `.lldbinit` file automates this — it sets the target architec
 **"Unable to resolve breakpoint to any actual locations".** The kernel binary may not contain debug symbols. Verify with `file build/kernel.elf` — the output should indicate the file is not stripped. If symbols are missing, check that the build configuration includes `-g`.
 
 **Breakpoint hits at the wrong address.** If the kernel uses a higher-half mapping, the symbol addresses in the ELF differ from the physical load address. LLDB uses the ELF's virtual addresses, which is correct after paging is active. For early boot code before paging, set breakpoints by raw address (`b -a 0x100000`).
+

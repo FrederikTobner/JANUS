@@ -1,8 +1,8 @@
 # Firmware
 
-Firmware is the first software that runs after a computer is powered on. It initialises the hardware, like memory controllers, buses, storage devices, and provides a standardised interface through which a bootloader or operating system can discover and configure the machine.
+The firmware is the first software that runs after a computer is powered on, initialising the hardware, like memory controllers, buses, storage devices, and providing a standardised interface, through which a bootloader or operating system can discover and configure the machine.
 Two families of firmware dominate the market.
-The older BIOS and the more modern UEFI.
+The older [BIOS](#BIOS) and the more modern [UEFI](#UEFI).
 
 ## BIOS
 
@@ -17,10 +17,13 @@ The limitations of BIOS are significant: it can only boot from MBR-partitioned d
 
 The Unified Extensible Firmware Interface is the modern replacement for BIOS, developed originally by Intel and now maintained by the UEFI Forum. UEFI boots in 32-bit or 64-bit mode (no real mode involved), reads GPT-partitioned disks natively, and supports a FAT32-formatted EFI System Partition from which it loads bootloader executables in PE format.
 
-Unlike BIOS, UEFI provides a rich runtime environment with boot services (memory allocation, timer access, block I/O, graphics output) and runtime services (variable storage, clock access) that remain available even after the operating system has started. Before calling `ExitBootServices()`, the bootloader can use UEFI facilities to allocate memory, query the memory map, and set the framebuffer mode.
+Unlike the BIOS, the UEFI provides a rich runtime environment with boot services like memory allocation, timer access, block I/O and graphics output.
+Additional runtime services, like variable storage and clock access that remain available even after the operating system has started are also part of this environment. 
 
-Most modern machines, nowadays ship with UEFI firmware instead of a BIOS.
-Many also include a Compatibility Support Module (CSM) that emulates BIOS for legacy operating systems, though CSM support is increasingly being dropped by vendors.
+Before calling `ExitBootServices()`, the bootloader can use UEFI facilities to allocate memory, query the memory map, and set the framebuffer mode.
+
+Most modern machines, nowadays ship with a UEFI firmware instead of a BIOS.
+Many also include a Compatibility Support Module (CSM) that emulates BIOS for legacy operating systems, though CSM support is nowadays increasingly being dropped by vendors.
 
 ## Implications for OS Development
 
@@ -28,5 +31,9 @@ Many also include a Compatibility Support Module (CSM) that emulates BIOS for le
 See [Bootloaders](bootloaders.md) for how bootloaders build on firmware services to load and configure the kernel.
 [/!side]
 
-An OS kernel typically does not interact with firmware directly. This is responsibility of the bootloader.
-However, the firmware determines what information is available at boot time: the memory map format, the framebuffer setup mechanism, and the address at which the kernel is loaded. Boot protocols like [Multiboot2](protocols/multiboot2.md) and Limine abstract over these firmware differences, providing a uniform interface that the kernel can consume regardless of whether the underlying firmware is BIOS or UEFI.
+An OS kernel typically does not interact with firmware directly. 
+This is responsibility of the bootloader.
+However, the firmware determines what kind of information is available at boot time. 
+This includes, but is not limited to the memory map format, the framebuffer setup mechanism, and the address at which the kernel is loaded. 
+Boot protocols like [Multiboot2](protocols/multiboot2.md) and Limine abstract over these firmware differences, providing a uniform interface that the kernel can consume regardless of whether the underlying firmware is BIOS or UEFI.
+

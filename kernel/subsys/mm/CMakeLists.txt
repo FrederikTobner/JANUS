@@ -8,5 +8,6 @@ janus_add_subsys(mm
         ${MM_SOURCES}
     DEPENDENCIES
         kio
+        janus_contract_memmap
 )
 

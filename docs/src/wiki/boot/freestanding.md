@@ -1,14 +1,22 @@
 # Freestanding Environments
 
-A C program can run in one of two environments. A *hosted* environment is the familiar one — the program runs under an operating system that provides the full C standard library: `malloc`, `printf`, file I/O, process control, and so on. A *freestanding* environment has none of this. The program runs without any underlying OS. There is no standard library, no runtime, no heap, and no assumption about the state of memory or hardware.
+A C program can run in one of two environments. 
+A *hosted* environment is the familiar one — the program runs under an operating system that provides the full C standard library: `malloc`, `printf`, file I/O, process control, and so on. 
+A *freestanding* environment has none of this. 
+The program runs without any underlying OS. 
+There is no standard library, no runtime, no heap, and no assumption about the state of memory or hardware.
 
-An OS kernel is the canonical example of a freestanding program. It is the software that *provides* the hosted environment for everything else; it cannot rely on one itself.
+An OS kernel is the canonical example of a freestanding program. 
+It is the software that *provides* the hosted environment for everything else; it cannot rely on one itself.
 
 ## What You Lose
 
-In a freestanding C environment, the compiler guarantees only a handful of headers: `<stddef.h>`, `<stdint.h>`, `<stdbool.h>`, `<stdarg.h>`, `<limits.h>`, and `<float.h>`. These provide type definitions and constants but no functions.
+In a freestanding C environment, the compiler guarantees only a handful of headers: `<stddef.h>`, `<stdint.h>`, `<stdbool.h>`, `<stdarg.h>`, `<limits.h>`, and `<float.h>`. 
+These provide type definitions and constants but no functions.
 
-Everything else — `printf`, `malloc`, `memcpy`, `strlen`, `fopen` — is absent. If the kernel needs any of these operations, it must implement them from scratch. This is why kernel projects maintain their own small utility libraries for memory operations, formatted output, and string handling.
+Everything else — `printf`, `malloc`, `memcpy`, `strlen`, `fopen` — is absent. 
+If the kernel needs any of these operations, it must implement them from scratch. 
+This is why kernel projects maintain their own small utility libraries for memory operations, formatted output, and string handling.
 
 ## Compiler Flags
 
@@ -22,7 +30,10 @@ clang -ffreestanding -nostdlib -c kernel.c -o kernel.o
 
 ## The Entry Point
 
-A hosted C program enters at `main`, which is called by the C runtime startup code (`crt0`). In a freestanding program there is no `crt0`. The entry point is whatever the linker script or bootloader protocol defines — typically a symbol like `_start` written in assembly. This entry code sets up a stack, initialises any hardware state the C code expects, and then calls into the kernel's C entry function.
+A hosted C program enters at `main`, which is called by the C runtime startup code (`crt0`). 
+In a freestanding program there is no `crt0`. 
+The entry point is whatever the linker script or bootloader protocol defines — typically a symbol like `_start` written in assembly. 
+This entry code sets up a stack, initialises any hardware state the C code expects, and then calls into the kernel's C entry function.
 
 ## Verification
 
@@ -41,4 +52,5 @@ clang -target x86_64-elf -ffreestanding -nostdlib -c test.c -o test.o
 file test.o    # Should report: ELF 64-bit LSB relocatable, x86-64
 ```
 
-Adding a call to `printf` and recompiling should produce an undefined-symbol error. If it does not, the toolchain is not properly configured for freestanding use.
+Adding a call to `printf` and recompiling should produce an undefined-symbol error. 
+If that is not the case, the toolchain is not properly configured for freestanding use.

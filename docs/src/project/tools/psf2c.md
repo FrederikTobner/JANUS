@@ -51,3 +51,4 @@ tools/psf2c/
 |------------|---------|
 | `clap` | Command-line argument parsing |
 | `ZLIB` | Gzip decompression of `.psf.gz` files |
+

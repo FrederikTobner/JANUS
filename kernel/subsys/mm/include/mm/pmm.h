@@ -29,7 +29,7 @@
 ///   phys_addr_t page = mm_pmm_alloc_page();
 ///   mm_pmm_free_page(page);
 
-#include <boot/memmap.h>
+#include <contracts/memmap.h>
 #include <janus/errno.h>
 #include <janus/types.h>
 

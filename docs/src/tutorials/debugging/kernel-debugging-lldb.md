@@ -1,10 +1,14 @@
 # Debugging a Kernel with LLDB
 
-This tutorial walks through a complete LLDB debugging session against a kernel running in QEMU. The goal is to verify — not assume — that the boot process worked: the Multiboot2 magic is correct, the info pointer is valid, and the CPU is executing our C code. The same workflow applies any time you need to inspect registers, step through assembly, or verify memory layout.
+This tutorial walks through a complete LLDB debugging session against a kernel running in QEMU. 
+The goal is to verify, and not to assume, that the boot process worked, meaning that the Multiboot2 magic is correct, the info pointer is valid, and the CPU is executing our C code. 
+The same workflow applies any time you need to inspect registers, step through assembly, or verify memory layout.
 
 ## Prerequisites
 
-LLDB and QEMU must be installed (see [Dependencies](../../project/setup/dependencies.md)). Familiarity with the Multiboot2 entry state helps — see [Multiboot2](../../wiki/boot/multiboot2.md). For a quick command reference, see [LLDB](../../project/tooling/lldb.md).
+LLDB and QEMU must be installed (see [Dependencies](../../project/setup/dependencies.md)). 
+Familiarity with the Multiboot2 entry state helps — see [Multiboot2](../../wiki/boot/multiboot2.md). 
+For a quick command reference, see [LLDB](../../project/tooling/lldb.md).
 
 ## The Setup
 
@@ -150,8 +154,3 @@ The null check passed too. The kernel is now sitting in the infinite halt loop �
 
 **Breakpoint fires at an unexpected address** — if the kernel uses higher-half mappings, LLDB may resolve the symbol to a virtual address that does not match the physical address where the code actually executes early in boot. Use `b -a 0x10109f` (or whatever `readelf -s` reports) to set a breakpoint at a physical address directly.
 
-## Key Takeaways
-
-- **Never assume the boot worked** — verify with a debugger. A black screen can mean success or a triple fault.
-- **The GDB stub is protocol-compatible** — LLDB, GDB, and other tools that speak the GDB Remote Serial Protocol all work with QEMU's `-s` flag.
-- **Register inspection beats `printf` in early boot** — before any I/O driver exists, the debugger is the only window into the machine.

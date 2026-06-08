@@ -74,6 +74,12 @@ function(janus_add_kernel)
         -T ${ARG_LINKER_SCRIPT}
         -nostdlib
         -static
+        -Wl,--build-id=none   # Prevent .note.gnu.build-id from being emitted.
+                              # Without this, ld places the note at vaddr=paddr=KERNEL_VMA+LMA
+                              # (no AT() transform) on the same 4K page as .limine_requests (RW),
+                              # creating two LOAD PHDRs with conflicting permissions on one page.
+                              # Limine enforces that no two PHDRs with different permissions share
+                              # a page and panics. Build IDs are unused in a bare-metal kernel.
     )
     set_target_properties(${ARG_TARGET} PROPERTIES
         LINK_DEPENDS "${ARG_LINKER_SCRIPT}"

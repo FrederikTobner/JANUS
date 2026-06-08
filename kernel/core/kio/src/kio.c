@@ -77,5 +77,5 @@ __cold __noreturn void kpanic_impl(char const * file, int line, char const * fmt
     va_end(ap);
 
     kprintf("\n\nSystem halted.\n");
-    kio_halt_forever();
+    asm_cpu_halt_forever();
 }

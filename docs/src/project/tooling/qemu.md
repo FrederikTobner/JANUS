@@ -59,3 +59,4 @@ The QEMU monitor provides additional introspection. Access it with `Ctrl+A C` wh
 **QEMU window not visible.** On tiling window managers (i3, sway), QEMU may default to VNC output. Force a visible window with `-display sdl` or `-display gtk`. Alternatively, use a VNC viewer.
 
 **Kernel appears to hang on boot.** A blank screen after "Booting from DVD/CD..." is normal if the kernel has no video or serial output yet. Use the `debug` build target and connect LLDB to verify execution — see [LLDB](lldb.md).
+

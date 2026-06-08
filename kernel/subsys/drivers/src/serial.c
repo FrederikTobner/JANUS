@@ -15,7 +15,7 @@
  ****************************************************************************/
 
 /// @file serial.c
-/// @brief Serial port driver — shared logic.
+/// @brief Shared logic of the serial port driver
 ///
 /// Implements the out-of-line serial API declared in <drivers/serial.h>.
 /// Architecture-specific hardware access is delegated to arch_serial_*.
@@ -35,6 +35,7 @@ void drivers_serial_putc(char c)
         while (!arch_serial_tx_ready()) {
             // Wait for transmit buffer to be ready
         }
+        //  Write carriage return before newline for proper formatting on the receiving end
         arch_serial_write('\r');
     }
     while (!arch_serial_tx_ready()) {
