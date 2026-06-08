@@ -14,7 +14,6 @@
     Limine is fetched automatically via FetchContent.
 ]]
 
-# ── Limine FetchContent ────────────────────────────────────────────
 include(FetchContent)
 FetchContent_Declare(
     limine
@@ -24,7 +23,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(limine)
 
-# ── Protocol discovery and validation ──────────────────────────────
 # Discover all known protocols from cmake/boot/*/Targets.cmake
 file(GLOB _proto_modules
      "${CMAKE_SOURCE_DIR}/cmake/boot/*/Targets.cmake")
