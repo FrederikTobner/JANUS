@@ -16,7 +16,7 @@
 
 /// @file serial.c
 /// @brief Shared logic of the serial port driver
-/// 
+///
 /// Implements the out-of-line serial API declared in <drivers/serial.h>.
 /// Architecture-specific hardware access is delegated to arch_serial_*.
 

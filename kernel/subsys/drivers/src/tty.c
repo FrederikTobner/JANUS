@@ -18,7 +18,7 @@
 /// @brief Shared logic of the TTY driver, like the cursor tracking or scrolling
 ///
 /// Handles cursor tracking, scrolling, and color management.
-/// Calls arch_tty_* functions for architecture-specific cell writing and cursor control. 
+/// Calls arch_tty_* functions for architecture-specific cell writing and cursor control.
 
 #include <arch/drivers/tty.h>
 #include <drivers/tty.h>

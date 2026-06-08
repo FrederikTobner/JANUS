@@ -18,9 +18,9 @@
 /// @brief Physical Memory Manager implementation
 ///
 /// Bitmap-based PMM covering up to 4 GiB of physical address space.
-/// The bitmap lives in .bss (128 KiB). 
+/// The bitmap lives in .bss (128 KiB).
 /// Each bit represents one 4 KiB frame.
-/// 1 = free, 0 = used. 
+/// 1 = free, 0 = used.
 /// The bitmap is initialised with all frames used,
 /// then usable regions from the boot memory map are marked free.
 ///
