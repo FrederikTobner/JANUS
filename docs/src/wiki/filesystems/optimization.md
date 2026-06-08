@@ -19,8 +19,11 @@ Balancing these trade-offs can be considered the key concern when optimizing a f
 ### Tracking free Space
 
 Another important aspect of space management is tracking free space on the disk.
+
+[!side]
+When these data structures are allocated using virtual memory, in a file system that supports swapping, the file system can take advantage of the virtual memory system to manage free space more efficiently, by allowing the file system to swap out unused blocks of the free space bitmap or free space list to disk when they are not needed, and swap them back in when they are needed again.
+[/!side]
 File systems typically use a free space bitmap or a free space list to keep track of which blocks on the disk are free and which are allocated.
 The free space list is usually implemented as a linked list of free blocks, while the free space bitmap is a bit array where each bit represents a block on the disk, with a value of 0 indicating that the block is free and a value of 1 indicating that the block is allocated.
 The free space bitmap can be more efficient than the free space list, as it allows for faster lookups and can reduce fragmentation, but it can also require more memory to store the bitmap.
 
-When these data structures are allocated using virtual memory, in a file system that supports swapping, the file system can take advantage of the virtual memory system to manage free space more efficiently, by allowing the file system to swap out unused blocks of the free space bitmap or free space list to disk when they are not needed, and swap them back in when they are needed again.

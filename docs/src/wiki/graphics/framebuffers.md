@@ -5,7 +5,7 @@ Each cell in the buffer corresponds to a pixel on the screen, and writing a colo
 
 ## How It Works
 
-The display controller reads from the framebuffer at a fixed refresh rate — typically 60 Hz — starting at the top-left corner and scanning left to right, top to bottom. 
+The display controller reads from the framebuffer at a fixed refresh rate (typically 60 Hz) starting at the top-left corner and scanning left to right, top to bottom. 
 Each pixel occupies a fixed number of bytes (commonly four: one each for red, green, blue, and either padding or an alpha channel). 
 The address of pixel (x, y) in a linear framebuffer is:
 

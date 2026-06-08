@@ -1,6 +1,7 @@
 # Virtual Memory
 
-Virtual memory is an abstraction that gives each program — and the kernel itself — the illusion of a private, contiguous address space, regardless of how physical memory is actually laid out. The hardware's memory management unit (MMU) translates every virtual address the CPU issues into a physical address before it reaches the memory bus, and this translation is governed by a set of data structures called page tables.
+Virtual memory is an abstraction that gives each program — and the kernel itself — the illusion of a private, contiguous address space, regardless of how physical memory is actually laid out. 
+The hardware's memory management unit (MMU) translates every virtual address the CPU issues into a physical address before it reaches the memory bus, and this translation is governed by a set of data structures called page tables.
 
 ## Why Virtual Memory Exists
 
