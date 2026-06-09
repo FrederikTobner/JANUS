@@ -9,7 +9,8 @@
 [![Architectures](https://img.shields.io/badge/arch-x86__64%20%7C%20aarch64-orange?logo=linux)](https://github.com/FrederikTobner/JANUS)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue?logo=gnu)](LICENSE)
 
-JANUS (Just ANother Unix-like System) is an educational operating system kernel written in C17 and assembly, supporting **x86_64** and **aarch64** architectures. The kernel follows a monolithic design.
+JANUS (Just ANother Unix-like System) is an educational operating system kernel written in C17 and assembly, supporting **x86_64** and **aarch64** architectures. 
+The kernel follows a monolithic design.
 
 ## Quick Start
 

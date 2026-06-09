@@ -201,7 +201,7 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
     get_filename_component(_dir "${OUTPUT_FILE}" DIRECTORY)
     file(MAKE_DIRECTORY "${_dir}")
     file(WRITE "${OUTPUT_FILE}" "${_content}")
-    message(STATUS "  Generated: ${OUTPUT_FILE}")
+    message(STATUS "Generated dependency graph in: ${OUTPUT_FILE}")
 endfunction()
 
 set(JANUS_REGISTRY_LOADED TRUE CACHE INTERNAL "Janus registry loaded")

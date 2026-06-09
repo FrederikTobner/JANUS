@@ -36,23 +36,7 @@ typedef struct {
 
 static tty_state_t g_tty;
 
-static void tty_scroll(void)
-{
-    // Move all lines up by one
-    for (u16 y = 0; y < g_tty.screen_height - 1; y++) {
-        for (u16 x = 0; x < g_tty.screen_width; x++) {
-            char ch;
-            u8 fg;
-            u8 bg;
-            arch_tty_read_cell(x, y + 1, &ch, &fg, &bg);
-            arch_tty_write_cell(x, y, ch, fg, bg);
-        }
-    }
-    // Clear last line
-    for (u16 x = 0; x < g_tty.screen_width; x++) {
-        arch_tty_write_cell(x, g_tty.screen_height - 1, ' ', g_tty.current_fg, g_tty.current_bg);
-    }
-}
+static void tty_scroll(void);
 
 __cold error_t drivers_tty_init(display_info_t const * config)
 {
@@ -156,5 +140,25 @@ void drivers_tty_get_size(u16 * width, u16 * height)
     }
     if (height) {
         *height = g_tty.screen_height;
+    }
+}
+
+// Static function definitions
+
+static void tty_scroll(void)
+{
+    // Move all lines up by one
+    for (u16 y = 0; y < g_tty.screen_height - 1; y++) {
+        for (u16 x = 0; x < g_tty.screen_width; x++) {
+            char ch;
+            u8 fg;
+            u8 bg;
+            arch_tty_read_cell(x, y + 1, &ch, &fg, &bg);
+            arch_tty_write_cell(x, y, ch, fg, bg);
+        }
+    }
+    // Clear last line
+    for (u16 x = 0; x < g_tty.screen_width; x++) {
+        arch_tty_write_cell(x, g_tty.screen_height - 1, ' ', g_tty.current_fg, g_tty.current_bg);
     }
 }

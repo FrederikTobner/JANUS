@@ -32,29 +32,7 @@ extern volatile struct limine_executable_address_request limine_executable_addre
 extern volatile struct limine_memmap_request limine_memmap_request;
 
 /// Translate Limine memmap entry type to canonical mem_region_type_t.
-static mem_region_type_t limine_translate_memmap_type(u64 limine_type)
-{
-    switch (limine_type) {
-    case LIMINE_MEMMAP_USABLE:
-        return MEM_REGION_USABLE;
-    case LIMINE_MEMMAP_RESERVED:
-        return MEM_REGION_RESERVED;
-    case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
-        return MEM_REGION_ACPI_RECLAIMABLE;
-    case LIMINE_MEMMAP_ACPI_NVS:
-        return MEM_REGION_ACPI_NVS;
-    case LIMINE_MEMMAP_BAD_MEMORY:
-        return MEM_REGION_BAD;
-    case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
-        return MEM_REGION_BOOTLOADER_RECLAIMABLE;
-    case LIMINE_MEMMAP_KERNEL_AND_MODULES:
-        return MEM_REGION_KERNEL_AND_MODULES;
-    case LIMINE_MEMMAP_FRAMEBUFFER:
-        return MEM_REGION_FRAMEBUFFER;
-    default:
-        return MEM_REGION_RESERVED;
-    }
-}
+static mem_region_type_t limine_translate_memmap_type(u64 limine_type);
 
 /// Kernel image physical end — provided by the linker script
 extern char kernel_phys_end[];
@@ -146,4 +124,30 @@ __cold error_t boot_init(boot_context_t * boot_context)
     }
 
     return 0;
+}
+
+// Static function definitions
+
+static mem_region_type_t limine_translate_memmap_type(u64 limine_type)
+{
+    switch (limine_type) {
+    case LIMINE_MEMMAP_USABLE:
+        return MEM_REGION_USABLE;
+    case LIMINE_MEMMAP_RESERVED:
+        return MEM_REGION_RESERVED;
+    case LIMINE_MEMMAP_ACPI_RECLAIMABLE:
+        return MEM_REGION_ACPI_RECLAIMABLE;
+    case LIMINE_MEMMAP_ACPI_NVS:
+        return MEM_REGION_ACPI_NVS;
+    case LIMINE_MEMMAP_BAD_MEMORY:
+        return MEM_REGION_BAD;
+    case LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE:
+        return MEM_REGION_BOOTLOADER_RECLAIMABLE;
+    case LIMINE_MEMMAP_KERNEL_AND_MODULES:
+        return MEM_REGION_KERNEL_AND_MODULES;
+    case LIMINE_MEMMAP_FRAMEBUFFER:
+        return MEM_REGION_FRAMEBUFFER;
+    default:
+        return MEM_REGION_RESERVED;
+    }
 }
