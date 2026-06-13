@@ -2,80 +2,108 @@
 
 ## Dependencies
 
-**Build system:** CMake 3.20+ and Ninja.
+The following tools are required to configure, build, and run JANUS. Where a
+distribution-specific install command is given, Debian/Ubuntu and Arch Linux are
+covered; consult your package manager for other distributions.
+
+### Build System
+
+CMake 3.20 or later is required, together with Ninja as the build backend.
 
 ```bash
-# Debian/Ubuntu
-sudo apt install cmake ninja-build
-
-# Arch Linux
-sudo pacman -S cmake ninja
+sudo apt install cmake ninja-build   # Debian/Ubuntu
+sudo pacman -S cmake ninja            # Arch Linux
 ```
 
-**Compilers:** GCC and Clang for x86_64; cross-toolchain for aarch64.
+### Compilers
+
+Both GCC and Clang are supported for x86_64. Cross-compiling for aarch64 requires
+the ARM64 GCC toolchain; Clang can cross-compile natively but still needs the GNU
+linker from the cross-binutils package.
 
 ```bash
-# Debian/Ubuntu
-sudo apt install gcc clang gcc-aarch64-linux-gnu llvm
+# x86_64
+sudo apt install gcc clang
+sudo pacman -S gcc clang
 
-# Arch Linux
-sudo pacman -S gcc clang aarch64-linux-gnu-gcc
+# aarch64 cross-toolchain
+sudo apt install gcc-aarch64-linux-gnu llvm
+sudo pacman -S aarch64-linux-gnu-gcc
 ```
 
-**Assembler:** NASM is required for x86_64. aarch64 uses GAS from the cross-toolchain.
+### Assembler
+
+NASM is required for x86_64 assembly. aarch64 uses GAS, which ships with the
+cross-compiler toolchain and requires no separate installation.
 
 ```bash
-sudo apt install nasm           # Debian/Ubuntu
-sudo pacman -S nasm             # Arch Linux
+sudo apt install nasm
+sudo pacman -S nasm
 ```
 
-**Debugger:** LLDB for x86_64, GDB multiarch for aarch64.
+### Debugger
+
+LLDB is the primary debugger for x86_64. GDB with multiarch support is used for
+aarch64. The repository includes a `.lldbinit` that automates connection to QEMU's
+debug server.
 
 ```bash
 sudo apt install lldb gdb-multiarch
 sudo pacman -S lldb gdb
 ```
 
-**Emulator:** QEMU.
+### Emulator
 
 ```bash
 sudo apt install qemu-system-x86 qemu-system-arm
 sudo pacman -S qemu-system-x86 qemu-system-aarch64
 ```
 
-**ISO tools:** xorriso and mtools (Limine); GRUB additionally for Multiboot2.
+### ISO and Bootloader Tools
+
+xorriso and mtools are needed to produce bootable ISO images for Limine. Multiboot2
+(x86_64 only) additionally requires GRUB.
 
 ```bash
 sudo apt install xorriso mtools grub-pc-bin
 sudo pacman -S xorriso mtools grub
 ```
 
-Limine is fetched automatically by CMake via `FetchContent`.
+Limine itself is fetched automatically by CMake via `FetchContent` and does not
+need to be installed separately.
 
-**Language server (optional):** clangd — the repository includes a `.clangd` config.
+### Language Server
+
+clangd provides IDE features such as autocompletion and jump-to-definition. The
+repository includes a `.clangd` configuration file that points clangd at the
+generated `compile_commands.json`.
+
+```bash
+sudo apt install clangd
+sudo pacman -S clang   # includes clangd on Arch
+```
 
 ## Building
 
-Configure and build using CMake presets:
+The recommended workflow uses CMake presets, which bundle the generator, toolchain
+file, and build directory into a single named configuration:
 
 ```bash
 cmake --preset x86_64-gcc
 cmake --build --preset x86_64-gcc
 ```
 
-Each preset writes to its own build directory (`build-x86_64-gcc/`, etc.), so
-multiple configurations coexist without conflict.
+Each preset writes to its own build directory (`build-x86_64-gcc/`, etc.), so all
+four configurations can coexist on disk simultaneously.
 
-Without presets:
+To build without presets, or to use a toolchain not covered by the presets:
 
 ```bash
+# Native x86_64
 cmake -B build -G Ninja
 cmake --build build
-```
 
-Cross-compile for aarch64:
-
-```bash
+# Explicit cross-compilation
 cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-gcc.cmake
 cmake --build build
 ```
@@ -87,7 +115,7 @@ cmake --build build
 | *(default)* | Build `kernel.elf` |
 | `iso` | Create all ISOs for this platform |
 | `iso-limine` | Limine ISO |
-| `iso-multiboot2` | Multiboot2 ISO (GRUB, x86_64 only) |
+| `iso-multiboot2` | Multiboot2 ISO via GRUB (x86_64 only) |
 | `run-limine` | Boot Limine ISO in QEMU |
 | `run-multiboot2` | Boot Multiboot2 ISO in QEMU (x86_64 only) |
 | `run-uefi` | Boot in UEFI mode (requires OVMF) |

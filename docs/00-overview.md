@@ -1,44 +1,99 @@
 # JANUS — Overview
 
-JANUS is a freestanding hobby kernel written in C17, targeting x86_64 and aarch64.
-It is built as a collection of independent, well-defined modules with strict
-layering enforced at compile time.
+JANUS is a freestanding kernel written in C17, targeting x86_64 and aarch64.
 
-## Philosophy
+## Design Principles
 
-**Educational Transparency.** Every architectural choice should be understandable
-and documented. Where a design departs from the obvious approach, the reasoning is
-recorded in code comments, commit messages, or these documents. References to
-processor manuals and specifications are included where they add clarity.
+### Strict Layering
 
-**Modular Architecture.** JANUS is built as independent modules drawing on patterns
-from the Linux kernel and LLVM. Each module has clear boundaries and explicit
-dependencies. Circular dependencies are forbidden and enforced by CMake. Rather than
-centralising all platform logic in a single `arch/` tree, each subsystem contains
-its own `arch/` subdirectory, so a module's complete implementation — generic and
-platform-specific — lives in one place.
+JANUS is organised into layers with one-directional dependencies. No module may
+depend on anything in the same layer or above it; violations are caught at CMake
+configure time. This discipline keeps each layer independently comprehensible and
+eliminates entire classes of coupling bugs before they can reach the linker.
 
-**Public Structures Over Opaque Handles.** Kernel data structures are defined
-publicly rather than hidden behind opaque pointer typedefs. In a freestanding
-kernel, the benefits of opaque handles (API stability across shared-library
-boundaries) do not apply, while the costs — pointer indirection, forced heap
-allocation, degraded cache locality, and poor debugger visibility — are real.
-Public structures allow stack allocation, embedding for cache-friendly layouts,
-and full visibility in LLDB or GDB. The rare exceptions are hardware abstraction
-boundaries where the underlying representation genuinely varies at runtime.
+```mermaid
+graph TD
+  subgraph entry["_start — Entry"]
+    _start
+  end
+  subgraph composition["kmain — Composition root"]
+    kmain
+  end
+  subgraph subsys["Subsystems"]
+    boot
+    drivers
+    mm
+  end
+  subgraph core["Core services"]
+    kio
+  end
+  subgraph libs["Libraries"]
+    fmt
+    display
+    page_tables
+  end
+  subgraph asm_layer["ASM abstraction"]
+    janus_asm
+  end
+  subgraph global["Global headers"]
+    types_h["types.h"]
+    attributes_h["attributes.h"]
+    config_h["config.h"]
+  end
+  _start --> kmain
+  kmain --> boot
+  kmain --> drivers
+  kmain --> mm
+  kmain --> kio
+  boot --> kio
+  drivers --> kio
+  mm --> kio
+  kio --> fmt
+  drivers --> display
+  drivers --> janus_asm
+  mm --> janus_asm
+  fmt --> types_h
+  janus_asm --> types_h
+```
 
-## Language and Compiler
+### Modular, Co-located Architecture
 
-C17 (`-std=gnu17`) is used for all kernel code, combined with architecture-specific
-assembly for entry points and low-level hardware interaction. C17 provides
-`_Static_assert`, `_Alignof`, and `_Noreturn` without experimental flags and enjoys
-universal compiler support.
+Each module has clear boundaries, explicit dependencies, and a public header
+interface that is the sole point of contact with the rest of the kernel. Rather
+than centralising all platform code in a single `arch/` tree, every subsystem and
+library contains its own `arch/` subdirectory. This means a module's complete
+implementation — generic logic and platform-specific code alike — is navigable as
+a single unit without jumping between distant directories.
 
-x86_64 assembly is written in NASM (Intel syntax). aarch64 assembly uses GAS
-(standard ARM syntax). Inline GCC `asm` is used sparingly and only for
-single-instruction helpers where a standalone file would be less clear.
+### Public Structures Over Opaque Handles
 
-Both GCC and Clang are supported and tested in CI:
+Kernel data structures are defined publicly rather than hidden behind opaque
+pointer typedefs. In a freestanding environment, the canonical justification for
+opaque handles — binary API stability across shared-library boundaries — simply
+does not exist, while the costs are immediate and tangible: pointer indirection,
+mandatory heap allocation, degraded cache locality, and structures that appear as
+featureless `void *` values in a debugger. Public structures admit stack allocation,
+in-place embedding for cache-friendly layouts, and complete visibility in LLDB or
+GDB. Opaque handles are reserved for the narrow set of genuine abstraction
+boundaries where the underlying representation varies at runtime, such as
+framebuffer backends.
+
+## Language and Assembly
+
+All kernel code is written in C17 (`-std=gnu17`). C17 was chosen because it is
+the most recent revision of the language standard with universal compiler support,
+and it provides `_Static_assert`, `_Alignof`, and `_Noreturn` — facilities that
+a freestanding kernel benefits from directly.
+
+x86_64 assembly is written in NASM using Intel syntax. aarch64 assembly uses GAS
+with standard ARM syntax. Inline `asm` is used sparingly and only for
+single-instruction helpers, such as `hlt` or memory barriers, where a standalone
+assembly file would add more indirection than clarity.
+
+## Compiler Support
+
+Both GCC and Clang are supported and tested in CI across the full
+architecture matrix:
 
 | Preset | Compiler | Architecture |
 |---|---|---|
@@ -47,5 +102,5 @@ Both GCC and Clang are supported and tested in CI:
 | `aarch64-gcc` | GCC | aarch64 |
 | `aarch64-clang` | Clang | aarch64 |
 
-All presets compile with `-Wall -Wextra -Werror -Wconversion -ffreestanding
--fno-builtin -nostdlib`.
+All configurations compile with `-Wall -Wextra -Werror -Wconversion` combined with
+the freestanding flags `-ffreestanding -fno-builtin -nostdlib`.

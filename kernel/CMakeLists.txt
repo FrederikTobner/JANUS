@@ -45,4 +45,4 @@ janus_validate_registry()
 janus_validate_contracts()
 
 # Generate dependency diagram into the docs source tree (one file per architecture)
-janus_write_mermaid_diagram("${CMAKE_SOURCE_DIR}/docs/src/generated/deps-${JANUS_TARGET_ARCH}.md")
+janus_write_mermaid_diagram("${CMAKE_SOURCE_DIR}/docs/generated/deps-${JANUS_TARGET_ARCH}.md")

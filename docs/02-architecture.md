@@ -2,85 +2,103 @@
 
 ## Layer Model
 
-Dependencies flow strictly downward. A module may depend on any module in a lower
-layer, never on the same layer or above. CMake enforces this via target
-dependencies.
+The entire kernel source tree is partitioned into layers ordered by abstraction
+level. The single governing rule is that dependencies may only point downward:
+a module may depend on anything in a lower layer, but never on a peer in the same
+layer or on anything above it. CMake enforces this constraint through its target
+dependency graph; a violation causes a configure-time fatal error before any
+compiler is invoked.
 
 ```
-kernel/_start/       Entry layer    — creates kernel.elf, owns entry point and linker script
-kernel/kmain/        Composition    — only module allowed to depend on subsystems
-kernel/subsys/       Subsystems     — boot, drivers, mm (isolated from each other)
-kernel/core/         Core services  — kio (output + panic); may use libs, not subsystems
-kernel/lib/          Libraries      — fmt, display, page_tables; no cross-lib deps
-kernel/asm/          ASM layer      — janus_asm INTERFACE; owns raw instruction wrappers
-kernel/include/      Global headers — types.h, attributes.h, config.h
-kernel/contracts/    Contracts      — shared types crossing subsystem boundaries
+kernel/_start/    Entry         — assembly entry point, linker script, creates kernel.elf
+kernel/kmain/     Composition   — the only module permitted to depend on subsystems
+kernel/subsys/    Subsystems    — mutually isolated
+kernel/core/      Core services — may use libraries, must not use subsystems
+kernel/lib/       Libraries     — no inter-library dependencies
+kernel/asm/       ASM layer     — janus_asm INTERFACE; sole owner of raw assembly instruction wrappers
+kernel/include/   Global        — types.h, attributes.h, config.h
+kernel/contracts/ Contracts     — shared type definitions crossing subsystem boundaries
 ```
 
-**`_start`** links `kmain` and all subsystem libraries into `kernel.elf`. It
-contains the assembly entry point, the boot protocol header, and the linker script.
+### Key Invariants
 
-**`kmain`** is the sole module that may depend on subsystems. All inter-subsystem
-coordination flows through it — the star topology means subsystems never call each
-other.
+**`_start`** links `kmain` and all subsystem libraries into the final `kernel-<boot protocol>.elf` executable.
+It owns the architecture-specific entry point in assembly, the boot protocol header, and the linker script that defines the memory layout.
 
-**Subsystems** are strictly isolated. `boot` cannot call `drivers`, `drivers`
-cannot call `mm`. If two subsystems need to share information, the data flows
-through `kmain` via an explicit parameter (typically in `kernel_descriptor_t`).
+**`kmain`** is the composition root, the sole module that may depend on subsystems.
+All inter-subsystem data flow is mediated through `kmain`, which acts as an explicit wiring point rather than allowing subsystems to reach one another directly.
 
-**Core services** sit between `lib/` and `subsys/`. They provide cross-cutting
-functionality (formatted output, panic) that multiple subsystems need. Core modules
-may depend on libraries but not on subsystems.
+**Subsystems** are strictly isolated from one another. `boot` cannot call into
+`drivers`, and `drivers` cannot call into `mm`.
+When two subsystems need to exchange data, the information travels through `kmain` via an explicit parameter,
+typically defined by a shared type that is defined in the contract layer.
 
-**Libraries** are freestanding utilities with no knowledge of the subsystems above
-them. No library may depend on another library.
+**Core services** occupy the layer between libraries and subsystems.
+A core module may depend on libraries but must not depend on subsystems.
+This keeps cross-cutting services reusable from any subsystem.
 
-**The ASM layer** is the only layer that owns raw instruction wrappers. Higher
-layers consume these through `janus_asm` instead of embedding inline assembly.
+**Libraries** are utility modules which act as the most basic building blocks for the kernel.
+No library may depend on another library; each one is self-contained.
 
-**Contracts** are type definitions shared across exactly N named subsystem
-boundaries. They live in `kernel/contracts/<name>/include/contracts/<name>.h` and
-are not in any default include search path. CMake enforces an allowlist of
-authorised consumers via `janus_add_contract`; an unauthorised direct link fails
-configure.
+**The ASM layer** is the only layer permitted to contain raw instruction wrappers.
+All higher layers call into `janus_asm` rather than embedding inline assembly
+directly.
+
+**Contracts** Used for sharing types across a subsystem boundary.
+Every artifact in the contract layer explicitly states its consuming subsystems, which is enforced using cmake.
 
 ## Directory Layout
 
 ```
 kernel/
-├── include/          Global headers (janus/types.h, janus/attributes.h, janus/config.h)
-├── contracts/        Cross-subsystem shared type definitions
-├── _start/           Entry point — creates kernel.elf
-├── kmain/            Kernel main — composition root, links subsystems
-├── lib/              Shared utility libraries
-├── core/             Shared kernel services (kio)
+├── include/          Global headers: janus/types.h, attributes.h, config.h
+├── contracts/        Cross-subsystem type contracts (allowlist-enforced)
+├── _start/           Entry layer — architecture and protocol subdirectories
+├── kmain/            Composition root — kernel_main(), init sequence
+├── lib/              Utility libraries: fmt, display, page_tables
+├── core/             Cross-cutting services: kio
 └── subsys/           Independent subsystems
-    ├── boot/             Boot protocol handling
-    ├── drivers/          Device drivers
-    └── mm/               Memory management
+    ├── boot/               Boot protocol parsing and context population
+    ├── drivers/            Device drivers: serial, TTY
+    └── mm/                 Memory management: PMM
 ```
 
-Architecture-specific code lives inside the module that needs it, not in a
-centralised `kernel/arch/` tree. A module's complete implementation — generic and
-platform-specific — is co-located.
+Architecture-specific code is co-located with the module that needs it rather than
+being aggregated in a centralised `arch/` tree. A subsystem's complete
+implementation — both the platform-agnostic logic and the per-architecture code —
+is navigable as a single unit.
 
 ## Three-Tier Include Hierarchy
 
-Every module with architecture-specific code uses three tiers of headers:
+Every module with architecture-specific code exposes its headers through three
+tiers, each with a distinct role:
 
-```
-Tier 1 — Public API          subsys/foo/include/foo/bar.h           #include <foo/bar.h>
-Tier 2 — Contract headers    subsys/foo/arch/include/arch/foo/bar.h #include <arch/foo/bar.h>
-Tier 3 — Implementation      subsys/foo/arch/<ARCH>/include/arch/impl/foo/bar.h
+```mermaid
+graph LR
+  T1["Tier 1 — Public API\nsubsys/foo/include/foo/\n#include <foo/bar.h>"]
+  T2["Tier 2 — Arch contract\nsubsys/foo/arch/include/arch/foo/\n#include <arch/foo/bar.h>"]
+  T3["Tier 3 — Implementation\nsubsys/foo/arch/x86_64/include/arch/impl/foo/\n(never included externally)"]
+  T1 -->|includes internally| T2
+  T2 -->|selects at configure time| T3
 ```
 
-Tier 1 is the stable public interface consumed by other modules. Tier 2 declares
-`arch_*` functions and includes the Tier 3 header for the current target
-architecture. Tier 3 is arch-specific internals and is never included directly from
-outside the module.
+**Tier 1** defines a stable public interface that other modules may include.
+It is architecture-agnostic and internally includes the Tier 2 header.
+
+**Tier 2** is the architecture contract.
+It declares the `arch_*` functions that generic code calls, and includes the appropriate Tier 3 header for the current
+target architecture.
+
+**Tier 3** is the implementation detail.
+It contains the architecture-specific functions or macro definitions and is never included from outside the module.
 
 ## Dependency Graph
 
-Auto-generated diagrams are written to `docs/generated/` during each CMake
-configure run. See `docs/generated/deps-x86_64.md` and
-`docs/generated/deps-aarch64.md`.
+A Mermaid dependency diagram is generated automatically during each CMake configure
+run and written to `docs/src/generated/`. Contract edges are rendered with dashed
+arrows to distinguish type-sharing relationships from module dependencies.
+
+See:
+
+- [deps-x86_64.md](src/generated/deps-x86_64.md)
+- [deps-aarch64.md](src/generated/deps-aarch64.md)
