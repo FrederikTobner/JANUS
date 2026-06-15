@@ -12,6 +12,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 include(Registry)
 include(ToolLib)
 include(Tool)
@@ -46,4 +47,4 @@ endif()
 add_subdirectory(lib/clap)
 add_subdirectory(psf2c)
 
-janus_write_tools_diagram("${CMAKE_CURRENT_SOURCE_DIR}/../docs/src/generated/deps-tools.md")
+janus_write_tools_diagram("${CMAKE_CURRENT_SOURCE_DIR}/../docs/generated/deps-tools.md")

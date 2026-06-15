@@ -4,4 +4,4 @@ This directory contains shell scripts for building, testing, and running JANUS.
 
 ## Content
 
-* regression_check.lua - Regression check that currently builds an ISO for all combinations of compiler, boot protocol, and supported architecture
+* regression_check.lua - Regression check that builds the kernel and creates an ISO using the combination of all supported compilers, boot protocols and hardware architectures.

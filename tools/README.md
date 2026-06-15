@@ -8,16 +8,16 @@ own CMake project.
 ### psf2c
 
 Converts PSF (PC Screen Font) files to C headers for embedding fonts directly
-in the kernel framebuffer driver. See [psf2c/README.md](psf2c/README.md).
+in the kernel framebuffer driver.
+See [psf2c/README.md](psf2c/README.md).
 
 ## Libraries
 
 ### clap
 
 Declarative command-line argument parsing library for C tools.
-Provides flag, option, and positional argument parsing with auto-generated
-help output and `--version` support. Used by `psf2c` and any other JANUS
-tools that need CLI parsing. See [lib/clap/README.md](lib/clap/README.md).
+Provides flag, option, and positional argument parsing with auto-generated help output and `--version` support.
+See [lib/clap/README.md](lib/clap/README.md).
 
 ## Building
 

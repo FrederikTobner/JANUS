@@ -37,6 +37,8 @@ struct display_fb {
 
 static display_fb_t g_display_fb;
 
+static void write_pixel(display_fb_t const * fb, u32 x, u32 y, u32 rgb);
+
 // --------------------------------------------------------------------------
 // Constructor
 // --------------------------------------------------------------------------
@@ -53,29 +55,6 @@ display_fb_init(void * base, u64 width, u64 height, u64 pitch, u16 bpp, u8 r_shi
     g_display_fb.green_shift = g_shift;
     g_display_fb.blue_shift = b_shift;
     return &g_display_fb;
-}
-
-// --------------------------------------------------------------------------
-// Internal helper: write one pixel
-// --------------------------------------------------------------------------
-
-static __always_inline void write_pixel(display_fb_t const * fb, u32 x, u32 y, u32 rgb)
-{
-    if (UNLIKELY(fb->bpp != 32 && fb->bpp != 24)) {
-        return;
-    }
-    u64 offset = ((u64) y * fb->pitch) + ((u64) x * (fb->bpp / 8));
-    u32 pixel = (u32) (((rgb >> 16) & 0xFF) << fb->red_shift) | (u32) (((rgb >> 8) & 0xFF) << fb->green_shift) |
-                (u32) ((rgb & 0xFF) << fb->blue_shift);
-
-    if (fb->bpp == 32) {
-        *((u32 volatile *) (fb->base + offset)) = pixel;
-    } else {
-        // 24 bpp — three individual byte writes, little-endian order.
-        fb->base[offset] = (u8) (pixel & 0xFF);
-        fb->base[offset + 1] = (u8) ((pixel >> 8) & 0xFF);
-        fb->base[offset + 2] = (u8) ((pixel >> 16) & 0xFF);
-    }
 }
 
 // --------------------------------------------------------------------------
@@ -132,5 +111,26 @@ __hot void display_blit_glyph(
                 }
             }
         }
+    }
+}
+
+// Static function definitions
+
+static void write_pixel(display_fb_t const * fb, u32 x, u32 y, u32 rgb)
+{
+    if (UNLIKELY(fb->bpp != 32 && fb->bpp != 24)) {
+        return;
+    }
+    u64 offset = ((u64) y * fb->pitch) + ((u64) x * (fb->bpp / 8));
+    u32 pixel = (u32) (((rgb >> 16) & 0xFF) << fb->red_shift) | (u32) (((rgb >> 8) & 0xFF) << fb->green_shift) |
+                (u32) ((rgb & 0xFF) << fb->blue_shift);
+
+    if (fb->bpp == 32) {
+        *((u32 volatile *) (fb->base + offset)) = pixel;
+    } else {
+        // 24 bpp — three individual byte writes, little-endian order.
+        fb->base[offset] = (u8) (pixel & 0xFF);
+        fb->base[offset + 1] = (u8) ((pixel >> 8) & 0xFF);
+        fb->base[offset + 2] = (u8) ((pixel >> 16) & 0xFF);
     }
 }

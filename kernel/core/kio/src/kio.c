@@ -32,12 +32,7 @@
 static kio_putc_fn g_putc = NULL;
 
 /// fmt_to sink adapter: forwards each char to the registered callback
-static void kio_fmt_putc(char c, __unused void * ctx)
-{
-    if (g_putc != NULL) {
-        g_putc(c);
-    }
-}
+static void kio_fmt_putc(char c, __unused void * ctx);
 
 void kio_register_putc(kio_putc_fn fn)
 {
@@ -78,4 +73,13 @@ __cold __noreturn void kpanic_impl(char const * file, int line, char const * fmt
 
     kprintf("\n\nSystem halted.\n");
     asm_cpu_halt_forever();
+}
+
+// Static function definitions
+
+static void kio_fmt_putc(char c, __unused void * ctx)
+{
+    if (g_putc != NULL) {
+        g_putc(c);
+    }
 }
