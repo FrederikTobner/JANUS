@@ -54,16 +54,14 @@ Within every `.c` file, the sections appear in the following order:
 
 ### Type Suffixes
 
-All custom types carry the `_t` suffix. Structure tags match the typedef name
-without the suffix so that both the tag and the typedef can be used:
+All custom types carry the `_t` suffix. Structure tags match the typedef name without the suffix so that both the tag and the typedef can be used:
 
 ```c
 typedef struct linked_list linked_list_t;
 typedef struct ring_buffer ring_buffer_t;
 ```
 
-Address types distinguish physical from virtual to prevent the silent bugs that
-arise from mixing them:
+Address types distinguish physical from virtual to prevent the silent bugs that arise from mixing them:
 
 ```c
 typedef uint64_t phys_addr_t;  // physical address

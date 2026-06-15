@@ -25,11 +25,10 @@ kernel/contracts/ Contracts     — shared type definitions crossing subsystem b
 **`_start`** links `kmain` and all subsystem libraries into the final `kernel-<boot protocol>.elf` executable.
 It owns the architecture-specific entry point in assembly, the boot protocol header, and the linker script that defines the memory layout.
 
-**`kmain`** is the composition root, the sole module that may depend on subsystems.
+**`kmain`** is the composition root, the sole subsystem that may depend on other subsystems.
 All inter-subsystem data flow is mediated through `kmain`, which acts as an explicit wiring point rather than allowing subsystems to reach one another directly.
 
-**Subsystems** are strictly isolated from one another. `boot` cannot call into
-`drivers`, and `drivers` cannot call into `mm`.
+**Subsystems** are strictly isolated from one another. `boot` cannot call into `drivers`, and `drivers` cannot call into `mm`.
 When two subsystems need to exchange data, the information travels through `kmain` via an explicit parameter,
 typically defined by a shared type that is defined in the contract layer.
 
@@ -41,8 +40,7 @@ This keeps cross-cutting services reusable from any subsystem.
 No library may depend on another library; each one is self-contained.
 
 **The ASM layer** is the only layer permitted to contain raw instruction wrappers.
-All higher layers call into `janus_asm` rather than embedding inline assembly
-directly.
+All higher layers call into `janus_asm` rather than embedding inline assembly directly.
 
 **Contracts** Used for sharing types across a subsystem boundary.
 Every artifact in the contract layer explicitly states its consuming subsystems, which is enforced using cmake.
@@ -51,27 +49,24 @@ Every artifact in the contract layer explicitly states its consuming subsystems,
 
 ```
 kernel/
-├── include/          Global headers: janus/types.h, attributes.h, config.h
-├── contracts/        Cross-subsystem type contracts (allowlist-enforced)
-├── _start/           Entry layer — architecture and protocol subdirectories
-├── kmain/            Composition root — kernel_main(), init sequence
-├── lib/              Utility libraries: fmt, display, page_tables
-├── core/             Cross-cutting services: kio
-└── subsys/           Independent subsystems
+├── include/                Global headers: janus/types.h, attributes.h, config.h
+├── contracts/              Cross-subsystem type contracts (allowlist-enforced)
+├── _start/                 Entry layer — architecture and protocol subdirectories
+├── kmain/                  Composition root — kernel_main(), init sequence
+├── lib/                    Utility libraries: fmt, display, page_tables
+├── core/                   Cross-cutting services: kio
+└── subsys/                 Independent subsystems
     ├── boot/               Boot protocol parsing and context population
     ├── drivers/            Device drivers: serial, TTY
     └── mm/                 Memory management: PMM
 ```
 
-Architecture-specific code is co-located with the module that needs it rather than
-being aggregated in a centralised `arch/` tree. A subsystem's complete
-implementation — both the platform-agnostic logic and the per-architecture code —
-is navigable as a single unit.
+Architecture-specific code is co-located with the module that needs it rather than being aggregated in a centralised `arch/` tree.
+A subsystem's complete implementation in particular both the platform-agnostic logic and the per-architecture code, is therefor navigable as a single unit.
 
 ## Three-Tier Include Hierarchy
 
-Every module with architecture-specific code exposes its headers through three
-tiers, each with a distinct role:
+Every module with architecture-specific code exposes its headers through three tiers, each with a distinct role:
 
 ```mermaid
 graph LR
@@ -86,17 +81,14 @@ graph LR
 It is architecture-agnostic and internally includes the Tier 2 header.
 
 **Tier 2** is the architecture contract.
-It declares the `arch_*` functions that generic code calls, and includes the appropriate Tier 3 header for the current
-target architecture.
+It declares the `arch_*` functions that generic code calls, and includes the appropriate Tier 3 header for the current target architecture.
 
 **Tier 3** is the implementation detail.
 It contains the architecture-specific functions or macro definitions and is never included from outside the module.
 
 ## Dependency Graph
 
-A Mermaid dependency diagram is generated automatically during each CMake configure
-run and written to `docs/src/generated/`. Contract edges are rendered with dashed
-arrows to distinguish type-sharing relationships from module dependencies.
+A Mermaid dependency diagram is generated automatically during each CMake configure run and written to `docs/src/generated/`. Contract edges are rendered with dashed arrows to distinguish type-sharing relationships from module dependencies.
 
 See:
 

@@ -17,9 +17,9 @@ sudo pacman -S cmake ninja            # Arch Linux
 
 ### Compilers
 
-Both GCC and Clang are supported for x86_64. Cross-compiling for aarch64 requires
-the ARM64 GCC toolchain; Clang can cross-compile natively but still needs the GNU
-linker from the cross-binutils package.
+Both GCC and Clang are supported for x86_64.
+Cross-compiling for aarch64 requires the ARM64 GCC toolchain.
+Clang can cross-compile natively but still needs the GNU linker from the cross-binutils package.
 
 ```bash
 # x86_64
@@ -33,8 +33,7 @@ sudo pacman -S aarch64-linux-gnu-gcc
 
 ### Assembler
 
-NASM is required for x86_64 assembly. aarch64 uses GAS, which ships with the
-cross-compiler toolchain and requires no separate installation.
+NASM is required for x86_64 assembly. aarch64 uses GAS, which ships with the cross-compiler toolchain and requires no separate installation.
 
 ```bash
 sudo apt install nasm
@@ -43,9 +42,8 @@ sudo pacman -S nasm
 
 ### Debugger
 
-LLDB is the primary debugger for x86_64. GDB with multiarch support is used for
-aarch64. The repository includes a `.lldbinit` that automates connection to QEMU's
-debug server.
+LLDB is the primary debugger for x86_64. GDB with multiarch support is used for aarch64.
+The repository includes a `.lldbinit` that automates connection to QEMU's debug server.
 
 ```bash
 sudo apt install lldb gdb-multiarch
@@ -61,8 +59,8 @@ sudo pacman -S qemu-system-x86 qemu-system-aarch64
 
 ### ISO and Bootloader Tools
 
-xorriso and mtools are needed to produce bootable ISO images for Limine. Multiboot2
-(x86_64 only) additionally requires GRUB.
+xorriso and mtools are needed to produce bootable ISO images for Limine.
+Multiboot2 (x86_64 only) additionally requires GRUB.
 
 ```bash
 sudo apt install xorriso mtools grub-pc-bin
@@ -85,16 +83,14 @@ sudo pacman -S clang   # includes clangd on Arch
 
 ## Building
 
-The recommended workflow uses CMake presets, which bundle the generator, toolchain
-file, and build directory into a single named configuration:
+The recommended workflow uses CMake presets, which bundle the generator, toolchain file, and build directory into a single named configuration:
 
 ```bash
 cmake --preset x86_64-gcc
 cmake --build --preset x86_64-gcc
 ```
 
-Each preset writes to its own build directory (`build-x86_64-gcc/`, etc.), so all
-four configurations can coexist on disk simultaneously.
+Each preset writes to its own build directory (`build-x86_64-gcc/`, etc.), so all four configurations can coexist on disk simultaneously.
 
 To build without presets, or to use a toolchain not covered by the presets:
 
@@ -110,14 +106,14 @@ cmake --build build
 
 ## Build Targets
 
-| Target | Description |
-|---|---|
-| *(default)* | Build `kernel.elf` |
-| `iso` | Create all ISOs for this platform |
-| `iso-limine` | Limine ISO |
-| `iso-multiboot2` | Multiboot2 ISO via GRUB (x86_64 only) |
-| `run-limine` | Boot Limine ISO in QEMU |
-| `run-multiboot2` | Boot Multiboot2 ISO in QEMU (x86_64 only) |
-| `run-uefi` | Boot in UEFI mode (requires OVMF) |
-| `debug-limine` | Limine ISO with GDB server on `:1234` |
+| Target             | Description                                  |
+|--------------------|----------------------------------------------|
+| *(default)*        | Build `kernel.elf`                           |
+| `iso`              | Create all ISOs for this platform            |
+| `iso-limine`       | Limine ISO                                   |
+| `iso-multiboot2`   | Multiboot2 ISO via GRUB (x86_64 only)        |
+| `run-limine`       | Boot Limine ISO in QEMU                      |
+| `run-multiboot2`   | Boot Multiboot2 ISO in QEMU (x86_64 only)    |
+| `run-uefi`         | Boot in UEFI mode (requires OVMF)            |
+| `debug-limine`     | Limine ISO with GDB server on `:1234`        |
 | `debug-multiboot2` | Multiboot2 ISO with GDB server (x86_64 only) |

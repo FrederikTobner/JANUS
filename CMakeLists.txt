@@ -53,7 +53,6 @@ message(STATUS "========================================")
 message(STATUS "Available targets:")
 # Compute the widest command column so every " - " separator aligns.
 # Column width = length of the longest "ninja <cmd>" string.
-# Bare "ninja" (no sub-command) counts as 5 chars; all others as 6 + len(cmd).
 set(_max_col 5) # bare "ninja"
 foreach(_cmd IN ITEMS "iso" "run-uefi" "run-elf")
     string(LENGTH "${_cmd}" _len)

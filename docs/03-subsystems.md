@@ -20,16 +20,6 @@ See [mm/README.md](../kernel/subsys/mm/README.md).
 ## kmain
 
 `kmain` is the composition root of the kernel.
-It is the only module permitted to depend on subsystems, and it is responsible for sequencing the initialisation of
-everything above the boot entry point.
-The init sequence proceeds as follows:
-
-```mermaid
-graph LR
-  A["_start\nassembly entry"] --> B["boot_init()\npopulate boot_context_t"]
-  B --> C["console_init()\ninit serial + TTY\nregister kio putc"]
-  C --> D["mm_pmm_init()\ninitialise frame allocator"]
-  D --> E["halt cpu"]
-```
+It is the only module permitted to depend on subsystems, and it is responsible for sequencing the initialisation of everything above the boot entry point.
 
 More information can be found in its [readme](../kernel/kmain/README.md)
