@@ -9,16 +9,16 @@ layer or on anything above it. CMake enforces this constraint through its target
 dependency graph; a violation causes a configure-time fatal error before any
 compiler is invoked.
 
-```
-kernel/_start/    Entry         — assembly entry point, linker script, creates kernel.elf
-kernel/kmain/     Composition   — the only module permitted to depend on subsystems
-kernel/subsys/    Subsystems    — mutually isolated
-kernel/core/      Core services — may use libraries, must not use subsystems
-kernel/lib/       Libraries     — no inter-library dependencies
-kernel/asm/       ASM layer     — janus_asm INTERFACE; sole owner of raw assembly instruction wrappers
-kernel/include/   Global        — types.h, attributes.h, config.h
-kernel/contracts/ Contracts     — shared type definitions crossing subsystem boundaries
-```
+|Location           | Name          | Description                                                           |
+|-------------------|---------------|-----------------------------------------------------------------------|
+| kernel/_start/    | Entry         | assembly entry point, linker script, creates kernel.elf               |
+| kernel/kmain/     | Composition   | the only module permitted to depend on subsystems                     |
+| kernel/subsys/    | Subsystems    | mutually isolated                                                     |
+| kernel/core/      | Core services | may use libraries, must not use subsystems                            |
+| kernel/lib/       | Libraries     | no inter-library dependencies                                         |
+| kernel/asm/       | ASM layer     | janus_asm INTERFACE; sole owner of raw assembly instruction wrappers  |
+| kernel/include/   | Global        | types.h, attributes.h, config.h                                       |
+| kernel/contracts/ | Contracts     | shared type definitions crossing subsystem boundaries                 |
 
 ### Key Invariants
 

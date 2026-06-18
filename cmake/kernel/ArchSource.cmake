@@ -39,19 +39,6 @@ function(janus_add_arch_subsys NAME)
         ${ARGN}
     )
 
-    set(ARCH_BASE "${CMAKE_CURRENT_SOURCE_DIR}/..")
-
-    # Export arch sources to parent janus_add_subsys() via global property
-    set_property(GLOBAL PROPERTY "JANUS_ARCH_SOURCES_${NAME}" "${ABS_SOURCES}")
-    
-    # Export include directories for janus_add_subsys() to apply
-    set_property(GLOBAL PROPERTY "JANUS_ARCH_INCLUDES_${NAME}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include"          # <arch/impl/drivers/*.h>
-    )
-    set_property(GLOBAL PROPERTY "JANUS_ARCH_PRIVATE_INCLUDES_${NAME}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/internal"         # <arch/internal/drivers/*.h>
-    )
-
     set(ARCH_LIB_NAME "${NAME}_arch")
     add_library(${ARCH_LIB_NAME} STATIC ${ARG_SOURCES})
     target_include_directories(${ARCH_LIB_NAME} 

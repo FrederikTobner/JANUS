@@ -21,13 +21,13 @@ mapping automatically when LLDB is launched from the project directory.
 
 ## Execution Control
 
-| Command | Description |
-|---|---|
-| `c` | Continue execution |
-| `n` | Step over (source line) |
-| `s` | Step into (source line) |
-| `si` | Step one machine instruction |
-| `ni` | Step over one machine instruction |
+| Command  | Description                            |
+|----------|----------------------------------------|
+| `c`      | Continue execution                     |
+| `n`      | Step over (source line)                |
+| `s`      | Step into (source line)                |
+| `si`     | Step one machine instruction           |
+| `ni`     | Step over one machine instruction      |
 | `finish` | Run until the current function returns |
 
 ## Breakpoints

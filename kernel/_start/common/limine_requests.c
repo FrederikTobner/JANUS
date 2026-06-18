@@ -27,19 +27,13 @@
 
 #include <janus/attributes.h>
 
-// ========================== External Entry Point ==========================
-
 // Assembly entry point that sets up arguments and calls kernel_main
 extern void _start_limine(void);
-
-// ========================== Section Markers ==========================
 
 __used __section(".limine_requests_start") static volatile u64 limine_requests_start_marker[4] =
     LIMINE_REQUESTS_START_MARKER;
 
 __used __section(".limine_requests_end") static volatile u64 limine_requests_end_marker[4] = LIMINE_REQUESTS_END_MARKER;
-
-// ========================== Limine Requests ==========================
 
 // Base revision - tells Limine which protocol revision we support.
 // Revision 3 is for Limine v8+.

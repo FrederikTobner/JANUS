@@ -7,7 +7,6 @@ janus_add_subsys(drivers
         ${DRIVER_SOURCES}
     DEPENDENCIES
         display
-        page_tables
 )
 
 # Note: arch/ is processed by janus_add_subsys via add_subdirectory(arch)

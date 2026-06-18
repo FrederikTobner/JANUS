@@ -20,10 +20,6 @@
 #include <display/fb.h>
 #include <janus/attributes.h>
 
-// --------------------------------------------------------------------------
-// Struct definition (private — not exposed in fb.h)
-// --------------------------------------------------------------------------
-
 struct display_fb {
     u8 volatile * base; ///< Framebuffer base address
     u64 pitch;          ///< Bytes per scanline
@@ -39,10 +35,6 @@ static display_fb_t g_display_fb;
 
 static void write_pixel(display_fb_t const * fb, u32 x, u32 y, u32 rgb);
 
-// --------------------------------------------------------------------------
-// Constructor
-// --------------------------------------------------------------------------
-
 __cold display_fb_t *
 display_fb_init(void * base, u64 width, u64 height, u64 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift)
 {
@@ -56,10 +48,6 @@ display_fb_init(void * base, u64 width, u64 height, u64 pitch, u16 bpp, u8 r_shi
     g_display_fb.blue_shift = b_shift;
     return &g_display_fb;
 }
-
-// --------------------------------------------------------------------------
-// Public API
-// --------------------------------------------------------------------------
 
 __hot void display_put_pixel(display_fb_t const * fb, u32 x, u32 y, u32 rgb)
 {
@@ -113,8 +101,6 @@ __hot void display_blit_glyph(
         }
     }
 }
-
-// Static function definitions
 
 static void write_pixel(display_fb_t const * fb, u32 x, u32 y, u32 rgb)
 {

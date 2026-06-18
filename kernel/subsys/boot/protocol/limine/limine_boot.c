@@ -23,6 +23,7 @@
 #include "limine_protocol.h"
 
 #include <boot/context.h>
+#include <janus/errno.h>
 
 // Extern request symbols (defined in limine_requests.c)
 
@@ -34,8 +35,9 @@ extern volatile struct limine_memmap_request limine_memmap_request;
 /// Translate Limine memmap entry type to canonical mem_region_type_t.
 static mem_region_type_t limine_translate_memmap_type(u64 limine_type);
 
-/// Kernel image physical end — provided by the linker script
-extern char kernel_phys_end[];
+extern char kernel_phys_start[];
+
+extern char kernel_size[];
 
 /// @brief Query address-translation parameters directly from Limine request structs.
 ///
@@ -73,11 +75,12 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->memmap.count = 0;
     display_info_t const none_display = {.mode = DISPLAY_MODE_NONE};
     boot_context->display = none_display;
+    boot_context->kernel_phys_end = (phys_addr_t) kernel_phys_start;
 
     // HHDM offset is required for address translation
     struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;
     if (UNLIKELY(hhdm == NULL)) {
-        return -1;
+        return JANUS_ENODEV; // HHDM is mandatory - bootloader did not provide it
     }
     boot_context->hhdm_offset = hhdm->offset;
 
@@ -107,7 +110,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
     }
 
     // Physical end of the kernel image (linker-provided symbol)
-    boot_context->kernel_phys_end = (phys_addr_t) kernel_phys_end;
+    boot_context->kernel_phys_end = (phys_addr_t) (boot_context->kernel_phys_base + (uintptr_t) kernel_size);
 
     // Physical memory map
     struct limine_memmap_response const * memmap_response = limine_memmap_request.response;
@@ -123,7 +126,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
         boot_context->memmap.count = (u32) n;
     }
 
-    return 0;
+    return JANUS_OK;
 }
 
 // Static function definitions

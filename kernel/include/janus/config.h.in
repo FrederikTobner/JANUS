@@ -28,30 +28,46 @@
 /*
  * Project Information
  */
-#define JANUS_PROJECT_NAME       "@PROJECT_NAME@"
-#define JANUS_VERSION_MAJOR      @PROJECT_VERSION_MAJOR@
-#define JANUS_VERSION_MINOR      @PROJECT_VERSION_MINOR@
-#define JANUS_VERSION_PATCH      @PROJECT_VERSION_PATCH@
-#define JANUS_VERSION_STRING     "@PROJECT_VERSION@"
+#define JANUS_PROJECT_NAME                        "@PROJECT_NAME@"
+#define JANUS_VERSION_MAJOR                       @PROJECT_VERSION_MAJOR @
+#define JANUS_VERSION_MINOR                       @PROJECT_VERSION_MINOR @
+#define JANUS_VERSION_PATCH                       @PROJECT_VERSION_PATCH @
+#define JANUS_VERSION_STRING                      "@PROJECT_VERSION@"
 
 /*
  * Build Information
  */
-#define JANUS_BUILD_TYPE         "@CMAKE_BUILD_TYPE@"
-#define JANUS_C_COMPILER         "@CMAKE_C_COMPILER_ID@"
-#define JANUS_C_COMPILER_VERSION "@CMAKE_C_COMPILER_VERSION@"
+#define JANUS_BUILD_TYPE                          "@CMAKE_BUILD_TYPE@"
+#define JANUS_C_COMPILER                          "@CMAKE_C_COMPILER_ID@"
+#define JANUS_C_COMPILER_VERSION                  "@CMAKE_C_COMPILER_VERSION@"
+
+/*
+ * Version Macros
+ */
+#define JANUS_VERSION_ENCODE(major, minor, patch) (((major) * 10000) + ((minor) * 100) + (patch))
+
+#define JANUS_VERSION_CODE JANUS_VERSION_ENCODE(JANUS_VERSION_MAJOR, JANUS_VERSION_MINOR, JANUS_VERSION_PATCH)
+
+/*
+ * Version String Builder
+ */
+#define JANUS_STRINGIFY(x) #x
+#define JANUS_TOSTRING(x)  JANUS_STRINGIFY(x)
+
+#define JANUS_FULL_VERSION_STRING \
+    JANUS_PROJECT_NAME " " JANUS_VERSION_STRING " (" JANUS_BUILD_TYPE " build, " JANUS_COMPILER_NAME ")"
 
 /*
  * Build Timestamp
  */
-#define JANUS_BUILD_DATE         "@JANUS_BUILD_DATE@"
-#define JANUS_BUILD_TIME         "@JANUS_BUILD_TIME@"
+#define JANUS_BUILD_DATE       "@JANUS_BUILD_DATE@"
+#define JANUS_BUILD_TIME       "@JANUS_BUILD_TIME@"
 
 /*
  * Memory Configuration
  */
-#define JANUS_PAGE_SIZE          4096
-#define JANUS_KERNEL_VIRT_BASE   0xFFFFFFFF80000000UL
+#define JANUS_PAGE_SIZE        4096
+#define JANUS_KERNEL_VIRT_BASE 0xFFFFFFFF80000000UL
 
 /*
  * Compiler Detection
@@ -75,21 +91,5 @@
 #else
 #define JANUS_DEBUG_BUILD 0
 #endif
-
-/*
- * Version Macros
- */
-#define JANUS_VERSION_ENCODE(major, minor, patch) (((major) * 10000) + ((minor) * 100) + (patch))
-
-#define JANUS_VERSION_CODE                        JANUS_VERSION_ENCODE(JANUS_VERSION_MAJOR, JANUS_VERSION_MINOR, JANUS_VERSION_PATCH)
-
-/*
- * Version String Builder
- */
-#define JANUS_STRINGIFY(x)                        #x
-#define JANUS_TOSTRING(x)                         JANUS_STRINGIFY(x)
-
-#define JANUS_FULL_VERSION_STRING \
-    JANUS_PROJECT_NAME " " JANUS_VERSION_STRING " (" JANUS_BUILD_TYPE " build, " JANUS_COMPILER_NAME ")"
 
 #endif /* JANUS_CONFIG_H */

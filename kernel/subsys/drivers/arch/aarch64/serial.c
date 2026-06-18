@@ -57,6 +57,9 @@
 // Virtual base address (computed at init time via MMIO mapping)
 static u64 g_pl011_base = 0;
 
+/// @brief Get virtual address for a PL011 register
+/// @param offset Register offset from base
+/// @return Virtual address of the register
 static inline u64 pl011_reg(u32 offset);
 
 __cold error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
@@ -121,7 +124,6 @@ bool arch_serial_rx_ready(void)
     return (mmio_read32(pl011_reg(PL011_REG_FR)) & PL011_FR_RXFE) == 0;
 }
 
-/// @brief Get virtual address for a PL011 register
 static inline u64 pl011_reg(u32 offset)
 {
     return g_pl011_base + offset;

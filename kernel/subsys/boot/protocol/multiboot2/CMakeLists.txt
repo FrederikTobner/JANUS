@@ -13,11 +13,5 @@ target_include_directories(boot_multiboot2
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_compile_options(boot_multiboot2 PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(boot_multiboot2 PRIVATE ${JANUS_COMPILE_OPTIONS_DEBUG})
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    target_compile_options(boot_multiboot2 PRIVATE ${JANUS_COMPILE_OPTIONS_RELEASE})
-elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
-    target_compile_options(boot_multiboot2 PRIVATE ${JANUS_COMPILE_OPTIONS_MINSIZEREL})
-endif()
+janus_apply_compile_flags(boot_multiboot2)
+
