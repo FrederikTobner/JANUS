@@ -76,8 +76,8 @@ __cold error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, v
     virt_addr_t mapped = 0;
     error_t map_err = mmu_map_mmio(PL011_PHYS_BASE, 0x1000, &mapped);
     if (map_err != JANUS_OK) {
-        // Failed to map UART - fall back to framebuffer-only output
-        return JANUS_ENODEV;
+        kpanic("arch_serial_init: failed to map PL011 MMIO region: %d", map_err);
+        return map_err;
     }
     g_pl011_base = mapped;
 

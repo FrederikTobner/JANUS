@@ -3,17 +3,15 @@
 ##############################
 .[Cc][Aa][Cc][Hh][Ee]/
 .[Cc][Ll][Aa][Nn][Gg][Dd]/
-# Track .clangd config, ignore generated compile_commands.json
 compile_commands.json
 
 ##############################
 ## cmake                    ##
 ##############################
-[Bb][Uu][Ii][Ll][Dd]/
-build/
-build-*/
+[Bb][Uu][Ii][Ll][Dd]*/
 cmake-build-*/
 CMakeFiles/
+.[Dd][Ee][Pp][Ss]/
 CMakeCache.txt
 cmake_install.cmake
 Makefile
