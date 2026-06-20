@@ -1,5 +1,6 @@
 # clang-tidy configuration for JANUS kernel
-# Targets freestanding C code — no libc, no C++ assumptions.
+
+## Targets freestanding C code — no libc, no C++ assumptions
 
 Checks: >
   bugprone-*,
@@ -13,20 +14,23 @@ Checks: >
   -bugprone-reserved-identifier,
   -clang-analyzer-security.insecureAPI.*,
 
-# Treat all enabled check warnings as errors.
+## Treat all enabled check warnings as errors
+
 WarningsAsErrors: "*"
 
-# Use the compile_commands.json from the x86_64-clang build.
-# (Passed via -p on the command line in CI.)
+## Use the compile_commands.json from the x86_64-clang build
+
+### (Passed via -p on the command line in CI.)
 
 HeaderFilterRegex: "^kernel/"
 
 CheckOptions:
-  - key: readability-function-cognitive-complexity.Threshold
+
+- key: readability-function-cognitive-complexity.Threshold
     value: "25"
-  - key: readability-function-size.LineThreshold
+- key: readability-function-size.LineThreshold
     value: "80"
-  - key: readability-function-size.StatementThreshold
+- key: readability-function-size.StatementThreshold
     value: "50"
-  - key: readability-braces-around-statements.ShortStatementLines
+- key: readability-braces-around-statements.ShortStatementLines
     value: "0"

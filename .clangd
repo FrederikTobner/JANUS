@@ -1,6 +1,6 @@
 # clangd configuration for JANUS kernel development
 
-# This file tells clangd (LSP) how to analyze the JANUS kernel source code properly
+## This file tells clangd (LSP) how to analyze the JANUS kernel source code properly
 
 CompileFlags:
   Add:

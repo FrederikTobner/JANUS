@@ -1,4 +1,4 @@
-# core — Kernel Core Services
+# Core
 
 The core layer contains shared kernel services that are used by multiple subsystems.
 
@@ -12,8 +12,4 @@ These rules are enforced by the CMake registry validation.
 
 ## Current Modules
 
-- `kio/` — formatted output and panic service (`kprintf`, `vkprintf`, `kpanic`)
-
-## Purpose
-
-Core exists to avoid duplicating cross-cutting logic in individual subsystems while keeping subsystem boundaries strict.
+- [kio](./kio/README.md) provides formatted output and panic service (`kprintf`, `vkprintf`, `kpanic`)

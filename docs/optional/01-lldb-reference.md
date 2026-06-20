@@ -2,8 +2,7 @@
 
 ## Connecting to QEMU
 
-Launch QEMU with the GDB server enabled using the `debug-limine` build target,
-then connect LLDB in a second terminal:
+Launch QEMU with the GDB server enabled using the `debug-limine` build target, then connect LLDB in a second terminal:
 
 ```bash
 # Terminal 1 — QEMU waits, frozen at the first instruction
@@ -16,8 +15,7 @@ lldb
 (lldb) c
 ```
 
-The `.lldbinit` at the project root configures the remote protocol and source path
-mapping automatically when LLDB is launched from the project directory.
+The `.lldbinit` at the project root configures the remote protocol and source path mapping automatically when LLDB is launched from the project directory.
 
 ## Execution Control
 
@@ -83,11 +81,6 @@ watchpoint list
 
 ## Notes
 
-- There is no libc and no dynamic linker. Symbol lookup works against the kernel
-  binary only. The entry point is `_start`; the first C function is `kernel_main`.
-- Single-stepping through UART or VGA I/O code sends real writes to the emulated
-  hardware. This can produce visible side effects such as partial characters on
-  the virtual screen.
-- Watchpoints on MMIO-mapped addresses may not fire because the hardware emulation
-  in QEMU intercepts the access before the CPU watchpoint mechanism sees it.
-  Use the QEMU monitor (`info mem`, `xp`) to inspect hardware state instead.
+- There is no libc and no dynamic linker. Symbol lookup works against the kernel   binary only. The entry point is `_start`; the first C function is `kernel_main`.
+- Single-stepping through UART or VGA I/O code sends real writes to the emulated hardware. This can produce visible side effects such as partial characters on the virtual screen.
+- Watchpoints on MMIO-mapped addresses may not fire because the hardware emulation in QEMU intercepts the access before the CPU watchpoint mechanism sees it. Use the QEMU monitor (`info mem`, `xp`) to inspect hardware state instead.
