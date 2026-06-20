@@ -26,6 +26,7 @@
 #include <arch/internal/drivers/mmio.h>
 #include <janus/errno.h>
 #include <janus/types.h>
+#include <kio/kio.h>
 #include <page_tables/mmu.h>
 
 // PL011 UART physical base address for QEMU virt machine

@@ -17,6 +17,10 @@
 #ifndef JANUS_VA_ARG_H
 #define JANUS_VA_ARG_H
 
+#ifndef JANUS_KERNEL
+#error "This header is for JANUS kernel code only. Do not include it from user-space code."
+#endif
+
 typedef __builtin_va_list va_list;
 
 #define va_start(ap, param) __builtin_va_start(ap, param)

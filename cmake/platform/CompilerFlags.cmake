@@ -12,6 +12,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/arch/${JANUS_TARGET_ARCH}/platform/CompilerFla
 # Common compiler flags for all kernel code
 set(JANUS_COMPILE_OPTIONS_COMMON
     ${JANUS_ARCH_FLAGS}
+    -DJANUS_KERNEL=1 # Indicates that we are in kernel space
     -nostdlib
     -ffreestanding
     -fno-builtin

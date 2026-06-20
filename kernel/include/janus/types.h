@@ -17,6 +17,9 @@
 #ifndef JANUS_TYPES_H
 #define JANUS_TYPES_H
 
+#ifndef JANUS_KERNEL
+#error "This header is for JANUS kernel code only. Do not include it from user-space code."
+#endif
 /// @file types.h
 /// @brief Global kernel type definitions
 ///

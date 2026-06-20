@@ -17,6 +17,10 @@
 #ifndef JANUS_ATTRIBUTES_H
 #define JANUS_ATTRIBUTES_H
 
+#ifndef JANUS_KERNEL
+#error "This header is for JANUS kernel code only. Do not include it from user-space code."
+#endif
+
 /// Compiler-specific attributes and macros for JANUS
 ///
 /// Provides portable compiler attributes for Clang and GCC.

@@ -25,6 +25,9 @@
 #ifndef JANUS_CONFIG_H
 #define JANUS_CONFIG_H
 
+#ifndef JANUS_KERNEL
+#error "This header is for JANUS kernel code only. Do not include it from user-space code."
+#endif
 /*
  * Project Information
  */
