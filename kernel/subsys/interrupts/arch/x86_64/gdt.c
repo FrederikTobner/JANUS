@@ -52,7 +52,7 @@ __cold void gdt_install(void)
     g_tss.ist[0] = (u64) (g_df_stack + DF_STACK_SIZE);
     g_tss.iomap_base = (u16) sizeof(tss_t);
 
-    g_gdt[0] = (gdt_entry_t) {0};
+    // g_gdt[0] is the null descriptor; it stays zero because g_gdt is static.
     gdt_set_segment(&g_gdt[1], GDT_ACCESS_CODE, GDT_FLAGS_LONG_MODE);
     gdt_set_segment(&g_gdt[2], GDT_ACCESS_DATA, 0);
     gdt_set_tss(&g_gdt[3], &g_gdt[4], (u64) &g_tss, (u32) (sizeof(tss_t) - 1));
