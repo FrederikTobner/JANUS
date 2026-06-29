@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.20)
 project(JanusTools VERSION 0.1.0 LANGUAGES C)
 
-message(STATUS "========================================")
+message(STATUS "================================================================================")
 message(STATUS "Janus Tools Build Configuration")
-message(STATUS "========================================")
+message(STATUS "================================================================================")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
-message(STATUS "========================================")
+message(STATUS "================================================================================")
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)

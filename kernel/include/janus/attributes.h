@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS                                              *
+ * This file is part of JANUS                                                *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,21 +14,16 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef JANUS_COMPILER_H
-#define JANUS_COMPILER_H
+#ifndef JANUS_ATTRIBUTES_H
+#define JANUS_ATTRIBUTES_H
+
+#ifndef JANUS_KERNEL
+#error "This header is for JANUS kernel code only. Do not include it from user-space code."
+#endif
 
 /// Compiler-specific attributes and macros for JANUS
 ///
 /// Provides portable compiler attributes for Clang and GCC.
-
-// Compiler detection
-#ifdef __clang__
-#define COMPILER_CLANG 1
-#elif defined(__GNUC__)
-#define COMPILER_GCC 1
-#else
-#error "Unsupported compiler - JANUS requires Clang or GCC - Screw you MSVC!"
-#endif
 
 // Function and type attributes
 
@@ -128,4 +123,4 @@
         (type *) ((char *) __mptr - __offsetof(type, member));   \
     })
 
-#endif // JANUS_COMPILER_H
+#endif // JANUS_ATTRIBUTES_H

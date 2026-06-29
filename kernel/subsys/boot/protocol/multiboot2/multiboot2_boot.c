@@ -27,6 +27,7 @@
 #include "multiboot2_protocol.h"
 
 #include <boot/context.h>
+#include <janus/errno.h>
 
 /// Kernel image physical end — provided by the multiboot2 linker script
 /// (symbol is named kernel_end in the multiboot2 linker, not kernel_phys_end)
@@ -35,7 +36,7 @@ extern char kernel_end[];
 /// Protocol-private stash — written by assembly via multiboot2_stash_bootinfo,
 /// read by boot_init. Correctness relies on write-before-read ordering,
 /// not on .bss being zeroed.
-static u64 g_mb2_magic;
+static u32 g_mb2_magic;
 static void const * g_mb2_info;
 
 static __cold void parse_framebuffer_tag(boot_context_t * boot_context, struct multiboot_tag_framebuffer const * fb);
@@ -49,7 +50,7 @@ static __cold void parse_mmap_tag(boot_context_t * boot_context, struct multiboo
 ///
 /// @param magic Value from EAX at boot (should be MULTIBOOT2_BOOTLOADER_MAGIC)
 /// @param info  Pointer to the Multiboot2 information structure
-void multiboot2_stash_bootinfo(u64 magic, void const * info)
+void multiboot2_stash_bootinfo(u32 magic, void const * info)
 {
     g_mb2_magic = magic;
     g_mb2_info = info;
@@ -79,11 +80,11 @@ __cold void boot_early_params(u64 * hhdm_offset, phys_addr_t * kernel_phys_base,
 /// @return 0 on success, non-zero on failure
 __cold error_t boot_init(boot_context_t * boot_context)
 {
-    if (UNLIKELY((u32) g_mb2_magic != MULTIBOOT2_BOOTLOADER_MAGIC)) {
-        return -1;
+    if (UNLIKELY(g_mb2_magic != MULTIBOOT2_BOOTLOADER_MAGIC)) {
+        return JANUS_ENODEV; // Magic number mismatch - not booted by a Multiboot2-compliant bootloader
     }
     if (UNLIKELY(g_mb2_info == NULL)) {
-        return -1;
+        return JANUS_EINVAL; // Info pointer is NULL - invalid Multiboot2 information structure
     }
 
     boot_context->protocol = BOOT_PROTOCOL_MULTIBOOT2;
@@ -105,7 +106,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
         tag = multiboot_next_tag(tag);
     }
 
-    return 0;
+    return JANUS_OK;
 }
 
 // Static function definitions

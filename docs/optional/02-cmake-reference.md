@@ -2,8 +2,8 @@
 
 ## Presets
 
-The available presets are defined in `CMakePresets.json`. Each preset bundles the
-generator, toolchain, build directory, and any preset-specific CMake variables.
+The available presets are defined in `CMakePresets.json`.
+Each preset bundles the generator, toolchain, build directory, and any preset-specific CMake variables.
 
 ```bash
 # List all available presets
@@ -72,8 +72,8 @@ cmake --preset x86_64-gcc --dev
 
 ## compile_commands.json
 
-The compile database is written to the build directory during configure and copied
-to the project root automatically. If clangd or clang-tidy reports stale results:
+The compile database is written to the build directory during configure and copied to the project root automatically.
+If clangd or clang-tidy reports stale results:
 
 ```bash
 # Regenerate by reconfiguring

@@ -43,14 +43,6 @@ void arch_tty_get_size(u16 * width, u16 * height);
 /// @param bg Background color (0-15).
 void arch_tty_write_cell(u16 x, u16 y, char c, u8 fg, u8 bg);
 
-/// @brief Read character and color from position.
-/// @param x Column position.
-/// @param y Row position.
-/// @param c Pointer to store character (may be NULL).
-/// @param fg Pointer to store foreground color (may be NULL).
-/// @param bg Pointer to store background color (may be NULL).
-void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * fg, u8 * bg);
-
 /// @brief Set hardware cursor position.
 /// @param x Column position.
 /// @param y Row position.

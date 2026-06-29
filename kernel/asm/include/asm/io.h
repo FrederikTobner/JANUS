@@ -20,10 +20,10 @@
 #ifndef ASM_IO_H
 #define ASM_IO_H
 
-#include <arch/asm/io.h>
 #include <asm/capabilities.h>
 
 #if ASM_CAP_PORT_IO
+#include <arch/asm/io.h>
 static __always_inline void asm_io_outb(u16 port, u8 value)
 {
     arch_asm_io_outb(port, value);
@@ -33,6 +33,6 @@ static __always_inline u8 asm_io_inb(u16 port)
 {
     return arch_asm_io_inb(port);
 }
-#endif
+#endif // ASM_CAP_PORT_IO
 
-#endif /* ASM_IO_H */
+#endif // ASM_IO_H

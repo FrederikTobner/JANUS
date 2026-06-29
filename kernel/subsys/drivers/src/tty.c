@@ -26,22 +26,33 @@
 #include <janus/errno.h>
 
 typedef struct {
+    char ch;
+    u8 fg;
+    u8 bg;
+} tty_cell_t;
+
+#define TTY_MAX_WIDTH  256
+#define TTY_MAX_HEIGHT 128
+
+typedef struct {
     u16 cursor_x;
     u16 cursor_y;
     u16 screen_width;
     u16 screen_height;
     u8 current_fg;
     u8 current_bg;
+    tty_cell_t buffer[TTY_MAX_HEIGHT][TTY_MAX_WIDTH];
 } tty_state_t;
 
 static tty_state_t g_tty;
 
 static void tty_scroll(void);
+static void tty_set_cell(u16 x, u16 y, char ch, u8 fg, u8 bg);
 
 __cold error_t drivers_tty_init(display_info_t const * config)
 {
     error_t err = arch_tty_init(config);
-    if (err != 0) {
+    if (err != JANUS_OK) {
         return err;
     }
 
@@ -69,7 +80,8 @@ __hot void drivers_tty_putc(char c)
             g_tty.cursor_x--;
         }
     } else {
-        arch_tty_write_cell(g_tty.cursor_x, g_tty.cursor_y, c, g_tty.current_fg, g_tty.current_bg);
+        tty_cell_t cell = {.ch = c, .fg = g_tty.current_fg, .bg = g_tty.current_bg};
+        tty_set_cell(g_tty.cursor_x, g_tty.cursor_y, cell.ch, cell.fg, cell.bg);
         g_tty.cursor_x++;
     }
 
@@ -105,7 +117,7 @@ void drivers_tty_clear(void)
 {
     for (u16 y = 0; y < g_tty.screen_height; y++) {
         for (u16 x = 0; x < g_tty.screen_width; x++) {
-            arch_tty_write_cell(x, y, ' ', g_tty.current_fg, g_tty.current_bg);
+            tty_set_cell(x, y, ' ', g_tty.current_fg, g_tty.current_bg);
         }
     }
     g_tty.cursor_x = 0;
@@ -143,22 +155,25 @@ void drivers_tty_get_size(u16 * width, u16 * height)
     }
 }
 
-// Static function definitions
-
 static void tty_scroll(void)
 {
     // Move all lines up by one
     for (u16 y = 0; y < g_tty.screen_height - 1; y++) {
         for (u16 x = 0; x < g_tty.screen_width; x++) {
-            char ch;
-            u8 fg;
-            u8 bg;
-            arch_tty_read_cell(x, y + 1, &ch, &fg, &bg);
-            arch_tty_write_cell(x, y, ch, fg, bg);
+            tty_cell_t c = g_tty.buffer[y + 1][x];
+            tty_set_cell(x, y, c.ch, c.fg, c.bg); // Clear old cell
         }
     }
     // Clear last line
+    u16 const last_line = g_tty.screen_height - 1;
     for (u16 x = 0; x < g_tty.screen_width; x++) {
-        arch_tty_write_cell(x, g_tty.screen_height - 1, ' ', g_tty.current_fg, g_tty.current_bg);
+        tty_set_cell(x, last_line, ' ', g_tty.current_fg, g_tty.current_bg);
+    }
+}
+
+static void tty_set_cell(u16 x, u16 y, char ch, u8 fg, u8 bg)
+{
+    if (x < g_tty.screen_width && y < g_tty.screen_height) {
+        arch_tty_write_cell(x, y, ch, fg, bg);
     }
 }

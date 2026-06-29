@@ -1,7 +1,6 @@
-# drivers — Device Drivers Subsystem
+# Drivers
 
-Hardware-facing drivers that provide small, C-friendly APIs to the rest of the
-kernel.
+Hardware-facing device drivers subsystem.
 
 ## Current Drivers
 
@@ -9,7 +8,7 @@ kernel.
 
 - Public API: `include/drivers/serial.h`
 - Arch implementations: `arch/x86_64/serial.c`, `arch/aarch64/serial.c`
-- Notes: COM1 (`0x3F8`) on x86_64, PL011 on aarch64. Fixed baud rate.
+- Notes: COM1 (`0x3F8`) on x86_64, PL011 on aarch64. Currently only supports a fixed baud rate.
 
 ### TTY (Text Terminal)
 
@@ -25,50 +24,10 @@ kernel.
 - Public API: `include/drivers/cpu.h`
 - Notes: Provides `drivers_cpu_halt_forever()` for fatal halts.
 
-## Directory Layout
-
-```text
-drivers/
-├── CMakeLists.txt
-├── README.md
-├── include/
-│   └── drivers/
-│       ├── cpu.h
-│       ├── serial.h
-│       └── tty.h
-├── src/
-│   └── tty.c                  # Generic TTY logic
-└── arch/
-    ├── include/
-    │   └── arch/
-    │       └── drivers/        # Tier 2 contract headers
-    ├── shared/
-    │   ├── include/
-    │   │   └── arch/
-    │   │       └── impl/
-    │   │           └── drivers/
-    │   └── framebuffer.c       # Shared framebuffer renderer
-    ├── x86_64/
-    │   ├── include/
-    │   │   └── arch/
-    │   │       └── impl/
-    │   │           └── drivers/
-    │   ├── internal/
-    │   ├── serial.c
-    │   └── tty.c
-    └── aarch64/
-        ├── include/
-        │   └── arch/
-        │       └── impl/
-        │           └── drivers/
-        ├── internal/
-        ├── serial.c
-        └── tty.c
-```
-
 ## Build Integration
 
 Uses `janus_add_subsys(drivers ...)` which automatically:
+
 - Detects the `arch/` folder and globs architecture-specific sources
 - Sets up three-tier include paths (Tier 1: public, Tier 2: arch contract, Tier 3: arch impl)
 - Enforces subsystem isolation (drivers cannot depend on other subsystems)

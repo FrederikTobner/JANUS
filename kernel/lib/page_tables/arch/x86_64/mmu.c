@@ -40,16 +40,12 @@
 #include <janus/types.h>
 #include <page_tables/mmu.h>
 
-// --- page table entry flags ---------------------------------------------------
-
 #define PTE_PRESENT       (1UL << 0)
 #define PTE_RW            (1UL << 1)
 #define PTE_PWT           (1UL << 3)
 #define PTE_PCD           (1UL << 4) ///< Cache-disable — required for MMIO
 #define PTE_NX            (1UL << 63)
 #define PTE_ADDR_MASK     0x000FFFFFFFFFF000UL
-
-// --- page table geometry ------------------------------------------------------
 
 #define PAGE_SIZE         4096UL
 #define ENTRIES_PER_TABLE 512UL
@@ -74,14 +70,10 @@
 #define MMIO_VIRT_BASE    0xFFFF900000000000UL
 #define MMIO_VIRT_END     0xFFFF980000000000UL
 
-// --- pool configuration -------------------------------------------------------
-
 #ifndef JANUS_PAGE_TABLE_POOL_SIZE
 #define JANUS_PAGE_TABLE_POOL_SIZE 16
 #endif
 #define PAGE_TABLE_POOL_SIZE JANUS_PAGE_TABLE_POOL_SIZE
-
-// --- module state -------------------------------------------------------------
 
 typedef struct {
     u64 hhdm_offset;
@@ -94,15 +86,10 @@ typedef struct {
 
 static u64 g_page_table_pool[PAGE_TABLE_POOL_SIZE][ENTRIES_PER_TABLE] __aligned(PAGE_SIZE);
 static mmu_state_t g_mmu;
-
-// --- forward declarations -----------------------------------------------------
-
 static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt);
 static virt_addr_t mmu_physical_to_virtual_address(phys_addr_t phys);
 static phys_addr_t mmu_alloc_page_table_phys(void);
 static u64 * mmu_get_or_create_entry(phys_addr_t table_phys, u32 index, bool is_table_level);
-
-// --- public API ---------------------------------------------------------------
 
 __cold error_t mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
 {

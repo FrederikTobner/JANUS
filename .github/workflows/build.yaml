@@ -36,15 +36,15 @@ jobs:
         run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }} --target iso
 
       - uses: ./.github/actions/setup-analysis-tools
-        if: matrix.arch == 'x86_64' && matrix.compiler == 'clang'
+        if: matrix.compiler == 'clang'
 
       - name: Check formatting
-        if: matrix.arch == 'x86_64' && matrix.compiler == 'clang'
+        if: matrix.compiler == 'clang'
         run: find kernel -name '*.c' -o -name '*.h' | xargs clang-format-18 --dry-run --Werror
 
       - name: Static analysis (clang-tidy)
-        if: matrix.arch == 'x86_64' && matrix.compiler == 'clang'
+        if: matrix.compiler == 'clang'
         run: |
-          jq -r '.[].file' build-x86_64-clang/compile_commands.json \
+          jq -r '.[].file' build-${{matrix.arch}}-clang/compile_commands.json \
             | grep 'kernel/.*\.c$' \
-            | xargs clang-tidy -p build-x86_64-clang
+            | xargs clang-tidy -p build-${{matrix.arch}}-clang

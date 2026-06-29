@@ -9,4 +9,5 @@ janus_add_arch_subsys(drivers
         janus_asm
         display
         page_tables
+        kio
 )

@@ -8,7 +8,6 @@ set(CMAKE_C_EXTENSIONS ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-# Single project() call — loads toolchain file, assembler languages enabled per-arch below
 project(JANUS VERSION 0.1.0 LANGUAGES C)
 
 # JANUS_TARGET_ARCH: set by toolchain file, preset, or -D flag.
@@ -19,82 +18,19 @@ if(NOT DEFINED JANUS_TARGET_ARCH)
     message(STATUS "For cross-compilation, use: cmake --preset <preset-name>")
 endif()
 
-# Validate target architecture
 if(NOT JANUS_TARGET_ARCH STREQUAL "x86_64" AND NOT JANUS_TARGET_ARCH STREQUAL "aarch64")
     message(FATAL_ERROR "Invalid JANUS_TARGET_ARCH: ${JANUS_TARGET_ARCH}. Must be 'x86_64' or 'aarch64'.")
 endif()
 
-# Enable architecture-appropriate assembler
 if(JANUS_TARGET_ARCH STREQUAL "x86_64")
     enable_language(ASM_NASM)
 elseif(JANUS_TARGET_ARCH STREQUAL "aarch64")
     enable_language(ASM)
 endif()
 
-# Platform detection, flags, and compiler validation
 include(platform/Detection)
 include(platform/CompilerFlags)
 
-# Print build configuration
-message(STATUS "========================================")
-message(STATUS "JANUS Build Configuration")
-message(STATUS "========================================")
-message(STATUS "Build Type:      ${CMAKE_BUILD_TYPE}")
-message(STATUS "Target Arch:     ${JANUS_TARGET_ARCH}")
-message(STATUS "Compiler:        ${CMAKE_C_COMPILER_ID} (${CMAKE_C_COMPILER})")
-message(STATUS "Linker:          ${CMAKE_LINKER}")
-if(JANUS_TARGET_ARCH STREQUAL "x86_64")
-    message(STATUS "Assembler:       ${CMAKE_ASM_NASM_COMPILER} (NASM)")
-elseif(JANUS_TARGET_ARCH STREQUAL "aarch64")
-    message(STATUS "Assembler:       ${CMAKE_ASM_COMPILER} (GAS)")
-endif()
-message(STATUS "Boot Protocols:  ${JANUS_BOOT_PROTOCOLS}")
-message(STATUS "========================================")
-message(STATUS "Available targets:")
-# Compute the widest command column so every " - " separator aligns.
-# Column width = length of the longest "ninja <cmd>" string.
-set(_max_col 5) # bare "ninja"
-foreach(_cmd IN ITEMS "iso" "run-uefi" "run-elf")
-    string(LENGTH "${_cmd}" _len)
-    math(EXPR _col "6 + ${_len}")
-    if(_col GREATER _max_col)
-        set(_max_col ${_col})
-    endif()
-endforeach()
-foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
-    foreach(_pfx IN ITEMS "iso-" "run-" "debug-")
-        string(LENGTH "${_pfx}${_proto}" _len)
-        math(EXPR _col "6 + ${_len}")
-        if(_col GREATER _max_col)
-            set(_max_col ${_col})
-        endif()
-    endforeach()
-endforeach()
-# Print one aligned target line: "  ninja [<cmd>]<pad> - <desc>"
-macro(_janus_msg _cmd _desc)
-    if("${_cmd}" STREQUAL "")
-        math(EXPR _pad "${_max_col} - 5 + 1")
-        string(REPEAT " " ${_pad} _sp)
-        message(STATUS "  ninja${_sp}- ${_desc}")
-    else()
-        string(LENGTH "${_cmd}" _clen)
-        math(EXPR _pad "${_max_col} - 6 - ${_clen} + 1")
-        string(REPEAT " " ${_pad} _sp)
-        message(STATUS "  ninja ${_cmd}${_sp}- ${_desc}")
-    endif()
-endmacro()
-_janus_msg("" "Build kernel ELFs")
-_janus_msg("iso" "Create all ISOs for this platform")
-foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
-    _janus_msg("iso-${_proto}" "Create ISO for the ${_proto} boot protocol")
-    _janus_msg("run-${_proto}" "Run ISO for the ${_proto} boot protocol")
-    _janus_msg("debug-${_proto}" "Debug ISO for the ${_proto} boot protocol")
-endforeach()
-_janus_msg("run-uefi" "Boot ISO in UEFI mode")
-_janus_msg("run-elf" "Direct kernel boot (debug)")
-message(STATUS "========================================")
-
-# Copy compile_commands.json to project root for clangd
 add_custom_target(
     copy_compile_commands ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -106,6 +42,21 @@ add_custom_target(
 
 add_subdirectory(kernel)
 
-# Setup all custom targets (iso, run-<boot-protocol>, debug-<boot-protocol>, etc.)
+message(STATUS "================================================================================")
+message(STATUS "JANUS Build Configuration")
+message(STATUS "================================================================================")
+message(STATUS "Build Type:      ${CMAKE_BUILD_TYPE}")
+message(STATUS "Target Arch:     ${JANUS_TARGET_ARCH}")
+message(STATUS "Compiler:        ${CMAKE_C_COMPILER_ID} (${CMAKE_C_COMPILER})")
+message(STATUS "Linker:          ${CMAKE_LINKER}")
+if(JANUS_TARGET_ARCH STREQUAL "x86_64")
+    message(STATUS "Assembler:       ${CMAKE_ASM_NASM_COMPILER} (NASM)")
+elseif(JANUS_TARGET_ARCH STREQUAL "aarch64")
+    message(STATUS "Assembler:       ${CMAKE_ASM_COMPILER} (GAS)")
+endif()
+message(STATUS "Boot Protocols:  ${JANUS_BOOT_PROTOCOLS}")
+message(STATUS "================================================================================")
+
 include(Targets)
 janus_setup_targets()
+janus_print_targets()

@@ -17,6 +17,9 @@
 #ifndef JANUS_ERRNO_H
 #define JANUS_ERRNO_H
 
+#ifndef JANUS_KERNEL
+#error "This header is for JANUS kernel code only. Do not include it from user-space code."
+#endif
 /// @file errno.h
 /// @brief Kernel error code constants.
 ///

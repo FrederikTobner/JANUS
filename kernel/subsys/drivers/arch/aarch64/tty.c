@@ -55,20 +55,6 @@ void arch_tty_write_cell(u16 x, u16 y, char c, u8 foreground, u8 background)
     framebuffer_draw_char(&g_framebuffer_state, x, y, c, foreground, background);
 }
 
-void arch_tty_read_cell(__unused u16 x, __unused u16 y, char * c, u8 * foreground, u8 * background)
-{
-    // Framebuffer doesn't store character data - return defaults
-    if (c) {
-        *c = ' ';
-    }
-    if (foreground) {
-        *foreground = TTY_COLOR_WHITE;
-    }
-    if (background) {
-        *background = TTY_COLOR_BLACK;
-    }
-}
-
 void arch_tty_set_cursor(__unused u16 x, __unused u16 y)
 {
     // Software cursor - for now just track position

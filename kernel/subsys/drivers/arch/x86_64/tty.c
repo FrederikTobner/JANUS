@@ -104,40 +104,6 @@ void arch_tty_write_cell(u16 x, u16 y, char c, u8 foreground, u8 background)
     }
 }
 
-void arch_tty_read_cell(u16 x, u16 y, char * c, u8 * foreground, u8 * background)
-{
-    switch (g_display_mode) {
-    case DISPLAY_MODE_VGA_TEXT:
-        vga_read_cell(g_vga_buffer, x, y, c, foreground, background);
-        break;
-
-    case DISPLAY_MODE_FRAMEBUFFER:
-        // Framebuffer doesn't store character data - return defaults
-        if (c) {
-            *c = ' ';
-        }
-        if (foreground) {
-            *foreground = TTY_COLOR_WHITE;
-        }
-        if (background) {
-            *background = TTY_COLOR_BLACK;
-        }
-        break;
-
-    default:
-        if (c) {
-            *c = ' ';
-        }
-        if (foreground) {
-            *foreground = 0;
-        }
-        if (background) {
-            *background = 0;
-        }
-        break;
-    }
-}
-
 void arch_tty_set_cursor(u16 x, u16 y)
 {
     // Hardware cursor only available in VGA mode
