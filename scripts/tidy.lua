@@ -89,9 +89,30 @@ local function find_tool(candidates)
     return nil
 end
 
-local TOOL = find_tool { "clang-tidy-18", "clang-tidy-17", "clang-tidy-16", "clang-tidy" }
+-- The CI pipeline pins clang-tidy-18.  Using a different version may silence
+-- or add diagnostics relative to CI, giving misleading local results.
+local CI_TOOL = "clang-tidy-18"
+
+local function find_tool(candidates)
+    for _, name in ipairs(candidates) do
+        local out = capture(string.format("command -v %s 2>/dev/null", name))
+        if out and out:match("%S") then return name end
+    end
+    return nil
+end
+
+local TOOL = find_tool { CI_TOOL }
 if not TOOL then
-    die("clang-tidy not found — install clang-tidy or add it to PATH")
+    TOOL = find_tool { "clang-tidy-17", "clang-tidy-16", "clang-tidy" }
+    if not TOOL then
+        die("clang-tidy not found — install clang-tidy-18 or add it to PATH")
+    end
+    local ver = capture(TOOL .. " --version 2>/dev/null") or "unknown"
+    ver = ver:match("^%s*(.-)%s*$")
+    io.stderr:write(string.format(
+        "%swarning:%s %s not found; using '%s' (%s)\n"
+        .. "         Results may differ from CI (which pins %s).\n\n",
+        C.yellow, C.reset, CI_TOOL, TOOL, ver, CI_TOOL))
 end
 
 -- ─── Options ──────────────────────────────────────────────────────────────────

@@ -69,6 +69,11 @@ end)()
 
 -- ─── Tool detection ───────────────────────────────────────────────────────────
 
+-- The CI pipeline pins clang-format-18.  Using a different version can produce
+-- different results (compound-literal spacing, brace-init rules, etc.), giving
+-- a false pass locally while CI still fails.
+local CI_TOOL = "clang-format-18"
+
 local function find_tool(candidates)
     for _, name in ipairs(candidates) do
         local out = capture(string.format("command -v %s 2>/dev/null", name))
@@ -77,9 +82,19 @@ local function find_tool(candidates)
     return nil
 end
 
-local TOOL = find_tool { "clang-format-18", "clang-format-17", "clang-format-16", "clang-format" }
+local TOOL = find_tool { CI_TOOL }
 if not TOOL then
-    die("clang-format not found — install clang-format or add it to PATH")
+    -- Fall back to whatever is available, but warn loudly.
+    TOOL = find_tool { "clang-format-17", "clang-format-16", "clang-format" }
+    if not TOOL then
+        die("clang-format not found — install clang-format-18 or add it to PATH")
+    end
+    local ver = capture(TOOL .. " --version 2>/dev/null") or "unknown"
+    ver = ver:match("^%s*(.-)%s*$")
+    io.stderr:write(string.format(
+        "%swarning:%s %s not found; using '%s' (%s)\n"
+        .. "         Results may differ from CI (which pins %s).\n\n",
+        C.yellow, C.reset, CI_TOOL, TOOL, ver, CI_TOOL))
 end
 
 -- ─── Options ──────────────────────────────────────────────────────────────────

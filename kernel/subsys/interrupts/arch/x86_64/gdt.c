@@ -45,9 +45,10 @@ static void gdt_set_tss(gdt_entry_t * lo, gdt_entry_t * hi, u64 base, u32 limit)
 
 __cold void gdt_install(void)
 {
-    // Point IST1 (tss.ist[0]) at the top of the dedicated double-fault stack.
-    // The stack grows downward, so the top is the end of the array.
-    __builtin_memset(&g_tss, 0, sizeof(g_tss));
+    // g_tss and g_gdt are static (.bss) and therefore already zero-initialised
+    // by the C runtime.  Only the fields that deviate from zero need setting.
+    // Point IST1 (tss.ist[0]) at the top of the dedicated double-fault stack;
+    // the stack grows downward, so the top is the end of the array.
     g_tss.ist[0] = (u64) (g_df_stack + DF_STACK_SIZE);
     g_tss.iomap_base = (u16) sizeof(tss_t);
 
