@@ -43,11 +43,12 @@ isr_stub_%1:
     jmp isr_common
 %endmacro
 
-; Generate all 256 stubs. Vectors 8, 10, 11, 12, 13, 14, 17, 21 push an error
-; code; all others do not.
+; Generate all 256 stubs. Vectors 8, 10, 11, 12, 13, 14, 17, 21, 29, 30 push an
+; error code; all others do not.
+; 29 = #VC (VMM Communication, AMD SEV-ES), 30 = #SX (Security Exception).
 %assign v 0
 %rep 256
-    %if v == 8 || v == 10 || v == 11 || v == 12 || v == 13 || v == 14 || v == 17 || v == 21
+    %if v == 8 || v == 10 || v == 11 || v == 12 || v == 13 || v == 14 || v == 17 || v == 21 || v == 29 || v == 30
         ISR_ERR v
     %else
         ISR_NOERR v

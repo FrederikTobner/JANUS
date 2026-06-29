@@ -1,4 +1,4 @@
-# subsys — Kernel Subsystems
+# subsys
 
 Kernel subsystems own hardware state and expose public C APIs.
 Each subsystem is isolated, meaning each subsystems may not depend on other subsystems.
@@ -83,3 +83,14 @@ Architecture-specific cell writing is delegated to `arch_tty_*` functions, which
 To add a new driver, provide the public header in `include/drivers/`, add architecture-specific implementations under `arch/<arch>/`, and add any platform-agnostic source in `src/`.
 
 More information about the submodule can be found in its [readme](drivers/README.md)
+
+## interrupts
+
+The interrupts subsystem installs CPU exception handling so that hardware faults become readable kernel panics over `kio` instead of silent triple-faults and machine resets.
+Its single entry point, `interrupts_init`, must be called once after console initialisation and before any subsystem that can fault (e.g. the physical memory manager).
+
+The public surface is intentionally architecture-agnostic: no x86_64 concept (IDT, CR2, gate type) appears above the arch contract boundary.
+
+Currently interrupts are not implemented for aarch64.
+
+More information about the subsystem can be found in its [README](interrupts/README.md)

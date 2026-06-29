@@ -25,12 +25,12 @@
 #include <janus/types.h>
 
 /// Size of the dedicated double-fault stack (selected via IST1).
-#define DF_STACK_SIZE 16384
+#define DF_STACK_SIZE       16384
 
 // Access-byte values.
-#define GDT_ACCESS_CODE 0x9A ///< present, DPL 0, code, execute/read
-#define GDT_ACCESS_DATA 0x92 ///< present, DPL 0, data, read/write
-#define GDT_ACCESS_TSS  0x89 ///< present, DPL 0, available 64-bit TSS
+#define GDT_ACCESS_CODE     0x9A ///< present, DPL 0, code, execute/read
+#define GDT_ACCESS_DATA     0x92 ///< present, DPL 0, data, read/write
+#define GDT_ACCESS_TSS      0x89 ///< present, DPL 0, available 64-bit TSS
 
 // Granularity/flags byte for a 64-bit code segment (L bit set).
 #define GDT_FLAGS_LONG_MODE 0x20
@@ -47,11 +47,11 @@ __cold void gdt_install(void)
 {
     // Point IST1 (tss.ist[0]) at the top of the dedicated double-fault stack.
     // The stack grows downward, so the top is the end of the array.
-    g_tss = (tss_t){0};
+    __builtin_memset(&g_tss, 0, sizeof(g_tss));
     g_tss.ist[0] = (u64) (g_df_stack + DF_STACK_SIZE);
     g_tss.iomap_base = (u16) sizeof(tss_t);
 
-    g_gdt[0] = (gdt_entry_t){0};
+    g_gdt[0] = (gdt_entry_t) {0};
     gdt_set_segment(&g_gdt[1], GDT_ACCESS_CODE, GDT_FLAGS_LONG_MODE);
     gdt_set_segment(&g_gdt[2], GDT_ACCESS_DATA, 0);
     gdt_set_tss(&g_gdt[3], &g_gdt[4], (u64) &g_tss, (u32) (sizeof(tss_t) - 1));

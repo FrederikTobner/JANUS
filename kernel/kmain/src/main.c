@@ -23,12 +23,14 @@
 
 #include <asm/cpu.h>
 #include <boot/context.h>
+#include <interrupts/interrupts.h>
 #include <janus/attributes.h>
 #include <janus/config.h>
 #include <janus/errno.h>
 #include <janus/types.h>
 #include <kio/kio.h>
 #include <kmain/console.h>
+#include <kmain/fault_test.h>
 #include <kmain/kernel_descriptor.h>
 #include <mm/pmm.h>
 
@@ -61,6 +63,13 @@ __noreturn void kernel_main(void)
     // Print greeting
     kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
 
+    if (interrupts_init() != JANUS_OK) {
+        kpanic("interrupts_init failed — cannot continue");
+    }
+
+#ifdef JANUS_TEST_FAULTS
+    kmain_fault_test();
+#endif
     // Initialize physical memory manager
     error_t pmm_err =
         mm_pmm_init(&descriptor.boot.memmap, descriptor.boot.kernel_phys_base, descriptor.boot.kernel_phys_end);

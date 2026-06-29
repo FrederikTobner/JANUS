@@ -41,8 +41,14 @@ __noreturn void kmain_fault_test(void)
     u64 sink = overflow_stack(0);
     kprintf("[fault-test] unreachable %llu\n", (unsigned long long) sink);
 #else
-    // Null-pointer write → #PF with CR2 == 0.
-    volatile u32 * p = (volatile u32 *) 0;
+    // Write above the first 4 GB → #PF in both boot configurations.
+    //
+    // Address 0 cannot be used: the multiboot2 boot path identity-maps the
+    // first 4 GB with 2 MB huge pages (paging.asm), so a write to virtual
+    // address 0 would silently succeed there.  0x100000000 (4 GB + 0) lies
+    // just above that window and is unmapped in both the multiboot2
+    // (identity-mapped) and limine (higher-half) virtual address spaces.
+    u32 volatile * p = (u32 volatile *) 0x100000000ULL;
     *p = 0xDEADBEEFu;
 #endif
     for (;;) {
@@ -55,7 +61,7 @@ static u64 overflow_stack(u64 depth)
     // A volatile on-stack buffer that is both written and read prevents the
     // compiler from turning this into a tail call / loop, guaranteeing the
     // stack actually grows until it faults.
-    volatile u8 guard[256];
+    u8 volatile guard[256];
     guard[0] = (u8) depth;
     guard[255] = (u8) (depth >> 8);
     u64 next = overflow_stack(depth + 1);
