@@ -14,52 +14,29 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/regs.h
-/// @brief Public asm register entry point.
+/// @file arch/impl/interrupts/vectors.h
+/// @brief x86_64 exception vector numbers and mnemonic lookup.
 
-#ifndef ASM_REGS_H
-#define ASM_REGS_H
+#ifndef X86_64_IMPL_INTERRUPTS_VECTORS_H
+#define X86_64_IMPL_INTERRUPTS_VECTORS_H
 
-#include <arch/asm/regs.h>
-#include <asm/capabilities.h>
+#include <janus/types.h>
 
-#if ASM_ARCH_X86_64
-static __always_inline u64 asm_read_cr3(void)
-{
-    return arch_asm_read_cr3();
-}
+#define VEC_INVALID_OPCODE 6  ///< #UD — Invalid Opcode
+#define VEC_DEVICE_NA      7  ///< #NM — Device Not Available (FPU/SSE)
+#define VEC_DOUBLE_FAULT   8  ///< #DF — Double Fault
+#define VEC_GP_FAULT       13 ///< #GP — General Protection fault
+#define VEC_PAGE_FAULT     14 ///< #PF — Page Fault
 
-static __always_inline void asm_write_cr3(u64 val)
-{
-    arch_asm_write_cr3(val);
-}
+/// Number of Intel-reserved exception vectors (0–31).
+#define VEC_RESERVED_COUNT 32
 
-static __always_inline u64 asm_read_cr2(void)
-{
-    return arch_asm_read_cr2();
-}
-#endif
+/// @brief Map a vector number to its Intel exception mnemonic.
+///
+/// @param vector The interrupt/exception vector number.
+/// @return A static mnemonic string for vectors 0–31; a generic
+///         "External/Reserved vector" label (covering hardware IRQs and
+///         reserved vectors) otherwise.
+char const * interrupts_vector_mnemonic(u64 vector);
 
-#if ASM_ARCH_AARCH64
-static __always_inline u64 asm_read_ttbr1_el1(void)
-{
-    return arch_asm_read_ttbr1_el1();
-}
-
-static __always_inline void asm_write_ttbr1_el1(u64 val)
-{
-    arch_asm_write_ttbr1_el1(val);
-}
-
-static __always_inline u64 asm_read_ttbr0_el1(void)
-{
-    return arch_asm_read_ttbr0_el1();
-}
-
-static __always_inline void asm_write_ttbr0_el1(u64 val)
-{
-    arch_asm_write_ttbr0_el1(val);
-}
-#endif
-
-#endif /* ASM_REGS_H */
+#endif /* X86_64_IMPL_INTERRUPTS_VECTORS_H */

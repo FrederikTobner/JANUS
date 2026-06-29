@@ -14,52 +14,31 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/regs.h
-/// @brief Public asm register entry point.
+/// @file arch/asm/dt.h
+/// @brief asm descriptor-table architecture contract.
 
-#ifndef ASM_REGS_H
-#define ASM_REGS_H
+#ifndef ARCH_ASM_DT_H
+#define ARCH_ASM_DT_H
 
-#include <arch/asm/regs.h>
-#include <asm/capabilities.h>
+#include <arch/asm/capabilities.h>
 
 #if ASM_ARCH_X86_64
-static __always_inline u64 asm_read_cr3(void)
+#include <arch/impl/asm/dt.h>
+
+static __always_inline void arch_asm_load_idt(void const * idtr)
 {
-    return arch_asm_read_cr3();
+    arch_asm_impl_load_idt(idtr);
 }
 
-static __always_inline void asm_write_cr3(u64 val)
+static __always_inline void arch_asm_load_gdt(void const * gdtr, u16 code_sel, u16 data_sel)
 {
-    arch_asm_write_cr3(val);
+    arch_asm_impl_load_gdt(gdtr, code_sel, data_sel);
 }
 
-static __always_inline u64 asm_read_cr2(void)
+static __always_inline void arch_asm_load_tr(u16 sel)
 {
-    return arch_asm_read_cr2();
-}
-#endif
-
-#if ASM_ARCH_AARCH64
-static __always_inline u64 asm_read_ttbr1_el1(void)
-{
-    return arch_asm_read_ttbr1_el1();
-}
-
-static __always_inline void asm_write_ttbr1_el1(u64 val)
-{
-    arch_asm_write_ttbr1_el1(val);
-}
-
-static __always_inline u64 asm_read_ttbr0_el1(void)
-{
-    return arch_asm_read_ttbr0_el1();
-}
-
-static __always_inline void asm_write_ttbr0_el1(u64 val)
-{
-    arch_asm_write_ttbr0_el1(val);
+    arch_asm_impl_load_tr(sel);
 }
 #endif
 
-#endif /* ASM_REGS_H */
+#endif /* ARCH_ASM_DT_H */

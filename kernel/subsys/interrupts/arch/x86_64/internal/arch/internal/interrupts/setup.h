@@ -14,52 +14,32 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/regs.h
-/// @brief Public asm register entry point.
+/// @file arch/internal/interrupts/setup.h
+/// @brief x86_64 interrupts subsystem-private setup declarations.
+///
+/// Internal to the interrupts x86_64 implementation; never included externally.
 
-#ifndef ASM_REGS_H
-#define ASM_REGS_H
+#ifndef X86_64_INTERNAL_INTERRUPTS_SETUP_H
+#define X86_64_INTERNAL_INTERRUPTS_SETUP_H
 
-#include <arch/asm/regs.h>
-#include <asm/capabilities.h>
+#include <arch/impl/interrupts/frame.h>
+#include <janus/attributes.h>
 
-#if ASM_ARCH_X86_64
-static __always_inline u64 asm_read_cr3(void)
-{
-    return arch_asm_read_cr3();
-}
+/// @brief Build and load the kernel GDT (Global Descriptor Table) and TSS (Task
+///        State Segment), wiring IST1 (Interrupt Stack Table entry 1) to the
+///        dedicated #DF (Double Fault) stack.
+void gdt_install(void);
 
-static __always_inline void asm_write_cr3(u64 val)
-{
-    arch_asm_write_cr3(val);
-}
+/// @brief Populate all 256 IDT (Interrupt Descriptor Table) gates from the stub
+///        table and load it via LIDT.
+void idt_install(void);
 
-static __always_inline u64 asm_read_cr2(void)
-{
-    return arch_asm_read_cr2();
-}
-#endif
+/// @brief Common C dispatch for every ISR (Interrupt Service Routine) stub.
+///
+/// Called from isr_common (isr.asm) with a pointer to the saved frame; reports
+/// the fault over kprintf/serial and halts. Never returns.
+///
+/// @param frame Snapshot of CPU state captured by the entry stub.
+__noreturn void interrupts_dispatch(interrupt_frame_t const * frame);
 
-#if ASM_ARCH_AARCH64
-static __always_inline u64 asm_read_ttbr1_el1(void)
-{
-    return arch_asm_read_ttbr1_el1();
-}
-
-static __always_inline void asm_write_ttbr1_el1(u64 val)
-{
-    arch_asm_write_ttbr1_el1(val);
-}
-
-static __always_inline u64 asm_read_ttbr0_el1(void)
-{
-    return arch_asm_read_ttbr0_el1();
-}
-
-static __always_inline void asm_write_ttbr0_el1(u64 val)
-{
-    arch_asm_write_ttbr0_el1(val);
-}
-#endif
-
-#endif /* ASM_REGS_H */
+#endif /* X86_64_INTERNAL_INTERRUPTS_SETUP_H */

@@ -8,6 +8,7 @@ janus_add_subsys(kmain SOURCES ${INIT_SOURCES}
         drivers
         boot
         fmt
+        interrupts
         kio
         mm
 )

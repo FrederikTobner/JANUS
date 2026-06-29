@@ -16,6 +16,11 @@ set(JANUS_PAGE_TABLE_POOL_SIZE "16" CACHE STRING
     "Static pool size for lib/page_tables (number of 4 KB page table pages)")
 add_compile_definitions(JANUS_PAGE_TABLE_POOL_SIZE=${JANUS_PAGE_TABLE_POOL_SIZE})
 
+option(JANUS_TEST_FAULTS "Enable fault injection for testing" OFF)
+if(JANUS_TEST_FAULTS)
+    add_compile_definitions(JANUS_TEST_FAULTS=1)
+endif()
+
 
 # Add generated config.h to include path
 include_directories("${CMAKE_BINARY_DIR}/kernel/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")

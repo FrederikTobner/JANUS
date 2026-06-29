@@ -14,52 +14,31 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/regs.h
-/// @brief Public asm register entry point.
+/// @file interrupts.h
+/// @brief Interrupt and CPU-exception handling — public API.
+///
+/// Architecture contract (arch_interrupts_*) is in
+/// <arch/interrupts/interrupts.h>. The public surface is intentionally
+/// architecture-agnostic: no x86 concept (IDT, CR2, gate type) appears here.
 
-#ifndef ASM_REGS_H
-#define ASM_REGS_H
+#ifndef INTERRUPTS_INTERRUPTS_H
+#define INTERRUPTS_INTERRUPTS_H
 
-#include <arch/asm/regs.h>
-#include <asm/capabilities.h>
+#include <arch/interrupts/interrupts.h>
+#include <janus/types.h>
 
-#if ASM_ARCH_X86_64
-static __always_inline u64 asm_read_cr3(void)
-{
-    return arch_asm_read_cr3();
-}
+/// @brief Install and activate interrupt/exception handling on the current CPU.
+///
+/// On x86_64: builds and loads a kernel-owned GDT (Global Descriptor Table)
+/// plus TSS (Task State Segment) — with a dedicated IST (Interrupt Stack Table)
+/// stack for #DF (Double Fault) — then builds and loads a 256-entry IDT
+/// (Interrupt Descriptor Table). After this returns, CPU exceptions are routed
+/// to handlers that emit a diagnostic panic instead of triple-faulting.
+///
+/// Must be called exactly once, after console init and before any subsystem
+/// that can fault (e.g. the physical memory manager).
+///
+/// @return JANUS_OK on success; a negative error_t otherwise.
+error_t interrupts_init(void);
 
-static __always_inline void asm_write_cr3(u64 val)
-{
-    arch_asm_write_cr3(val);
-}
-
-static __always_inline u64 asm_read_cr2(void)
-{
-    return arch_asm_read_cr2();
-}
-#endif
-
-#if ASM_ARCH_AARCH64
-static __always_inline u64 asm_read_ttbr1_el1(void)
-{
-    return arch_asm_read_ttbr1_el1();
-}
-
-static __always_inline void asm_write_ttbr1_el1(u64 val)
-{
-    arch_asm_write_ttbr1_el1(val);
-}
-
-static __always_inline u64 asm_read_ttbr0_el1(void)
-{
-    return arch_asm_read_ttbr0_el1();
-}
-
-static __always_inline void asm_write_ttbr0_el1(u64 val)
-{
-    arch_asm_write_ttbr0_el1(val);
-}
-#endif
-
-#endif /* ASM_REGS_H */
+#endif /* INTERRUPTS_INTERRUPTS_H */

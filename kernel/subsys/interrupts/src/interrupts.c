@@ -14,52 +14,16 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/regs.h
-/// @brief Public asm register entry point.
+/// @file interrupts.c
+/// @brief Shared logic of the interrupts subsystem.
+///
+/// Delegates to the architecture-specific arch_interrupts_init().
 
-#ifndef ASM_REGS_H
-#define ASM_REGS_H
+#include <arch/interrupts/interrupts.h>
+#include <interrupts/interrupts.h>
+#include <janus/attributes.h>
 
-#include <arch/asm/regs.h>
-#include <asm/capabilities.h>
-
-#if ASM_ARCH_X86_64
-static __always_inline u64 asm_read_cr3(void)
+__cold error_t interrupts_init(void)
 {
-    return arch_asm_read_cr3();
+    return arch_interrupts_init();
 }
-
-static __always_inline void asm_write_cr3(u64 val)
-{
-    arch_asm_write_cr3(val);
-}
-
-static __always_inline u64 asm_read_cr2(void)
-{
-    return arch_asm_read_cr2();
-}
-#endif
-
-#if ASM_ARCH_AARCH64
-static __always_inline u64 asm_read_ttbr1_el1(void)
-{
-    return arch_asm_read_ttbr1_el1();
-}
-
-static __always_inline void asm_write_ttbr1_el1(u64 val)
-{
-    arch_asm_write_ttbr1_el1(val);
-}
-
-static __always_inline u64 asm_read_ttbr0_el1(void)
-{
-    return arch_asm_read_ttbr0_el1();
-}
-
-static __always_inline void asm_write_ttbr0_el1(u64 val)
-{
-    arch_asm_write_ttbr0_el1(val);
-}
-#endif
-
-#endif /* ASM_REGS_H */

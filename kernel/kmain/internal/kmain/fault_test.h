@@ -14,52 +14,26 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/regs.h
-/// @brief Public asm register entry point.
+/// @file fault_test.h
+/// @brief Deliberate-fault self-test for QEMU verification (build-flag guarded).
+///
+/// Only declared/compiled when JANUS_TEST_FAULTS is defined. Used to verify the
+/// interrupt subsystem turns CPU faults into readable panics instead of resets.
 
-#ifndef ASM_REGS_H
-#define ASM_REGS_H
+#ifndef KMAIN_FAULT_TEST_H
+#define KMAIN_FAULT_TEST_H
 
-#include <arch/asm/regs.h>
-#include <asm/capabilities.h>
+#ifdef JANUS_TEST_FAULTS
 
-#if ASM_ARCH_X86_64
-static __always_inline u64 asm_read_cr3(void)
-{
-    return arch_asm_read_cr3();
-}
+#include <janus/attributes.h>
 
-static __always_inline void asm_write_cr3(u64 val)
-{
-    arch_asm_write_cr3(val);
-}
+/// @brief Trigger a deliberate CPU fault to exercise exception handling.
+///
+/// The fault kind is selected at build time via JANUS_FAULT_TEST_KIND
+/// (0 = page fault via null dereference, 1 = double fault via stack overflow).
+/// Never returns: either the fault handler panics, or the function spins.
+__noreturn void kmain_fault_test(void);
 
-static __always_inline u64 asm_read_cr2(void)
-{
-    return arch_asm_read_cr2();
-}
-#endif
+#endif /* JANUS_TEST_FAULTS */
 
-#if ASM_ARCH_AARCH64
-static __always_inline u64 asm_read_ttbr1_el1(void)
-{
-    return arch_asm_read_ttbr1_el1();
-}
-
-static __always_inline void asm_write_ttbr1_el1(u64 val)
-{
-    arch_asm_write_ttbr1_el1(val);
-}
-
-static __always_inline u64 asm_read_ttbr0_el1(void)
-{
-    return arch_asm_read_ttbr0_el1();
-}
-
-static __always_inline void asm_write_ttbr0_el1(u64 val)
-{
-    arch_asm_write_ttbr0_el1(val);
-}
-#endif
-
-#endif /* ASM_REGS_H */
+#endif /* KMAIN_FAULT_TEST_H */

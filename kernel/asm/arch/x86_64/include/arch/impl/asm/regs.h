@@ -49,4 +49,13 @@ static __always_inline void arch_asm_impl_write_cr3(u64 val)
     __asm__ volatile("mov %0, %%cr3" : : "r"(val) : "memory");
 }
 
+/// Read the Page Fault Linear Address Register (CR2).
+///
+/// @return The linear address that triggered the most recent page fault.
+static __always_inline u64 arch_asm_impl_read_cr2(void)
+{
+    u64 val;
+    __asm__ volatile("mov %%cr2, %0" : "=r"(val));
+    return val;
+}
 #endif /* X86_64_IMPL_ASM_REGS_H */

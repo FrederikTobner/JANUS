@@ -33,6 +33,10 @@ static __always_inline void arch_asm_write_cr3(u64 val)
 {
     arch_asm_impl_write_cr3(val);
 }
+static __always_inline u64 arch_asm_read_cr2(void)
+{
+    return arch_asm_impl_read_cr2();
+}
 #endif
 
 #if ASM_ARCH_AARCH64

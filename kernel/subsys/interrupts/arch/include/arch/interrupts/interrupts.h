@@ -14,52 +14,24 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/regs.h
-/// @brief Public asm register entry point.
+/// @file arch/interrupts/interrupts.h
+/// @brief Interrupt handling architecture contract.
+///
+/// Declares arch_interrupts_* functions implemented in arch/<ARCH>/.
 
-#ifndef ASM_REGS_H
-#define ASM_REGS_H
+#ifndef ARCH_INTERRUPTS_INTERRUPTS_H
+#define ARCH_INTERRUPTS_INTERRUPTS_H
 
-#include <arch/asm/regs.h>
-#include <asm/capabilities.h>
+#include <janus/types.h>
 
-#if ASM_ARCH_X86_64
-static __always_inline u64 asm_read_cr3(void)
-{
-    return arch_asm_read_cr3();
-}
+/// @brief Architecture-specific interrupt initialisation.
+///
+/// Implemented per architecture in arch/<ARCH>/. x86_64 installs the GDT
+/// (Global Descriptor Table), TSS (Task State Segment), and IDT (Interrupt
+/// Descriptor Table); aarch64 will install a VBAR_EL1 (Vector Base Address
+/// Register, EL1) exception vector table.
+///
+/// @return JANUS_OK on success; a negative error_t otherwise.
+error_t arch_interrupts_init(void);
 
-static __always_inline void asm_write_cr3(u64 val)
-{
-    arch_asm_write_cr3(val);
-}
-
-static __always_inline u64 asm_read_cr2(void)
-{
-    return arch_asm_read_cr2();
-}
-#endif
-
-#if ASM_ARCH_AARCH64
-static __always_inline u64 asm_read_ttbr1_el1(void)
-{
-    return arch_asm_read_ttbr1_el1();
-}
-
-static __always_inline void asm_write_ttbr1_el1(u64 val)
-{
-    arch_asm_write_ttbr1_el1(val);
-}
-
-static __always_inline u64 asm_read_ttbr0_el1(void)
-{
-    return arch_asm_read_ttbr0_el1();
-}
-
-static __always_inline void asm_write_ttbr0_el1(u64 val)
-{
-    arch_asm_write_ttbr0_el1(val);
-}
-#endif
-
-#endif /* ASM_REGS_H */
+#endif /* ARCH_INTERRUPTS_INTERRUPTS_H */
