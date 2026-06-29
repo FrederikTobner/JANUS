@@ -29,12 +29,12 @@
 /// The TSS (Task State Segment) descriptor is a system descriptor that spans
 /// two consecutive entries of this type (16 bytes total) in 64-bit mode.
 typedef struct gdt_entry {
-    u16 limit_low;   ///< Bits [15:0] of the segment limit
-    u16 base_low;    ///< Bits [15:0] of the base address
-    u8 base_mid;     ///< Bits [23:16] of the base address
-    u8 access;       ///< Access byte (present, DPL, type)
-    u8 granularity;  ///< Granularity/flags and bits [19:16] of the limit
-    u8 base_high;    ///< Bits [31:24] of the base address
+    u16 limit_low;  ///< Bits [15:0] of the segment limit
+    u16 base_low;   ///< Bits [15:0] of the base address
+    u8 base_mid;    ///< Bits [23:16] of the base address
+    u8 access;      ///< Access byte (present, DPL, type)
+    u8 granularity; ///< Granularity/flags and bits [19:16] of the limit
+    u8 base_high;   ///< Bits [31:24] of the base address
 } __packed gdt_entry_t;
 
 /// @brief x86_64 TSS (Task State Segment).
@@ -66,7 +66,7 @@ typedef struct gdt_ptr {
 #define GDT_SEL_TSS  0x18 ///< Task State Segment descriptor
 
 /// Number of 8-byte slots in the kernel GDT (null, code, data, TSS low/high).
-#define GDT_SLOTS 5
+#define GDT_SLOTS    5
 
 STATIC_ASSERT(sizeof(gdt_entry_t) == 8, "GDT entry must be 8 bytes");
 STATIC_ASSERT(sizeof(tss_t) == 104, "TSS must be 104 bytes");

@@ -41,12 +41,12 @@ typedef struct idt_ptr {
 } __packed idt_ptr_t;
 
 /// Number of vectors in the IDT.
-#define IDT_ENTRIES 256
+#define IDT_ENTRIES          256
 
 /// Present, DPL 0, 64-bit interrupt gate (clears IF, the interrupt-enable flag).
-#define IDT_TYPE_INTERRUPT 0x8E
+#define IDT_TYPE_INTERRUPT   0x8E
 /// Present, DPL 0, 64-bit trap gate (leaves IF unchanged).
-#define IDT_TYPE_TRAP 0x8F
+#define IDT_TYPE_TRAP        0x8F
 
 /// IST (Interrupt Stack Table) index used by the #DF (Double Fault) gate.
 /// 1-based in the gate's ist field; selects tss.ist[0].

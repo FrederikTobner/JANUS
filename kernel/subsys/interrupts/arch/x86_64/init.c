@@ -17,8 +17,8 @@
 /// @file init.c
 /// @brief x86_64 interrupt subsystem entry point.
 
-#include <arch/interrupts/interrupts.h>
 #include <arch/internal/interrupts/setup.h>
+#include <arch/interrupts/interrupts.h>
 #include <janus/attributes.h>
 #include <janus/errno.h>
 

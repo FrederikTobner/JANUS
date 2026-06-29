@@ -73,8 +73,10 @@ char const * interrupts_vector_mnemonic(u64 vector)
 __noreturn void interrupts_dispatch(interrupt_frame_t const * frame)
 {
     kprintf("\n*** CPU EXCEPTION ***\n");
-    kprintf("Vector %llu (%s)  error_code=0x%016llx\n", (unsigned long long) frame->vector,
-            interrupts_vector_mnemonic(frame->vector), (unsigned long long) frame->error_code);
+    kprintf("Vector %llu (%s)  error_code=0x%016llx\n",
+            (unsigned long long) frame->vector,
+            interrupts_vector_mnemonic(frame->vector),
+            (unsigned long long) frame->error_code);
 
     if (frame->vector == VEC_PAGE_FAULT) {
         kprintf("CR2 (faulting address) = 0x%016llx\n", (unsigned long long) asm_read_cr2());
@@ -86,17 +88,29 @@ __noreturn void interrupts_dispatch(interrupt_frame_t const * frame)
 
 static void dump_registers(interrupt_frame_t const * f)
 {
-    kprintf("  RIP=0x%016llx  CS=0x%016llx  RFLAGS=0x%016llx\n", (unsigned long long) f->rip,
-            (unsigned long long) f->cs, (unsigned long long) f->rflags);
+    kprintf("  RIP=0x%016llx  CS=0x%016llx  RFLAGS=0x%016llx\n",
+            (unsigned long long) f->rip,
+            (unsigned long long) f->cs,
+            (unsigned long long) f->rflags);
     kprintf("  RSP=0x%016llx  SS=0x%016llx\n", (unsigned long long) f->rsp, (unsigned long long) f->ss);
-    kprintf("  RAX=0x%016llx  RBX=0x%016llx  RCX=0x%016llx\n", (unsigned long long) f->rax,
-            (unsigned long long) f->rbx, (unsigned long long) f->rcx);
-    kprintf("  RDX=0x%016llx  RSI=0x%016llx  RDI=0x%016llx\n", (unsigned long long) f->rdx,
-            (unsigned long long) f->rsi, (unsigned long long) f->rdi);
-    kprintf("  RBP=0x%016llx  R8 =0x%016llx  R9 =0x%016llx\n", (unsigned long long) f->rbp,
-            (unsigned long long) f->r8, (unsigned long long) f->r9);
-    kprintf("  R10=0x%016llx  R11=0x%016llx  R12=0x%016llx\n", (unsigned long long) f->r10,
-            (unsigned long long) f->r11, (unsigned long long) f->r12);
-    kprintf("  R13=0x%016llx  R14=0x%016llx  R15=0x%016llx\n", (unsigned long long) f->r13,
-            (unsigned long long) f->r14, (unsigned long long) f->r15);
+    kprintf("  RAX=0x%016llx  RBX=0x%016llx  RCX=0x%016llx\n",
+            (unsigned long long) f->rax,
+            (unsigned long long) f->rbx,
+            (unsigned long long) f->rcx);
+    kprintf("  RDX=0x%016llx  RSI=0x%016llx  RDI=0x%016llx\n",
+            (unsigned long long) f->rdx,
+            (unsigned long long) f->rsi,
+            (unsigned long long) f->rdi);
+    kprintf("  RBP=0x%016llx  R8 =0x%016llx  R9 =0x%016llx\n",
+            (unsigned long long) f->rbp,
+            (unsigned long long) f->r8,
+            (unsigned long long) f->r9);
+    kprintf("  R10=0x%016llx  R11=0x%016llx  R12=0x%016llx\n",
+            (unsigned long long) f->r10,
+            (unsigned long long) f->r11,
+            (unsigned long long) f->r12);
+    kprintf("  R13=0x%016llx  R14=0x%016llx  R15=0x%016llx\n",
+            (unsigned long long) f->r13,
+            (unsigned long long) f->r14,
+            (unsigned long long) f->r15);
 }
