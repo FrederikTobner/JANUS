@@ -31,6 +31,12 @@ extern u64 isr_stub_table[IDT_ENTRIES];
 static idt_entry_t g_idt[IDT_ENTRIES];
 static idt_ptr_t g_idtr;
 
+/// @brief Write one 16-byte interrupt gate descriptor into the IDT.
+///
+/// @param vec      Vector number (0–255); used as the index into g_idt.
+/// @param handler  Virtual address of the ISR entry stub.
+/// @param type     Gate type/attribute byte (e.g. IDT_TYPE_INTERRUPT).
+/// @param ist      IST index: 0 = disabled, 1–7 = use tss.ist[index - 1].
 static void idt_set_gate(u8 vec, u64 handler, u8 type, u8 ist);
 
 __cold void idt_install(void)

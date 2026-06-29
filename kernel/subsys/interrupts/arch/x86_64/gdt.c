@@ -40,7 +40,27 @@ static gdt_entry_t g_gdt[GDT_SLOTS];
 static tss_t g_tss;
 static gdt_ptr_t g_gdtr;
 
+/// @brief Populate one 8-byte code or data segment descriptor.
+///
+/// Sets all base and limit fields to zero (ignored in 64-bit mode) and writes
+/// the given access byte and flags nibble.
+///
+/// @param entry   Descriptor slot to fill.
+/// @param access  Access byte: present bit, DPL, and segment type.
+/// @param flags   Flags/granularity byte (L bit set for 64-bit code, 0 for data).
 static void gdt_set_segment(gdt_entry_t * entry, u8 access, u8 flags);
+
+/// @brief Encode a 64-bit TSS base address into a 16-byte GDT system descriptor.
+///
+/// In 64-bit mode a TSS descriptor occupies two consecutive 8-byte GDT slots.
+/// The low slot (@p lo) follows the standard 8-byte layout; the high slot
+/// (@p hi) holds base bits [63:32] in its first four bytes, with the rest
+/// reserved and zeroed.
+///
+/// @param lo     Low 8-byte slot of the system descriptor pair.
+/// @param hi     High 8-byte slot (receives base bits [63:32]).
+/// @param base   Linear base address of the TSS.
+/// @param limit  Segment limit for the TSS (typically sizeof(tss_t) - 1).
 static void gdt_set_tss(gdt_entry_t * lo, gdt_entry_t * hi, u64 base, u32 limit);
 
 __cold void gdt_install(void)

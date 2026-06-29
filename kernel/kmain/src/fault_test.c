@@ -29,6 +29,14 @@
 #endif
 
 #if JANUS_FAULT_TEST_KIND == 1
+/// @brief Exhaust the kernel stack via unbounded recursion to provoke a #DF.
+///
+/// A volatile on-stack buffer that is both written and read prevents the
+/// compiler from converting the recursion into a tail call or a loop,
+/// guaranteeing that every frame actually consumes stack space.
+///
+/// @param depth  Recursion counter threaded through each frame; pass 0.
+/// @return       Unreachable; present only to defeat tail-call optimisation.
 static u64 overflow_stack(u64 depth);
 #endif
 

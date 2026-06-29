@@ -29,9 +29,15 @@
 
 /// @brief Trigger a deliberate CPU fault to exercise exception handling.
 ///
-/// The fault kind is selected at build time via JANUS_FAULT_TEST_KIND
-/// (0 = page fault via null dereference, 1 = double fault via stack overflow).
-/// Never returns: either the fault handler panics, or the function spins.
+/// The fault kind is selected at build time via JANUS_FAULT_TEST_KIND:
+/// - 0 (default) — write to address 0x100000000 (first byte above the 4 GB
+///                 identity-map window) to force a #PF in both multiboot2 and
+///                 limine boot configurations.
+/// - 1           — trigger a #DF via unbounded recursion that exhausts the main
+///                 kernel stack, verifying that the IST1 double-fault stack
+///                 catches the overflow instead of triple-faulting.
+///
+/// Never returns: the fault handler panics, or the function spins.
 __noreturn void kmain_fault_test(void);
 
 #endif /* JANUS_TEST_FAULTS */

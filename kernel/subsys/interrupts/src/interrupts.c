@@ -19,8 +19,9 @@
 ///
 /// Delegates to the architecture-specific arch_interrupts_init().
 
-#include <arch/interrupts/interrupts.h>
 #include <interrupts/interrupts.h>
+
+#include <arch/interrupts/interrupts.h>
 #include <janus/attributes.h>
 
 __cold error_t interrupts_init(void)

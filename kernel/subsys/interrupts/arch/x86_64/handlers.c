@@ -25,6 +25,10 @@
 #include <janus/types.h>
 #include <kio/kio.h>
 
+/// @brief Intel-reserved exception mnemonics indexed by vector number (0–31).
+///
+/// Entries that correspond to reserved or vendor-specific vectors carry a
+/// "(reserved)" placeholder so the array is always fully populated.
 static char const * const k_mnemonics[VEC_RESERVED_COUNT] = {
     "#DE Divide Error",
     "#DB Debug",
@@ -60,6 +64,12 @@ static char const * const k_mnemonics[VEC_RESERVED_COUNT] = {
     "(reserved)",
 };
 
+/// @brief Print the full CPU register state captured in an interrupt frame.
+///
+/// Writes the trap frame (RIP, CS, RFLAGS, RSP, SS) and all saved
+/// general-purpose registers to the kernel console via kprintf.
+///
+/// @param f  Interrupt frame captured by the ISR entry stub in isr.asm.
 static void dump_registers(interrupt_frame_t const * f);
 
 char const * interrupts_vector_mnemonic(u64 vector)
