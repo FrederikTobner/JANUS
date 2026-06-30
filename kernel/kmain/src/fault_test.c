@@ -56,7 +56,7 @@ __noreturn void kmain_fault_test(void)
     // address 0 would silently succeed there.  0x100000000 (4 GB + 0) lies
     // just above that window and is unmapped in both the multiboot2
     // (identity-mapped) and limine (higher-half) virtual address spaces.
-    
+
     u32 volatile * p = (u32 volatile *) 0x100000000ULL;
     *p = 0xDEADBEEFu;
 #endif

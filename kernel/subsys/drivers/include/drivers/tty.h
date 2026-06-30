@@ -22,7 +22,7 @@
 ///
 /// Backends:
 /// - x86_64: VGA text mode via port I/O or framebuffer text rendering via memory-mapped I/O
-/// - aarch64: Framebuffer text rendering 
+/// - aarch64: Framebuffer text rendering
 
 #ifndef DRIVERS_TTY_H
 #define DRIVERS_TTY_H
