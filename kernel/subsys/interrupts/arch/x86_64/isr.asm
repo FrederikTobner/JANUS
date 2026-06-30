@@ -40,12 +40,13 @@ isr_stub_%1:
 %macro ISR_ERR 1
 isr_stub_%1:
     push qword %1           ; vector number (error code already on stack)
-    jmp isr_common
+    jmp isr_common          ; jmp to common tail
 %endmacro
 
 ; Generate all 256 stubs. Vectors 8, 10, 11, 12, 13, 14, 17, 21, 29, 30 push an
 ; error code; all others do not.
-; 29 = #VC (VMM Communication, AMD SEV-ES), 30 = #SX (Security Exception).
+; 29 = #VC (VMM Communication, AMD SEV-ES)
+; 30 = #SX (Security Exception).
 %assign v 0
 %rep 256
     %if v == 8 || v == 10 || v == 11 || v == 12 || v == 13 || v == 14 || v == 17 || v == 21 || v == 29 || v == 30
@@ -56,9 +57,12 @@ isr_stub_%1:
     %assign v v+1
 %endrep
 
-; Common tail: save GPRs (r15 pushed last -> lowest address -> frame.r15),
+; Common tail: save general purpose registers (r15 pushed last -> lowest address -> frame.r15),
 ; pass the frame pointer to C, then (unreachable for fatal faults) restore.
 isr_common:
+    ; Push all general-purpose registers.  The order is chosen to match the
+    ; layout of interrupt_frame_t, so that the C dispatcher can simply cast the
+    ; stack pointer to a pointer to interrupt_frame_t.
     push rax
     push rbx
     push rcx
@@ -79,7 +83,7 @@ isr_common:
     mov rdi, rsp            ; arg0 = interrupt_frame_t *
     call interrupts_dispatch
 
-    ; Retained for completeness; interrupts_dispatch is __noreturn today.
+    ; Retained for completeness; interrupts_dispatch is __noreturn today
     pop r15
     pop r14
     pop r13

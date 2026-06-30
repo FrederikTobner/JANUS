@@ -20,7 +20,8 @@ option(JANUS_TEST_FAULTS "Enable fault injection for testing" OFF)
 if(JANUS_TEST_FAULTS)
     add_compile_definitions(JANUS_TEST_FAULTS=1)
 endif()
-
+# Used to indicate that the kernel is being built (as opposed to userland code)
+add_compile_definitions(JANUS_KERNEL=1)
 
 # Add generated config.h to include path
 include_directories("${CMAKE_BINARY_DIR}/kernel/include" "${CMAKE_CURRENT_SOURCE_DIR}/include")

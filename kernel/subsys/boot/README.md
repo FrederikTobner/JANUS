@@ -3,18 +3,18 @@
 Protocol-agnostic boot context definitions and protocol-specific initialization
 implementations.
 
+## Current Implementations
+
+| Protocol   | Supported Architectures | Entry point setup                                              |
+|------------|-------------------------|----------------------------------------------------------------|
+| Limine     | x86_64, aarch64         | Assembly calls `kernel_main` directly                          |
+| Multiboot2 | x86_64                  | Assembly calls `multiboot2_stash_bootinfo`, then `kernel_main` |
+
 ## Responsibilities
 
 - Define the `boot_context_t` structure (public, not opaque) that captures all boot-time information the kernel needs
 - Provide a common `boot_init(boot_context_t *)` entry point, which is implemented by each protocol
 - Parse protocol-specific data (Limine responses, Multiboot2 tags) into the uniform boot context
-
-## Public Interface
-
-Headers live under `include/boot/`:
-
-- `context.h` — `boot_context_t`, `boot_display_info_t`, `boot_protocol_t`,
-  `boot_init()` declaration, and inline address-translation helpers
 
 ## Architecture
 
@@ -23,13 +23,6 @@ The actual initialization code lives in the protocol libraries under `protocol/`
 
 `kernel_main` calls `boot_init(&kd.boot)`.
 The linker resolves this to the symbol in the proper protocol library, that was linked
-
-## Current Implementations
-
-| Protocol   | Supported Architectures | Entry point setup                                              |
-|------------|-------------------------|----------------------------------------------------------------|
-| Limine     | x86_64, aarch64         | Assembly calls `kernel_main` directly                          |
-| Multiboot2 | x86_64                  | Assembly calls `multiboot2_stash_bootinfo`, then `kernel_main` |
 
 ## Adding a New Boot Protocol
 

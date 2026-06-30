@@ -72,6 +72,10 @@ static char const * const k_mnemonics[VEC_RESERVED_COUNT] = {
 /// @param f  Interrupt frame captured by the ISR entry stub in isr.asm.
 static void dump_registers(interrupt_frame_t const * f);
 
+/// @brief Return a human-readable mnemonic for a CPU exception vector.
+/// @param vector  CPU exception vector number (0–31).
+/// @return Pointer to a static string describing the exception, or a generic
+///         "External/Reserved vector" message for vectors outside the reserved range.
 char const * interrupts_vector_mnemonic(u64 vector)
 {
     if (vector < VEC_RESERVED_COUNT) {
@@ -80,6 +84,13 @@ char const * interrupts_vector_mnemonic(u64 vector)
     return "External/Reserved vector";
 }
 
+//// @brief Dispatch a CPU exception to the kernel panic handler.
+////
+/// This function is called from the architecture-specific ISR entry stubs
+/// in isr.asm. It prints a diagnostic message to the kernel console, including
+/// the vector number, mnemonic, error code, and register state.
+///
+/// @param frame  Pointer to the interrupt frame captured by the ISR entry stub.
 __noreturn void interrupts_dispatch(interrupt_frame_t const * frame)
 {
     kprintf("\n*** CPU EXCEPTION ***\n");

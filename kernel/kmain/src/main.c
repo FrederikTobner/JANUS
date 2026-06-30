@@ -59,8 +59,6 @@ __noreturn void kernel_main(void)
         kpanic("boot_init failed — cannot continue");
     }
 
-    console_init(&descriptor.boot);
-    // Print greeting
     kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
 
     if (interrupts_init() != JANUS_OK) {
@@ -70,7 +68,6 @@ __noreturn void kernel_main(void)
 #ifdef JANUS_TEST_FAULTS
     kmain_fault_test();
 #endif
-    // Initialize physical memory manager
     error_t pmm_err =
         mm_pmm_init(&descriptor.boot.memmap, descriptor.boot.kernel_phys_base, descriptor.boot.kernel_phys_end);
     if (pmm_err != JANUS_OK) {
@@ -78,8 +75,7 @@ __noreturn void kernel_main(void)
     }
     mm_pmm_stats_t pmm_stats;
     mm_pmm_get_stats(&pmm_stats);
-    kprintf("PMM: %llu MiB free\n", pmm_stats.free_pages * 4096ULL / (1024ULL * 1024ULL));
+    kprintf("Physical Memory Manager: %llu MiB free\n", pmm_stats.free_pages * 4096ULL / (1024ULL * 1024ULL));
 
-    // Halt the CPU forever
     asm_cpu_halt_forever();
 }

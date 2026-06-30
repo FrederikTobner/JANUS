@@ -35,6 +35,11 @@
 /// Safe to call multiple times — no-op if serial is already active.
 void console_init_early(void);
 
+//// @brief Initialize the kernel console after boot context is available.
+///
+/// Initializes the serial and TTY drivers based on the boot context.
+///
+/// @param boot_context  Pointer to the boot context structure containing boot information.
 void console_init(boot_context_t const * boot_context);
 
 #endif // KMAIN_CONSOLE_H

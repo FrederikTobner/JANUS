@@ -29,7 +29,7 @@
 
 /// @brief Install and activate interrupt/exception handling on the current CPU.
 ///
-/// On x86_64: builds and loads a kernel-owned GDT (Global Descriptor Table)
+/// On x86_64 this function builds and loads a kernel-owned GDT (Global Descriptor Table)
 /// plus TSS (Task State Segment) — with a dedicated IST (Interrupt Stack Table)
 /// stack for #DF (Double Fault) — then builds and loads a 256-entry IDT
 /// (Interrupt Descriptor Table). After this returns, CPU exceptions are routed

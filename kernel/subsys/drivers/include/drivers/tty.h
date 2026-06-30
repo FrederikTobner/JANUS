@@ -17,16 +17,12 @@
 /// @file tty.h
 /// @brief Text display driver interface.
 ///
-/// This header contains:
-/// - Public API (drivers_tty_*)
-/// - Types (tty_color_t)
-///
 /// Architecture contract (arch_tty_*) is in <arch/drivers/tty.h>.
 /// Shared logic (cursor tracking, scrolling) is in tty.c.
 ///
 /// Backends:
-/// - x86_64: VGA text mode (0xB8000)
-/// - aarch64: Framebuffer text rendering (future)
+/// - x86_64: VGA text mode via port I/O or framebuffer text rendering via memory-mapped I/O
+/// - aarch64: Framebuffer text rendering 
 
 #ifndef DRIVERS_TTY_H
 #define DRIVERS_TTY_H

@@ -49,11 +49,8 @@ __cold void console_init_early(void)
     }
 }
 
-// After serial/tty init, set up the output sink:
-// (This should be called after both drivers are initialized and their availability is known)
 __cold void console_init(boot_context_t const * boot_context)
 {
-    // Initialize drivers
     bool serial_available = init_serial(boot_context);
     bool tty_available = init_tty(boot_context, serial_available);
     g_serial_active = serial_available;
