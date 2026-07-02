@@ -1,7 +1,6 @@
 # JANUS Development Tools
 
-Development tools and utilities built separately from the kernel using their
-own CMake project.
+Development tools and utilities built separately from the kernel using their own CMake project.
 
 ## Tools
 
