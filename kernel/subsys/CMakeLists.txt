@@ -7,4 +7,6 @@ add_subdirectory(boot)
 
 add_subdirectory(drivers)
 
+add_subdirectory(interrupts)
+
 add_subdirectory(mm)

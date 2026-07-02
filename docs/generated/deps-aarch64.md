@@ -13,6 +13,7 @@ graph TD
   subgraph subsys_layer["Subsystem Layer"]
     boot["boot"]
     drivers["drivers"]
+    interrupts["interrupts"]
     mm["mm"]
     kmain["kmain"]
   end
@@ -35,16 +36,19 @@ graph TD
   boot -.-> janus_contract_memmap
   boot_limine --> boot
   drivers --> display
+  interrupts --> kio
   mm --> kio
   mm -.-> janus_contract_memmap
   kmain --> drivers
   kmain --> boot
   kmain --> fmt
+  kmain --> interrupts
   kmain --> kio
   kmain --> mm
-  kernel_limine_elf --> drivers
   kernel_limine_elf --> boot
   kernel_limine_elf --> boot_limine
+  kernel_limine_elf --> drivers
+  kernel_limine_elf --> interrupts
   kernel_limine_elf --> mm
   kernel_limine_elf --> kmain
 ```

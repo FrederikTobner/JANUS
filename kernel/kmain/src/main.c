@@ -23,12 +23,14 @@
 
 #include <asm/cpu.h>
 #include <boot/context.h>
+#include <interrupts/interrupts.h>
 #include <janus/attributes.h>
 #include <janus/config.h>
 #include <janus/errno.h>
 #include <janus/types.h>
 #include <kio/kio.h>
 #include <kmain/console.h>
+#include <kmain/fault_test.h>
 #include <kmain/kernel_descriptor.h>
 #include <mm/pmm.h>
 
@@ -56,12 +58,16 @@ __noreturn void kernel_main(void)
     if (boot_init(&descriptor.boot) != JANUS_OK) {
         kpanic("boot_init failed — cannot continue");
     }
-
     console_init(&descriptor.boot);
-    // Print greeting
     kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
 
-    // Initialize physical memory manager
+    if (interrupts_init() != JANUS_OK) {
+        kpanic("interrupts_init failed — cannot continue");
+    }
+
+#ifdef JANUS_TEST_FAULTS
+    kmain_fault_test();
+#endif
     error_t pmm_err =
         mm_pmm_init(&descriptor.boot.memmap, descriptor.boot.kernel_phys_base, descriptor.boot.kernel_phys_end);
     if (pmm_err != JANUS_OK) {
@@ -69,8 +75,7 @@ __noreturn void kernel_main(void)
     }
     mm_pmm_stats_t pmm_stats;
     mm_pmm_get_stats(&pmm_stats);
-    kprintf("PMM: %llu MiB free\n", pmm_stats.free_pages * 4096ULL / (1024ULL * 1024ULL));
+    kprintf("Physical Memory Manager: %llu MiB free\n", pmm_stats.free_pages * 4096ULL / (1024ULL * 1024ULL));
 
-    // Halt the CPU forever
     asm_cpu_halt_forever();
 }

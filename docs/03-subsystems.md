@@ -11,6 +11,10 @@ See [boot/README.md](../kernel/subsys/boot/README.md).
 Hardware-facing device drivers: serial (UART), TTY (text terminal and framebuffer), and CPU control (`drivers_cpu_halt_forever`).
 See [drivers/README.md](../kernel/subsys/drivers/README.md).
 
+## interrupts
+
+Interrupt subsystem. Currently only supports x86_64.
+
 ## mm
 
 Memory management subsystem.

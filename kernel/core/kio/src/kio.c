@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                              *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -31,7 +31,9 @@
 /// Registered output callback, NULL until kio_register_putc() is called.
 static kio_putc_fn g_putc = NULL;
 
-/// fmt_to sink adapter: forwards each char to the registered callback
+/// @brief fmt_to sink adapter: forwards each char to the registered callback
+/// @param c The character to output
+/// @param ctx Unused context pointer (required by fmt_to signature)
 static void kio_fmt_putc(char c, __unused void * ctx);
 
 void kio_register_putc(kio_putc_fn fn)

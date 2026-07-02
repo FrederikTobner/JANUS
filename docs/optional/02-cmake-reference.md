@@ -79,6 +79,6 @@ If clangd or clang-tidy reports stale results:
 # Regenerate by reconfiguring
 cmake --preset x86_64-gcc
 
-# Verify the root symlink is current
+# Verify that the file has been copied to the project root 
 ls -la compile_commands.json
 ```
