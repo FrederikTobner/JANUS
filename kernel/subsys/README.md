@@ -1,7 +1,7 @@
 # subsys
 
 Kernel subsystems own hardware state and expose public C APIs.
-Each subsystem is isolated, meaning each subsystems may not depend on other subsystems.
+Each subsystem is isolated, meaning subsystems are not allowed to depend on each other. 
 Only `kmain` is permitted to depend on other subsystems.
 
 Architecture-specific code lives inside the owning subsystem under `arch/`, following the three-tier include hierarchy (Tier 1 public → Tier 2 contract → Tier 3 implementation).

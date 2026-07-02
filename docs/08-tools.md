@@ -44,4 +44,4 @@ The generated header defines three dimension macros and one glyph array:
 - `<PREFIX>_GLYPH_COUNT` — number of glyphs in the font
 - `<PREFIX>_glyphs[]` — flat byte array of all glyph bitmaps in row-major order
 
-More information regarding the tool can bee found in its [readme](psf2c/README.md),
+More information regarding the tool can be found in its [readme](psf2c/README.md),

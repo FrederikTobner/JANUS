@@ -58,7 +58,7 @@ __noreturn void kernel_main(void)
     if (boot_init(&descriptor.boot) != JANUS_OK) {
         kpanic("boot_init failed — cannot continue");
     }
-
+    console_init(&descriptor.boot);
     kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
 
     if (interrupts_init() != JANUS_OK) {

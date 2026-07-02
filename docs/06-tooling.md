@@ -19,12 +19,12 @@ A full list of available CMake commands for inspecting cache variables, enabling
 
 ## QEMU
 
-The `run` build target invokes QEMU with the flags appropriate for the selected preset.
+The `run-<protocol>` build target invokes QEMU with the flags appropriate for the selected preset.
 Driving the kernel through the build system is the recommended path because it keeps the QEMU flags, the ISO path, and the firmware selection consistent with how CI runs:
 
 ```bash
-cmake --build --preset x86_64-gcc --target run
-cmake --build --preset aarch64-clang --target run
+cmake --build --preset x86_64-gcc --target run-multiboot2
+cmake --build --preset aarch64-clang --target run-limine
 ```
 
 QEMU's built-in GDB server is activated by the `debug-limine` target (see the LLDB section below).
@@ -49,7 +49,7 @@ lldb
 
 The kernel binary contains full DWARF symbols when built with `Debug` or `RelWithDebInfo`.
 Because there is no libc and no dynamic linker, the symbol table contains exactly the symbols defined in the codebase.
-The entry point of the whole program then correspondsto the symbol `_start`, while the first C function, that is envoked within the kernel, is called `kernel_main`.
+The entry point of the whole program then corresponds to the symbol `_start`, while the first C function, that is envoked within the kernel, is called `kernel_main`.
 
 A complete LLDB command reference, including memory inspection, disassembly, and watchpoint commands, is in [optional/01-lldb-reference.md](optional/01-lldb-reference.md).
 
