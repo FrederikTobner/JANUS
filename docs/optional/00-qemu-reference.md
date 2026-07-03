@@ -2,9 +2,8 @@
 
 ## Invocation
 
-The `run` and `debug-*` CMake targets invoke QEMU with the correct flags for the
-selected preset. Direct invocation is rarely necessary, but the underlying commands
-are:
+The `run` and `debug-*` CMake targets invoke QEMU with the correct flags for the selected preset. 
+Direct invocation is rarely necessary, but the underlying commands are:
 
 ```bash
 # x86_64 Limine ISO
@@ -31,9 +30,8 @@ qemu-system-aarch64 -M virt -cpu cortex-a72 -kernel build-aarch64-gcc/kernel.elf
 
 ## QEMU Monitor
 
-The QEMU monitor is accessible by pressing `Ctrl+A C` when running with
-`-serial stdio`. It provides direct inspection of the emulated machine state
-without stopping the guest CPU:
+The QEMU monitor is accessible by pressing `Ctrl+A C` when running with `-serial stdio`. 
+It provides direct inspection of the emulated machine state without stopping the guest CPU:
 
 | Command             | Description                                                    |
 |---------------------|----------------------------------------------------------------|

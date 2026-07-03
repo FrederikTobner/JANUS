@@ -22,7 +22,9 @@ For plain one-dimensional arrays, standard subscript notation is perfectly accep
 
 ### Structure Encapsulation
 
-Structures are defined publicly in their owning module's header by default, rather than being hidden behind opaque pointer typedefs. The rationale is covered in depth in [00-overview.md](00-overview.md); the practical rule is that a struct should only be made opaque when its internal representation genuinely varies at runtime and that variation needs to be hidden from consumers.
+Structures are defined publicly in their owning module's header by default, rather than being hidden behind opaque pointer typedefs. 
+The rationale is covered in depth in [00-overview.md](00-overview.md). 
+The practical rule is that a struct should only be made opaque when its internal representation genuinely varies at runtime and that variation needs to be hidden from consumers.
 
 ### East-Const
 

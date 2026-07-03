@@ -2,12 +2,12 @@
 
 ## Layer Model
 
-The entire kernel source tree is partitioned into layers ordered by abstraction
-level. The single governing rule is that dependencies may only point downward:
+The entire kernel source tree is partitioned into layers ordered by abstraction level. 
+The single governing rule is that dependencies may only point downward:
 a module may depend on anything in a lower layer, but never on a peer in the same
-layer or on anything above it. CMake enforces this constraint through its target
-dependency graph; a violation causes a configure-time fatal error before any
-compiler is invoked.
+layer or on anything above it. 
+CMake enforces this constraint through its target dependency graph. 
+A violation causes a configure-time fatal error before any compiler is invoked.
 
 |Location                   | Name          | Description                                                           |
 |---------------------------|---------------|-----------------------------------------------------------------------|
