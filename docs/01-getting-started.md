@@ -2,9 +2,8 @@
 
 ## Dependencies
 
-The following tools are required to configure, build, and run JANUS. Where a
-distribution-specific install command is given, Debian/Ubuntu and Arch Linux are
-covered; consult your package manager for other distributions.
+The following tools are required to configure, build, and run JANUS. 
+Where a distribution-specific install command is given, Debian/Ubuntu and Arch Linux are covered other distributions may follow in the future. 
 
 ### Build System
 
@@ -42,7 +41,7 @@ sudo pacman -S nasm
 
 ### Debugger
 
-LLDB is the primary debugger for x86_64. GDB with multiarch support is used for aarch64.
+For the debugging workflow I use lldb, but you can use whatever debugger you prefer.
 The repository includes a `.lldbinit` that automates connection to QEMU's debug server.
 
 ```bash
@@ -51,6 +50,8 @@ sudo pacman -S lldb gdb
 ```
 
 ### Emulator
+
+QEMU is used to run the kernel in a virtual machine. The `qemu-system-x86` and `qemu-system-arm` packages are required for x86_64 and aarch64 respectively.
 
 ```bash
 sudo apt install qemu-system-x86 qemu-system-arm
@@ -67,13 +68,12 @@ sudo apt install xorriso mtools grub-pc-bin
 sudo pacman -S xorriso mtools grub
 ```
 
-Limine itself is fetched automatically by CMake via `FetchContent` and does not
-need to be installed separately.
+Limine itself is fetched automatically by CMake via `FetchContent` and does not need to be installed separately.
 
 ### Language Server
 
-clangd provides IDE features such as autocompletion and jump-to-definition. The
-repository includes a `.clangd` configuration file that points clangd at the
+clangd provides IDE features such as autocompletion and jump-to-definition. 
+The repository includes a `.clangd` configuration file that points clangd at the
 generated `compile_commands.json`.
 
 ```bash
