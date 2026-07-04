@@ -14,10 +14,10 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef KIO_KIO_H
-#define KIO_KIO_H
+#ifndef KIO_OUTPUT_H
+#define KIO_OUTPUT_H
 
-/// @file kio.h
+/// @file output.h
 /// @brief Kernel I/O — formatted output and fatal error handling.
 ///
 /// kio is a core-layer service that provides kprintf(), vkprintf(), and
@@ -59,24 +59,4 @@ s32 kprintf(char const * fmtstr, ...) __attribute__((format(printf, 1, 2)));
 /// @brief Kernel vprintf — va_list variant of kprintf.
 s32 vkprintf(char const * fmtstr, va_list args);
 
-/// @brief Underlying panic implementation — do not call directly; use kpanic().
-///
-/// Prints a banner and the diagnostic message if output is available,
-/// then halts the CPU permanently.
-__cold __noreturn void kpanic_impl(char const * file, int line, char const * fmt, ...)
-    __attribute__((format(printf, 3, 4)));
-
-/// @brief Panic with a human-readable message and halt the CPU.
-///
-/// Injects __FILE__ and __LINE__ automatically so the panic site is always
-/// identifiable in the output.
-///
-/// Example:
-/// @code
-///     if (err != JANUS_OK) {
-///         kpanic("subsystem_init failed: %d", err);
-///     }
-/// @endcode
-#define kpanic(fmt, ...) kpanic_impl(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
-
-#endif /* KIO_KIO_H */
+#endif /* KIO_OUTPUT_H */

@@ -14,13 +14,13 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/interrupts/interrupts.h
+/// @file arch/interrupts/init.h
 /// @brief Interrupt handling architecture contract.
 ///
 /// Declares arch_interrupts_* functions implemented in arch/<ARCH>/.
 
-#ifndef ARCH_INTERRUPTS_INTERRUPTS_H
-#define ARCH_INTERRUPTS_INTERRUPTS_H
+#ifndef ARCH_INTERRUPTS_INIT_H
+#define ARCH_INTERRUPTS_INIT_H
 
 #include <janus/types.h>
 
@@ -34,4 +34,4 @@
 /// @return JANUS_OK on success; a negative error_t otherwise.
 error_t arch_interrupts_init(void);
 
-#endif /* ARCH_INTERRUPTS_INTERRUPTS_H */
+#endif /* ARCH_INTERRUPTS_INIT_H */

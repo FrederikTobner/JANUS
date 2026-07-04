@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                               *
+ * This file is part of JANUS.                                              *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,17 +14,33 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file interrupts.c
-/// @brief Shared logic of the interrupts subsystem.
-///
-/// Delegates to the architecture-specific arch_interrupts_init().
+#ifndef KIO_DIE_H
+#define KIO_DIE_H
 
-#include <interrupts/interrupts.h>
-
-#include <arch/interrupts/interrupts.h>
+/// @file die.h
+/// @brief Kernel panic interface.
 #include <janus/attributes.h>
+#include <janus/types.h>
+#include <janus/va_arg.h>
 
-__cold error_t interrupts_init(void)
-{
-    return arch_interrupts_init();
-}
+/// @brief Underlying panic implementation — do not call directly; use kpanic().
+///
+/// Prints a banner and the diagnostic message if output is available,
+/// then halts the CPU permanently.
+__cold __noreturn void kpanic_impl(char const * file, int line, char const * fmt, ...)
+    __attribute__((format(printf, 3, 4)));
+
+/// @brief Panic with a human-readable message and halt the CPU.
+///
+/// Injects __FILE__ and __LINE__ automatically so the panic site is always
+/// identifiable in the output.
+///
+/// Example:
+/// @code
+///     if (err != JANUS_OK) {
+///         kpanic("subsystem_init failed: %d", err);
+///     }
+/// @endcode
+#define kpanic(fmt, ...) kpanic_impl(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
+
+#endif /* KIO_OUTPUT_H */

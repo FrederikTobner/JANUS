@@ -14,17 +14,17 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file interrupts.h
+/// @file init.h
 /// @brief Interrupt and CPU-exception handling — public API.
 ///
 /// Architecture contract (arch_interrupts_*) is in
-/// <arch/interrupts/interrupts.h>. The public surface is intentionally
+/// <arch/interrupts/init.h>. The public surface is intentionally
 /// architecture-agnostic: no x86 concept (IDT, CR2, gate type) appears here.
 
-#ifndef INTERRUPTS_INTERRUPTS_H
-#define INTERRUPTS_INTERRUPTS_H
+#ifndef INTERRUPTS_INIT_H
+#define INTERRUPTS_INIT_H
 
-#include <arch/interrupts/interrupts.h>
+#include <arch/interrupts/init.h>
 #include <janus/types.h>
 
 /// @brief Install and activate interrupt/exception handling on the current CPU.
@@ -41,4 +41,4 @@
 /// @return JANUS_OK on success; a negative error_t otherwise.
 error_t interrupts_init(void);
 
-#endif /* INTERRUPTS_INTERRUPTS_H */
+#endif /* INTERRUPTS_INIT_H */

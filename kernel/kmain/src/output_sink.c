@@ -24,7 +24,7 @@
 #include <drivers/serial.h>
 #include <janus/attributes.h>
 #include <janus/errno.h>
-#include <kio/kio.h>
+#include <kio/output.h>
 
 static bool g_serial_active = false;
 static bool g_console_active = false;

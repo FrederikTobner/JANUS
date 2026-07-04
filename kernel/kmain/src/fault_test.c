@@ -22,7 +22,7 @@
 #ifdef JANUS_TEST_FAULTS
 
 #include <janus/types.h>
-#include <kio/kio.h>
+#include <kio/output.h>
 
 #ifndef JANUS_FAULT_TEST_KIND
 #define JANUS_FAULT_TEST_KIND 0

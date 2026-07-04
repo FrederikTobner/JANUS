@@ -9,7 +9,7 @@
 - `vkprintf(char const *fmt, va_list ap)`
 - `kpanic(fmt, ...)`
 
-Header: `include/kio/kio.h`
+Header: `include/kio/output.h`
 
 ## Design
 

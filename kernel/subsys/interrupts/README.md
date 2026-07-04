@@ -6,7 +6,7 @@ Currenlty only supports x86_64.
 
 ## Public API
 
-- `include/interrupts/interrupts.h`
+- `include/interrupts/init.h`
 - `error_t interrupts_init(void)` — install and activate exception handling on
   the current CPU. Must be called once, after console init and before any
   fault-prone subsystem (e.g. the PMM).

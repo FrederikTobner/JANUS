@@ -23,7 +23,8 @@
 #include <asm/regs.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
-#include <kio/kio.h>
+#include <kio/die.h>
+#include <kio/output.h>
 
 /// @brief Intel-reserved exception mnemonics indexed by vector number (0–31).
 ///

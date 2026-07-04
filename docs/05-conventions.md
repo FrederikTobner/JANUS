@@ -100,13 +100,15 @@ The general pattern is `<module>_<type>_<action>` for operations whose primary s
 
 ### File Naming
 
-A file must be named after its **responsibility**, not its containing module. A file `kio/kio.c` carries no more information than its directory path already does — name it for what it does: `kio/output.c`. The same applies to public headers: `<kio/output.h>` states what it contains; `<kio/kio.h>` does not.
+A file must be named after its **responsibility**, not its containing module.
+A file `kio/kio.c` carries no more information than its directory path already does, so split it into two parts in order to name it for what it does: `kio/output.c` and `kio/input.c` for example.
+The same applies to public headers: `<kio/output.h>` states what it contains; `<kio/output.h>` does not.
 
 Some examples:
 
 | Module | Avoid | Prefer |
 |--------|-------|--------|
-| `kio` | `kio/kio.c`, `<kio/kio.h>` | `kio/output.c`, `<kio/output.h>` |
+| `kio` | `kio/kio.c`, `<kio/output.h>` | `kio/output.c`, `<kio/output.h>` |
 | `interrupts` | `interrupts/interrupts.c` | `interrupts/init.c` |
 | `gfx` | `gfx/gfx.c` | `gfx/draw.c`, `gfx/surface.h` |
 
