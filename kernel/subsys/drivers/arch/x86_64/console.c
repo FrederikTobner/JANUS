@@ -14,28 +14,22 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/shared/drivers/framebuffer.c
-/// @brief Shared framebuffer text-rendering implementation.
-///
-/// Character drawing logic for framebuffer-based text output.
-/// Pixel operations are delegated to lib/gfx (gfx_surface_blit_mono).
-/// Shared between all architectures that use framebuffer output.
+/// @file arch/x86_64/drivers/console.c
+/// @brief x86_64 console probe — selects VGA text or framebuffer backend.
 
-#include <arch/shared/drivers/framebuffer.h>
-#include <gfx/draw.h>
+#include <arch/drivers/console.h>
+#include <arch/internal/drivers/vga_console.h>
+#include <arch/shared/drivers/fb_console.h>
+#include <janus/attributes.h>
 
-__cold void
-framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
+__cold console_ops_t const * arch_console_probe(display_info_t const * cfg)
 {
-    if (UNLIKELY(!state->surface.base || column >= state->text_width || row >= state->text_height)) {
-        return;
+    switch (cfg->mode) {
+    case DISPLAY_MODE_VGA_TEXT:
+        return vga_console_init(cfg);
+    case DISPLAY_MODE_FRAMEBUFFER:
+        return fb_console_init(cfg);
+    default:
+        return NULL;
     }
-
-    u32 px = (u32) column * FRAMEBUFFER_FONT_WIDTH;
-    u32 py = (u32) row * FRAMEBUFFER_FONT_HEIGHT;
-    u32 fg = framebuffer_color_palette[foreground & 0x0F];
-    u32 bg = framebuffer_color_palette[background & 0x0F];
-
-    gfx_surface_blit_mono(
-        &state->surface, px, py, terminus_glyphs[(u8) c], FRAMEBUFFER_FONT_WIDTH, FRAMEBUFFER_FONT_HEIGHT, fg, bg);
 }

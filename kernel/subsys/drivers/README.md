@@ -10,12 +10,12 @@ Hardware-facing device drivers subsystem.
 - Arch implementations: `arch/x86_64/serial.c`, `arch/aarch64/serial.c`
 - Notes: COM1 (`0x3F8`) on x86_64, PL011 on aarch64. Currently only supports a fixed baud rate.
 
-### TTY (Text Terminal)
+### Console (Text Terminal)
 
-- Public API: `include/drivers/tty.h`
-- Arch implementations: `arch/x86_64/tty.c`, `arch/aarch64/tty.c`
-- Generic source: `src/tty.c`
-- Shared framebuffer renderer: `arch/shared/framebuffer.c`
+- Public API: `include/drivers/console.h`
+- Arch contract: `arch/include/arch/drivers/console.h` (`console_ops_t`, `arch_console_probe`)
+- Arch selectors: `arch/x86_64/console.c`, `arch/aarch64/console.c`
+- Generic source: `src/console.c`
+- Shared framebuffer backend: `arch/shared/fb_console.c`, `arch/shared/framebuffer.c`
 - Notes: Supports VGA text mode (x86_64 Multiboot2) and framebuffer rendering
-  (Limine on both architectures).
-
+  (Limine on both architectures). No shadow buffer — device state lives in the backend.

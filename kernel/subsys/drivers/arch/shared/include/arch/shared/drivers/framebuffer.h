@@ -17,15 +17,16 @@
 #ifndef ARCH_SHARED_DRIVERS_FRAMEBUFFER_H
 #define ARCH_SHARED_DRIVERS_FRAMEBUFFER_H
 
-/// @file framebuffer.h
-/// @brief Shared framebuffer text rendering interface.
+/// @file arch/shared/drivers/framebuffer.h
+/// @brief Shared framebuffer text-rendering interface.
 ///
-/// Provides text rendering on a linear framebuffer using the Terminus 16x32
-/// bitmap font. Pixel primitives are delegated to lib/display (display_fb_t).
-/// This code is shared between architectures that use framebuffer output.
+/// Provides character drawing on a linear framebuffer using the Terminus
+/// 16×32 bitmap font.  Pixel primitives are delegated to lib/gfx
+/// (gfx_surface_t).  This code is shared between all architectures that
+/// use framebuffer output.
 
-#include <display/display.h>
-#include <display/fb.h>
+#include <contracts/display.h>
+#include <gfx/surface.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 
@@ -36,18 +37,18 @@
 
 /// @brief Framebuffer state for text rendering.
 ///
-/// Wraps a display_fb_t pointer with the cursor and text-grid dimensions
-/// needed by the TTY driver. Code that only writes pixels should use
-/// display_fb_t directly via display_put_pixel / display_fill_rect.
+/// Embeds a gfx_surface_t by value (public struct — no opaque handle).
+/// Code that only writes pixels uses gfx_surface_t directly via the
+/// gfx_surface_* primitives.
 typedef struct {
-    display_fb_t * fb; ///< Pixel-level framebuffer handle (lib/display)
-    u16 text_width;    ///< Width in characters
-    u16 text_height;   ///< Height in characters
+    gfx_surface_t surface; ///< Pixel-level surface (lib/gfx)
+    u16 text_width;        ///< Width in character cells
+    u16 text_height;       ///< Height in character cells
 } framebuffer_state_t;
 
-/// @brief Standard 16-color palette (VGA compatible).
+/// @brief Standard 16-color palette (VGA-compatible).
 ///
-/// Maps TTY color indices (0-15) to RGB values.
+/// Maps TTY color indices (0–15) to RGB values.
 static u32 const framebuffer_color_palette[16] = {
     0x000000, // Black
     0x0000AA, // Blue
@@ -69,30 +70,31 @@ static u32 const framebuffer_color_palette[16] = {
 
 /// @brief Initialize framebuffer state from a display_info_t descriptor.
 ///
-/// @param state   Framebuffer state to initialize.
-/// @param info    Display configuration from the boot context.
+/// @param state  Framebuffer state to initialize.
+/// @param info   Display configuration from the boot context.
 static inline void framebuffer_init(framebuffer_state_t * state, display_info_t const * info)
 {
-    state->fb = display_fb_init(info->framebuffer,
-                                info->width,
-                                info->height,
-                                info->pitch,
-                                info->bpp,
-                                info->red_mask_shift,
-                                info->green_mask_shift,
-                                info->blue_mask_shift);
+    gfx_surface_init(&state->surface,
+                     info->framebuffer,
+                     (u32) info->width,
+                     (u32) info->height,
+                     (u32) info->pitch,
+                     info->bpp,
+                     info->red_mask_shift,
+                     info->green_mask_shift,
+                     info->blue_mask_shift);
     state->text_width = (u16) (info->width / FRAMEBUFFER_FONT_WIDTH);
     state->text_height = (u16) (info->height / FRAMEBUFFER_FONT_HEIGHT);
 }
 
-/// @brief Draw a character at the specified text position.
+/// @brief Draw a character at the specified text-cell position.
 ///
-/// @param state      Framebuffer state
-/// @param column     Column (character position)
-/// @param row        Row (character position)
-/// @param c          Character to draw
-/// @param foreground Foreground color index (0-15)
-/// @param background Background color index (0-15)
+/// @param state       Framebuffer state.
+/// @param column      Column (character cell, 0-based).
+/// @param row         Row (character cell, 0-based).
+/// @param c           Character to draw.
+/// @param foreground  Foreground color index (0–15).
+/// @param background  Background color index (0–15).
 void framebuffer_draw_char(
     framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background);
 

@@ -14,32 +14,23 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef KMAIN_CONSOLE_H
-#define KMAIN_CONSOLE_H
+#ifndef ARCH_SHARED_DRIVERS_FB_CONSOLE_H
+#define ARCH_SHARED_DRIVERS_FB_CONSOLE_H
 
-/// @file console.h
-/// @brief Kernel console output.
+/// @file arch/shared/drivers/fb_console.h
+/// @brief Framebuffer text-console backend.
 ///
-///
-/// Provides functions for kernel console output, including formatted printing.
+/// Declares fb_console_init(), which initializes the shared framebuffer
+/// console and returns its console_ops_t.  Used by arch_console_probe()
+/// on any architecture that supports a linear framebuffer.
 
-#include <boot/context.h>
-#include <kio/kio.h>
+#include <arch/drivers/console.h>
+#include <contracts/display.h>
 
-/// @brief Best-effort serial initialization before boot context is available.
+/// @brief Initialize the framebuffer console for the given display config.
 ///
-/// Calls boot_early_params() to obtain address-translation parameters.
-/// On Multiboot2 all outputs are zero (x86_64 uses port I/O, so zero is valid).
-/// On Limine the real HHDM offset and base addresses are supplied by the bootloader.
-/// On AArch64 with Multiboot2 this may silently fail when HHDM data is not yet available.
-/// Safe to call multiple times — no-op if serial is already active.
-void console_init_early(void);
+/// @param cfg  Display configuration (must have mode == DISPLAY_MODE_FRAMEBUFFER).
+/// @return Pointer to the framebuffer console's console_ops_t.
+console_ops_t const * fb_console_init(display_info_t const * cfg);
 
-//// @brief Initialize the kernel console after boot context is available.
-///
-/// Initializes the serial and TTY drivers based on the boot context.
-///
-/// @param boot_context  Pointer to the boot context structure containing boot information.
-void console_init(boot_context_t const * boot_context);
-
-#endif // KMAIN_CONSOLE_H
+#endif /* ARCH_SHARED_DRIVERS_FB_CONSOLE_H */

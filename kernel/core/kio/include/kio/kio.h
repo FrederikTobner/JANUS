@@ -24,7 +24,7 @@
 /// kpanic() to any kernel module that needs them. It is deliberately
 /// decoupled from the hardware drivers: output is funnelled through a
 /// single registered putc callback (kio_register_putc()). The callback
-/// is installed once by console_init_early() / console_init() in kmain.
+/// is installed once by output_sink_init_early() / output_sink_init() in kmain.
 ///
 /// Before the callback is registered:
 ///   - kprintf / vkprintf are silent no-ops.
@@ -43,7 +43,7 @@ typedef void (*kio_putc_fn)(char c);
 
 /// @brief Register the kernel output callback.
 ///
-/// Called once by console_init_early() before the first kprintf/kpanic.
+/// Called once by output_sink_init_early() before the first kprintf/kpanic.
 /// Subsequent calls replace the callback (e.g. upgrading from serial-only
 /// to serial + TTY).
 ///

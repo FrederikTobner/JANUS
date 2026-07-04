@@ -13,7 +13,7 @@ Header: `include/kio/kio.h`
 
 ## Design
 
-`kio` does not depend on hardware drivers directly. It writes through a registered callback (`kio_putc_fn`) provided by `kmain` console initialization.
+`kio` does not depend on hardware drivers directly. It writes through a registered callback (`kio_putc_fn`) provided by `kmain` output sink initialization (`output_sink_init` / `output_sink_init_early`).
 
 Formatting is delegated to `lib/fmt`.
 

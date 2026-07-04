@@ -14,38 +14,22 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/drivers/tty.h
-/// @brief TTY architecture contract.
+#ifndef X86_64_INTERNAL_DRIVERS_VGA_CONSOLE_H
+#define X86_64_INTERNAL_DRIVERS_VGA_CONSOLE_H
+
+/// @file arch/internal/drivers/vga_console.h
+/// @brief VGA text-mode console backend (x86_64 internal).
 ///
-/// Declares arch_tty_* functions implemented in arch/<ARCH>/tty.c
+/// Declares vga_console_init(), used by arch_console_probe() when the
+/// bootloader reports DISPLAY_MODE_VGA_TEXT.
 
-#ifndef ARCH_DRIVERS_TTY_H
-#define ARCH_DRIVERS_TTY_H
+#include <arch/drivers/console.h>
+#include <contracts/display.h>
 
-#include <drivers/tty.h>
-#include <janus/types.h>
+/// @brief Initialize the VGA text-mode console.
+///
+/// @param cfg  Display configuration (mode == DISPLAY_MODE_VGA_TEXT).
+/// @return Pointer to the VGA console's console_ops_t.
+console_ops_t const * vga_console_init(display_info_t const * cfg);
 
-/// @brief Initialize display hardware.
-/// @param config Display configuration (framebuffer or VGA).
-/// @return 0 on success, negative error code on failure.
-error_t arch_tty_init(display_info_t const * config);
-
-/// @brief Get display dimensions.
-/// @param width Pointer to store width (may be NULL).
-/// @param height Pointer to store height (may be NULL).
-void arch_tty_get_size(u16 * width, u16 * height);
-
-/// @brief Write character and color at position.
-/// @param x Column position.
-/// @param y Row position.
-/// @param c Character to write.
-/// @param fg Foreground color (0-15).
-/// @param bg Background color (0-15).
-void arch_tty_write_cell(u16 x, u16 y, char c, u8 fg, u8 bg);
-
-/// @brief Set hardware cursor position.
-/// @param x Column position.
-/// @param y Row position.
-void arch_tty_set_cursor(u16 x, u16 y);
-
-#endif /* ARCH_DRIVERS_TTY_H */
+#endif /* X86_64_INTERNAL_DRIVERS_VGA_CONSOLE_H */

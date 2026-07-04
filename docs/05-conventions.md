@@ -22,8 +22,8 @@ For plain one-dimensional arrays, standard subscript notation is perfectly accep
 
 ### Structure Encapsulation
 
-Structures are defined publicly in their owning module's header by default, rather than being hidden behind opaque pointer typedefs. 
-The rationale is covered in depth in [00-overview.md](00-overview.md). 
+Structures are defined publicly in their owning module's header by default, rather than being hidden behind opaque pointer typedefs.
+The rationale is covered in depth in [00-overview.md](00-overview.md).
 The practical rule is that a struct should only be made opaque when its internal representation genuinely varies at runtime and that variation needs to be hidden from consumers.
 
 ### East-Const
@@ -75,9 +75,39 @@ typedef uint64_t virt_addr_t;  // virtual address
 Every function is prefixed with the abbreviation of its owning module, making the origin of a call immediately apparent at every use site:
 
 ```c
-mm_pmm_init(...)          // memory management — PMM
-kprintf(...)              // kio — kernel output
-drivers_tty_putc(...)     // drivers — TTY
-arch_serial_write(...)    // arch layer — serial
-mmu_map_mmio(...)         // page_tables — MMU
+mm_pmm_init(...)              // memory management — PMM
+kprintf(...)                  // kio — kernel output
+drivers_console_putc(...)     // drivers — console
+arch_serial_write(...)        // arch layer — serial
+mmu_map_mmio(...)             // page_tables — MMU
 ```
+
+### Type-Scoped Function Prefixes
+
+When a function's primary subject is a specific type exported by the module, extend the prefix to include the type name. This makes call sites self-documenting without requiring the reader to inspect the function signature:
+
+```c
+// preferred — the call site names the type being operated on
+gfx_surface_put_pixel(&surface, x, y, color);
+gfx_surface_fill_rect(&surface, x, y, w, h, color);
+gfx_surface_init(&surface, base, width, height, pitch, bpp, r, g, b);
+
+// avoid — leaves the call site ambiguous about what the first argument is
+gfx_put_pixel(&surface, x, y, color);
+```
+
+The general pattern is `<module>_<type>_<action>` for operations whose primary subject is a named type, and `<module>_<action>` when the module has a single implicit subject or the operation is not type-specific.
+
+### File Naming
+
+A file must be named after its **responsibility**, not its containing module. A file `kio/kio.c` carries no more information than its directory path already does — name it for what it does: `kio/output.c`. The same applies to public headers: `<kio/output.h>` states what it contains; `<kio/kio.h>` does not.
+
+Some examples:
+
+| Module | Avoid | Prefer |
+|--------|-------|--------|
+| `kio` | `kio/kio.c`, `<kio/kio.h>` | `kio/output.c`, `<kio/output.h>` |
+| `interrupts` | `interrupts/interrupts.c` | `interrupts/init.c` |
+| `gfx` | `gfx/gfx.c` | `gfx/draw.c`, `gfx/surface.h` |
+
+**Exception — contracts:** contract headers are intentionally named after the contract itself (`contracts/memmap.h`, `contracts/display.h`) because the header *is* the named type definition. The module and the responsibility are one and the same in this case.

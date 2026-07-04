@@ -29,9 +29,9 @@
 #include <janus/errno.h>
 #include <janus/types.h>
 #include <kio/kio.h>
-#include <kmain/console.h>
 #include <kmain/fault_test.h>
 #include <kmain/kernel_descriptor.h>
+#include <kmain/output_sink.h>
 #include <mm/pmm.h>
 
 // Greeting message printed after booting has been completed and the console has ben initialized
@@ -58,7 +58,7 @@ __noreturn void kernel_main(void)
     if (boot_init(&descriptor.boot) != JANUS_OK) {
         kpanic("boot_init failed — cannot continue");
     }
-    console_init(&descriptor.boot);
+    output_sink_init(&descriptor.boot);
     kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
 
     if (interrupts_init() != JANUS_OK) {

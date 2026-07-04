@@ -14,28 +14,31 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/shared/drivers/framebuffer.c
-/// @brief Shared framebuffer text-rendering implementation.
+#ifndef KMAIN_OUTPUT_SINK_H
+#define KMAIN_OUTPUT_SINK_H
+
+/// @file kmain/output_sink.h
+/// @brief Kernel output sink — fans kio output to serial and console.
 ///
-/// Character drawing logic for framebuffer-based text output.
-/// Pixel operations are delegated to lib/gfx (gfx_surface_blit_mono).
-/// Shared between all architectures that use framebuffer output.
+/// This module does exactly one thing: register a putc callback with kio
+/// that forwards each character to whichever drivers are active (serial,
+/// text console, or both).  It has no input path, no line discipline, and
+/// no cursor of its own.
 
-#include <arch/shared/drivers/framebuffer.h>
-#include <gfx/draw.h>
+#include <boot/context.h>
 
-__cold void
-framebuffer_draw_char(framebuffer_state_t const * state, u16 column, u16 row, char c, u8 foreground, u8 background)
-{
-    if (UNLIKELY(!state->surface.base || column >= state->text_width || row >= state->text_height)) {
-        return;
-    }
+/// @brief Best-effort serial initialization before the boot context is available.
+///
+/// Calls boot_early_params() to obtain address-translation parameters.
+/// Safe to call multiple times — no-op if serial is already active.
+void output_sink_init_early(void);
 
-    u32 px = (u32) column * FRAMEBUFFER_FONT_WIDTH;
-    u32 py = (u32) row * FRAMEBUFFER_FONT_HEIGHT;
-    u32 fg = framebuffer_color_palette[foreground & 0x0F];
-    u32 bg = framebuffer_color_palette[background & 0x0F];
+/// @brief Initialize the output sink after the boot context is available.
+///
+/// Initializes serial and console drivers based on the boot context, then
+/// re-registers the putc callback to include any newly available outputs.
+///
+/// @param boot_context  Pointer to the boot context.
+void output_sink_init(boot_context_t const * boot_context);
 
-    gfx_surface_blit_mono(
-        &state->surface, px, py, terminus_glyphs[(u8) c], FRAMEBUFFER_FONT_WIDTH, FRAMEBUFFER_FONT_HEIGHT, fg, bg);
-}
+#endif /* KMAIN_OUTPUT_SINK_H */

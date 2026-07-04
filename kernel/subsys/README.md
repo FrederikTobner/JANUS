@@ -1,7 +1,7 @@
 # subsys
 
 Kernel subsystems own hardware state and expose public C APIs.
-Each subsystem is isolated, meaning subsystems are not allowed to depend on each other. 
+Each subsystem is isolated, meaning subsystems are not allowed to depend on each other.
 Only `kmain` is permitted to depend on other subsystems.
 
 Architecture-specific code lives inside the owning subsystem under `arch/`, following the three-tier include hierarchy (Tier 1 public → Tier 2 contract → Tier 3 implementation).
@@ -72,13 +72,13 @@ More information about the submodule can be found in its [Readme](mm/README.md)
 The drivers subsystem provides narrow, hardware-facing C APIs for devices that the kernel needs during early initialisation.
 Each driver exposes its public interface through `include/drivers/` and hides all hardware register access behind the three-tier include hierarchy, so the generic driver code is fully portable and the architecture-specific code is contained in a single, auditable location.
 
-| Driver | Description                                                    |
-|--------|----------------------------------------------------------------|
-| Serial | Character-level UART output — COM1 on x86_64, PL011 on aarch64 |
-| TTY    | Text terminal rendering over VGA text mode or a framebuffer    |
+| Driver  | Description                                                    |
+|---------|----------------------------------------------------------------|
+| Serial  | Character-level UART output — COM1 on x86_64, PL011 on aarch64 |
+| Console | Text terminal rendering over VGA text mode or a framebuffer    |
 
-The TTY generic layer owns cursor tracking, line wrapping, scrolling, and colour state.
-Architecture-specific cell writing is delegated to `arch_tty_*` functions, which are resolved at link time to the platform's implementation.
+The console generic layer owns cursor tracking, line wrapping, scrolling, and colour state.
+Architecture-specific rendering is delegated via `console_ops_t` (a vtable filled by `arch_console_probe`), which is resolved at init time to the platform's backend.
 
 To add a new driver, provide the public header in `include/drivers/`, add architecture-specific implementations under `arch/<arch>/`, and add any platform-agnostic source in `src/`.
 

@@ -14,10 +14,10 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef ARCH_IMPL_DRIVERS_VGA_H
-#define ARCH_IMPL_DRIVERS_VGA_H
+#ifndef X86_64_INTERNAL_DRIVERS_VGA_H
+#define X86_64_INTERNAL_DRIVERS_VGA_H
 
-/// @file vga.h
+/// @file arch/internal/drivers/vga.h
 /// @brief x86_64 VGA text mode driver.
 ///
 /// Provides low-level VGA text mode (0xB8000) operations.
@@ -99,4 +99,38 @@ static __always_inline void vga_set_cursor(u16 x, u16 y)
     outb(VGA_CRTC_DATA, (u8) ((pos >> 8) & 0xFF));
 }
 
-#endif /* ARCH_IMPL_DRIVERS_VGA_H */
+/// @brief Scroll the VGA text buffer up by one row.
+///
+/// Copies rows [1, VGA_HEIGHT) upward to [0, VGA_HEIGHT-1), then fills
+/// the last row with a blank entry in the given colors.
+///
+/// @param buf  Pointer to VGA text buffer.
+/// @param fg   Foreground color index (0–15) for the blank bottom row.
+/// @param bg   Background color index (0–15) for the blank bottom row.
+static __always_inline void vga_scroll(u16 volatile * buf, u8 fg, u8 bg)
+{
+    for (u16 y = 0; y + 1 < VGA_HEIGHT; y++) {
+        for (u16 x = 0; x < VGA_WIDTH; x++) {
+            buf[(u32) y * VGA_WIDTH + x] = buf[(u32) (y + 1) * VGA_WIDTH + x];
+        }
+    }
+    u16 const blank = vga_entry(' ', fg, bg);
+    for (u16 x = 0; x < VGA_WIDTH; x++) {
+        buf[(u32) (VGA_HEIGHT - 1) * VGA_WIDTH + x] = blank;
+    }
+}
+
+/// @brief Clear the entire VGA text buffer.
+///
+/// @param buf  Pointer to VGA text buffer.
+/// @param fg   Foreground color index (0–15).
+/// @param bg   Background color index (0–15).
+static __always_inline void vga_clear(u16 volatile * buf, u8 fg, u8 bg)
+{
+    u16 const blank = vga_entry(' ', fg, bg);
+    for (u32 i = 0; i < (u32) VGA_WIDTH * VGA_HEIGHT; i++) {
+        buf[i] = blank;
+    }
+}
+
+#endif /* X86_64_INTERNAL_DRIVERS_VGA_H */
