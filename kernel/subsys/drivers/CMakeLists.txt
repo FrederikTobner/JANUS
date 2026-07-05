@@ -8,5 +8,3 @@ janus_add_subsys(drivers
     DEPENDENCIES
         janus_contract_display
 )
-
-# Note: arch/ is processed by janus_add_subsys via add_subdirectory(arch)

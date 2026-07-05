@@ -1,7 +1,6 @@
 # interrupts — Interrupt & Exception Handling Subsystem
 
-Installs CPU interrupt/exception handling so that faults become readable panics
-over `kio` instead of silent triple faults and resets.
+Installs CPU interrupt/exception handling so that faults become readable panics over `kio` instead of silent triple faults and resets.
 Currenlty only supports x86_64.
 
 ## Public API

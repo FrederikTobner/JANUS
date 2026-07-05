@@ -21,15 +21,7 @@
 #include <gfx/surface.h>
 #include <janus/attributes.h>
 
-// ---------------------------------------------------------------------------
-// Forward declarations
-// ---------------------------------------------------------------------------
-
 static void write_pixel(gfx_surface_t const * s, u32 x, u32 y, u32 rgb);
-
-// ---------------------------------------------------------------------------
-// Public functions
-// ---------------------------------------------------------------------------
 
 __cold void gfx_surface_init(
     gfx_surface_t * s, void * base, u32 width, u32 height, u32 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift)

@@ -19,6 +19,10 @@
 
 /// @file die.h
 /// @brief Kernel panic interface.
+///
+/// This module provides the kpanic() macro, which prints a diagnostic message and halts the CPU.
+/// It is intended for unrecoverable errors in the kernel.
+
 #include <janus/attributes.h>
 #include <janus/types.h>
 #include <janus/va_arg.h>

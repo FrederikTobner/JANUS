@@ -84,7 +84,8 @@ mmu_map_mmio(...)             // page_tables — MMU
 
 ### Type-Scoped Function Prefixes
 
-When a function's primary subject is a specific type exported by the module, extend the prefix to include the type name. This makes call sites self-documenting without requiring the reader to inspect the function signature:
+When a function's primary subject is a specific type exported by the module, extend the prefix to include the type name.
+This makes call sites self-documenting without requiring the reader to inspect the function signature:
 
 ```c
 // preferred — the call site names the type being operated on
@@ -102,14 +103,6 @@ The general pattern is `<module>_<type>_<action>` for operations whose primary s
 
 A file must be named after its **responsibility**, not its containing module.
 A file `kio/kio.c` carries no more information than its directory path already does, so split it into two parts in order to name it for what it does: `kio/output.c` and `kio/input.c` for example.
-The same applies to public headers: `<kio/output.h>` states what it contains; `<kio/output.h>` does not.
-
-Some examples:
-
-| Module | Avoid | Prefer |
-|--------|-------|--------|
-| `kio` | `kio/kio.c`, `<kio/output.h>` | `kio/output.c`, `<kio/output.h>` |
-| `interrupts` | `interrupts/interrupts.c` | `interrupts/init.c` |
-| `gfx` | `gfx/gfx.c` | `gfx/draw.c`, `gfx/surface.h` |
+The same applies to public headers: `<kio/output.h>` states what it contains; `<kio/kio.h>` does not.
 
 **Exception — contracts:** contract headers are intentionally named after the contract itself (`contracts/memmap.h`, `contracts/display.h`) because the header *is* the named type definition. The module and the responsibility are one and the same in this case.

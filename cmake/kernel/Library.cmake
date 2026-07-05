@@ -40,7 +40,7 @@ function(janus_add_library NAME)
         target_include_directories(${NAME}
             INTERFACE
                 ${CMAKE_CURRENT_SOURCE_DIR}/include
-                ${CMAKE_SOURCE_DIR}/include
+                ${CMAKE_SOURCE_DIR}/kernel/include
         )
         
         # Link dependencies
@@ -61,7 +61,7 @@ function(janus_add_library NAME)
     target_include_directories(${NAME}
         PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}/include
-            ${CMAKE_SOURCE_DIR}/include
+            ${CMAKE_SOURCE_DIR}/kernel/include
     )
 
     # Link dependencies

@@ -53,12 +53,13 @@ kernel/
 ├── contracts/              Cross-subsystem type contracts (allowlist-enforced)
 ├── _start/                 Entry layer — architecture and protocol subdirectories
 ├── kmain/                  Composition root — kernel_main(), init sequence
-├── lib/                    Utility libraries: fmt, gfx, page_tables
-├── core/                   Cross-cutting services: kio
+├── lib/                    Utility libraries
+├── core/                   Cross-cutting services
 └── subsys/                 Independent subsystems
     ├── boot/               Boot protocol parsing and context population
-    ├── drivers/            Device drivers: serial, console
-    └── mm/                 Memory management: PMM
+    ├── drivers/            Device drivers
+    ├── interrupts/         Interrupt handling
+    └── mm/                 Memory management
 ```
 
 Architecture-specific code is co-located with the module that needs it rather than being aggregated in a centralised `arch/` tree.
@@ -66,7 +67,8 @@ A subsystem's complete implementation in particular both the platform-agnostic l
 
 ## File Name Uniqueness
 
-Every source file and header name must be **unique across the entire kernel tree**, with two permitted exceptions. Duplicate names at different paths create ambiguity in tooling output (compiler diagnostics, linker errors, file-finder results) and force every reader to verify which copy is meant each time the name appears.
+Every source file and header name must be **unique across the entire kernel tree**, with two permitted exceptions.
+Duplicate names at different paths create ambiguity in tooling output (compiler diagnostics, linker errors, file-finder results) and force every reader to verify which copy is meant each time the name appears.
 
 **Permitted exceptions:**
 

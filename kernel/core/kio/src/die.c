@@ -15,14 +15,12 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file output.c
-/// @brief Kernel I/O implementation.
+/// @file die.c
+/// @brief Kernel Panic Implementation
 ///
-/// Bridges the fmt library to kernel output hardware via a registered putc
-/// callback. Hardware drivers register themselves via kio_register_putc();
-/// all kprintf/kpanic calls flow through that single point.
-///
-/// kpanic halts via an architecture-specific backend selected by CMake.
+/// This module implements the kernel panic interface.  It is called when
+/// the kernel encounters a fatal error and cannot continue.  It prints
+/// the panic message and halts the CPU.
 
 #include <kio/die.h>
 #include <kio/output.h>

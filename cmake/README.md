@@ -14,18 +14,6 @@ cmake/
 └── Registry.cmake       # Dependency registry + Mermaid graph generator
 ```
 
-## toolchains/
-
-Toolchain files processed before `project()`.
-Sets the compiler, linker, and binutils for each architecture/compiler combination.
-
-| File                  | Target                        |
-|-----------------------|-------------------------------|
-| `x86_64-gcc.cmake`    | GCC, x86\_64                  |
-| `x86_64-clang.cmake`  | Clang, x86\_64                |
-| `aarch64-gcc.cmake`   | GCC cross-compiler, AArch64   |
-| `aarch64-clang.cmake` | Clang cross-compiler, AArch64 |
-
 ## platform/
 
 `Detection.cmake` — host detection, compiler validation, freestanding flags (`-ffreestanding`, `-nostdlib`, warnings), and build-type flags.
@@ -37,21 +25,25 @@ Helper functions for adding kernel targets.
 
 ### `Library.cmake` — `janus_add_library(name SOURCES ... [DEPENDENCIES ...])`
 
-Creates a kernel library (STATIC, or INTERFACE when no sources are provided).
-Adds `include/` and global `kernel/include/` to include paths and registers the target in the dependency registry.
-To use `<asm/*.h>`, list `janus_asm` in `DEPENDENCIES`.
+Used for creating a kernel library (STATIC, or INTERFACE when no sources are provided).
+
+### `Core.cmake`- `janus_add_core(name SOURCES ... [DEPENDENCIES ...])`
+
+Used for creating a core service.
+
+### `Contract.cmake` - `janus_add_contract(name [CONSUMERS ...])`
+
+Used for creating a contract between some subsystems, that need to share a datastructure.
 
 ### `Subsystem.cmake` — `janus_add_subsys(name SOURCES ... [DEPENDENCIES ...])`
 
-Creates a kernel subsystem. Automatically detects an `arch/CMakeLists.txt` and calls `add_subdirectory(arch)`.
-**Sources must be listed explicitly** — no globbing.
-Enforces subsystem isolation: a fatal error is raised if a subsystem depends on another subsystem (except `kmain`).
+Used for creating a kernel subsystem.
+Automatically detects an `arch/CMakeLists.txt` and calls `add_subdirectory(arch)`.
 
 ### `ArchSource.cmake` — `janus_add_arch_subsys(name SOURCES ...)`
 
 Called from within `arch/CMakeLists.txt`.
 Creates a `${name}_arch` static library with the three-tier include hierarchy as PUBLIC paths.
-To use `<asm/*.h>` (e.g. Tier 3 wrappers), list `janus_asm` in `DEPENDENCIES`.
 
 ### `Executable.cmake` — `janus_add_kernel(TARGET ... LINKER_SCRIPT ... DEPENDENCIES ... OBJECTS ...)`
 
@@ -68,3 +60,7 @@ Called after all `add_subdirectory` calls.
   graph to `docs/src/generated/deps-<arch>.md`
 
 **Node shapes:** LIB → rounded rectangle, SUBSYS → rectangle, ASM → cylinder, PROTOCOL\_LIB → subroutine box, EXEC → hexagon.
+
+## Targets.cmake
+
+Defines all the (phony) targers used for creating iso, running and debuggung the kernel.
