@@ -3,7 +3,7 @@
 ```mermaid
 graph TD
   subgraph lib_layer["Library Layer"]
-    display("display")
+    gfx("gfx")
     fmt("fmt")
     page_tables("page_tables")
   end
@@ -28,14 +28,15 @@ graph TD
   end
   subgraph contract_layer["Contracts"]
     janus_contract_memmap(("memmap"))
+    janus_contract_display(("display"))
   end
   page_tables --> janus_asm
   kio --> fmt
   kio --> janus_asm
-  boot --> display
   boot -.-> janus_contract_memmap
+  boot -.-> janus_contract_display
   boot_limine --> boot
-  drivers --> display
+  drivers -.-> janus_contract_display
   interrupts --> kio
   mm --> kio
   mm -.-> janus_contract_memmap

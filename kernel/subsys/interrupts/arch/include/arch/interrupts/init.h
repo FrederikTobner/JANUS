@@ -14,18 +14,24 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file init.c
-/// @brief x86_64 interrupt subsystem entry point.
+/// @file arch/interrupts/init.h
+/// @brief Interrupt handling architecture contract.
+///
+/// Declares arch_interrupts_* functions implemented in arch/<ARCH>/.
 
-#include <arch/internal/interrupts/setup.h>
-#include <arch/interrupts/init.h>
-#include <janus/attributes.h>
-#include <janus/errno.h>
+#ifndef ARCH_INTERRUPTS_INIT_H
+#define ARCH_INTERRUPTS_INIT_H
 
-__cold error_t arch_interrupts_init(void)
-{
-    // GDT + TSS + IST must exist before the IDT references IST1 for #DF.
-    gdt_install();
-    idt_install();
-    return JANUS_OK;
-}
+#include <janus/types.h>
+
+/// @brief Architecture-specific interrupt initialisation.
+///
+/// Implemented per architecture in arch/<ARCH>/. x86_64 installs the GDT
+/// (Global Descriptor Table), TSS (Task State Segment), and IDT (Interrupt
+/// Descriptor Table); aarch64 will install a VBAR_EL1 (Vector Base Address
+/// Register, EL1) exception vector table.
+///
+/// @return JANUS_OK on success; a negative error_t otherwise.
+error_t arch_interrupts_init(void);
+
+#endif /* ARCH_INTERRUPTS_INIT_H */

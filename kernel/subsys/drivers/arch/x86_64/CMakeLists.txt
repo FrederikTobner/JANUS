@@ -3,9 +3,12 @@
 janus_add_arch_subsys(drivers
     SOURCES
         serial.c
-        tty.c
         ../shared/framebuffer.c
+        ../shared/fb_console.c
+        vga_console.c
+        console.c
     DEPENDENCIES
         janus_asm
-        display
+        gfx
+        janus_contract_display
 )

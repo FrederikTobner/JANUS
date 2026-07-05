@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                               *
+ * This file is part of JANUS.                                              *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -14,24 +14,37 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/interrupts/interrupts.h
-/// @brief Interrupt handling architecture contract.
+#ifndef KIO_DIE_H
+#define KIO_DIE_H
+
+/// @file die.h
+/// @brief Kernel panic interface.
 ///
-/// Declares arch_interrupts_* functions implemented in arch/<ARCH>/.
+/// This module provides the kpanic() macro, which prints a diagnostic message and halts the CPU.
+/// It is intended for unrecoverable errors in the kernel.
 
-#ifndef ARCH_INTERRUPTS_INTERRUPTS_H
-#define ARCH_INTERRUPTS_INTERRUPTS_H
-
+#include <janus/attributes.h>
 #include <janus/types.h>
+#include <janus/va_arg.h>
 
-/// @brief Architecture-specific interrupt initialisation.
+/// @brief Underlying panic implementation — do not call directly; use kpanic().
 ///
-/// Implemented per architecture in arch/<ARCH>/. x86_64 installs the GDT
-/// (Global Descriptor Table), TSS (Task State Segment), and IDT (Interrupt
-/// Descriptor Table); aarch64 will install a VBAR_EL1 (Vector Base Address
-/// Register, EL1) exception vector table.
-///
-/// @return JANUS_OK on success; a negative error_t otherwise.
-error_t arch_interrupts_init(void);
+/// Prints a banner and the diagnostic message if output is available,
+/// then halts the CPU permanently.
+__cold __noreturn void kpanic_impl(char const * file, int line, char const * fmt, ...)
+    __attribute__((format(printf, 3, 4)));
 
-#endif /* ARCH_INTERRUPTS_INTERRUPTS_H */
+/// @brief Panic with a human-readable message and halt the CPU.
+///
+/// Injects __FILE__ and __LINE__ automatically so the panic site is always
+/// identifiable in the output.
+///
+/// Example:
+/// @code
+///     if (err != JANUS_OK) {
+///         kpanic("subsystem_init failed: %d", err);
+///     }
+/// @endcode
+#define kpanic(fmt, ...) kpanic_impl(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
+
+#endif /* KIO_OUTPUT_H */

@@ -14,38 +14,31 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/drivers/tty.h
-/// @brief TTY architecture contract.
+/// @file init.h
+/// @brief Interrupt and CPU-exception handling — public API.
 ///
-/// Declares arch_tty_* functions implemented in arch/<ARCH>/tty.c
+/// Architecture contract (arch_interrupts_*) is in
+/// <arch/interrupts/init.h>. The public surface is intentionally
+/// architecture-agnostic: no x86 concept (IDT, CR2, gate type) appears here.
 
-#ifndef ARCH_DRIVERS_TTY_H
-#define ARCH_DRIVERS_TTY_H
+#ifndef INTERRUPTS_INIT_H
+#define INTERRUPTS_INIT_H
 
-#include <drivers/tty.h>
+#include <arch/interrupts/init.h>
 #include <janus/types.h>
 
-/// @brief Initialize display hardware.
-/// @param config Display configuration (framebuffer or VGA).
-/// @return 0 on success, negative error code on failure.
-error_t arch_tty_init(display_info_t const * config);
+/// @brief Install and activate interrupt/exception handling on the current CPU.
+///
+/// On x86_64 this function builds and loads a kernel-owned GDT (Global Descriptor Table)
+/// plus TSS (Task State Segment) — with a dedicated IST (Interrupt Stack Table)
+/// stack for #DF (Double Fault) — then builds and loads a 256-entry IDT
+/// (Interrupt Descriptor Table). After this returns, CPU exceptions are routed
+/// to handlers that emit a diagnostic panic instead of triple-faulting.
+///
+/// Must be called exactly once, after console init and before any subsystem
+/// that can fault (e.g. the physical memory manager).
+///
+/// @return JANUS_OK on success; a negative error_t otherwise.
+error_t interrupts_init(void);
 
-/// @brief Get display dimensions.
-/// @param width Pointer to store width (may be NULL).
-/// @param height Pointer to store height (may be NULL).
-void arch_tty_get_size(u16 * width, u16 * height);
-
-/// @brief Write character and color at position.
-/// @param x Column position.
-/// @param y Row position.
-/// @param c Character to write.
-/// @param fg Foreground color (0-15).
-/// @param bg Background color (0-15).
-void arch_tty_write_cell(u16 x, u16 y, char c, u8 fg, u8 bg);
-
-/// @brief Set hardware cursor position.
-/// @param x Column position.
-/// @param y Row position.
-void arch_tty_set_cursor(u16 x, u16 y);
-
-#endif /* ARCH_DRIVERS_TTY_H */
+#endif /* INTERRUPTS_INIT_H */

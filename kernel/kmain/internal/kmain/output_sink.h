@@ -14,18 +14,31 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file init.c
-/// @brief x86_64 interrupt subsystem entry point.
+#ifndef KMAIN_OUTPUT_SINK_H
+#define KMAIN_OUTPUT_SINK_H
 
-#include <arch/internal/interrupts/setup.h>
-#include <arch/interrupts/init.h>
-#include <janus/attributes.h>
-#include <janus/errno.h>
+/// @file kmain/output_sink.h
+/// @brief Kernel output sink — fans kio output to serial and console.
+///
+/// This module does exactly one thing: register a putc callback with kio
+/// that forwards each character to whichever drivers are active (serial,
+/// text console, or both).  It has no input path, no line discipline, and
+/// no cursor of its own.
 
-__cold error_t arch_interrupts_init(void)
-{
-    // GDT + TSS + IST must exist before the IDT references IST1 for #DF.
-    gdt_install();
-    idt_install();
-    return JANUS_OK;
-}
+#include <boot/context.h>
+
+/// @brief Best-effort serial initialization before the boot context is available.
+///
+/// Calls boot_early_params() to obtain address-translation parameters.
+/// Safe to call multiple times — no-op if serial is already active.
+void output_sink_init_early(void);
+
+/// @brief Initialize the output sink after the boot context is available.
+///
+/// Initializes serial and console drivers based on the boot context, then
+/// re-registers the putc callback to include any newly available outputs.
+///
+/// @param boot_context  Pointer to the boot context.
+void output_sink_init(boot_context_t const * boot_context);
+
+#endif /* KMAIN_OUTPUT_SINK_H */

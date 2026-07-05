@@ -12,3 +12,9 @@ janus_add_contract(memmap
         boot
         mm
 )
+
+janus_add_contract(display
+    CONSUMERS
+        boot
+        drivers
+)

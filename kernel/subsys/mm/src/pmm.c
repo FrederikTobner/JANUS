@@ -34,7 +34,7 @@
 
 #include <janus/attributes.h>
 #include <janus/errno.h>
-#include <kio/kio.h>
+#include <kio/die.h>
 
 /// Page size in bytes (4 KiB)
 #define PAGE_SIZE           4096ULL

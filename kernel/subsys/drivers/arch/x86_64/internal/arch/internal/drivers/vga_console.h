@@ -14,17 +14,22 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file interrupts.c
-/// @brief Shared logic of the interrupts subsystem.
+#ifndef X86_64_INTERNAL_DRIVERS_VGA_CONSOLE_H
+#define X86_64_INTERNAL_DRIVERS_VGA_CONSOLE_H
+
+/// @file arch/internal/drivers/vga_console.h
+/// @brief VGA text-mode console backend (x86_64 internal).
 ///
-/// Delegates to the architecture-specific arch_interrupts_init().
+/// Declares vga_console_init(), used by arch_console_probe() when the
+/// bootloader reports DISPLAY_MODE_VGA_TEXT.
 
-#include <interrupts/interrupts.h>
+#include <arch/drivers/console.h>
+#include <contracts/display.h>
 
-#include <arch/interrupts/interrupts.h>
-#include <janus/attributes.h>
+/// @brief Initialize the VGA text-mode console.
+///
+/// @param cfg  Display configuration (mode == DISPLAY_MODE_VGA_TEXT).
+/// @return Pointer to the VGA console's console_ops_t.
+console_ops_t const * vga_console_init(display_info_t const * cfg);
 
-__cold error_t interrupts_init(void)
-{
-    return arch_interrupts_init();
-}
+#endif /* X86_64_INTERNAL_DRIVERS_VGA_CONSOLE_H */

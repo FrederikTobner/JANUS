@@ -17,7 +17,7 @@
 /// @file exceptions.c
 /// @brief aarch64 exception handling (not yet implemented).
 
-#include <arch/interrupts/interrupts.h>
+#include <arch/interrupts/init.h>
 #include <janus/attributes.h>
 #include <janus/errno.h>
 

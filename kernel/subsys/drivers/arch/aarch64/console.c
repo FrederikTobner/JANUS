@@ -14,32 +14,14 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef KMAIN_CONSOLE_H
-#define KMAIN_CONSOLE_H
+/// @file arch/aarch64/drivers/console.c
+/// @brief AArch64 console probe — framebuffer only (no VGA on AArch64).
 
-/// @file console.h
-/// @brief Kernel console output.
-///
-///
-/// Provides functions for kernel console output, including formatted printing.
+#include <arch/drivers/console.h>
+#include <arch/shared/drivers/fb_console.h>
+#include <janus/attributes.h>
 
-#include <boot/context.h>
-#include <kio/kio.h>
-
-/// @brief Best-effort serial initialization before boot context is available.
-///
-/// Calls boot_early_params() to obtain address-translation parameters.
-/// On Multiboot2 all outputs are zero (x86_64 uses port I/O, so zero is valid).
-/// On Limine the real HHDM offset and base addresses are supplied by the bootloader.
-/// On AArch64 with Multiboot2 this may silently fail when HHDM data is not yet available.
-/// Safe to call multiple times — no-op if serial is already active.
-void console_init_early(void);
-
-//// @brief Initialize the kernel console after boot context is available.
-///
-/// Initializes the serial and TTY drivers based on the boot context.
-///
-/// @param boot_context  Pointer to the boot context structure containing boot information.
-void console_init(boot_context_t const * boot_context);
-
-#endif // KMAIN_CONSOLE_H
+__cold console_ops_t const * arch_console_probe(display_info_t const * cfg)
+{
+    return (cfg->mode == DISPLAY_MODE_FRAMEBUFFER) ? fb_console_init(cfg) : NULL;
+}

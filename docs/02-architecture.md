@@ -2,11 +2,11 @@
 
 ## Layer Model
 
-The entire kernel source tree is partitioned into layers ordered by abstraction level. 
+The entire kernel source tree is partitioned into layers ordered by abstraction level.
 The single governing rule is that dependencies may only point downward:
 a module may depend on anything in a lower layer, but never on a peer in the same
-layer or on anything above it. 
-CMake enforces this constraint through its target dependency graph. 
+layer or on anything above it.
+CMake enforces this constraint through its target dependency graph.
 A violation causes a configure-time fatal error before any compiler is invoked.
 
 |Location                   | Name          | Description                                                           |
@@ -53,16 +53,30 @@ kernel/
 ├── contracts/              Cross-subsystem type contracts (allowlist-enforced)
 ├── _start/                 Entry layer — architecture and protocol subdirectories
 ├── kmain/                  Composition root — kernel_main(), init sequence
-├── lib/                    Utility libraries: fmt, display, page_tables
-├── core/                   Cross-cutting services: kio
+├── lib/                    Utility libraries
+├── core/                   Cross-cutting services
 └── subsys/                 Independent subsystems
     ├── boot/               Boot protocol parsing and context population
-    ├── drivers/            Device drivers: serial, TTY
-    └── mm/                 Memory management: PMM
+    ├── drivers/            Device drivers
+    ├── interrupts/         Interrupt handling
+    └── mm/                 Memory management
 ```
 
 Architecture-specific code is co-located with the module that needs it rather than being aggregated in a centralised `arch/` tree.
 A subsystem's complete implementation in particular both the platform-agnostic logic and the per-architecture code, is therefor navigable as a single unit.
+
+## File Name Uniqueness
+
+Every source file and header name must be **unique across the entire kernel tree**, with two permitted exceptions.
+Duplicate names at different paths create ambiguity in tooling output (compiler diagnostics, linker errors, file-finder results) and force every reader to verify which copy is meant each time the name appears.
+
+**Permitted exceptions:**
+
+1. **Arch layer**: architecture-specific files intentionally carry the same base name because they provide alternative implementations of the same interface. For example, `console.c` exists in both `arch/x86_64/` and `arch/aarch64/`, and `mmu.c` exists under each architecture. Path-qualified `@file` tags and include-guard names (which embed the architecture name) disambiguate these unambiguously.
+
+2. **Conditional compilation units**: the boot subsystem compiles exactly one of several protocol implementations per build (e.g. `limine_boot.c`, `multiboot2_boot.c`). Because they are alternatives rather than co-resident files, no collision occurs in practice — and their base names already differ to make the protocol scope explicit.
+
+Outside these two cases, any new file whose base name already exists elsewhere in the tree must be renamed before it is merged.
 
 ## Three-Tier Include Hierarchy
 

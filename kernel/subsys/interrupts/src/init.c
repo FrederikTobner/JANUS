@@ -15,17 +15,16 @@
  ****************************************************************************/
 
 /// @file init.c
-/// @brief x86_64 interrupt subsystem entry point.
+/// @brief Shared logic of the interrupts subsystem.
+///
+/// Delegates to the architecture-specific arch_interrupts_init().
 
-#include <arch/internal/interrupts/setup.h>
+#include <interrupts/init.h>
+
 #include <arch/interrupts/init.h>
 #include <janus/attributes.h>
-#include <janus/errno.h>
 
-__cold error_t arch_interrupts_init(void)
+__cold error_t interrupts_init(void)
 {
-    // GDT + TSS + IST must exist before the IDT references IST1 for #DF.
-    gdt_install();
-    idt_install();
-    return JANUS_OK;
+    return arch_interrupts_init();
 }

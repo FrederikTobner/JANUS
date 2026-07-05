@@ -3,8 +3,8 @@
 
 janus_add_subsys(boot
     DEPENDENCIES
-        display
         janus_contract_memmap
+        janus_contract_display
 )
 
 # Protocol libraries (plain add_library, not subsystems)

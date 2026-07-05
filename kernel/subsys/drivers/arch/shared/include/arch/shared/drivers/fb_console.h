@@ -14,31 +14,23 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file interrupts.h
-/// @brief Interrupt and CPU-exception handling — public API.
-///
-/// Architecture contract (arch_interrupts_*) is in
-/// <arch/interrupts/interrupts.h>. The public surface is intentionally
-/// architecture-agnostic: no x86 concept (IDT, CR2, gate type) appears here.
+#ifndef ARCH_SHARED_DRIVERS_FB_CONSOLE_H
+#define ARCH_SHARED_DRIVERS_FB_CONSOLE_H
 
-#ifndef INTERRUPTS_INTERRUPTS_H
-#define INTERRUPTS_INTERRUPTS_H
-
-#include <arch/interrupts/interrupts.h>
-#include <janus/types.h>
-
-/// @brief Install and activate interrupt/exception handling on the current CPU.
+/// @file arch/shared/drivers/fb_console.h
+/// @brief Framebuffer text-console backend.
 ///
-/// On x86_64 this function builds and loads a kernel-owned GDT (Global Descriptor Table)
-/// plus TSS (Task State Segment) — with a dedicated IST (Interrupt Stack Table)
-/// stack for #DF (Double Fault) — then builds and loads a 256-entry IDT
-/// (Interrupt Descriptor Table). After this returns, CPU exceptions are routed
-/// to handlers that emit a diagnostic panic instead of triple-faulting.
-///
-/// Must be called exactly once, after console init and before any subsystem
-/// that can fault (e.g. the physical memory manager).
-///
-/// @return JANUS_OK on success; a negative error_t otherwise.
-error_t interrupts_init(void);
+/// Declares fb_console_init(), which initializes the shared framebuffer
+/// console and returns its console_ops_t.  Used by arch_console_probe()
+/// on any architecture that supports a linear framebuffer.
 
-#endif /* INTERRUPTS_INTERRUPTS_H */
+#include <arch/drivers/console.h>
+#include <contracts/display.h>
+
+/// @brief Initialize the framebuffer console for the given display config.
+///
+/// @param cfg  Display configuration (must have mode == DISPLAY_MODE_FRAMEBUFFER).
+/// @return Pointer to the framebuffer console's console_ops_t.
+console_ops_t const * fb_console_init(display_info_t const * cfg);
+
+#endif /* ARCH_SHARED_DRIVERS_FB_CONSOLE_H */

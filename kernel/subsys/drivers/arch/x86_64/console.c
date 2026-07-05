@@ -14,18 +14,22 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file init.c
-/// @brief x86_64 interrupt subsystem entry point.
+/// @file arch/x86_64/drivers/console.c
+/// @brief x86_64 console probe — selects VGA text or framebuffer backend.
 
-#include <arch/internal/interrupts/setup.h>
-#include <arch/interrupts/init.h>
+#include <arch/drivers/console.h>
+#include <arch/internal/drivers/vga_console.h>
+#include <arch/shared/drivers/fb_console.h>
 #include <janus/attributes.h>
-#include <janus/errno.h>
 
-__cold error_t arch_interrupts_init(void)
+__cold console_ops_t const * arch_console_probe(display_info_t const * cfg)
 {
-    // GDT + TSS + IST must exist before the IDT references IST1 for #DF.
-    gdt_install();
-    idt_install();
-    return JANUS_OK;
+    switch (cfg->mode) {
+    case DISPLAY_MODE_VGA_TEXT:
+        return vga_console_init(cfg);
+    case DISPLAY_MODE_FRAMEBUFFER:
+        return fb_console_init(cfg);
+    default:
+        return NULL;
+    }
 }

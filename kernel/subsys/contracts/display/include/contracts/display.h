@@ -14,20 +14,19 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-#ifndef DISPLAY_DISPLAY_H
-#define DISPLAY_DISPLAY_H
+#ifndef CONTRACTS_DISPLAY_H
+#define CONTRACTS_DISPLAY_H
 
-/// @file display.h
-/// @brief Shared display information type
+/// @file contracts/display.h
+/// @brief Shared display configuration contract.
 ///
-/// Protocol-agnostic display configuration shared between the boot
-/// subsystem (which populates it) and the drivers subsystem (which
-/// consumes it).  Lives in lib/ so both subsystems can depend on it
-/// without depending on each other.
+/// Protocol-agnostic display configuration produced by the boot subsystem
+/// and consumed by the drivers subsystem.  Structurally identical to the
+/// memmap contract: one producer, one consumer, build-enforced allowlist.
 
 #include <janus/types.h>
 
-/// @brief Display mode reported by the bootloader
+/// @brief Display mode reported by the bootloader.
 ///
 /// Distinguishes the three states a bootloader can leave us in:
 /// no display at all, a linear RGB framebuffer, or VGA text hardware.
@@ -37,11 +36,11 @@ typedef enum {
     DISPLAY_MODE_VGA_TEXT,    ///< VGA text mode confirmed (Multiboot2 EGA text)
 } display_mode_t;
 
-/// @brief Display configuration
+/// @brief Display configuration.
 ///
-/// Describes the display mode and, when in framebuffer mode, the
-/// linear RGB framebuffer parameters.  The @c mode field replaces
-/// the old convention of checking the @c framebuffer pointer for NULL.
+/// Describes the display mode and, when in framebuffer mode, the linear
+/// RGB framebuffer parameters.  The @c mode field replaces the old
+/// convention of testing @c framebuffer for NULL.
 typedef struct display_info {
     display_mode_t mode; ///< What kind of display the bootloader provided
     void * framebuffer;  ///< Linear framebuffer base address (NULL for VGA text mode)
@@ -54,4 +53,4 @@ typedef struct display_info {
     u8 blue_mask_shift;  ///< Blue component bit position
 } display_info_t;
 
-#endif /* DISPLAY_DISPLAY_H */
+#endif /* CONTRACTS_DISPLAY_H */

@@ -24,8 +24,8 @@
 /// The boot_context_t struct is public (per Coding-Style.md) —
 /// consumers access fields directly.
 
+#include <contracts/display.h>
 #include <contracts/memmap.h>
-#include <display/display.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 
