@@ -8,7 +8,8 @@ set(JANUS_REGISTRY_NAMES "" CACHE INTERNAL "All registry names" FORCE)
 
 # Helper to register an entry
 function(janus_register NAME TYPE DEPENDENCIES)
-    set(JANUS_REGISTRY_NAMES "${JANUS_REGISTRY_NAMES};${NAME}" CACHE INTERNAL "All registry names" FORCE)
+    list(APPEND JANUS_REGISTRY_NAMES "${NAME}")
+    set(JANUS_REGISTRY_NAMES "${JANUS_REGISTRY_NAMES}" CACHE INTERNAL "All registry names" FORCE)
     set(JANUS_TYPE_${NAME} ${TYPE} CACHE INTERNAL "Janus type for ${NAME}" FORCE)
     set(JANUS_DEPS_${NAME} ${DEPENDENCIES} CACHE INTERNAL "Janus deps for ${NAME}" FORCE)
 endfunction()
@@ -80,9 +81,6 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
     set(_contract_nodes "")
 
     foreach(name ${JANUS_REGISTRY_NAMES})
-        if(NOT name)
-            continue()
-        endif()
         set(_t "${JANUS_TYPE_${name}}")
         if(_t STREQUAL "LIB")
             list(APPEND _lib_nodes "${name}")
@@ -104,7 +102,6 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
     # Set of all registered names for edge filtering
     set(_registered "${JANUS_REGISTRY_NAMES}")
 
-    # ── Build graph string ──────────────────────────────────────────────────
     set(_d "graph TD\n")
 
     if(_lib_nodes)
@@ -178,9 +175,6 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
     # Emit edges (skip deps that are not registered).
     # Contract dependencies use dashed arrows to signal type-sharing vs. module deps.
     foreach(name ${JANUS_REGISTRY_NAMES})
-        if(NOT name)
-            continue()
-        endif()
         _janus_mermaid_id("${name}" _from)
         foreach(dep ${JANUS_DEPS_${name}})
             if(dep IN_LIST _registered)
@@ -194,7 +188,6 @@ function(janus_write_mermaid_diagram OUTPUT_FILE)
         endforeach()
     endforeach()
 
-    # ── Write output ────────────────────────────────────────────────────────
     set(_note "> *Generated for `${JANUS_TARGET_ARCH}` — run `cmake --preset <${JANUS_TARGET_ARCH}-preset>` to regenerate.*\n\n")
     set(_content "${_note}```mermaid\n${_d}```\n")
 

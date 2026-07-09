@@ -6,9 +6,9 @@ JANUS is a freestanding kernel written in C17, targeting x86_64 and aarch64.
 
 ### Strict Layering
 
-JANUS is organised into layers with one-directional dependencies. 
+JANUS is organised into layers with one-directional dependencies.
 No module may depend on anything in the same layer or above it.
-Any violations are caught at CMake configure time. 
+Any violations are caught at CMake configuration time.
 
 A detailed view of the dependency graph is generated automatically during each CMake configure run and written to `docs/generated/`.
 

@@ -10,7 +10,7 @@ if(JANUS_TEST_FAULTS_KIND)
 endif()
 
 
-file(GLOB_RECURSE INIT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+file(GLOB_RECURSE INIT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 
 # kmain links to subsystems - arch includes propagate automatically via PUBLIC
 janus_add_subsys(kmain SOURCES ${INIT_SOURCES}

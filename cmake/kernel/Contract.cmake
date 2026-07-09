@@ -123,7 +123,7 @@ function(janus_validate_contracts)
                         "contract '${contract}' (janus_contract_${contract}) "
                         "but is not in the allowed consumers list: [${allowed}]. "
                         "Add '${name}' to the CONSUMERS list in "
-                        "kernel/contracts/CMakeLists.txt if this dependency is "
+                        "kernel/subsys/contracts/CMakeLists.txt if this dependency is "
                         "intentional.")
                 endif()
             endif()

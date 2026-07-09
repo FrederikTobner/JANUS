@@ -8,4 +8,4 @@ All subsequent calls to `kprintf` or `kpanic` from any module flow through that 
 
 The panic surface is intentionally minimal.
 The `kpanic(msg, ...)` macro injects `__FILE__` and `__LINE__` at the call site and forwards to `kpanic_impl`, which prints a structured banner and halts the CPU via `asm_cpu_halt_forever()`.
-There is currently no support for stack unwinding, no attempt at recovery, and no return.
+There is currently no support for stack unwinding and no attempt at recovery.
