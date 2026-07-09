@@ -42,7 +42,7 @@ typedef enum {
 /// RGB framebuffer parameters.  The @c mode field replaces the old
 /// convention of testing @c framebuffer for NULL.
 typedef struct display_info {
-    display_mode mode; ///< What kind of display the bootloader provided
+    display_mode mode;   ///< What kind of display the bootloader provided
     void * framebuffer;  ///< Linear framebuffer base address (NULL for VGA text mode)
     u64 width;           ///< Horizontal resolution in pixels
     u64 height;          ///< Vertical resolution in pixels
