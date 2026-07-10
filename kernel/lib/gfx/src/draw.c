@@ -112,10 +112,6 @@ __hot void gfx_surface_scroll(gfx_surface_t const * s, u32 dy, u32 fill_rgb)
     gfx_surface_fill_rect(s, 0, s->height - dy, s->width, dy, fill_rgb);
 }
 
-// ---------------------------------------------------------------------------
-// Static helpers
-// ---------------------------------------------------------------------------
-
 static void write_pixel(gfx_surface_t const * s, u32 x, u32 y, u32 rgb)
 {
     if (UNLIKELY(s->bpp != 32 && s->bpp != 24)) {
