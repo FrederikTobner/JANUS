@@ -2,7 +2,7 @@
 
 ```mermaid
 graph TD
-  subgraph lib_layer["Library Layer"]
+  subgraph library_layer["Library Layer"]
     gfx("gfx")
     fmt("fmt")
     page_tables("page_tables")
@@ -10,25 +10,25 @@ graph TD
   subgraph core_layer["Core Layer"]
     kio(["kio"])
   end
-  subgraph subsys_layer["Subsystem Layer"]
+  subgraph subsystem_layer["Subsystem Layer"]
     boot["boot"]
     drivers["drivers"]
     interrupts["interrupts"]
     mm["mm"]
     kmain["kmain"]
   end
-  subgraph proto_layer["Protocol Libraries"]
+  subgraph protocol_libraries["Protocol Libraries"]
     boot_limine[["boot_limine"]]
     boot_multiboot2[["boot_multiboot2"]]
   end
-  subgraph exec_layer["Executables"]
+  subgraph executables["Executables"]
     kernel_limine_elf{{"kernel-limine.elf"}}
     kernel_multiboot2_elf{{"kernel-multiboot2.elf"}}
   end
   subgraph asm_layer["ASM Layer"]
     janus_asm[("janus_asm")]
   end
-  subgraph contract_layer["Contracts"]
+  subgraph contracts["Contracts"]
     janus_contract_memmap(("memmap"))
     janus_contract_display(("display"))
   end
