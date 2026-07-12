@@ -98,7 +98,7 @@ function(janus_validate_contracts)
         set(contract_target "janus_contract_${contract}")
         set(allowed "${JANUS_CONTRACT_CONSUMERS_${contract}}")
 
-        foreach(name ${JANUS_REGISTRY_NAMES})
+        foreach(name ${JANUS_REG_KERNEL_NAMES})
             if(NOT TARGET ${name})
                 continue()
             endif()
@@ -123,7 +123,7 @@ function(janus_validate_contracts)
                         "contract '${contract}' (janus_contract_${contract}) "
                         "but is not in the allowed consumers list: [${allowed}]. "
                         "Add '${name}' to the CONSUMERS list in "
-                        "kernel/contracts/CMakeLists.txt if this dependency is "
+                        "kernel/subsys/contracts/CMakeLists.txt if this dependency is "
                         "intentional.")
                 endif()
             endif()

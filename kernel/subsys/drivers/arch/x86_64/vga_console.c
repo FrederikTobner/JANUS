@@ -22,25 +22,13 @@
 #include <arch/internal/drivers/vga_console.h>
 #include <janus/attributes.h>
 
-// ---------------------------------------------------------------------------
-// Module state
-// ---------------------------------------------------------------------------
-
 static u16 volatile * g_vga;
-
-// ---------------------------------------------------------------------------
-// Forward declarations
-// ---------------------------------------------------------------------------
 
 static void vga_put_cell(u16 x, u16 y, char c, u8 fg, u8 bg);
 static void vga_scroll_op(u8 fg, u8 bg);
 static void vga_clear_op(u8 fg, u8 bg);
 static void vga_set_cursor_op(u16 x, u16 y);
 static void vga_get_size(u16 * w, u16 * h);
-
-// ---------------------------------------------------------------------------
-// Public functions
-// ---------------------------------------------------------------------------
 
 static console_ops_t const vga_console_backend = {
     vga_put_cell,

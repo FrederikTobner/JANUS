@@ -61,8 +61,6 @@ s32 vkprintf(char const * fmtstr, va_list args)
     return vfmt_to(kio_fmt_putc, NULL, fmtstr, args);
 }
 
-// Static function definitions
-
 static void kio_fmt_putc(char c, __unused void * ctx)
 {
     if (g_putc != NULL) {

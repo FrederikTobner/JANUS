@@ -4,7 +4,6 @@ The `mm` subsystem owns physical memory allocation and memory-management lifecyc
 
 ## Responsibilities
 
-- **Physical memory manager (PMM)** 
-- **Virtual memory manager (VMM)** 
-- **TLB management** 
-
+- **Physical memory manager (PMM)**
+- **Virtual memory manager (VMM)**
+- **TLB management**

@@ -27,25 +27,13 @@
 #include <gfx/draw.h>
 #include <janus/attributes.h>
 
-// ---------------------------------------------------------------------------
-// Module state
-// ---------------------------------------------------------------------------
-
 static framebuffer_state_t g_fb;
-
-// ---------------------------------------------------------------------------
-// Forward declarations
-// ---------------------------------------------------------------------------
 
 static void fb_put_cell(u16 x, u16 y, char c, u8 fg, u8 bg);
 static void fb_scroll(u8 fg, u8 bg);
 static void fb_clear(u8 fg, u8 bg);
 static void fb_set_cursor(u16 x, u16 y);
 static void fb_get_size(u16 * w, u16 * h);
-
-// ---------------------------------------------------------------------------
-// Public functions
-// ---------------------------------------------------------------------------
 
 static console_ops_t const fb_console_backend = {
     fb_put_cell,
@@ -60,10 +48,6 @@ __cold console_ops_t const * fb_console_init(display_info_t const * cfg)
     framebuffer_init(&g_fb, cfg);
     return &fb_console_backend;
 }
-
-// ---------------------------------------------------------------------------
-// Static backend ops
-// ---------------------------------------------------------------------------
 
 static void fb_put_cell(u16 x, u16 y, char c, u8 fg, u8 bg)
 {

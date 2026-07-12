@@ -34,7 +34,7 @@ typedef enum {
     DISPLAY_MODE_NONE = 0,    ///< No display information provided
     DISPLAY_MODE_FRAMEBUFFER, ///< Linear RGB framebuffer available
     DISPLAY_MODE_VGA_TEXT,    ///< VGA text mode confirmed (Multiboot2 EGA text)
-} display_mode_t;
+} display_mode;
 
 /// @brief Display configuration.
 ///
@@ -42,7 +42,7 @@ typedef enum {
 /// RGB framebuffer parameters.  The @c mode field replaces the old
 /// convention of testing @c framebuffer for NULL.
 typedef struct display_info {
-    display_mode_t mode; ///< What kind of display the bootloader provided
+    display_mode mode;   ///< What kind of display the bootloader provided
     void * framebuffer;  ///< Linear framebuffer base address (NULL for VGA text mode)
     u64 width;           ///< Horizontal resolution in pixels
     u64 height;          ///< Vertical resolution in pixels

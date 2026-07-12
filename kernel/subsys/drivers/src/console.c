@@ -27,10 +27,6 @@
 #include <janus/attributes.h>
 #include <janus/errno.h>
 
-// ---------------------------------------------------------------------------
-// Module state
-// ---------------------------------------------------------------------------
-
 typedef struct {
     u16 cursor_x;
     u16 cursor_y;
@@ -42,10 +38,6 @@ typedef struct {
 
 static console_ops_t const * g_console;
 static console_state_t g_con;
-
-// ---------------------------------------------------------------------------
-// Public functions
-// ---------------------------------------------------------------------------
 
 __cold error_t drivers_console_init(display_info_t const * cfg)
 {

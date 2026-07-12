@@ -12,6 +12,8 @@ if(NOT JANUS_REGISTRY_LOADED)
     message(FATAL_ERROR "Registry.cmake must be included before kernel/Subsystem.cmake")
 endif()
 
+include(kernel/Module)
+
 #
 # Add a kernel subsystem (like boot, drivers, mm)
 #
@@ -26,68 +28,26 @@ endif()
 # Enforces subsystem isolation - subsystems cannot depend on other subsystems.
 #
 function(janus_add_subsys NAME)
-    cmake_parse_arguments(
-        ARG
-        ""
-        ""
-        "SOURCES;DEPENDENCIES"
-        ${ARGN}
-    )
+    cmake_parse_arguments(ARG "" "" "SOURCES;DEPENDENCIES" ${ARGN})
 
-    # Register subsystem and dependencies in global registry
-    janus_register(${NAME} SUBSYS "${ARG_DEPENDENCIES}")
+    # Export subsystem identity to parent scope so janus_add_arch_subsys() can
+    # read it when the arch subdirectory is processed below.
+    set(JANUS_CURRENT_SUBSYS_NAME "${NAME}"                    PARENT_SCOPE)
+    set(JANUS_CURRENT_SUBSYS_DIR  "${CMAKE_CURRENT_SOURCE_DIR}" PARENT_SCOPE)
 
-    set(SUBSYS_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-    set(ALL_SOURCES ${ARG_SOURCES})
-
-    # Export subsystem info to parent scope for janus_add_arch_subsys
-    set(JANUS_CURRENT_SUBSYS_NAME ${NAME} PARENT_SCOPE)
-    set(JANUS_CURRENT_SUBSYS_DIR "${SUBSYS_DIR}" PARENT_SCOPE)
-    
-    # Check for architecture folder with its own CMakeLists.txt
-    set(ARCH_DIR "${SUBSYS_DIR}/arch")
-    set(HAS_ARCH FALSE)
-    
-    if(EXISTS "${ARCH_DIR}/CMakeLists.txt")
-        set(HAS_ARCH TRUE)
-        # Include the arch CMakeLists which will call janus_add_arch_subsys
+    set(_has_arch FALSE)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/arch/CMakeLists.txt")
+        set(_has_arch TRUE)
         add_subdirectory(arch)
     endif()
 
-    # Handle empty subsystems (placeholders)
-    if(NOT ALL_SOURCES)
-        add_library(${NAME} INTERFACE)
-        target_include_directories(${NAME} INTERFACE
-            ${SUBSYS_DIR}/include
-            ${CMAKE_SOURCE_DIR}/kernel/include
-        )
-        if(ARG_DEPENDENCIES)
-            target_link_libraries(${NAME} INTERFACE ${ARG_DEPENDENCIES})
-        endif()
-        return()
-    endif()
-
-    # Create static library
-    add_library(${NAME} STATIC ${ALL_SOURCES})
-
-    # Include directories - PUBLIC for transitive propagation to consumers
-    target_include_directories(${NAME}
-        PUBLIC
-            ${SUBSYS_DIR}/include
-            ${CMAKE_SOURCE_DIR}/kernel/include
+    _janus_add_module("${NAME}" SUBSYS
+        SOURCES      ${ARG_SOURCES}
+        DEPENDENCIES ${ARG_DEPENDENCIES}
     )
-    
-    # Add arch-specific include directories if arch exists
-    if(HAS_ARCH)
-        target_link_libraries(${NAME} PUBLIC ${NAME}_arch)
+
+    # Link the arch library only for non-placeholder (STATIC) targets.
+    if(_has_arch AND ARG_SOURCES)
+        target_link_libraries("${NAME}" PUBLIC "${NAME}_arch")
     endif()
-
-    # Link dependencies (only lib allowed, not other subsystems)
-    if(ARG_DEPENDENCIES)
-        target_link_libraries(${NAME} PUBLIC ${ARG_DEPENDENCIES})
-    endif()
-
-    # Apply compiler flags
-    janus_apply_compile_flags(${NAME})
-
 endfunction()

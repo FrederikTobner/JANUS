@@ -60,13 +60,9 @@
 #define PD_INDEX(va)      (((va) >> PD_SHIFT) & 0x1FF)
 #define PT_INDEX(va)      (((va) >> PT_SHIFT) & 0x1FF)
 
-// --- MMIO virtual address window ----------------------------------------------
-//
 // 128 GiB window in the kernel-private half of the address space.
 // Must not overlap with the HHDM or the kernel image.
-// Limine places the HHDM at 0xFFFF800000000000; the kernel image typically
-// lands near 0xFFFFFFFF80000000. This window sits well clear of both.
-
+// Limine places the HHDM at 0xFFFF800000000000
 #define MMIO_VIRT_BASE    0xFFFF900000000000UL
 #define MMIO_VIRT_END     0xFFFF980000000000UL
 
@@ -89,6 +85,17 @@ static mmu_state_t g_mmu;
 static phys_addr_t mmu_virtual_to_physical_address(virt_addr_t virt);
 static virt_addr_t mmu_physical_to_virtual_address(phys_addr_t phys);
 static phys_addr_t mmu_alloc_page_table_phys(void);
+
+/// Walk or create one level of the page table hierarchy.
+///
+/// If @param is_table_level is true and the entry is not yet present, a new
+/// zeroed page table page is allocated from the pool and the entry is
+/// initialised to point to it (Present | RW).
+///
+/// @param table_phys    Physical address of the current-level table.
+/// @param index         Entry index within that table (0–511).
+/// @param is_table_level  True for PML4/PDPT/PD entries; false for PT entries.
+/// @return Pointer to the entry (via HHDM), or NULL if pool exhausted.
 static u64 * mmu_get_or_create_entry(phys_addr_t table_phys, u32 index, bool is_table_level);
 
 __cold error_t mmu_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, virt_addr_t kernel_virt_base)
@@ -176,16 +183,6 @@ static phys_addr_t mmu_alloc_page_table_phys(void)
     return mmu_virtual_to_physical_address((virt_addr_t) table);
 }
 
-/// Walk or create one level of the page table hierarchy.
-///
-/// If @p is_table_level is true and the entry is not yet present, a new
-/// zeroed page table page is allocated from the pool and the entry is
-/// initialised to point to it (Present | RW).
-///
-/// @param table_phys    Physical address of the current-level table.
-/// @param index         Entry index within that table (0–511).
-/// @param is_table_level  True for PML4/PDPT/PD entries; false for PT entries.
-/// @return Pointer to the entry (via HHDM), or NULL if pool exhausted.
 static u64 * mmu_get_or_create_entry(phys_addr_t table_phys, u32 index, bool is_table_level)
 {
     u64 * table = (u64 *) mmu_physical_to_virtual_address(table_phys);
