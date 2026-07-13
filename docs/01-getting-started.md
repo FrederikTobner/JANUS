@@ -2,8 +2,8 @@
 
 ## Dependencies
 
-The following tools are required to configure, build, and run JANUS. 
-Where a distribution-specific install command is given, Debian/Ubuntu and Arch Linux are covered other distributions may follow in the future. 
+The following tools are required to configure, build, and run JANUS.
+Where a distribution-specific install command is given, Debian/Ubuntu and Arch Linux are covered other distributions may follow in the future.
 
 ### Build System
 
@@ -72,7 +72,7 @@ Limine itself is fetched automatically by CMake via `FetchContent` and does not 
 
 ### Language Server
 
-clangd provides IDE features such as autocompletion and jump-to-definition. 
+clangd provides IDE features such as autocompletion and jump-to-definition.
 The repository includes a `.clangd` configuration file that points clangd at the
 generated `compile_commands.json`.
 

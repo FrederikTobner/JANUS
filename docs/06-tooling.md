@@ -15,8 +15,6 @@ The configure step generates a `compile_commands.json` in the build directory an
 clangd and clang-tidy both read this file, so IDE autocomplete and static analysis are always in sync with the real build.
 If editor completions appear stale after adding a new source file or changing include paths, re-running configure regenerates the file.
 
-A full list of available CMake commands for inspecting cache variables, enabling verbose output, and cleaning the build directory is in [optional/02-cmake-reference.md](optional/02-cmake-reference.md).
-
 ## QEMU
 
 The `run-<protocol>` build target invokes QEMU with the flags appropriate for the selected preset.
@@ -34,22 +32,6 @@ The `-no-reboot` and `-d int,cpu_reset` flags are useful for catching triple fau
 
 LLDB is the primary debugger.
 The repository ships an `.lldbinit` that automates the connection sequence.
-To start a debugging session, launch QEMU with the GDB server enabled, then attach LLDB:
-
-```bash
-# Terminal 1 — starts QEMU frozen, waiting for the debugger
-cmake --build --preset x86_64-gcc --target debug-limine
-
-# Terminal 2 — connects to the waiting VM
-lldb
-(lldb) gdb-remote localhost:1234
-(lldb) b kernel_main
-(lldb) c
-```
-
-The kernel binary contains full DWARF symbols when built with `Debug` or `RelWithDebInfo`.
-Because there is no libc and no dynamic linker, the symbol table contains exactly the symbols defined in the codebase.
-The entry point of the whole program then corresponds to the symbol `_start`, while the first C function, that is envoked within the kernel, is called `kernel_main`.
 
 A complete LLDB command reference, including memory inspection, disassembly, and watchpoint commands, is in [optional/01-lldb-reference.md](optional/01-lldb-reference.md).
 
@@ -69,4 +51,4 @@ The active check set is configured in `.clang-tidy` at the project root. Suppres
 The preferred response to any finding is to fix its root cause.
 
 To run clang-tidy locally before pushing, configure the `x86_64-clang` preset to produce a compile database and then invoke clang-tidy against the kernel sources.
-The exact commands are in [optional/03-clang-tidy-reference.md](optional/03-clang-tidy-reference.md).
+The exact commands are in [optional/03-clang-tidy-reference.md](optional/02-clang-tidy-reference.md).

@@ -1,5 +1,7 @@
 # LLDB Reference
 
+Since I tend to forget things easily here is an overview of lldb, the command line debugger provided by the llvm project.
+
 ## Connecting to QEMU
 
 Launch QEMU with the GDB server enabled using the `debug-limine` build target, then connect LLDB in a second terminal:
@@ -9,7 +11,7 @@ Launch QEMU with the GDB server enabled using the `debug-limine` build target, t
 cmake --build --preset x86_64-gcc --target debug-limine
 
 # Terminal 2 — attach and set an initial breakpoint
-lldb
+lldb ./build-x86_64-gcc/kernel-limine.elf
 (lldb) gdb-remote localhost:1234
 (lldb) b kernel_main
 (lldb) c

@@ -14,6 +14,7 @@ See [drivers/README.md](../kernel/subsys/drivers/README.md).
 ## interrupts
 
 Interrupt subsystem. Currently only supports x86_64.
+See [interrupts/README.md](..kernel/subsys/interrupts/README.md).
 
 ## mm
 
