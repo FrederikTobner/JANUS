@@ -39,9 +39,9 @@ extern char kernel_end[];
 static u32 g_mb2_magic;
 static void const * g_mb2_info;
 
-static __cold void parse_framebuffer_tag(boot_context_t * boot_context, struct multiboot_tag_framebuffer const * fb);
+static __cold void parse_framebuffer_tag(boot_context_t * boot_context, multiboot_tag_framebuffer_t const * fb);
 static mem_region_type_t translate_mmap_type(u32 mb2_type);
-static __cold void parse_mmap_tag(boot_context_t * boot_context, struct multiboot_tag_mmap const * mmap_tag);
+static __cold void parse_mmap_tag(boot_context_t * boot_context, multiboot_tag_mmap_t const * mmap_tag);
 
 /// @brief Stash Multiboot2 boot info from CPU registers
 ///
@@ -96,12 +96,12 @@ __cold error_t boot_init(boot_context_t * boot_context)
     display_info_t const none_display = {.mode = DISPLAY_MODE_NONE};
     boot_context->display = none_display;
 
-    struct multiboot_tag * tag = multiboot_first_tag((struct multiboot_info *) (phys_addr_t) g_mb2_info);
+    multiboot_tag_t * tag = multiboot_first_tag((multiboot_info_t *) (phys_addr_t) g_mb2_info);
     while (!multiboot_is_end_tag(tag)) {
         if (tag->type == MULTIBOOT2_TAG_FRAMEBUFFER) {
-            parse_framebuffer_tag(boot_context, (struct multiboot_tag_framebuffer const *) tag);
+            parse_framebuffer_tag(boot_context, (multiboot_tag_framebuffer_t const *) tag);
         } else if (tag->type == MULTIBOOT2_TAG_MMAP) {
-            parse_mmap_tag(boot_context, (struct multiboot_tag_mmap const *) tag);
+            parse_mmap_tag(boot_context, (multiboot_tag_mmap_t const *) tag);
         }
         tag = multiboot_next_tag(tag);
     }
@@ -112,7 +112,7 @@ __cold error_t boot_init(boot_context_t * boot_context)
 // Static function definitions
 
 /// Parse a Multiboot2 framebuffer tag and populate the display field.
-static __cold void parse_framebuffer_tag(boot_context_t * boot_context, struct multiboot_tag_framebuffer const * fb)
+static __cold void parse_framebuffer_tag(boot_context_t * boot_context, multiboot_tag_framebuffer_t const * fb)
 {
     if (fb->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB) {
         display_info_t const fb_display = {
@@ -152,14 +152,14 @@ static mem_region_type_t translate_mmap_type(u32 mb2_type)
 }
 
 /// Parse a Multiboot2 memory-map tag and populate boot_context->memmap.
-static __cold void parse_mmap_tag(boot_context_t * boot_context, struct multiboot_tag_mmap const * mmap_tag)
+static __cold void parse_mmap_tag(boot_context_t * boot_context, multiboot_tag_mmap_t const * mmap_tag)
 {
     u32 const entry_size = mmap_tag->entry_size;
     u8 const * cursor = (u8 const *) mmap_tag->entries;
     u8 const * const end = (u8 const *) mmap_tag + mmap_tag->size;
 
     while (cursor + entry_size <= end && boot_context->memmap.count < BOOT_MEMMAP_MAX_ENTRIES) {
-        struct multiboot_mmap_entry const * src = (struct multiboot_mmap_entry const *) cursor;
+        multiboot_mmap_entry_t const * src = (multiboot_mmap_entry_t const *) cursor;
         u32 const idx = boot_context->memmap.count;
         boot_context->memmap.entries[idx].base = (phys_addr_t) src->addr;
         boot_context->memmap.entries[idx].length = src->len;

@@ -30,7 +30,7 @@
 /// common tail pushes the general-purpose registers (r15 last → lowest
 /// address), and the CPU pushes the trap frame (rip..ss) automatically.
 /// Do not reorder without updating isr.asm in lockstep.
-typedef struct interrupt_frame {
+typedef struct {
     u64 r15; ///< General-purpose register R15
     u64 r14; ///< General-purpose register R14
     u64 r13; ///< General-purpose register R13

@@ -24,7 +24,7 @@
 #include <janus/types.h>
 
 /// @brief One 16-byte x86_64 IDT (Interrupt Descriptor Table) gate descriptor.
-typedef struct idt_entry {
+typedef struct {
     u16 offset_low;  ///< Bits [15:0] of the handler address
     u16 selector;    ///< Code-segment selector for the handler
     u8 ist;          ///< Bits [2:0] IST (Interrupt Stack Table) index (0 = none)
@@ -35,7 +35,7 @@ typedef struct idt_entry {
 } __packed idt_entry_t;
 
 /// @brief Pseudo-descriptor operand for LIDT (loads the IDT register).
-typedef struct idt_ptr {
+typedef struct {
     u16 limit; ///< Size of the table in bytes minus one
     u64 base;  ///< Linear address of the first IDT entry
 } __packed idt_ptr_t;

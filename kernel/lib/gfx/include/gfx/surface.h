@@ -31,7 +31,7 @@
 /// Backed by a framebuffer today; may back an off-screen buffer later.
 /// The struct is intentionally public so callers can embed surfaces by
 /// value, enabling multiple surfaces without heap allocation.
-typedef struct gfx_surface {
+typedef struct {
     u8 volatile * base; ///< Pixel-plane base address
     u32 width;          ///< Width in pixels
     u32 height;         ///< Height in pixels

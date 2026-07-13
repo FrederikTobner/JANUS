@@ -28,7 +28,7 @@
 ///
 /// The TSS (Task State Segment) descriptor is a system descriptor that spans
 /// two consecutive entries of this type (16 bytes total) in 64-bit mode.
-typedef struct gdt_entry {
+typedef struct {
     u16 limit_low;  ///< Bits [15:0] of the segment limit
     u16 base_low;   ///< Bits [15:0] of the base address
     u8 base_mid;    ///< Bits [23:16] of the base address
@@ -41,7 +41,7 @@ typedef struct gdt_entry {
 ///
 /// Only the IST (Interrupt Stack Table) and rsp fields are used by JANUS;
 /// the rest are present for hardware-layout correctness.
-typedef struct tss {
+typedef struct {
     u32 reserved0;
     u64 rsp0; ///< Stack pointer for privilege level 0
     u64 rsp1; ///< Stack pointer for privilege level 1
@@ -54,7 +54,7 @@ typedef struct tss {
 } __packed tss_t;
 
 /// @brief Pseudo-descriptor operand for LGDT (loads the GDT register).
-typedef struct gdt_ptr {
+typedef struct {
     u16 limit; ///< Size of the table in bytes minus one
     u64 base;  ///< Linear address of the first GDT entry
 } __packed gdt_ptr_t;

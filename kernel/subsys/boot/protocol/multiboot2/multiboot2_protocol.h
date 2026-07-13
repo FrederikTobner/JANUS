@@ -68,25 +68,25 @@
 #define MULTIBOOT2_TAG_LOAD_BASE_ADDR           21
 
 /// Multiboot2 information structure header (passed by the bootloader)
-struct multiboot_info {
+typedef struct {
     u32 total_size;
     u32 reserved;
     // Followed by tags
-} __packed;
+} __packed multiboot_info_t;
 
 /// Common tag structure
-struct multiboot_tag {
+typedef struct {
     u32 type;
     u32 size;
-} __packed;
+} __packed multiboot_tag_t;
 
 /// Basic memory information tag
-struct multiboot_tag_basic_meminfo {
+typedef struct {
     u32 type;
     u32 size;
     u32 mem_lower;
     u32 mem_upper;
-} __packed;
+} __packed multiboot_tag_basic_meminfo_t;
 
 /// Memory map entry type constants (Multiboot2 spec §3.6.8)
 #define MULTIBOOT2_MEMORY_AVAILABLE        1 ///< Usable RAM
@@ -96,21 +96,21 @@ struct multiboot_tag_basic_meminfo {
 #define MULTIBOOT2_MEMORY_BADRAM           5 ///< Defective memory
 
 /// Memory map entry
-struct multiboot_mmap_entry {
+typedef struct {
     u64 addr;
     u64 len;
     u32 type;
     u32 reserved;
-} __packed;
+} __packed multiboot_mmap_entry_t;
 
 /// Memory map tag
-struct multiboot_tag_mmap {
+typedef struct {
     u32 type;
     u32 size;
     u32 entry_size;
     u32 entry_version;
-    struct multiboot_mmap_entry entries[];
-} __packed;
+    multiboot_mmap_entry_t entries[];
+} __packed multiboot_tag_mmap_t;
 
 /// Framebuffer type constants (fb_type field)
 #define MULTIBOOT2_FRAMEBUFFER_TYPE_INDEXED  0
@@ -118,7 +118,7 @@ struct multiboot_tag_mmap {
 #define MULTIBOOT2_FRAMEBUFFER_TYPE_EGA_TEXT 2
 
 /// Framebuffer tag
-struct multiboot_tag_framebuffer {
+typedef struct {
     u32 type;
     u32 size;
     u64 addr;
@@ -135,39 +135,39 @@ struct multiboot_tag_framebuffer {
     u8 green_mask_size;
     u8 blue_field_position;
     u8 blue_mask_size;
-} __packed;
+} __packed multiboot_tag_framebuffer_t;
 
 /// Boot command line tag
-struct multiboot_tag_string {
+typedef struct {
     u32 type;
     u32 size;
     char string[];
-} __packed;
+} __packed multiboot_tag_string_t;
 
 /// Module tag
-struct multiboot_tag_module {
+typedef struct {
     u32 type;
     u32 size;
     u32 mod_start;
     u32 mod_end;
     char cmdline[];
-} __packed;
+} __packed multiboot_tag_module_t;
 
 /// Get the first tag from multiboot info
-static inline __pure struct multiboot_tag * multiboot_first_tag(struct multiboot_info * info)
+static __always_inline __pure multiboot_tag_t * multiboot_first_tag(multiboot_info_t * info)
 {
-    return (struct multiboot_tag *) ((u8 *) info + 8);
+    return (multiboot_tag_t *) ((u8 *) info + 8);
 }
 
 /// Get the next tag (8-byte aligned)
-static inline __pure struct multiboot_tag * multiboot_next_tag(struct multiboot_tag * tag)
+static __always_inline __pure multiboot_tag_t * multiboot_next_tag(multiboot_tag_t * tag)
 {
     u32 size = (tag->size + 7) & ~7u;
-    return (struct multiboot_tag *) ((u8 *) tag + size);
+    return (multiboot_tag_t *) ((u8 *) tag + size);
 }
 
 /// Check if tag is the end tag
-static inline __pure bool multiboot_is_end_tag(struct multiboot_tag * tag)
+static __always_inline __pure bool multiboot_is_end_tag(multiboot_tag_t * tag)
 {
     return tag->type == MULTIBOOT2_TAG_TYPE_END && tag->size == 8;
 }

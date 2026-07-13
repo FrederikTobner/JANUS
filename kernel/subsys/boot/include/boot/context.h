@@ -40,7 +40,7 @@ typedef enum {
 ///
 /// Contains all boot-protocol-derived information needed by the kernel.
 /// Public struct per Coding-Style.md: consumers access fields directly.
-typedef struct boot_context {
+typedef struct {
     boot_protocol_t protocol;     ///< Which boot protocol was used
     u64 hhdm_offset;              ///< Higher Half Direct Map offset (0 for identity-mapped)
     phys_addr_t kernel_phys_base; ///< Kernel physical base address
