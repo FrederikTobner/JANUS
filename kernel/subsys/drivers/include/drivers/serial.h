@@ -25,6 +25,7 @@
 #define DRIVERS_SERIAL_H
 
 #include <arch/drivers/serial.h>
+#include <janus/attributes.h>
 #include <janus/types.h>
 
 /// @brief Initialize the serial port.
@@ -57,14 +58,14 @@ s32 drivers_serial_getc(void);
 
 /// @brief Check if transmit buffer is ready.
 /// @return true if ready, false otherwise.
-static inline bool drivers_serial_tx_ready(void)
+static __always_inline bool drivers_serial_tx_ready(void)
 {
     return arch_serial_tx_ready();
 }
 
 /// @brief Check if receive buffer has data.
 /// @return true if data available, false otherwise.
-static inline bool drivers_serial_rx_ready(void)
+static __always_inline bool drivers_serial_rx_ready(void)
 {
     return arch_serial_rx_ready();
 }

@@ -1,4 +1,3 @@
-
 <p align="center"><a href="https://github.com/FrederikTobner/JANUS"><img src="./images/JANUS_Logo_Small.jpg" alt="JANUS Logo" height="180"/></a></p>
 <p align="center">A monolitihic kernel, supporting x86_64 and aarch64.</p>
 
@@ -10,31 +9,34 @@
 
 ## Quick Start
 
-Building the kernel
+For building the kernel the usage of one of the presets is recommended to simplify the configuration.
 
 ```bash
 # Using presets (recommended):
 cmake --preset x86_64-gcc        # or x86_64-clang, aarch64-gcc, aarch64-clang
 cmake --build --preset x86_64-gcc
-
-# Or manually (defaults to x86_64 with system compiler):
-cmake -B build -G Ninja
-ninja -C build
 ```
 
-Available presets: `x86_64-gcc`, `x86_64-clang`, `aarch64-gcc`, `aarch64-clang`
+Since both clang and gcc are supported under all architectures the available presets are `x86_64-gcc`, `x86_64-clang`, `aarch64-gcc` and `aarch64-clang`.
 
-Creating all bootable ISO's for the current architecture with the supported boot protocols
+For creating all bootable ISO's for the current architecture with the supported boot protocols, you can execute the following command:
 
 ```bash
-ninja -C build iso         # or: cmake --build --preset <preset> --target iso
+ninja -C build-x86_64-gcc iso         # or: cmake --build --preset <preset> --target iso
 ```
 
-Running in QEMU using limine (both supported by x86_64 and aarch64)
+For running the kernel in QEMU every supported boot protocol defines its own target, that can be used to make the setup easier:
 
 ```bash
-ninja -C build run-limine         # or: cmake --build --preset <preset> --target run-limine
+ninja -C build-x86_64-gcc run-<protocol>         # E.g ninja -C build-x86_64-gcc run-limine
 ```
+
+Currently JANUS supports the following boot protocols per architecture:
+
+| Architecture | Supported Boot Protocols |
+|--------------|--------------------------|
+| x86_64       | limine, multiboot2       |
+| aarch64      | limine                   |
 
 ## License
 

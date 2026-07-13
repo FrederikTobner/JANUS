@@ -26,11 +26,10 @@
 #include <janus/errno.h>
 
 // Extern request symbols (defined in limine_requests.c)
-
-extern volatile struct limine_hhdm_request limine_hhdm_request;
-extern volatile struct limine_framebuffer_request limine_framebuffer_request;
-extern volatile struct limine_executable_address_request limine_executable_address_request;
-extern volatile struct limine_memmap_request limine_memmap_request;
+extern limine_hhdm_request_t volatile limine_hhdm_request;
+extern limine_framebuffer_request_t volatile limine_framebuffer_request;
+extern limine_executable_address_request_t volatile limine_executable_address_request;
+extern limine_memmap_request_t volatile limine_memmap_request;
 
 /// Translate Limine memmap entry type to canonical mem_region_type_t.
 static mem_region_type_t limine_translate_memmap_type(u64 limine_type);
@@ -45,11 +44,11 @@ extern char kernel_size[];
 /// is entered, so this is safe to call before boot_init().
 __cold void boot_early_params(u64 * hhdm_offset, phys_addr_t * kernel_phys_base, virt_addr_t * kernel_virt_base)
 {
-    struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;
+    limine_hhdm_response_t const * hhdm = limine_hhdm_request.response;
     *hhdm_offset = (hhdm != NULL) ? hhdm->offset : 0;
     *kernel_phys_base = 0;
     *kernel_virt_base = 0;
-    struct limine_executable_address_response const * exe = limine_executable_address_request.response;
+    limine_executable_address_response_t const * exe = limine_executable_address_request.response;
     if (exe != NULL) {
         *kernel_phys_base = exe->physical_base;
         *kernel_virt_base = exe->virtual_base;
@@ -78,23 +77,23 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->kernel_phys_end = (phys_addr_t) kernel_phys_start;
 
     // HHDM offset is required for address translation
-    struct limine_hhdm_response const * hhdm = limine_hhdm_request.response;
+    limine_hhdm_response_t const * hhdm = limine_hhdm_request.response;
     if (UNLIKELY(hhdm == NULL)) {
         return JANUS_ENODEV; // HHDM is mandatory - bootloader did not provide it
     }
     boot_context->hhdm_offset = hhdm->offset;
 
     // Executable address (required on aarch64, optional on x86_64)
-    struct limine_executable_address_response const * executable_address = limine_executable_address_request.response;
+    limine_executable_address_response_t const * executable_address = limine_executable_address_request.response;
     if (executable_address != NULL) {
         boot_context->kernel_phys_base = executable_address->physical_base;
         boot_context->kernel_virt_base = executable_address->virtual_base;
     }
 
     // Framebuffer is optional — if not present, display_mode remains NONE
-    struct limine_framebuffer_response const * framebuffer_response = limine_framebuffer_request.response;
+    limine_framebuffer_response_t const * framebuffer_response = limine_framebuffer_request.response;
     if (framebuffer_response != NULL && framebuffer_response->framebuffer_count > 0) {
-        struct limine_framebuffer const * primary_framebuffer = framebuffer_response->framebuffers[0];
+        limine_framebuffer_t const * primary_framebuffer = framebuffer_response->framebuffers[0];
         display_info_t const fb_display = {
             .mode = DISPLAY_MODE_FRAMEBUFFER,
             .framebuffer = (u8 *) primary_framebuffer->address,
@@ -113,12 +112,12 @@ __cold error_t boot_init(boot_context_t * boot_context)
     boot_context->kernel_phys_end = (phys_addr_t) (boot_context->kernel_phys_base + (uintptr_t) kernel_size);
 
     // Physical memory map
-    struct limine_memmap_response const * memmap_response = limine_memmap_request.response;
+    limine_memmap_response_t const * memmap_response = limine_memmap_request.response;
     if (memmap_response != NULL) {
         u64 const max_entries = BOOT_MEMMAP_MAX_ENTRIES;
         u64 const n = (memmap_response->entry_count < max_entries) ? memmap_response->entry_count : max_entries;
         for (u64 i = 0; i < n; i++) {
-            struct limine_memmap_entry const * src = memmap_response->entries[i];
+            limine_memmap_entry_t const * src = memmap_response->entries[i];
             boot_context->memmap.entries[i].base = (phys_addr_t) src->base;
             boot_context->memmap.entries[i].length = src->length;
             boot_context->memmap.entries[i].type = limine_translate_memmap_type(src->type);
@@ -128,8 +127,6 @@ __cold error_t boot_init(boot_context_t * boot_context)
 
     return JANUS_OK;
 }
-
-// Static function definitions
 
 static mem_region_type_t limine_translate_memmap_type(u64 limine_type)
 {

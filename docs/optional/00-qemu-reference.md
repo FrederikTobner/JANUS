@@ -1,8 +1,10 @@
 # QEMU Reference
 
+Cause I would loose me head if it would not be attached to my shoulders here is an overview of QEMU.
+
 ## Invocation
 
-The `run` and `debug-*` CMake targets invoke QEMU with the correct flags for the selected preset. 
+The `run` and `debug-*` CMake targets invoke QEMU with the correct flags for the selected preset.
 Direct invocation is rarely necessary, but the underlying commands are:
 
 ```bash
@@ -30,7 +32,7 @@ qemu-system-aarch64 -M virt -cpu cortex-a72 -kernel build-aarch64-gcc/kernel.elf
 
 ## QEMU Monitor
 
-The QEMU monitor is accessible by pressing `Ctrl+A C` when running with `-serial stdio`. 
+The QEMU monitor is accessible by pressing `Ctrl+A C` when running with `-serial stdio`.
 It provides direct inspection of the emulated machine state without stopping the guest CPU:
 
 | Command             | Description                                                    |

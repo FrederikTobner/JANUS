@@ -76,28 +76,10 @@ Every function is prefixed with the abbreviation of its owning module, making th
 
 ```c
 mm_pmm_init(...)              // memory management — PMM
-kprintf(...)                  // kio — kernel output
-drivers_console_putc(...)     // drivers — console
-arch_serial_write(...)        // arch layer — serial
+drivers_serial_putc(...)      // Generic serial driver, putc function
+arch_serial_write(...)        // Arch specific serial driver write implementation
 mmu_map_mmio(...)             // page_tables — MMU
 ```
-
-### Type-Scoped Function Prefixes
-
-When a function's primary subject is a specific type exported by the module, extend the prefix to include the type name.
-This makes call sites self-documenting without requiring the reader to inspect the function signature:
-
-```c
-// preferred — the call site names the type being operated on
-gfx_surface_put_pixel(&surface, x, y, color);
-gfx_surface_fill_rect(&surface, x, y, w, h, color);
-gfx_surface_init(&surface, base, width, height, pitch, bpp, r, g, b);
-
-// avoid — leaves the call site ambiguous about what the first argument is
-gfx_put_pixel(&surface, x, y, color);
-```
-
-The general pattern is `<module>_<type>_<action>` for operations whose primary subject is a named type, and `<module>_<action>` when the module has a single implicit subject or the operation is not type-specific.
 
 ### File Naming
 

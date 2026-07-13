@@ -16,12 +16,11 @@ cmake/
 
 ## platform/
 
-`Detection.cmake` — host detection, compiler validation, freestanding flags (`-ffreestanding`, `-nostdlib`, warnings), and build-type flags.
-Includes `arch/<arch>/JanusPlatform.cmake` for ISA-specific flags.
+`Detection.cmake` is used for host detection, compiler validation, freestanding flags (`-ffreestanding`, `-nostdlib`, warnings), and build-type flags. It includes `arch/<arch>/JanusPlatform.cmake` for ISA-specific flags.
 
 ## kernel/
 
-Helper functions for adding kernel targets.
+This folder contains helper functions for adding kernel targets.
 
 ### `Library.cmake` — `janus_add_library(name SOURCES ... [DEPENDENCIES ...])`
 
@@ -56,10 +55,7 @@ Tracks all registered targets.
 Called after all `add_subdirectory` calls.
 
 - `janus_validate_registry()` — verify isolation rules
-- `janus_write_mermaid_diagram(output_file)` — write a Mermaid dependency
-  graph to `docs/src/generated/deps-<arch>.md`
-
-**Node shapes:** LIB → rounded rectangle, SUBSYS → rectangle, ASM → cylinder, PROTOCOL\_LIB → subroutine box, EXEC → hexagon.
+- `janus_write_mermaid_diagram(output_file)` — write a Mermaid dependency graph to `docs/src/generated/deps-<arch>.md`
 
 ## Targets.cmake
 

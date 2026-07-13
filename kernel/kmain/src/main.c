@@ -43,7 +43,7 @@
     "| |_| / ___ \\| |\\  | |_| |___) |\n"   \
     " \\___/_/   \\_\\_| \\_|\\___/|____/ \n"
 
-/// @brief Main kernel entry point
+/// @brief Main kernel entry point (in C)
 ///
 /// Called from the assembly entry point. At this point:
 /// - Stack is configured

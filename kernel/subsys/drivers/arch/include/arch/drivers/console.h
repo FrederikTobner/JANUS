@@ -35,7 +35,7 @@
 ///
 /// Coordinates are character cells; colors are 0–15 palette indices
 /// compatible with the ANSI/VGA 16-color scheme.
-typedef struct console_ops {
+typedef struct {
     /// Write character @p c at cell (@p x, @p y) with given colors.
     void (*put_cell)(u16 x, u16 y, char c, u8 fg, u8 bg);
     /// Scroll the display up one row; fill the new bottom row with @p bg.

@@ -12,17 +12,14 @@ implementations.
 
 ## Responsibilities
 
-- Define the `boot_context_t` structure (public, not opaque) that captures all boot-time information the kernel needs
-- Provide a common `boot_init(boot_context_t *)` entry point, which is implemented by each protocol
-- Parse protocol-specific data (Limine responses, Multiboot2 tags) into the uniform boot context
+- Defines the `boot_context_t` structure that captures all boot-time information the kernel needs
+- Provides a common `boot_init(boot_context_t *)` entry point, which is implemented by each protocol
+- Parses protocol-specific data into a uniform boot context
 
 ## Architecture
 
 The boot subsystem is an **INTERFACE library**.
-The actual initialization code lives in the protocol libraries under `protocol/`, which are plain `add_library(STATIC)` targets that link against `boot` to inherit its include paths.
-
-`kernel_main` calls `boot_init(&kd.boot)`.
-The linker resolves this to the symbol in the proper protocol library, that was linked
+The actual initialization code lives in the protocol libraries under `protocol/`, which are static libraries that link against `boot`.
 
 ## Adding a New Boot Protocol
 

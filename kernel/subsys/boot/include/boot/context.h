@@ -34,14 +34,14 @@ typedef enum {
     BOOT_PROTOCOL_UNKNOWN = 0,
     BOOT_PROTOCOL_MULTIBOOT2,
     BOOT_PROTOCOL_LIMINE,
-} boot_protocol_t;
+} boot_protocol;
 
 /// @brief Boot context — populated once during init, immutable after
 ///
 /// Contains all boot-protocol-derived information needed by the kernel.
 /// Public struct per Coding-Style.md: consumers access fields directly.
-typedef struct boot_context {
-    boot_protocol_t protocol;     ///< Which boot protocol was used
+typedef struct {
+    boot_protocol protocol;       ///< Which boot protocol was used
     u64 hhdm_offset;              ///< Higher Half Direct Map offset (0 for identity-mapped)
     phys_addr_t kernel_phys_base; ///< Kernel physical base address
     virt_addr_t kernel_virt_base; ///< Kernel virtual base address
@@ -56,7 +56,7 @@ typedef struct boot_context {
 /// implementation of this symbol. Only one is linked per kernel binary.
 /// The implementation must set every field unconditionally.
 ///
-/// @param ctx Boot context to populate
+/// @param boot_context Boot context to populate
 /// @return JANUS_OK on success, or a negative JANUS_E* error code on failure
 error_t boot_init(boot_context_t * boot_context);
 

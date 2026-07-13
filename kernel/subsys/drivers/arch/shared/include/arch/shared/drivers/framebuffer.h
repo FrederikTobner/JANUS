@@ -72,7 +72,7 @@ static u32 const framebuffer_color_palette[16] = {
 ///
 /// @param state  Framebuffer state to initialize.
 /// @param info   Display configuration from the boot context.
-static inline void framebuffer_init(framebuffer_state_t * state, display_info_t const * info)
+static __always_inline void framebuffer_init(framebuffer_state_t * state, display_info_t const * info)
 {
     gfx_surface_init(&state->surface,
                      info->framebuffer,
