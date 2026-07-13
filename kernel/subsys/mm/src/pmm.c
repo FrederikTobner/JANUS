@@ -230,31 +230,31 @@ static void pmm_mark_range_used(phys_addr_t base, u64 length)
 }
 
 /// Convert a physical address to a frame index
-static inline u64 phys_to_frame(phys_addr_t addr)
+static __always_inline u64 phys_to_frame(phys_addr_t addr)
 {
     return addr / PAGE_SIZE;
 }
 
 /// Convert a frame index to a physical address
-static inline phys_addr_t frame_to_phys(u64 frame)
+static __always_inline phys_addr_t frame_to_phys(u64 frame)
 {
     return (phys_addr_t) (frame * PAGE_SIZE);
 }
 
 /// Test whether a frame is free (bit == 1)
-static inline bool pmm_is_free(u8 const * bitmap, u64 frame)
+static __always_inline bool pmm_is_free(u8 const * bitmap, u64 frame)
 {
     return (bitmap[frame >> 3] & (1U << (frame & 7U))) != 0;
 }
 
 /// Mark a frame free (set bit to 1)
-static inline void pmm_mark_free(u8 * bitmap, u64 frame)
+static __always_inline void pmm_mark_free(u8 * bitmap, u64 frame)
 {
     bitmap[frame >> 3] |= (u8) (1U << (frame & 7U));
 }
 
 /// Mark a frame used (clear bit to 0)
-static inline void pmm_mark_used(u8 * bitmap, u64 frame)
+static __always_inline void pmm_mark_used(u8 * bitmap, u64 frame)
 {
     bitmap[frame >> 3] &= (u8) ~(1U << (frame & 7U));
 }

@@ -66,79 +66,92 @@
     {LIMINE_COMMON_MAGIC_0, LIMINE_COMMON_MAGIC_1, 0x67cf3d9d378a806fULL, 0xe304acdfc50c3c62ULL}
 // clang-format on
 
+/// Memory map entry
+typedef struct {
+    u64 base;
+    u64 length;
+    u64 type;
+} limine_memmap_entry_t;
+
+/// Memory map response
+typedef struct {
+    u64 revision;
+    u64 entry_count;
+    limine_memmap_entry_t ** entries;
+} limine_memmap_response_t;
 /// Entry point request
-struct limine_entry_point_request {
+typedef struct {
     u64 id[4];
     u64 revision;
     void * response;
     void (*entry)(void);
-};
+} limine_entry_point_request_t;
 
 /// Stack size request
-struct limine_stack_size_request {
+typedef struct {
     u64 id[4];
     u64 revision;
     void * response;
     u64 stack_size;
-};
+} limine_stack_size_request_t;
 
 /// HHDM (Higher Half Direct Map) request
-struct limine_hhdm_request {
+typedef struct {
     u64 id[4];
     u64 revision;
     void * response;
-};
+} limine_hhdm_request_t;
 
 /// Framebuffer request
-struct limine_framebuffer_request {
+typedef struct {
     u64 id[4];
     u64 revision;
     void * response;
-};
+} limine_framebuffer_request_t;
 
 /// Executable address request — provides kernel physical/virtual base
-struct limine_executable_address_request {
+typedef struct {
     u64 id[4];
     u64 revision;
     void * response;
-};
+} limine_executable_address_request_t;
 
 /// Memory map request — provides physical memory map
-struct limine_memmap_request {
+typedef struct {
     u64 id[4];
     u64 revision;
-    struct limine_memmap_response * response;
-};
+    limine_memmap_response_t * response;
+} limine_memmap_request_t;
 
 /// Base revision (protocol version)
-struct limine_base_revision {
+typedef struct {
     u64 magic[2];
     u64 revision;
-};
+} limine_base_revision_t;
 
 /// Generic response header (common to all responses)
-struct limine_response {
+typedef struct {
     u64 revision;
-};
+} limine_response_t;
 
 /// HHDM response — the offset to add to physical addresses
-struct limine_hhdm_response {
+typedef struct {
     u64 revision;
     u64 offset;
-};
+} limine_hhdm_response_t;
 
 /// Executable address response — kernel load addresses
-struct limine_executable_address_response {
+typedef struct {
     u64 revision;
     u64 physical_base;
     u64 virtual_base;
-};
+} limine_executable_address_response_t;
 
 /// Framebuffer memory model types
 #define LIMINE_FRAMEBUFFER_RGB 1
 
 /// Video mode descriptor
-struct limine_video_mode {
+typedef struct {
     u64 pitch;
     u64 width;
     u64 height;
@@ -150,10 +163,10 @@ struct limine_video_mode {
     u8 green_mask_shift;
     u8 blue_mask_size;
     u8 blue_mask_shift;
-};
+} limine_video_mode_t;
 
 /// Individual framebuffer descriptor
-struct limine_framebuffer {
+typedef struct {
     void * address;
     u64 width;
     u64 height;
@@ -171,15 +184,15 @@ struct limine_framebuffer {
     void * edid;
     // Revision 1+
     u64 mode_count;
-    struct limine_video_mode ** modes;
-};
+    limine_video_mode_t ** modes;
+} limine_framebuffer_t;
 
 /// Framebuffer response — array of framebuffers
-struct limine_framebuffer_response {
+typedef struct {
     u64 revision;
     u64 framebuffer_count;
-    struct limine_framebuffer ** framebuffers;
-};
+    limine_framebuffer_t ** framebuffers;
+} limine_framebuffer_response_t;
 
 /// Memory map entry types
 #define LIMINE_MEMMAP_USABLE                 0
@@ -190,19 +203,5 @@ struct limine_framebuffer_response {
 #define LIMINE_MEMMAP_BOOTLOADER_RECLAIMABLE 5
 #define LIMINE_MEMMAP_KERNEL_AND_MODULES     6
 #define LIMINE_MEMMAP_FRAMEBUFFER            7
-
-/// Memory map entry
-struct limine_memmap_entry {
-    u64 base;
-    u64 length;
-    u64 type;
-};
-
-/// Memory map response
-struct limine_memmap_response {
-    u64 revision;
-    u64 entry_count;
-    struct limine_memmap_entry ** entries;
-};
 
 #endif /* JANUS_LIMINE_PROTOCOL_H */

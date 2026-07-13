@@ -42,7 +42,7 @@ __used __section(".limine_requests") static volatile u64 limine_base_revision[3]
 };
 
 // Entry point request - tells Limine where to jump after boot.
-__used __section(".limine_requests") static volatile struct limine_entry_point_request limine_entry_point_request = {
+__used __section(".limine_requests") static volatile limine_entry_point_request_t limine_entry_point_request = {
     .id = LIMINE_ENTRY_POINT_REQUEST_ID,
     .revision = 0,
     .response = NULL,
@@ -50,7 +50,7 @@ __used __section(".limine_requests") static volatile struct limine_entry_point_r
 };
 
 // Stack size request - requests a 64KB stack from Limine.
-__used __section(".limine_requests") static volatile struct limine_stack_size_request limine_stack_size_request = {
+__used __section(".limine_requests") static volatile limine_stack_size_request_t limine_stack_size_request = {
     .id = LIMINE_STACK_SIZE_REQUEST_ID,
     .revision = 0,
     .response = NULL,
@@ -60,7 +60,7 @@ __used __section(".limine_requests") static volatile struct limine_stack_size_re
 // HHDM (Higher Half Direct Map) request.
 // Required to access physical memory via virtual addresses.
 // The response contains the HHDM offset to add to physical addresses.
-__used __section(".limine_requests") volatile struct limine_hhdm_request limine_hhdm_request = {
+__used __section(".limine_requests") volatile limine_hhdm_request_t limine_hhdm_request = {
     .id = LIMINE_HHDM_REQUEST_ID,
     .revision = 0,
     .response = NULL,
@@ -68,7 +68,7 @@ __used __section(".limine_requests") volatile struct limine_hhdm_request limine_
 
 // Framebuffer request - requests a graphical framebuffer.
 // Used by the TTY driver for graphical output.
-__used __section(".limine_requests") volatile struct limine_framebuffer_request limine_framebuffer_request = {
+__used __section(".limine_requests") volatile limine_framebuffer_request_t limine_framebuffer_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
     .revision = 0,
     .response = NULL,
@@ -76,16 +76,15 @@ __used __section(".limine_requests") volatile struct limine_framebuffer_request 
 
 // Executable address request - provides kernel physical and virtual base addresses.
 // Needed for aarch64 to compute physical addresses of kernel memory for page tables.
-__used __section(".limine_requests") volatile struct limine_executable_address_request
-    limine_executable_address_request = {
-        .id = LIMINE_EXECUTABLE_ADDRESS_REQUEST_ID,
-        .revision = 0,
-        .response = NULL,
+__used __section(".limine_requests") volatile limine_executable_address_request_t limine_executable_address_request = {
+    .id = LIMINE_EXECUTABLE_ADDRESS_REQUEST_ID,
+    .revision = 0,
+    .response = NULL,
 };
 
 // Memory map request - provides the physical memory map from the bootloader.
 // Required by the PMM to discover usable RAM regions.
-__used __section(".limine_requests") volatile struct limine_memmap_request limine_memmap_request = {
+__used __section(".limine_requests") volatile limine_memmap_request_t limine_memmap_request = {
     .id = LIMINE_MEMMAP_REQUEST_ID,
     .revision = 0,
     .response = NULL,

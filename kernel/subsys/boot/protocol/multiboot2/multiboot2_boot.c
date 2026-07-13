@@ -39,8 +39,22 @@ extern char kernel_end[];
 static u32 g_mb2_magic;
 static void const * g_mb2_info;
 
+/// Parse a Multiboot2 framebuffer tag and populate the display field
+///
+/// @param boot_context Boot context to populate
+/// @param fb Multiboot2 framebuffer tag to parse
 static __cold void parse_framebuffer_tag(boot_context_t * boot_context, multiboot_tag_framebuffer_t const * fb);
+
+/// Translate a single Multiboot2 memory type to mem_region_type_t.
+///
+///@param mb2_type Multiboot2 memory type (from multiboot_mmap_entry_t.type)
+/// @return Canonical mem_region_type_t
 static mem_region_type_t translate_mmap_type(u32 mb2_type);
+
+/// Parse a Multiboot2 memory-map tag and populate boot_context->memmap
+///
+/// @param boot_context Boot context to populate
+/// @param mmap_tag Multiboot2 memory-map tag to parse
 static __cold void parse_mmap_tag(boot_context_t * boot_context, multiboot_tag_mmap_t const * mmap_tag);
 
 /// @brief Stash Multiboot2 boot info from CPU registers
@@ -109,9 +123,6 @@ __cold error_t boot_init(boot_context_t * boot_context)
     return JANUS_OK;
 }
 
-// Static function definitions
-
-/// Parse a Multiboot2 framebuffer tag and populate the display field.
 static __cold void parse_framebuffer_tag(boot_context_t * boot_context, multiboot_tag_framebuffer_t const * fb)
 {
     if (fb->fb_type == MULTIBOOT2_FRAMEBUFFER_TYPE_RGB) {
@@ -133,7 +144,6 @@ static __cold void parse_framebuffer_tag(boot_context_t * boot_context, multiboo
     }
 }
 
-/// Translate a single Multiboot2 memory type to mem_region_type_t.
 static mem_region_type_t translate_mmap_type(u32 mb2_type)
 {
     switch (mb2_type) {
@@ -151,7 +161,6 @@ static mem_region_type_t translate_mmap_type(u32 mb2_type)
     }
 }
 
-/// Parse a Multiboot2 memory-map tag and populate boot_context->memmap.
 static __cold void parse_mmap_tag(boot_context_t * boot_context, multiboot_tag_mmap_t const * mmap_tag)
 {
     u32 const entry_size = mmap_tag->entry_size;
