@@ -14,38 +14,26 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/dt.h
-/// @brief Public asm descriptor-table entry point.
+/// @file arch/impl/asm/dt.h
+/// @brief AArch64 device tree assembly helpers.
 ///
-/// Wrappers for loading the x86_64 descriptor tables (IDT/GDT) and the task
-/// register. These are x86_64-only; the header body is empty on other
-/// architectures, so it is safe to include only from x86_64 code paths.
+/// Raw inline-assembly wrappers for installing the EL1 exception vector table.
 
-#ifndef ASM_DT_H
-#define ASM_DT_H
+#ifndef AARCH64_IMPL_ASM_DT_H
+#define AARCH64_IMPL_ASM_DT_H
 
-#include <arch/asm/dt.h>
-#include <asm/capabilities.h>
 #include <janus/attributes.h>
-#include <janus/types.h>
 
-#if ASM_CAP_INTERRUPT_VECTOR_TABLE
-static __always_inline void asm_load_interrupt_vectors(void const * idtr)
+/// Install the EL1 exception vector table.
+///
+/// @param vector_table 2 KiB-aligned virtual address of the 16-entry vector table
+static __always_inline void arch_asm_impl_dt_load_interrupt_vectors(void const * vector_table)
 {
-    arch_asm_load_interrupt_vectors(idtr);
-}
-#endif /* ASM_CAP_INTERRUPT_VECTOR_TABLE */
-
-#if ASM_CAP_SEGMENT_DESCRIPTORS
-static __always_inline void asm_load_gdt(void const * gdtr, u16 code_sel, u16 data_sel)
-{
-    arch_asm_load_gdt(gdtr, code_sel, data_sel);
+    __asm__ volatile("msr vbar_el1, %0\n\t"
+                     "isb"
+                     :
+                     : "r"(vector_table)
+                     : "memory");
 }
 
-static __always_inline void asm_load_tr(u16 sel)
-{
-    arch_asm_load_tr(sel);
-}
-#endif /* ASM_CAP_SEGMENT_DESCRIPTORS */
-
-#endif /* ASM_DT_H */
+#endif /* AARCH64_IMPL_ASM_DT_H */

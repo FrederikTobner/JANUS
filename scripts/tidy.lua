@@ -127,6 +127,7 @@ Options:
   -p, --preset PRESET   CMake preset whose build dir to use (e.g. x86_64-clang)
                         Defaults to the first available *-clang build directory.
       --filter PATTERN  Only analyse files whose path matches PATTERN
+  -f, --fix             Apply clang-tidy suggested fixes in-place
   -v, --verbose         Show full clang-tidy output even for passing files
   -h, --help            Print this message and exit
 
@@ -138,6 +139,7 @@ Exit codes:
 local opts = {
     preset  = nil,
     filter  = nil,
+    fix     = false,
     verbose = false,
 }
 
@@ -155,6 +157,8 @@ do
             i = i + 1
             if not arg[i] then die("--filter requires an argument") end
             opts.filter = arg[i]
+        elseif a == "-f" or a == "--fix" then
+            opts.fix = true
         elseif a == "-v" or a == "--verbose" then
             opts.verbose = true
         else
@@ -291,8 +295,9 @@ local function main()
         status(i, n, path, "analysing...")
         local t_start = now()
 
+        local fix_flag = opts.fix and " --fix" or ""
         local cmd    = string.format(
-            "%s -p %q %q 2>&1", TOOL, BUILD_DIR, path)
+            "%s -p %q%s %q 2>&1", TOOL, BUILD_DIR, fix_flag, path)
         local output = capture(cmd)
         -- clang-tidy exits 0 even with warnings; treat any diagnostic output
         -- that contains ": error:" or ": warning:" as a failure.

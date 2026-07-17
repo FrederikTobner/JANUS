@@ -117,7 +117,7 @@ error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt)
     // All page-table entries installed successfully — commit the VA window.
     g_mmu.mmio_virt_next += aligned_size;
     for (virt_addr_t v = virt_addr; v < virt_addr + aligned_size; v += PAGE_SIZE) {
-        asm_tlbi_vale1is(v >> 12);
+        asm_tlb_invalidate_page(v);
     }
     asm_dsb();
     asm_isb();

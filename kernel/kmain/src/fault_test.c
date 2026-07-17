@@ -47,7 +47,7 @@ __noreturn void kmain_fault_test(void)
     // Unbounded recursion exhausts the main kernel stack, escalating to #DF,
     // which must fire on the dedicated IST stack instead of triple-faulting.
     u64 sink = overflow_stack(0);
-    kprintf("[fault-test] unreachable %llu\n", (unsigned long long) sink);
+    kprintf("[fault-test] unreachable %llu\n", (u64) sink);
 #else
     // Write above the first 4 GB → #PF in both boot configurations.
     //

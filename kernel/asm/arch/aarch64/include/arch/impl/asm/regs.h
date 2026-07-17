@@ -27,6 +27,16 @@
 #include <janus/attributes.h>
 #include <janus/types.h>
 
+/// Read the faulting address (FAR_EL1) register.
+///
+/// @return Faulting virtual address.
+static __always_inline u64 arch_asm_impl_read_fault_address(void)
+{
+    u64 val;
+    __asm__ volatile("mrs %0, far_el1" : "=r"(val));
+    return val;
+}
+
 /// Read the kernel-mode page table base register (TTBR1_EL1).
 ///
 /// @return Physical address of the L0 page table used for EL1 kernel mappings.

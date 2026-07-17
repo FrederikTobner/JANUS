@@ -23,16 +23,18 @@
 #include <arch/asm/capabilities.h>
 #include <arch/impl/asm/tlb.h>
 
+#if ASM_CAP_TLB_INVALIDATE_PAGE
 static __always_inline void arch_asm_tlb_invalidate_page(virt_addr_t va)
 {
     arch_asm_impl_tlb_invalidate_page(va);
 }
+#endif /* ASM_CAP_TLB_INVALIDATE_PAGE */
 
-#if ASM_ARCH_AARCH64
+#if ASM_CAP_TLB_INVALIDATE_ALL
 static __always_inline void arch_asm_tlb_invalidate_all(void)
 {
     arch_asm_impl_tlb_invalidate_all();
 }
-#endif
+#endif /* ASM_CAP_TLB_INVALIDATE_ALL */
 
 #endif /* ARCH_ASM_TLB_H */

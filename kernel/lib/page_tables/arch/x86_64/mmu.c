@@ -150,7 +150,7 @@ error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt)
         // Device memory: Present | RW | PWT | PCD | NX — no caching.
         pt[PT_INDEX(va)] = (pa & PTE_ADDR_MASK) | PTE_PRESENT | PTE_RW | PTE_PWT | PTE_PCD | PTE_NX;
 
-        asm_tlb_invlpg(va);
+        asm_tlb_invalidate_page(va);
     }
     // All page-table entries installed successfully — commit the VA window.
     g_mmu.mmio_virt_next += aligned_size;

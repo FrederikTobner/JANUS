@@ -48,7 +48,7 @@ __cold void idt_install(void)
 
     g_idtr.limit = (u16) (sizeof(g_idt) - 1);
     g_idtr.base = (u64) &g_idt;
-    asm_load_idt(&g_idtr);
+    asm_load_interrupt_vectors(&g_idtr);
 }
 
 static void idt_set_gate(u8 vec, u64 handler, u8 type, u8 ist)

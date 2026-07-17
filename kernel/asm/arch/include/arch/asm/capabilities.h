@@ -22,4 +22,7 @@
 
 #include <arch/impl/asm/capabilities.h>
 
+#define ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED 1
+#define ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT   2
+
 #endif /* ARCH_ASM_CAPABILITIES_H */

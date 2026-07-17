@@ -102,8 +102,8 @@ __hot void gfx_surface_scroll(gfx_surface_t const * s, u32 dy, u32 fill_rgb)
     // Ascending iteration is safe: destination row y < source row y+dy.
     u32 const copy_rows = s->height - dy;
     for (u32 row = 0; row < copy_rows; row++) {
-        u8 volatile * dst = s->base + (u64) row * s->pitch;
-        u8 const volatile * src = s->base + (u64) (row + dy) * s->pitch;
+        u8 volatile * dst = s->base + ((u64) row * s->pitch);
+        u8 const volatile * src = s->base + ((u64) (row + dy) * s->pitch);
         for (u32 i = 0; i < s->pitch; i++) {
             dst[i] = src[i];
         }
