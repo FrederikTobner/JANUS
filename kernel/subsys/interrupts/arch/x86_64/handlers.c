@@ -17,9 +17,9 @@
 /// @file handlers.c
 /// @brief x86_64 exception dispatch and diagnostic reporting.
 
-#include <arch/impl/interrupts/frame.h>
-#include <arch/impl/interrupts/vectors.h>
+#include <arch/internal/interrupts/frame.h>
 #include <arch/internal/interrupts/setup.h>
+#include <arch/internal/interrupts/vectors.h>
 #include <asm/regs.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
@@ -70,17 +70,17 @@ static char const * const k_mnemonics[VEC_RESERVED_COUNT] = {
 /// Writes the trap frame (RIP, CS, RFLAGS, RSP, SS) and all saved
 /// general-purpose registers to the kernel console via kprintf.
 ///
-/// @param f  Interrupt frame captured by the ISR entry stub in isr.asm.
-static void dump_registers(interrupt_frame_t const * f);
+/// @param frame  Interrupt frame captured by the ISR entry stub in isr.asm.
+static void dump_registers(interrupt_frame_t const * frame);
 
 /// @brief Return a human-readable mnemonic for a CPU exception vector.
 /// @param vector  CPU exception vector number (0–31).
 /// @return Pointer to a static string describing the exception, or a generic
 ///         "External/Reserved vector" message for vectors outside the reserved range.
-char const * interrupts_vector_mnemonic(u64 vector)
+char const * interrupts_vector_mnemonic(u64 vector_index)
 {
-    if (vector < VEC_RESERVED_COUNT) {
-        return k_mnemonics[vector];
+    if (vector_index < VEC_RESERVED_COUNT) {
+        return k_mnemonics[vector_index];
     }
     return "External/Reserved vector";
 }
@@ -108,13 +108,13 @@ __noreturn void interrupts_dispatch(interrupt_frame_t const * frame)
     kpanic("unhandled CPU exception (vector %lu)", frame->vector);
 }
 
-static void dump_registers(interrupt_frame_t const * f)
+static void dump_registers(interrupt_frame_t const * frame)
 {
-    kprintf("  RIP=0x%016lx  CS=0x%016lx  RFLAGS=0x%016lx\n", f->rip, f->cs, f->rflags);
-    kprintf("  RSP=0x%016lx  SS=0x%016lx\n", f->rsp, f->ss);
-    kprintf("  RAX=0x%016lx  RBX=0x%016lx  RCX=0x%016lx\n", f->rax, f->rbx, f->rcx);
-    kprintf("  RDX=0x%016lx  RSI=0x%016lx  RDI=0x%016lx\n", f->rdx, f->rsi, f->rdi);
-    kprintf("  RBP=0x%016lx  R8 =0x%016lx  R9 =0x%016lx\n", f->rbp, f->r8, f->r9);
-    kprintf("  R10=0x%016lx  R11=0x%016lx  R12=0x%016lx\n", f->r10, f->r11, f->r12);
-    kprintf("  R13=0x%016lx  R14=0x%016lx  R15=0x%016lx\n", f->r13, f->r14, f->r15);
+    kprintf("  RIP=0x%016lx  CS=0x%016lx  RFLAGS=0x%016lx\n", frame->rip, frame->cs, frame->rflags);
+    kprintf("  RSP=0x%016lx  SS=0x%016lx\n", frame->rsp, frame->ss);
+    kprintf("  RAX=0x%016lx  RBX=0x%016lx  RCX=0x%016lx\n", frame->rax, frame->rbx, frame->rcx);
+    kprintf("  RDX=0x%016lx  RSI=0x%016lx  RDI=0x%016lx\n", frame->rdx, frame->rsi, frame->rdi);
+    kprintf("  RBP=0x%016lx  R8 =0x%016lx  R9 =0x%016lx\n", frame->rbp, frame->r8, frame->r9);
+    kprintf("  R10=0x%016lx  R11=0x%016lx  R12=0x%016lx\n", frame->r10, frame->r11, frame->r12);
+    kprintf("  R13=0x%016lx  R14=0x%016lx  R15=0x%016lx\n", frame->r13, frame->r14, frame->r15);
 }

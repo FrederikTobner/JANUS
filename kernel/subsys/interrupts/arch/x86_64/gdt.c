@@ -18,7 +18,7 @@
 /// @brief x86_64 GDT (Global Descriptor Table) and TSS (Task State Segment)
 ///        construction, including the dedicated #DF (Double Fault) IST stack.
 
-#include <arch/impl/interrupts/gdt.h>
+#include <arch/internal/interrupts/gdt.h>
 #include <arch/internal/interrupts/setup.h>
 #include <asm/dt.h>
 #include <janus/attributes.h>

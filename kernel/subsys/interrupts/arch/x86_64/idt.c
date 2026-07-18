@@ -17,10 +17,10 @@
 /// @file idt.c
 /// @brief x86_64 IDT (Interrupt Descriptor Table) construction and loading.
 
-#include <arch/impl/interrupts/gdt.h>
-#include <arch/impl/interrupts/idt.h>
-#include <arch/impl/interrupts/vectors.h>
+#include <arch/internal/interrupts/gdt.h>
+#include <arch/internal/interrupts/idt.h>
 #include <arch/internal/interrupts/setup.h>
+#include <arch/internal/interrupts/vectors.h>
 #include <asm/dt.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
