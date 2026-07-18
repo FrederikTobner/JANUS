@@ -18,7 +18,7 @@
 /// @brief x86_64 GDT (Global Descriptor Table) and TSS (Task State Segment)
 ///        construction, including the dedicated #DF (Double Fault) IST stack.
 
-#include <arch/impl/interrupts/gdt.h>
+#include <arch/internal/interrupts/gdt.h>
 #include <arch/internal/interrupts/setup.h>
 #include <asm/dt.h>
 #include <janus/attributes.h>
@@ -32,8 +32,8 @@
 #define GDT_ACCESS_DATA     0x92 ///< present, DPL 0, data, read/write
 #define GDT_ACCESS_TSS      0x89 ///< present, DPL 0, available 64-bit TSS
 
-// Granularity/flags byte for a 64-bit code segment (L bit set).
-#define GDT_FLAGS_LONG_MODE 0x20
+// Flags
+#define GDT_FLAGS_LONG_MODE 0x20 ///< Long mode flag of the global descriptor table
 
 static u8 g_df_stack[DF_STACK_SIZE] __aligned(16);
 static gdt_entry_t g_gdt[GDT_SLOTS];
@@ -72,7 +72,7 @@ __cold void gdt_install(void)
     g_tss.ist[0] = (u64) (g_df_stack + DF_STACK_SIZE);
     g_tss.iomap_base = (u16) sizeof(tss_t);
 
-    // g_gdt[0] is the null descriptor; it stays zero because g_gdt is static.
+    // g_gdt[0] is the null descriptor
     gdt_set_segment(&g_gdt[1], GDT_ACCESS_CODE, GDT_FLAGS_LONG_MODE);
     gdt_set_segment(&g_gdt[2], GDT_ACCESS_DATA, 0);
     gdt_set_tss(&g_gdt[3], &g_gdt[4], (u64) &g_tss, (u32) (sizeof(tss_t) - 1));
@@ -104,7 +104,6 @@ static void gdt_set_tss(gdt_entry_t * lo, gdt_entry_t * hi, u64 base, u32 limit)
     lo->granularity = (u8) ((limit >> 16) & 0x0F);
     lo->base_high = (u8) ((base >> 24) & 0xFF);
 
-    // Upper half of the 16-byte system descriptor: base[63:32], rest reserved.
     u32 base_upper = (u32) (base >> 32);
     hi->limit_low = (u16) (base_upper & 0xFFFF);
     hi->base_low = (u16) ((base_upper >> 16) & 0xFFFF);

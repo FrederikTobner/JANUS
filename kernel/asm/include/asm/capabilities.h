@@ -21,6 +21,7 @@
 #define ASM_CAPABILITIES_H
 
 #include <arch/asm/capabilities.h>
+#include <janus/attributes.h>
 
 /*
  * Validation block:
@@ -28,7 +29,7 @@
  * and each value must be 0 or 1.
  */
 
-#define ASM_VALIDATE_BOOL_MACRO(name) _Static_assert(((name) == 0) || ((name) == 1), #name " must be 0 or 1")
+#define ASM_VALIDATE_BOOL_MACRO(name) STATIC_ASSERT(((name) == 0) || ((name) == 1), #name " must be 0 or 1")
 
 /* Required architecture selectors */
 
@@ -69,6 +70,12 @@ ASM_VALIDATE_BOOL_MACRO(ASM_CAP_IDLE_WAIT_INTERRUPT);
 ASM_VALIDATE_BOOL_MACRO(ASM_CAP_TLB_INVALIDATE_PAGE);
 #endif
 
+#ifndef ASM_CAP_TLB_INVALIDATE_ALL
+#error "Missing required macro: ASM_CAP_TLB_INVALIDATE_ALL"
+#else
+ASM_VALIDATE_BOOL_MACRO(ASM_CAP_TLB_INVALIDATE_ALL);
+#endif
+
 // Port I/O instructions (in/out style) are available.
 #ifndef ASM_CAP_PORT_IO
 #error "Missing required macro: ASM_CAP_PORT_IO"
@@ -81,6 +88,33 @@ ASM_VALIDATE_BOOL_MACRO(ASM_CAP_PORT_IO);
 #error "Missing required macro: ASM_CAP_ARCH_SYSREG_ACCESS"
 #else
 ASM_VALIDATE_BOOL_MACRO(ASM_CAP_ARCH_SYSREG_ACCESS);
+#endif
+
+#ifndef ASM_CAP_INTERRUPT_VECTOR_TABLE
+#error "Missing required macro: ASM_CAP_INTERRUPT_VECTOR_TABLE"
+#else
+ASM_VALIDATE_BOOL_MACRO(ASM_CAP_INTERRUPT_VECTOR_TABLE);
+#endif
+
+#ifndef ASM_CAP_SEGMENT_DESCRIPTORS
+#error "Missing required macro: ASM_CAP_SEGMENT_DESCRIPTORS"
+#else
+ASM_VALIDATE_BOOL_MACRO(ASM_CAP_SEGMENT_DESCRIPTORS);
+#endif
+
+#ifndef ASM_CAP_FAULT_ADDRESS_REGISTER
+#error "Missing required macro: ASM_CAP_FAULT_ADDRESS_REGISTER"
+#else
+ASM_VALIDATE_BOOL_MACRO(ASM_CAP_FAULT_ADDRESS_REGISTER);
+#endif
+
+#ifndef ASM_CAP_PAGE_TABLE_BASE_MODEL
+#error "Missing required macro: ASM_CAP_PAGE_TABLE_BASE_MODEL"
+#else
+STATIC_ASSERT((ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED) ||
+                  (ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT),
+              "ASM_CAP_PAGE_TABLE_BASE_MODEL must be either ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED or "
+              "ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT");
 #endif
 
 #undef ASM_VALIDATE_BOOL_MACRO

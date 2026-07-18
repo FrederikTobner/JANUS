@@ -23,7 +23,14 @@
 #include <arch/asm/capabilities.h>
 #include <arch/impl/asm/regs.h>
 
-#if ASM_ARCH_X86_64
+#if ASM_CAP_FAULT_ADDRESS_REGISTER
+static __always_inline u64 arch_asm_read_fault_address(void)
+{
+    return arch_asm_impl_read_fault_address();
+}
+#endif /* ASM_CAP_FAULT_ADDRESS_REGISTER */
+
+#if ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED
 static __always_inline u64 arch_asm_read_cr3(void)
 {
     return arch_asm_impl_read_cr3();
@@ -33,13 +40,9 @@ static __always_inline void arch_asm_write_cr3(u64 val)
 {
     arch_asm_impl_write_cr3(val);
 }
-static __always_inline u64 arch_asm_read_cr2(void)
-{
-    return arch_asm_impl_read_cr2();
-}
-#endif
+#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED */
 
-#if ASM_ARCH_AARCH64
+#if ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT
 static __always_inline u64 arch_asm_read_ttbr1_el1(void)
 {
     return arch_asm_impl_read_ttbr1_el1();
@@ -59,6 +62,6 @@ static __always_inline void arch_asm_write_ttbr0_el1(u64 val)
 {
     arch_asm_impl_write_ttbr0_el1(val);
 }
-#endif
+#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT */
 
 #endif /* ARCH_ASM_REGS_H */

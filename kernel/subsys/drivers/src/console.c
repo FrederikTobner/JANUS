@@ -65,7 +65,7 @@ __hot void drivers_console_putc(char c)
         g_con.cursor_x = 0;
         break;
     case '\t':
-        g_con.cursor_x = (u16) ((g_con.cursor_x + 8) & ~7u);
+        g_con.cursor_x = (u16) ((g_con.cursor_x + 8) & ~7U);
         break;
     case '\b':
         if (g_con.cursor_x > 0) {

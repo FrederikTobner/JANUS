@@ -82,12 +82,11 @@ __cold error_t mm_pmm_init(boot_memmap_t const * memmap, phys_addr_t kernel_phys
         return JANUS_EINVAL;
     }
 
-    // bitmap is already all-zero (.bss) — every frame starts as "used"
     g_pmm.free_pages = 0;
     g_pmm.total_pages = 0;
     g_pmm.first_free_hint = PMM_MIN_ALLOC_FRAME;
 
-    // Pass 1: mark all USABLE and BOOTLOADER_RECLAIMABLE regions free
+    // Mark all usable regions and all regions that the bootloader reclaimed as being free
     for (u32 i = 0; i < memmap->count; i++) {
         mem_region_t const * region = &memmap->entries[i];
         if (region->type == MEM_REGION_USABLE || region->type == MEM_REGION_BOOTLOADER_RECLAIMABLE) {
@@ -98,7 +97,7 @@ __cold error_t mm_pmm_init(boot_memmap_t const * memmap, phys_addr_t kernel_phys
         return JANUS_ENOMEM;
     }
 
-    // Pass 2: punch out the kernel image (always reserved)
+    // Mark the kernel image region as used (reserved)
     if (kernel_phys_end > kernel_phys_base) {
         u64 const klen = kernel_phys_end - kernel_phys_base;
         pmm_mark_range_used(kernel_phys_base, klen);
@@ -146,19 +145,19 @@ void mm_pmm_free_page(phys_addr_t phys)
         kpanic("mm_pmm_free_page: PMM not initialized");
     }
     if (UNLIKELY(phys & (PAGE_SIZE - 1))) {
-        kpanic("mm_pmm_free_page: unaligned address 0x%llx", (unsigned long long) phys);
+        kpanic("mm_pmm_free_page: unaligned address 0x%lx", phys);
     }
 
     u64 const frame = phys_to_frame(phys);
 
     if (UNLIKELY(frame >= PMM_BITMAP_BITS)) {
-        kpanic("mm_pmm_free_page: address 0x%llx out of tracked range", (unsigned long long) phys);
+        kpanic("mm_pmm_free_page: address 0x%lx out of tracked range", phys);
     }
     if (UNLIKELY(frame < PMM_MIN_ALLOC_FRAME)) {
-        kpanic("mm_pmm_free_page: attempt to free reserved low-memory frame at 0x%llx", (unsigned long long) phys);
+        kpanic("mm_pmm_free_page: attempt to free reserved low-memory frame at 0x%lx", phys);
     }
     if (UNLIKELY(pmm_is_free(g_pmm.bitmap, frame))) {
-        kpanic("mm_pmm_free_page: double-free detected at 0x%llx", (unsigned long long) phys);
+        kpanic("mm_pmm_free_page: double-free detected at 0x%lx", phys);
     }
 
     pmm_mark_free(g_pmm.bitmap, frame);

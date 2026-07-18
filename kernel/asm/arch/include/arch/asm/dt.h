@@ -21,15 +21,16 @@
 #define ARCH_ASM_DT_H
 
 #include <arch/asm/capabilities.h>
-
-#if ASM_ARCH_X86_64
 #include <arch/impl/asm/dt.h>
 
-static __always_inline void arch_asm_load_idt(void const * idtr)
+#if ASM_CAP_INTERRUPT_VECTOR_TABLE
+static __always_inline void arch_asm_load_interrupt_vectors(void const * vector_table)
 {
-    arch_asm_impl_load_idt(idtr);
+    arch_asm_impl_load_interrupt_vectors(vector_table);
 }
+#endif /* ASM_CAP_INTERRUPT_VECTOR_TABLE */
 
+#if ASM_CAP_SEGMENT_DESCRIPTORS
 static __always_inline void arch_asm_load_gdt(void const * gdtr, u16 code_sel, u16 data_sel)
 {
     arch_asm_impl_load_gdt(gdtr, code_sel, data_sel);
@@ -39,6 +40,6 @@ static __always_inline void arch_asm_load_tr(u16 sel)
 {
     arch_asm_impl_load_tr(sel);
 }
-#endif
+#endif /* ASM_CAP_SEGMENT_DESCRIPTORS */
 
 #endif /* ARCH_ASM_DT_H */

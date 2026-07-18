@@ -17,10 +17,10 @@
 /// @file idt.c
 /// @brief x86_64 IDT (Interrupt Descriptor Table) construction and loading.
 
-#include <arch/impl/interrupts/gdt.h>
-#include <arch/impl/interrupts/idt.h>
-#include <arch/impl/interrupts/vectors.h>
+#include <arch/internal/interrupts/gdt.h>
+#include <arch/internal/interrupts/idt.h>
 #include <arch/internal/interrupts/setup.h>
+#include <arch/internal/interrupts/vectors.h>
 #include <asm/dt.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
@@ -48,7 +48,7 @@ __cold void idt_install(void)
 
     g_idtr.limit = (u16) (sizeof(g_idt) - 1);
     g_idtr.base = (u64) &g_idt;
-    asm_load_idt(&g_idtr);
+    asm_load_interrupt_vectors(&g_idtr);
 }
 
 static void idt_set_gate(u8 vec, u64 handler, u8 type, u8 ist)

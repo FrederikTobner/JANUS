@@ -27,10 +27,10 @@
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-/// Load the IDT (Interrupt Descriptor Table) register via LIDT.
+/// Install the IDT (Interrupt Descriptor Table) via LIDT.
 ///
-/// @param idtr Pointer to a 10-byte pseudo-descriptor { u16 limit; u64 base }.
-static __always_inline void arch_asm_impl_load_idt(void const * idtr)
+/// @param idtr Pointer to a 10-byte pseudo-descriptor with a u16 limit and a u64 base }.
+static __always_inline void arch_asm_impl_load_interrupt_vectors(void const * idtr)
 {
     __asm__ volatile("lidt %0" : : "m"(*(u8 const *) idtr) : "memory");
 }
@@ -61,7 +61,7 @@ static __always_inline void arch_asm_impl_load_gdt(void const * gdtr, u16 code_s
 
 /// Load the Task Register (TR) via LTR with the TSS (Task State Segment) selector.
 ///
-/// @param sel The TSS selector (offset into the GDT).
+/// @param sel The TSS selector
 static __always_inline void arch_asm_impl_load_tr(u16 sel)
 {
     __asm__ volatile("ltr %0" : : "r"(sel));

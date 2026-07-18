@@ -12,7 +12,7 @@ cmake --build --preset x86_64-gcc --target debug-limine
 
 # Terminal 2 — attach and set an initial breakpoint
 lldb ./build-x86_64-gcc/kernel-limine.elf
-(lldb) gdb-remote localhost:1234
+(lldb) connect-qemu
 (lldb) b kernel_main
 (lldb) c
 ```
@@ -48,6 +48,7 @@ register read                        # all registers
 register read rip rsp rbp            # specific registers (x86_64)
 frame variable                       # all locals in the current frame
 p my_variable                        # print a variable
+p &my_variable                       # print the memory address of a variable
 p/x my_variable                      # print in hexadecimal
 p *(boot_context_t *)ctx             # dereference a typed pointer
 bt                                   # backtrace
@@ -80,9 +81,3 @@ watchpoint set variable my_var -w read_write  # break on read or write
 watchpoint set expression -- &g_pmm_bitmap    # break on address
 watchpoint list
 ```
-
-## Notes
-
-- There is no libc and no dynamic linker. Symbol lookup works against the kernel   binary only. The entry point is `_start`; the first C function is `kernel_main`.
-- Single-stepping through UART or VGA I/O code sends real writes to the emulated hardware. This can produce visible side effects such as partial characters on the virtual screen.
-- Watchpoints on MMIO-mapped addresses may not fire because the hardware emulation in QEMU intercepts the access before the CPU watchpoint mechanism sees it. Use the QEMU monitor (`info mem`, `xp`) to inspect hardware state instead.
