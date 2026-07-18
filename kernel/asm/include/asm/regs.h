@@ -30,7 +30,7 @@ static __always_inline u64 asm_read_fault_address(void)
 }
 #endif /* ASM_CAP_FAULT_ADDRESS_REGISTER */
 
-#if ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_PAGE_TABLE_BASE_UNIFIED
+#if ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED
 static __always_inline u64 asm_read_cr3(void)
 {
     return arch_asm_read_cr3();
@@ -40,7 +40,7 @@ static __always_inline void asm_write_cr3(u64 val)
 {
     arch_asm_write_cr3(val);
 }
-#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_PAGE_TABLE_BASE_UNIFIED */
+#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED */
 
 #if ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT
 static __always_inline u64 asm_read_ttbr1_el1(void)
@@ -62,6 +62,6 @@ static __always_inline void asm_write_ttbr0_el1(u64 val)
 {
     arch_asm_write_ttbr0_el1(val);
 }
-#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_PAGE_TABLE_BASE_SPLIT */
+#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT */
 
 #endif /* ASM_REGS_H */
