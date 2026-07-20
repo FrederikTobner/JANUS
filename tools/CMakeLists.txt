@@ -16,6 +16,8 @@ include(Registry)
 include(ToolLib)
 include(Tool)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
+
 option(JANUS_TOOLS_ENABLE_TESTS "Enable tests for all tools" ON)
 option(JANUS_TOOLS_ENABLE_COVERAGE "Instrument for gcov/lcov coverage (requires GCC or Clang, implies JANUS_TOOLS_ENABLE_TESTS)" OFF)
 
@@ -47,8 +49,6 @@ add_subdirectory(lib/clap)
 add_subdirectory(psf2c)
 
 janus_write_tools_diagram("${CMAKE_CURRENT_SOURCE_DIR}/../docs/generated/deps-tools.md")
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
 
 add_custom_target(
     copy_compile_commands ALL
