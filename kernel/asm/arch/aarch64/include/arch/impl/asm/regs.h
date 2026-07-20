@@ -30,7 +30,7 @@
 /// Read the faulting address (FAR_EL1) register.
 ///
 /// @return Faulting virtual address.
-static __always_inline u64 arch_asm_impl_read_fault_address(void)
+static __always_inline u64 arch_asm_read_fault_address(void)
 {
     u64 val;
     __asm__ volatile("mrs %0, far_el1" : "=r"(val));
@@ -40,7 +40,7 @@ static __always_inline u64 arch_asm_impl_read_fault_address(void)
 /// Read the kernel-mode page table base register (TTBR1_EL1).
 ///
 /// @return Physical address of the L0 page table used for EL1 kernel mappings.
-static __always_inline u64 arch_asm_impl_read_ttbr1_el1(void)
+static __always_inline u64 arch_asm_read_ttbr1_el1(void)
 {
     u64 val;
     __asm__ volatile("mrs %0, ttbr1_el1" : "=r"(val));
@@ -50,7 +50,7 @@ static __always_inline u64 arch_asm_impl_read_ttbr1_el1(void)
 /// Write the kernel-mode page table base register (TTBR1_EL1).
 ///
 /// @param val Physical address of the L0 page table (must be page-aligned).
-static __always_inline void arch_asm_impl_write_ttbr1_el1(u64 val)
+static __always_inline void arch_asm_write_ttbr1_el1(u64 val)
 {
     __asm__ volatile("msr ttbr1_el1, %0" : : "r"(val) : "memory");
 }
@@ -58,7 +58,7 @@ static __always_inline void arch_asm_impl_write_ttbr1_el1(u64 val)
 /// Read the user-mode page table base register (TTBR0_EL1).
 ///
 /// @return Physical address of the L0 page table used for EL0/user mappings.
-static __always_inline u64 arch_asm_impl_read_ttbr0_el1(void)
+static __always_inline u64 arch_asm_read_ttbr0_el1(void)
 {
     u64 val;
     __asm__ volatile("mrs %0, ttbr0_el1" : "=r"(val));
@@ -68,7 +68,7 @@ static __always_inline u64 arch_asm_impl_read_ttbr0_el1(void)
 /// Write the user-mode page table base register (TTBR0_EL1).
 ///
 /// @param val Physical address of the L0 page table (must be page-aligned).
-static __always_inline void arch_asm_impl_write_ttbr0_el1(u64 val)
+static __always_inline void arch_asm_write_ttbr0_el1(u64 val)
 {
     __asm__ volatile("msr ttbr0_el1, %0" : : "r"(val) : "memory");
 }

@@ -23,7 +23,7 @@
 #include <asm/capabilities.h>
 
 #if ASM_CAP_PORT_IO
-#include <arch/asm/io.h>
+#include <arch/impl/asm/io.h>
 static __always_inline void asm_io_outb(u16 port, u8 value)
 {
     arch_asm_io_outb(port, value);

@@ -10,7 +10,6 @@ add_library(janus_asm INTERFACE)
 target_include_directories(janus_asm
     INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/arch/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/arch/${JANUS_TARGET_ARCH}/include"
 )
 

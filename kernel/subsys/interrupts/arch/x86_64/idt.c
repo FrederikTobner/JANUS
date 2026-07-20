@@ -21,7 +21,7 @@
 #include <arch/internal/interrupts/idt.h>
 #include <arch/internal/interrupts/setup.h>
 #include <arch/internal/interrupts/vectors.h>
-#include <asm/dt.h>
+#include <asm/interrupt_vectors.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 

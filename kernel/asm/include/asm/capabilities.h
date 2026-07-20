@@ -20,8 +20,11 @@
 #ifndef ASM_CAPABILITIES_H
 #define ASM_CAPABILITIES_H
 
-#include <arch/asm/capabilities.h>
+#include <arch/impl/asm/capabilities.h>
 #include <janus/attributes.h>
+
+#define ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED 1
+#define ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT   2
 
 /*
  * Validation block:
@@ -29,7 +32,7 @@
  * and each value must be 0 or 1.
  */
 
-#define ASM_VALIDATE_BOOL_MACRO(name) STATIC_ASSERT(((name) == 0) || ((name) == 1), #name " must be 0 or 1")
+#define ASM_VALIDATE_BOOL_MACRO(name)       STATIC_ASSERT(((name) == 0) || ((name) == 1), #name " must be 0 or 1")
 
 /* Required architecture selectors */
 

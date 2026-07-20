@@ -20,7 +20,7 @@
 #ifndef ASM_BARRIERS_H
 #define ASM_BARRIERS_H
 
-#include <arch/asm/barriers.h>
+#include <arch/impl/asm/barriers.h>
 #include <asm/capabilities.h>
 
 static __always_inline void asm_barrier_full(void)
@@ -37,40 +37,5 @@ static __always_inline void asm_barrier_store(void)
 {
     arch_asm_barrier_store();
 }
-
-/* Compatibility aliases for existing call sites. */
-#if ASM_ARCH_X86_64
-static __always_inline void asm_mfence(void)
-{
-    asm_barrier_full();
-}
-
-static __always_inline void asm_lfence(void)
-{
-    asm_barrier_load();
-}
-
-static __always_inline void asm_sfence(void)
-{
-    asm_barrier_store();
-}
-#endif
-
-#if ASM_ARCH_AARCH64
-static __always_inline void asm_dsb(void)
-{
-    asm_barrier_full();
-}
-
-static __always_inline void asm_isb(void)
-{
-    asm_barrier_load();
-}
-
-static __always_inline void asm_dmb(void)
-{
-    asm_barrier_store();
-}
-#endif
 
 #endif /* ASM_BARRIERS_H */

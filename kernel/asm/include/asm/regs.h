@@ -20,7 +20,7 @@
 #ifndef ASM_REGS_H
 #define ASM_REGS_H
 
-#include <arch/asm/regs.h>
+#include <arch/impl/asm/regs.h>
 #include <asm/capabilities.h>
 
 #if ASM_CAP_FAULT_ADDRESS_REGISTER

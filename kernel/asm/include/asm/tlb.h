@@ -20,7 +20,7 @@
 #ifndef ASM_TLB_H
 #define ASM_TLB_H
 
-#include <arch/asm/tlb.h>
+#include <arch/impl/asm/tlb.h>
 #include <asm/capabilities.h>
 
 #if ASM_CAP_TLB_INVALIDATE_PAGE

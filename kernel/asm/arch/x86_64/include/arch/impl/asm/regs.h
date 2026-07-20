@@ -32,7 +32,7 @@
 /// Read the Page Directory Base Register (CR3).
 ///
 /// @return Physical address of the current PML4 table, plus PCID bits in [11:0].
-static __always_inline u64 arch_asm_impl_read_cr3(void)
+static __always_inline u64 arch_asm_read_cr3(void)
 {
     u64 val;
     __asm__ volatile("mov %%cr3, %0" : "=r"(val));
@@ -44,7 +44,7 @@ static __always_inline u64 arch_asm_impl_read_cr3(void)
 /// Writing CR3 flushes all non-global TLB entries.
 ///
 /// @param val Physical address of the PML4 table (must be 4 KB aligned).
-static __always_inline void arch_asm_impl_write_cr3(u64 val)
+static __always_inline void arch_asm_write_cr3(u64 val)
 {
     __asm__ volatile("mov %0, %%cr3" : : "r"(val) : "memory");
 }
@@ -52,7 +52,7 @@ static __always_inline void arch_asm_impl_write_cr3(u64 val)
 /// Read the Page Fault Linear Address Register (CR2).
 ///
 /// @return The linear address that triggered the most recent page fault.
-static __always_inline u64 arch_asm_impl_read_fault_address(void)
+static __always_inline u64 arch_asm_read_fault_address(void)
 {
     u64 val;
     __asm__ volatile("mov %%cr2, %0" : "=r"(val));

@@ -33,7 +33,7 @@
 /// ASID, for EL1, broadcast to all CPUs in the inner-shareable domain.
 ///
 /// @param va_page  Virtual address right-shifted by 12 (i.e. va >> 12).
-static __always_inline void arch_asm_impl_tlb_invalidate_page(virt_addr_t va)
+static __always_inline void arch_asm_tlb_invalidate_page(virt_addr_t va)
 {
     u64 const va_page = (u64) (va >> 12);
     __asm__ volatile("tlbi vale1is, %0" : : "r"(va_page) : "memory");
@@ -43,7 +43,7 @@ static __always_inline void arch_asm_impl_tlb_invalidate_page(virt_addr_t va)
 ///
 /// Flushes all EL1 TLB entries for all ASIDs, broadcast to all CPUs in the
 /// inner-shareable domain. Use after a full page table rebuild.
-static __always_inline void arch_asm_impl_tlb_invalidate_all(void)
+static __always_inline void arch_asm_tlb_invalidate_all(void)
 {
     __asm__ volatile("tlbi vmalle1is" ::: "memory");
 }

@@ -156,7 +156,7 @@ error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt)
     g_mmu.mmio_virt_next += aligned_size;
     // x86_64 INVLPG is self-serialising — no additional fence needed.
     // An MFENCE after all mappings ensures subsequent loads see the new PTEs.
-    asm_mfence();
+    asm_barrier_full();
     *out_virt = virt_addr;
     return JANUS_OK;
 }

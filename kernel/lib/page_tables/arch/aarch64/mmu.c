@@ -119,8 +119,8 @@ error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt)
     for (virt_addr_t v = virt_addr; v < virt_addr + aligned_size; v += PAGE_SIZE) {
         asm_tlb_invalidate_page(v);
     }
-    asm_dsb();
-    asm_isb();
+    asm_barrier_full();
+    asm_barrier_load();
     *out_virt = virt_addr;
     return JANUS_OK;
 }
