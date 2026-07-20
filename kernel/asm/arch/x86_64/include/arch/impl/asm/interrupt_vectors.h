@@ -14,38 +14,25 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/dt.h
-/// @brief Public asm descriptor-table entry point.
+/// @file arch/impl/asm/interrupt_vectors.h
+/// @brief x86_64 interrupt-vector-table load primitive.
 ///
-/// Wrappers for loading the x86_64 descriptor tables (IDT/GDT) and the task
-/// register. These are x86_64-only; the header body is empty on other
-/// architectures, so it is safe to include only from x86_64 code paths.
+/// Raw inline-assembly wrapper for LIDT. This is the only permitted site for
+/// __asm__ volatile on x86_64 for interrupt vector table loading.
+/// Consumed by the interrupts subsystem's x86_64 implementation.
 
-#ifndef ASM_DT_H
-#define ASM_DT_H
+#ifndef X86_64_IMPL_ASM_INTERRUPT_VECTORS_H
+#define X86_64_IMPL_ASM_INTERRUPT_VECTORS_H
 
-#include <arch/asm/dt.h>
-#include <asm/capabilities.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-#if ASM_CAP_INTERRUPT_VECTOR_TABLE
-static __always_inline void asm_load_interrupt_vectors(void const * idtr)
+/// Install the IDT (Interrupt Descriptor Table) via LIDT.
+///
+/// @param idtr Pointer to a 10-byte pseudo-descriptor { u16 limit; u64 base }.
+static __always_inline void arch_asm_load_interrupt_vectors(void const * idtr)
 {
-    arch_asm_load_interrupt_vectors(idtr);
-}
-#endif /* ASM_CAP_INTERRUPT_VECTOR_TABLE */
-
-#if ASM_CAP_SEGMENT_DESCRIPTORS
-static __always_inline void asm_load_gdt(void const * gdtr, u16 code_sel, u16 data_sel)
-{
-    arch_asm_load_gdt(gdtr, code_sel, data_sel);
+    __asm__ volatile("lidt %0" : : "m"(*(u8 const *) idtr) : "memory");
 }
 
-static __always_inline void asm_load_tr(u16 sel)
-{
-    arch_asm_load_tr(sel);
-}
-#endif /* ASM_CAP_SEGMENT_DESCRIPTORS */
-
-#endif /* ASM_DT_H */
+#endif /* X86_64_IMPL_ASM_INTERRUPT_VECTORS_H */

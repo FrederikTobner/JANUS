@@ -20,7 +20,7 @@
 #ifndef ASM_CPU_H
 #define ASM_CPU_H
 
-#include <arch/asm/cpu.h>
+#include <arch/impl/asm/cpu.h>
 #include <asm/capabilities.h>
 #include <janus/attributes.h>
 

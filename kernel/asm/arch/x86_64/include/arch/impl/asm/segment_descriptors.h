@@ -14,26 +14,18 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/impl/asm/dt.h
-/// @brief x86_64 descriptor-table load primitives.
+/// @file arch/impl/asm/segment_descriptors.h
+/// @brief x86_64 segment-descriptor-table load primitives.
 ///
-/// Raw inline-assembly wrappers for LIDT/LGDT/LTR. This is the only permitted
-/// site for __asm__ volatile on x86_64 for descriptor-table loading.
+/// Raw inline-assembly wrappers for LGDT and LTR. This is the only permitted
+/// site for __asm__ volatile on x86_64 for segment-table loading.
 /// Consumed by the interrupts subsystem's x86_64 implementation.
 
-#ifndef X86_64_IMPL_ASM_DT_H
-#define X86_64_IMPL_ASM_DT_H
+#ifndef X86_64_IMPL_ASM_SEGMENT_DESCRIPTORS_H
+#define X86_64_IMPL_ASM_SEGMENT_DESCRIPTORS_H
 
 #include <janus/attributes.h>
 #include <janus/types.h>
-
-/// Install the IDT (Interrupt Descriptor Table) via LIDT.
-///
-/// @param idtr Pointer to a 10-byte pseudo-descriptor with a u16 limit and a u64 base }.
-static __always_inline void arch_asm_impl_load_interrupt_vectors(void const * idtr)
-{
-    __asm__ volatile("lidt %0" : : "m"(*(u8 const *) idtr) : "memory");
-}
 
 /// Load the GDT (Global Descriptor Table) via LGDT and reload every segment
 /// register, performing a far return to reload CS (the code segment register).
@@ -41,7 +33,7 @@ static __always_inline void arch_asm_impl_load_interrupt_vectors(void const * id
 /// @param gdtr     Pointer to a 10-byte pseudo-descriptor { u16 limit; u64 base }.
 /// @param code_sel Code-segment selector to load into CS.
 /// @param data_sel Data-segment selector to load into DS/ES/SS/FS/GS.
-static __always_inline void arch_asm_impl_load_gdt(void const * gdtr, u16 code_sel, u16 data_sel)
+static __always_inline void arch_asm_load_gdt(void const * gdtr, u16 code_sel, u16 data_sel)
 {
     __asm__ volatile("lgdt %[gdtr]\n\t"
                      "mov %w[data], %%ds\n\t"
@@ -61,10 +53,10 @@ static __always_inline void arch_asm_impl_load_gdt(void const * gdtr, u16 code_s
 
 /// Load the Task Register (TR) via LTR with the TSS (Task State Segment) selector.
 ///
-/// @param sel The TSS selector
-static __always_inline void arch_asm_impl_load_tr(u16 sel)
+/// @param sel The TSS selector.
+static __always_inline void arch_asm_load_tr(u16 sel)
 {
     __asm__ volatile("ltr %0" : : "r"(sel));
 }
 
-#endif /* X86_64_IMPL_ASM_DT_H */
+#endif /* X86_64_IMPL_ASM_SEGMENT_DESCRIPTORS_H */

@@ -14,32 +14,22 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/asm/dt.h
-/// @brief asm descriptor-table architecture contract.
+/// @file asm/interrupt_vectors.h
+/// @brief Public asm interrupt-vector-table entry point.
 
-#ifndef ARCH_ASM_DT_H
-#define ARCH_ASM_DT_H
+#ifndef ASM_INTERRUPT_VECTORS_H
+#define ASM_INTERRUPT_VECTORS_H
 
-#include <arch/asm/capabilities.h>
-#include <arch/impl/asm/dt.h>
+#include <asm/capabilities.h>
+#include <janus/attributes.h>
 
 #if ASM_CAP_INTERRUPT_VECTOR_TABLE
-static __always_inline void arch_asm_load_interrupt_vectors(void const * vector_table)
+#include <arch/impl/asm/interrupt_vectors.h>
+
+static __always_inline void asm_load_interrupt_vectors(void const * table)
 {
-    arch_asm_impl_load_interrupt_vectors(vector_table);
+    arch_asm_load_interrupt_vectors(table);
 }
 #endif /* ASM_CAP_INTERRUPT_VECTOR_TABLE */
 
-#if ASM_CAP_SEGMENT_DESCRIPTORS
-static __always_inline void arch_asm_load_gdt(void const * gdtr, u16 code_sel, u16 data_sel)
-{
-    arch_asm_impl_load_gdt(gdtr, code_sel, data_sel);
-}
-
-static __always_inline void arch_asm_load_tr(u16 sel)
-{
-    arch_asm_impl_load_tr(sel);
-}
-#endif /* ASM_CAP_SEGMENT_DESCRIPTORS */
-
-#endif /* ARCH_ASM_DT_H */
+#endif /* ASM_INTERRUPT_VECTORS_H */

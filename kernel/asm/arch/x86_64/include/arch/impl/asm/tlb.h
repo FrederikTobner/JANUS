@@ -34,7 +34,7 @@
 /// (not required in JANUS at this stage — single-core only).
 ///
 /// @param va  Any virtual address within the page to invalidate.
-static __always_inline void arch_asm_impl_tlb_invalidate_page(virt_addr_t va)
+static __always_inline void arch_asm_tlb_invalidate_page(virt_addr_t va)
 {
     __asm__ volatile("invlpg (%0)" : : "r"(va) : "memory");
 }

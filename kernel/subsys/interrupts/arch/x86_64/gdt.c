@@ -20,7 +20,7 @@
 
 #include <arch/internal/interrupts/gdt.h>
 #include <arch/internal/interrupts/setup.h>
-#include <asm/dt.h>
+#include <asm/segment_descriptors.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 

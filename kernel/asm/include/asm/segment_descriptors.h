@@ -14,27 +14,28 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/asm/barriers.h
-/// @brief asm barrier architecture contract.
+/// @file asm/segment_descriptors.h
+/// @brief Public asm segment-descriptor-table entry point.
 
-#ifndef ARCH_ASM_BARRIERS_H
-#define ARCH_ASM_BARRIERS_H
+#ifndef ASM_SEGMENT_DESCRIPTORS_H
+#define ASM_SEGMENT_DESCRIPTORS_H
 
-#include <arch/impl/asm/barriers.h>
+#include <asm/capabilities.h>
+#include <janus/attributes.h>
+#include <janus/types.h>
 
-static __always_inline void arch_asm_barrier_full(void)
+#if ASM_CAP_SEGMENT_DESCRIPTORS
+#include <arch/impl/asm/segment_descriptors.h>
+
+static __always_inline void asm_load_gdt(void const * gdtr, u16 code_sel, u16 data_sel)
 {
-    arch_asm_impl_barrier_full();
+    arch_asm_load_gdt(gdtr, code_sel, data_sel);
 }
 
-static __always_inline void arch_asm_barrier_load(void)
+static __always_inline void asm_load_tr(u16 sel)
 {
-    arch_asm_impl_barrier_load();
+    arch_asm_load_tr(sel);
 }
+#endif /* ASM_CAP_SEGMENT_DESCRIPTORS */
 
-static __always_inline void arch_asm_barrier_store(void)
-{
-    arch_asm_impl_barrier_store();
-}
-
-#endif /* ARCH_ASM_BARRIERS_H */
+#endif /* ASM_SEGMENT_DESCRIPTORS_H */

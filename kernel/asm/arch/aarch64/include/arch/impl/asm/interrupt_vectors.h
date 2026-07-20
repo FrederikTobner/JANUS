@@ -14,27 +14,29 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/asm/cpu.h
-/// @brief asm CPU architecture contract.
+/// @file arch/impl/asm/interrupt_vectors.h
+/// @brief AArch64 interrupt-vector-table load primitive.
+///
+/// Raw inline-assembly wrapper for installing the EL1 exception vector table.
+/// This is the only permitted site for __asm__ volatile on AArch64 for
+/// exception vector table installation.
+/// Consumed by the interrupts subsystem's AArch64 implementation.
 
-#ifndef ARCH_ASM_CPU_H
-#define ARCH_ASM_CPU_H
+#ifndef AARCH64_IMPL_ASM_INTERRUPT_VECTORS_H
+#define AARCH64_IMPL_ASM_INTERRUPT_VECTORS_H
 
-#include <arch/impl/asm/cpu.h>
+#include <janus/attributes.h>
 
-static __always_inline void arch_asm_cpu_halt_once(void)
+/// Install the EL1 exception vector table.
+///
+/// @param vector_table 2 KiB-aligned virtual address of the 16-entry vector table.
+static __always_inline void arch_asm_load_interrupt_vectors(void const * vector_table)
 {
-    arch_asm_impl_cpu_halt_once();
+    __asm__ volatile("msr vbar_el1, %0\n\t"
+                     "isb"
+                     :
+                     : "r"(vector_table)
+                     : "memory");
 }
 
-static __always_inline void arch_asm_irq_disable_local(void)
-{
-    arch_asm_impl_irq_disable_local();
-}
-
-static __always_inline void arch_asm_irq_enable_local(void)
-{
-    arch_asm_impl_irq_enable_local();
-}
-
-#endif /* ARCH_ASM_CPU_H */
+#endif /* AARCH64_IMPL_ASM_INTERRUPT_VECTORS_H */

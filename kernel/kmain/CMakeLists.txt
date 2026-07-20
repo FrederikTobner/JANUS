@@ -4,9 +4,9 @@ option(JANUS_TEST_FAULTS "Enable fault injection for testing" OFF)
 if(JANUS_TEST_FAULTS)
     add_compile_definitions(JANUS_TEST_FAULTS=1)
 endif()
-option(JANUS_TEST_FAULTS_KIND "Fault injection kind (0=stack overflow, 1=page fault)" 0)
-if(JANUS_TEST_FAULTS_KIND)
-    add_compile_definitions(JANUS_TEST_FAULTS_KIND=${JANUS_TEST_FAULTS_KIND})
+option(JANUS_FAULT_TEST_KIND "Fault injection kind (0=stack overflow, 1=page fault)" 0)
+if(JANUS_FAULT_TEST_KIND)
+    add_compile_definitions(JANUS_FAULT_TEST_KIND=${JANUS_FAULT_TEST_KIND})
 endif()
 
 
