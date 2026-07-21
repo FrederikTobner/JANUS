@@ -60,34 +60,34 @@ char const * interrupts_ec_mnemonic(u64 ec)
     }
 
     switch (ec) {
-        case ESR_EC_UNKNOWN:
-            return "Unknown reason";
-        case ESR_EC_ILLEGAL_STATE:
-            return "Illegal Execution state";
-        case ESR_EC_SVC64:
-            return "SVC (AArch64)";
-        case ESR_EC_MSR_MRS:
-            return "Trapped MSR/MRS/system instruction";
-        case ESR_EC_INSTR_ABORT_LOWER:
-            return "Instruction Abort, lower EL";
-        case ESR_EC_INSTR_ABORT_CUR:
-            return "Instruction Abort, current EL";
-        case ESR_EC_PC_ALIGNMENT:
-            return "PC alignment fault";
-        case ESR_EC_DATA_ABORT_LOWER:
-            return "Data Abort, lower EL";
-        case ESR_EC_DATA_ABORT_CUR:
-            return "Data Abort, current EL";
-        case ESR_EC_SP_ALIGNMENT:
-            return "SP alignment fault";
-        case ESR_EC_FP64:
-            return "Trapped floating-point exception";
-        case ESR_EC_SERROR:
-            return "SError interrupt";
-        case ESR_EC_BRK64:
-            return "BRK instruction (AArch64)";
-        default:
-            return "Unrecognised exception class";
+    case ESR_EC_UNKNOWN:
+        return "Unknown reason";
+    case ESR_EC_ILLEGAL_STATE:
+        return "Illegal Execution state";
+    case ESR_EC_SVC64:
+        return "SVC (AArch64)";
+    case ESR_EC_MSR_MRS:
+        return "Trapped MSR/MRS/system instruction";
+    case ESR_EC_INSTR_ABORT_LOWER:
+        return "Instruction Abort, lower EL";
+    case ESR_EC_INSTR_ABORT_CUR:
+        return "Instruction Abort, current EL";
+    case ESR_EC_PC_ALIGNMENT:
+        return "PC alignment fault";
+    case ESR_EC_DATA_ABORT_LOWER:
+        return "Data Abort, lower EL";
+    case ESR_EC_DATA_ABORT_CUR:
+        return "Data Abort, current EL";
+    case ESR_EC_SP_ALIGNMENT:
+        return "SP alignment fault";
+    case ESR_EC_FP64:
+        return "Trapped floating-point exception";
+    case ESR_EC_SERROR:
+        return "SError interrupt";
+    case ESR_EC_BRK64:
+        return "BRK instruction (AArch64)";
+    default:
+        return "Unrecognised exception class";
     }
 }
 
@@ -102,15 +102,15 @@ char const * interrupts_source_label(u64 source)
 bool interrupts_ec_has_fault_address(u64 ec)
 {
     switch (ec) {
-        case ESR_EC_INSTR_ABORT_LOWER:
-        case ESR_EC_INSTR_ABORT_CUR:
-        case ESR_EC_PC_ALIGNMENT:
-        case ESR_EC_DATA_ABORT_LOWER:
-        case ESR_EC_DATA_ABORT_CUR:
-        case ESR_EC_SP_ALIGNMENT:
-            return true;
-        default:
-            return false;
+    case ESR_EC_INSTR_ABORT_LOWER:
+    case ESR_EC_INSTR_ABORT_CUR:
+    case ESR_EC_PC_ALIGNMENT:
+    case ESR_EC_DATA_ABORT_LOWER:
+    case ESR_EC_DATA_ABORT_CUR:
+    case ESR_EC_SP_ALIGNMENT:
+        return true;
+    default:
+        return false;
     }
 }
 
@@ -120,16 +120,19 @@ __noreturn void interrupts_dispatch(interrupt_frame_t const * frame)
 
     kprintf("\n*** CPU EXCEPTION ***\n");
     kprintf("Source %llu (%s)\n", (unsigned long long) frame->source, interrupts_source_label(frame->source));
-    kprintf("ESR_EL1=0x%016llx  EC=0x%02llx (%s)\n", (unsigned long long) frame->esr, (unsigned long long) ec,
+    kprintf("ESR_EL1=0x%016llx  EC=0x%02llx (%s)\n",
+            (unsigned long long) frame->esr,
+            (unsigned long long) ec,
             interrupts_ec_mnemonic(ec));
     if (interrupts_ec_has_fault_address(ec)) {
         kprintf("FAR_EL1 (faulting address) = 0x%016llx\n", (unsigned long long) frame->far);
     }
-    kprintf("ELR_EL1=0x%016llx  SPSR_EL1=0x%016llx\n", (unsigned long long) frame->elr,
-            (unsigned long long) frame->spsr);
+    kprintf(
+        "ELR_EL1=0x%016llx  SPSR_EL1=0x%016llx\n", (unsigned long long) frame->elr, (unsigned long long) frame->spsr);
     dump_registers(frame);
 
-    kpanic("unhandled CPU exception (source %llu, EC 0x%02llx)", (unsigned long long) frame->source,
+    kpanic("unhandled CPU exception (source %llu, EC 0x%02llx)",
+           (unsigned long long) frame->source,
            (unsigned long long) ec);
 }
 

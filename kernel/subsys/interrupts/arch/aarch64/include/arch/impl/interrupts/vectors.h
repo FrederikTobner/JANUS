@@ -51,23 +51,23 @@
 /// kernel runs at EL1h (SPx) with no EL0, so genuine faults arrive as
 /// EXC_SRC_CUR_SPX_SYNC; every other slot is populated defensively.
 typedef enum {
-    EXC_SRC_CUR_SP0_SYNC = 0,   ///< Current EL, SP0, Synchronous
-    EXC_SRC_CUR_SP0_IRQ,        ///< Current EL, SP0, IRQ
-    EXC_SRC_CUR_SP0_FIQ,        ///< Current EL, SP0, FIQ
-    EXC_SRC_CUR_SP0_SERROR,     ///< Current EL, SP0, SError
-    EXC_SRC_CUR_SPX_SYNC,       ///< Current EL, SPx, Synchronous (real faults)
-    EXC_SRC_CUR_SPX_IRQ,        ///< Current EL, SPx, IRQ
-    EXC_SRC_CUR_SPX_FIQ,        ///< Current EL, SPx, FIQ
-    EXC_SRC_CUR_SPX_SERROR,     ///< Current EL, SPx, SError
-    EXC_SRC_LOWER_A64_SYNC,     ///< Lower EL, AArch64, Synchronous
-    EXC_SRC_LOWER_A64_IRQ,      ///< Lower EL, AArch64, IRQ
-    EXC_SRC_LOWER_A64_FIQ,      ///< Lower EL, AArch64, FIQ
-    EXC_SRC_LOWER_A64_SERROR,   ///< Lower EL, AArch64, SError
-    EXC_SRC_LOWER_A32_SYNC,     ///< Lower EL, AArch32, Synchronous
-    EXC_SRC_LOWER_A32_IRQ,      ///< Lower EL, AArch32, IRQ
-    EXC_SRC_LOWER_A32_FIQ,      ///< Lower EL, AArch32, FIQ
-    EXC_SRC_LOWER_A32_SERROR,   ///< Lower EL, AArch32, SError
-    EXC_SRC_COUNT               ///< Number of vector-table entries (16)
+    EXC_SRC_CUR_SP0_SYNC = 0, ///< Current EL, SP0, Synchronous
+    EXC_SRC_CUR_SP0_IRQ,      ///< Current EL, SP0, IRQ
+    EXC_SRC_CUR_SP0_FIQ,      ///< Current EL, SP0, FIQ
+    EXC_SRC_CUR_SP0_SERROR,   ///< Current EL, SP0, SError
+    EXC_SRC_CUR_SPX_SYNC,     ///< Current EL, SPx, Synchronous (real faults)
+    EXC_SRC_CUR_SPX_IRQ,      ///< Current EL, SPx, IRQ
+    EXC_SRC_CUR_SPX_FIQ,      ///< Current EL, SPx, FIQ
+    EXC_SRC_CUR_SPX_SERROR,   ///< Current EL, SPx, SError
+    EXC_SRC_LOWER_A64_SYNC,   ///< Lower EL, AArch64, Synchronous
+    EXC_SRC_LOWER_A64_IRQ,    ///< Lower EL, AArch64, IRQ
+    EXC_SRC_LOWER_A64_FIQ,    ///< Lower EL, AArch64, FIQ
+    EXC_SRC_LOWER_A64_SERROR, ///< Lower EL, AArch64, SError
+    EXC_SRC_LOWER_A32_SYNC,   ///< Lower EL, AArch32, Synchronous
+    EXC_SRC_LOWER_A32_IRQ,    ///< Lower EL, AArch32, IRQ
+    EXC_SRC_LOWER_A32_FIQ,    ///< Lower EL, AArch32, FIQ
+    EXC_SRC_LOWER_A32_SERROR, ///< Lower EL, AArch32, SError
+    EXC_SRC_COUNT             ///< Number of vector-table entries (16)
 } exc_source_t;
 
 /// @brief Map an exception class (EC) to a human-readable mnemonic.
