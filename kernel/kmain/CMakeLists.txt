@@ -4,10 +4,9 @@ option(JANUS_TEST_FAULTS "Enable fault injection for testing" OFF)
 if(JANUS_TEST_FAULTS)
     add_compile_definitions(JANUS_TEST_FAULTS=1)
 endif()
-option(JANUS_FAULT_TEST_KIND "Fault injection kind (0=stack overflow, 1=page fault)" 0)
-if(JANUS_FAULT_TEST_KIND)
-    add_compile_definitions(JANUS_FAULT_TEST_KIND=${JANUS_FAULT_TEST_KIND})
-endif()
+
+set(JANUS_FAULT_TEST_KIND 0 CACHE STRING "Fault injection test kind (0=page fault, 1 stack overflow (x86_64 only))")
+add_compile_definitions(JANUS_FAULT_TEST_KIND=${JANUS_FAULT_TEST_KIND})
 
 
 file(GLOB_RECURSE INIT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
