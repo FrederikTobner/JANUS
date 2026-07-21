@@ -15,20 +15,36 @@
  ****************************************************************************/
 
 /// @file exceptions.c
-/// @brief aarch64 exception handling (not yet implemented).
+/// @brief AArch64 EL1 exception vector table installation.
 
-#include <arch/interrupts/init.h>
+#include <arch/internal/interrupts/setup.h>
+#include <asm/exception_stack.h>
+#include <asm/interrupt_vectors.h>
 #include <janus/attributes.h>
 #include <janus/errno.h>
+#include <janus/types.h>
 
-/// @brief aarch64 exception initialisation — currently a no-op.
+/// The exception vector table, defined in vector_table.S (2 KiB aligned).
+extern u8 janus_vector_table[];
+
+/// Dedicated stack for exception entry (SP_EL1).
 ///
-/// TODO: allocate a 2 KiB-aligned exception vector table, populate its 16
-/// entries, and install it via MSR VBAR_EL1 (Vector Base Address Register, EL1),
-/// using an asm wrapper added under ASM_ARCH_AARCH64. Returning JANUS_OK keeps
-/// boot behaviour on aarch64 identical to before the interrupts subsystem
-/// existed, so the shared kmain init sequence links and runs unchanged.
-__cold error_t arch_interrupts_init(void)
+/// The kernel main runs at EL1t (using SP_EL0); exceptions taken to EL1 switch
+/// to SP_EL1, which the bootloader leaves pointing at an unmapped low address.
+/// This kernel-image .bss stack is guaranteed mapped, so the entry path can
+/// save the frame without immediately faulting. It also survives a corrupted
+/// SP_EL0, the aarch64 analog of the x86 IST #DF stack.
+#define EXCEPTION_STACK_SIZE 16384
+static u8 g_exception_stack[EXCEPTION_STACK_SIZE] __aligned(16);
+
+__cold error_t exceptions_install(void)
 {
+    // Point SP_EL1 at a mapped stack before the vectors go live. The kernel main
+    // runs at EL1t (SPSel = 0, on SP_EL0); exception entry switches to SP_EL1,
+    // which the bootloader leaves unusable, so it must be set up here first.
+    asm_set_exception_stack(g_exception_stack + sizeof(g_exception_stack));
+
+    // MSR VBAR_EL1 + ISB. Cannot fail: the table is a static code symbol.
+    asm_load_interrupt_vectors(janus_vector_table);
     return JANUS_OK;
 }

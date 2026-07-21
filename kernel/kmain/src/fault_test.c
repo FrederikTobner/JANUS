@@ -24,10 +24,6 @@
 #include <janus/types.h>
 #include <kio/output.h>
 
-#ifndef JANUS_FAULT_TEST_KIND
-#define JANUS_FAULT_TEST_KIND 0
-#endif
-
 #if JANUS_FAULT_TEST_KIND == 1
 /// @brief Exhaust the kernel stack via unbounded recursion to provoke a #DF.
 ///

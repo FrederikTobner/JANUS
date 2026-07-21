@@ -13,7 +13,8 @@ See [drivers/README.md](../kernel/subsys/drivers/README.md).
 
 ## interrupts
 
-Interrupt subsystem. Currently only supports x86_64.
+Interrupt and CPU-exception handling. Implemented on x86_64 (GDT/TSS/IST and 256-gate IDT)
+and aarch64 (EL1 `VBAR_EL1` exception vector table). Ob both CPU faults become readable diagnostic panics over kio.
 See [interrupts/README.md](..kernel/subsys/interrupts/README.md).
 
 ## mm

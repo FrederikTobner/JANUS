@@ -14,27 +14,29 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file arch/impl/asm/capabilities.h
-/// @brief AArch64 asm capability flags.
+/// @file asm/exception_stack.h
+/// @brief Public asm exception stack entry point.
 
-#ifndef AARCH64_IMPL_ASM_CAPABILITIES_H
-#define AARCH64_IMPL_ASM_CAPABILITIES_H
+#ifndef ASM_EXCEPTION_STACK_H
+#define ASM_EXCEPTION_STACK_H
 
-#define ASM_ARCH_X86_64                  0
-#define ASM_ARCH_AARCH64                 1
+#include <asm/capabilities.h>
+#include <janus/attributes.h>
 
-#define ASM_CAP_LOCAL_IRQ_CONTROL        1
-#define ASM_CAP_IDLE_WAIT_INTERRUPT      1
-#define ASM_CAP_TLB_INVALIDATE_PAGE      1
-#define ASM_CAP_TLB_INVALIDATE_ALL       1
-#define ASM_CAP_PORT_IO                  0
-#define ASM_CAP_ARCH_SYSREG_ACCESS       1
-#define ASM_CAP_INTERRUPT_VECTOR_TABLE   1 // MSR VBAR_EL1 installs the vector table
-#define ASM_CAP_SEGMENT_DESCRIPTORS      0 // AArch64 does not use segment descriptors
-#define ASM_CAP_FAULT_ADDRESS_REGISTER   1 // AArch64 has a fault address register (FAR_EL1)
-#define ASM_CAP_EXCEPTION_STACK_REGISTER 1 // AArch64 has an exception stack pointer register (SP_EL1), set via MSR
+#if ASM_CAP_EXCEPTION_STACK_REGISTER
+#include <arch/impl/asm/exception_stack.h>
 
-// AArch64 uses a split page table base model (TTBR0_EL1 and TTBR1_EL1)
-#define ASM_CAP_PAGE_TABLE_BASE_MODEL    ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT
+/// @breif set the stack pointer the CPU switches to on exception entry
+///
+/// On architectures where exception entry selectss a distinct banked stack regiister
+/// (aarch64: SP_EL1), this points that register at a valid mapped stack.
+/// Architectures that source the exception stack form a descriptor table instead (x86_64: IST1 in the TSS)
+/// dont have this capability.
+static __always_inline void asm_set_exception_stack(void const * stack_top)
+{
+    arch_asm_set_exception_stack(stack_top);
+}
 
-#endif /* AARCH64_IMPL_ASM_CAPABILITIES_H */
+#endif /* ASM_CAP_EXCEPTION_STACK_REGISTER */
+
+#endif /* ASM_EXCEPTION_STACK_H */
