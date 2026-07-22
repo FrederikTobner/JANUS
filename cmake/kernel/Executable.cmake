@@ -1,5 +1,7 @@
-# JANUS Kernel Executable Helper
-# Provides janus_add_kernel() for linking kernel ELF binaries
+#[[
+    Executable.cmake - JANUS Kernel Executable Helper
+    Provides janus_add_kernel() for linking kernel ELF binaries
+]]
 
 include_guard(GLOBAL)
 

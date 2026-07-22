@@ -1,5 +1,7 @@
-# JANUS Library Helper
-# Provides janus_add_library() for creating kernel libraries
+#[[
+    Library.cmake - JANUS Library Helper
+    Provides janus_add_library() for creating kernel libraries
+]]
 
 include_guard(GLOBAL)
 

@@ -1,8 +1,10 @@
-# JANUS Platform Detection
-# Detects host OS, compiler, validates toolchain
-#
-# Expects: JANUS_TARGET_ARCH set (by toolchain file, preset, or -D flag)
-# Expects: CMAKE_C_COMPILER set (by toolchain file or CMake auto-detection)
+#[[ 
+    Detection.cmake - JANUS Platform Detection
+    Detects host OS, compiler, validates toolchain
+
+    Expects: JANUS_TARGET_ARCH set (by toolchain file, preset, or -D flag)
+    Expects: CMAKE_C_COMPILER set (by toolchain file or CMake auto-detection)
+]]
 
 include_guard(GLOBAL)
 

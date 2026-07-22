@@ -1,9 +1,11 @@
-# JANUS Module Helper — private
-#
-# Provides _janus_add_module(), the common implementation shared by
-# janus_add_library(), janus_add_core(), and janus_add_subsys().
-# Callers are responsible for any type-specific behaviour (arch subdirectory
-# for subsystems, placeholder status messages for libraries, etc.).
+#[[
+    Module.cmake - JANUS Module Helper — private
+
+    Provides _janus_add_module(), the common implementation shared by
+    janus_add_library(), janus_add_core(), and janus_add_subsys().
+    Callers are responsible for any type-specific behaviour (arch subdirectory
+    for subsystems, placeholder status messages for libraries, etc.).
+]]
 
 include_guard(GLOBAL)
 

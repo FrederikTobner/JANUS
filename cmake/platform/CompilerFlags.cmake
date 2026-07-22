@@ -1,8 +1,10 @@
-# JANUS Compiler Flags
-# Architecture-specific flags (from arch layer) + common kernel compiler flags
-#
-# Expects: JANUS_COMPILER_CLANG or JANUS_COMPILER_GCC set (by platform/Detection.cmake)
-# Expects: JANUS_TARGET_ARCH set (by toolchain file)
+#[[ 
+    CompilerFlags.cmake - JANUS Compiler Flags
+    Architecture-specific flags (from arch layer) + common kernel compiler flags
+
+    Expects: JANUS_COMPILER_CLANG or JANUS_COMPILER_GCC set (by platform/Detection.cmake)
+    Expects: JANUS_TARGET_ARCH set (by toolchain file)
+]]
 
 include_guard(GLOBAL)
 
@@ -47,7 +49,6 @@ set(JANUS_COMPILE_OPTIONS_MINSIZEREL
 )
 
 # Apply all compile flags (common + build-type) to a target.
-# Replaces the duplicated flag blocks in Subsystem/Library/ArchSource.
 function(janus_apply_compile_flags TARGET)
     target_compile_options(${TARGET} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")

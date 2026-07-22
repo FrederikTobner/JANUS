@@ -1,5 +1,9 @@
-# aarch64 architecture-specific flags and configuration
-# Compiler and linker are set by the toolchain file
+#[[ 
+    CompilerFlags.cmake - JANUS Compiler Flags
+
+    aarch64 architecture-specific flags and configuration
+    Compiler and linker are set by the toolchain file
+]]
 
 # Boot protocols (aarch64 is UEFI-only, no Multiboot2)
 set(JANUS_BOOT_PROTOCOLS "limine" CACHE STRING "Boot protocols (aarch64: limine only)" FORCE)

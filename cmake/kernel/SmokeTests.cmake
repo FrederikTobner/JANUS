@@ -1,15 +1,16 @@
-# JANUS Smoke-Test Registration
-# Provides janus_register_smoke_tests(), which registers CTest smoke tests that
-# boot the built ISO in QEMU headless and assert on serial output.
-#
-# These are HOST-SIDE tests: a Lua runner (kernel/tests/smoke/run_smoke.lua) plus
-# CTest glue. Nothing here is compiled into a kernel artifact, so the tests never
-# enter the kernel's layered dependency graph even though they live under kernel/.
-#
-# Must be called from a scope where the arch QEMU variables and the iso-* targets
-# already exist (i.e. from within the Targets orchestration, after the arch layer
-# and protocol modules have run): QEMU_BINARY, QEMU_MACHINE_FLAGS, JANUS_QEMU_FOUND,
-# AARCH64_UEFI_FIRMWARE, JANUS_ISO_NAME, JANUS_BOOT_PROTOCOLS.
+#[[
+    SmokeTests.cmake - JANUS Smoke-Test Registration
+
+    Provides janus_register_smoke_tests(), which registers CTest smoke tests that
+    boot the built ISO in QEMU headless and assert on serial output.
+    These are HOST-SIDE tests: a Lua runner (kernel/tests/smoke/run_smoke.lua) plus
+    CTest glue. Nothing here is compiled into a kernel artifact, so the tests never
+    enter the kernel's layered dependency graph even though they live under kernel/.
+    Must be called from a scope where the arch QEMU variables and the iso-* targets
+    already exist (i.e. from within the Targets orchestration, after the arch layer
+    and protocol modules have run): QEMU_BINARY, QEMU_MACHINE_FLAGS, JANUS_QEMU_FOUND,
+    AARCH64_UEFI_FIRMWARE, JANUS_ISO_NAME, JANUS_BOOT_PROTOCOLS.
+]]
 
 include_guard(GLOBAL)
 
