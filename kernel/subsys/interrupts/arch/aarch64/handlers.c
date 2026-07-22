@@ -17,9 +17,9 @@
 /// @file handlers.c
 /// @brief AArch64 exception dispatch and diagnostic reporting.
 
-#include <arch/impl/interrupts/frame.h>
-#include <arch/impl/interrupts/vectors.h>
+#include <arch/internal/interrupts/frame.h>
 #include <arch/internal/interrupts/setup.h>
+#include <arch/internal/interrupts/vectors.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 #include <kio/die.h>
@@ -119,30 +119,24 @@ __noreturn void interrupts_dispatch(interrupt_frame_t const * frame)
     u64 ec = ESR_EC(frame->esr);
 
     kprintf("\n*** CPU EXCEPTION ***\n");
-    kprintf("Source %llu (%s)\n", (unsigned long long) frame->source, interrupts_source_label(frame->source));
-    kprintf("ESR_EL1=0x%016llx  EC=0x%02llx (%s)\n",
-            (unsigned long long) frame->esr,
-            (unsigned long long) ec,
-            interrupts_ec_mnemonic(ec));
+    kprintf("Source %lu (%s)\n", (u64) frame->source, interrupts_source_label(frame->source));
+    kprintf("ESR_EL1=0x%016lx  EC=0x%02lx (%s)\n", (u64) frame->esr, (u64) ec, interrupts_ec_mnemonic(ec));
     if (interrupts_ec_has_fault_address(ec)) {
-        kprintf("FAR_EL1 (faulting address) = 0x%016llx\n", (unsigned long long) frame->far);
+        kprintf("FAR_EL1 (faulting address) = 0x%016lx\n", (u64) frame->far);
     }
-    kprintf(
-        "ELR_EL1=0x%016llx  SPSR_EL1=0x%016llx\n", (unsigned long long) frame->elr, (unsigned long long) frame->spsr);
+    kprintf("ELR_EL1=0x%016lx  SPSR_EL1=0x%016lx\n", (u64) frame->elr, (u64) frame->spsr);
     dump_registers(frame);
 
-    kpanic("unhandled CPU exception (source %llu, EC 0x%02llx)",
-           (unsigned long long) frame->source,
-           (unsigned long long) ec);
+    kpanic("unhandled CPU exception (source %lu, EC 0x%02lx)", (u64) frame->source, (u64) ec);
 }
 
 static void dump_registers(interrupt_frame_t const * frame)
 {
     for (u32 i = 0; i < 31; ++i) {
-        kprintf("  x%-2u=0x%016llx", i, (unsigned long long) frame->x[i]);
+        kprintf("  x%-2u=0x%016lx", i, (u64) frame->x[i]);
         if ((i % 3) == 2) {
             kprintf("\n");
         }
     }
-    kprintf("  sp =0x%016llx\n", (unsigned long long) frame->sp);
+    kprintf("  sp =0x%016lx\n", (u64) frame->sp);
 }

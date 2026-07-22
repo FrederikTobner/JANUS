@@ -29,7 +29,7 @@
  * The file is named .S so the C preprocessor runs and can include that header.
  */
 
-#include <arch/impl/interrupts/frame.h>
+#include <arch/internal/interrupts/frame.h>
 
 .extern interrupts_dispatch
 .global janus_vector_table

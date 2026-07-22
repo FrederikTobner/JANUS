@@ -6,7 +6,7 @@
 add_library(interrupts_vectors OBJECT vector_table.S)
 target_compile_options(interrupts_vectors PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 target_include_directories(interrupts_vectors PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/include"   # <arch/impl/interrupts/frame.h>
+    "${CMAKE_CURRENT_SOURCE_DIR}/internal"   # <arch/internal/interrupts/*.h> 
     "${CMAKE_SOURCE_DIR}/kernel/include"    # <janus/*.h> (guarded out for the assembler)
 )
 

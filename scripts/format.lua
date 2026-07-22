@@ -7,10 +7,8 @@
 -- Usage: lua scripts/format.lua [OPTIONS]
 -- Run with --help for full usage information.
 --
--- @copyright Copyright (C) 2026 Frederik, TinyOS contributors
+-- @copyright Copyright (C) 2026 Frederik Tobner 
 -- @license   GNU Affero General Public License v3.0 or later
-
--- ─── Colours ─────────────────────────────────────────────────────────────────
 
 local _tty_raw   = os.execute("test -t 1") -- luacheck: ignore
 local use_colour = (_tty_raw == true) or (_tty_raw == 0)
@@ -28,8 +26,6 @@ local C = {
     yellow = sgr("33"),
     dim    = sgr("2"),
 }
-
--- ─── Helpers ──────────────────────────────────────────────────────────────────
 
 --- Print an error message and exit.
 local function die(fmt, ...)
@@ -54,8 +50,6 @@ local function capture(cmd)
     return out
 end
 
--- ─── Project root ─────────────────────────────────────────────────────────────
-
 local ROOT = (function()
     local abs = capture(string.format("realpath %q 2>/dev/null", arg[0]))
     if not abs then die("cannot resolve script path from '%s'", arg[0]) end
@@ -66,8 +60,6 @@ local ROOT = (function()
     end
     return root
 end)()
-
--- ─── Tool detection ───────────────────────────────────────────────────────────
 
 -- The CI pipeline pins clang-format-18.  Using a different version can produce
 -- different results (compound-literal spacing, brace-init rules, etc.), giving
@@ -96,8 +88,6 @@ if not TOOL then
         .. "         Results may differ from CI (which pins %s).\n\n",
         C.yellow, C.reset, CI_TOOL, TOOL, ver, CI_TOOL))
 end
-
--- ─── Options ──────────────────────────────────────────────────────────────────
 
 local USAGE = [[
 Usage: lua scripts/format.lua [OPTIONS]
@@ -142,8 +132,6 @@ do
     end
 end
 
--- ─── File discovery ───────────────────────────────────────────────────────────
-
 local function find_sources()
     local raw = capture(string.format(
         "find %q/kernel -type f \\( -name '*.c' -o -name '*.h' \\) | sort",
@@ -163,8 +151,6 @@ local function find_sources()
     return files
 end
 
--- ─── Core operations ──────────────────────────────────────────────────────────
-
 --- Returns true if the file is already correctly formatted.
 local function is_clean(path)
     local ok, _ = exec(string.format(
@@ -177,8 +163,6 @@ local function fix_file(path)
     exec(string.format("%s -i %q", TOOL, path))
 end
 
--- ─── Progress helpers ─────────────────────────────────────────────────────────
-
 --- Strip ROOT prefix for readable output.
 local function short_path(path)
     return path:gsub("^" .. ROOT .. "/", "")
@@ -189,8 +173,6 @@ local function print_file_result(i, total, path, label)
         i, total, short_path(path), label))
     io.flush()
 end
-
--- ─── Main ─────────────────────────────────────────────────────────────────────
 
 local function main()
     local mode_label = opts.fix and "fix" or "check"

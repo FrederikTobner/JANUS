@@ -76,5 +76,35 @@
             "name": "aarch64-clang",
             "configurePreset": "aarch64-clang"
         }
+    ],
+    "testPresets": [
+        {
+            "name": "x86_64-gcc",
+            "configurePreset": "x86_64-gcc",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "x86_64-clang",
+            "configurePreset": "x86_64-clang",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "aarch64-gcc",
+            "configurePreset": "aarch64-gcc",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "aarch64-clang",
+            "configurePreset": "aarch64-clang",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
     ]
 }

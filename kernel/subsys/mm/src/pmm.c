@@ -99,8 +99,8 @@ __cold error_t mm_pmm_init(boot_memmap_t const * memmap, phys_addr_t kernel_phys
 
     // Mark the kernel image region as used (reserved)
     if (kernel_phys_end > kernel_phys_base) {
-        u64 const klen = kernel_phys_end - kernel_phys_base;
-        pmm_mark_range_used(kernel_phys_base, klen);
+        u64 const kernel_length = kernel_phys_end - kernel_phys_base;
+        pmm_mark_range_used(kernel_phys_base, kernel_length);
     }
 
     g_pmm.initialized = true;
