@@ -119,24 +119,24 @@ __noreturn void interrupts_dispatch(interrupt_frame_t const * frame)
     u64 ec = ESR_EC(frame->esr);
 
     kprintf("\n*** CPU EXCEPTION ***\n");
-    kprintf("Source %lu (%s)\n", (u64) frame->source, interrupts_source_label(frame->source));
-    kprintf("ESR_EL1=0x%016lx  EC=0x%02lx (%s)\n", (u64) frame->esr, (u64) ec, interrupts_ec_mnemonic(ec));
+    kprintf("Source %lu (%s)\n", frame->source, interrupts_source_label(frame->source));
+    kprintf("ESR_EL1=0x%016lx  EC=0x%02lx (%s)\n", frame->esr, ec, interrupts_ec_mnemonic(ec));
     if (interrupts_ec_has_fault_address(ec)) {
-        kprintf("FAR_EL1 (faulting address) = 0x%016lx\n", (u64) frame->far);
+        kprintf("FAR_EL1 (faulting address) = 0x%016lx\n", frame->far);
     }
-    kprintf("ELR_EL1=0x%016lx  SPSR_EL1=0x%016lx\n", (u64) frame->elr, (u64) frame->spsr);
+    kprintf("ELR_EL1=0x%016lx  SPSR_EL1=0x%016lx\n", frame->elr, frame->spsr);
     dump_registers(frame);
 
-    kpanic("unhandled CPU exception (source %lu, EC 0x%02lx)", (u64) frame->source, (u64) ec);
+    kpanic("unhandled CPU exception (source %lu, EC 0x%02lx)", frame->source, ec);
 }
 
 static void dump_registers(interrupt_frame_t const * frame)
 {
     for (u32 i = 0; i < 31; ++i) {
-        kprintf("  x%-2u=0x%016lx", i, (u64) frame->x[i]);
+        kprintf("  x%-2u=0x%016lx", i, frame->x[i]);
         if ((i % 3) == 2) {
             kprintf("\n");
         }
     }
-    kprintf("  sp =0x%016lx\n", (u64) frame->sp);
+    kprintf("  sp =0x%016lx\n", frame->sp);
 }
