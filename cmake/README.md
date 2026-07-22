@@ -11,7 +11,8 @@ cmake/
 ├── platform/            # Platform detection and common compile flags
 ├── boot/                # Boot protocol cmake helpers
 ├── kernel/              # Kernel target helpers
-└── Registry.cmake       # Dependency registry + Mermaid graph generator
+├── Registry.cmake       # Dependency registry + Mermaid graph generator
+└── Targets.cmake        # Defines all the phony targets of the kernel
 ```
 
 ## platform/
@@ -51,11 +52,7 @@ Called from `_start/<arch>/` to produce the final `kernel-<protocol>.elf`.
 
 ## Registry.cmake
 
-Tracks all registered targets.
-Called after all `add_subdirectory` calls.
-
-- `janus_validate_registry()` — verify isolation rules
-- `janus_write_mermaid_diagram(output_file)` — write a Mermaid dependency graph to `docs/src/generated/deps-<arch>.md`
+Tracks all registered targets, verifies the isolation rules and writes a Mermaid dependency graph to `docs/src/generated/deps-<arch>.md`.
 
 ## Targets.cmake
 
