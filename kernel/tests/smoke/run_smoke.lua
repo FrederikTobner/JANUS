@@ -141,6 +141,7 @@ local function build_command(a, pidfile)
         "-display", "none", -- headless
         "-monitor", "none", -- keep the monitor off our stdio
         "-no-reboot", "-no-shutdown", -- a reset ends the run; no reboot spin
+        "-L", "pc-bios", -- QEMU's default BIOS search path
         "-pidfile", shq(pidfile),
     }
     if a.bios and #a.bios > 0 then
