@@ -40,6 +40,8 @@ add_custom_target(
     COMMENT "Copying compile_commands.json to project root"
 )
 
+
+
 add_subdirectory(kernel)
 
 message(STATUS "================================================================================")

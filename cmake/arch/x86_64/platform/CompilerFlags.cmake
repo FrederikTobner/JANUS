@@ -1,5 +1,9 @@
-# x86_64 architecture-specific flags and configuration
-# Compiler and linker are set by the toolchain file
+#[[ 
+    CompilerFlags.cmake - JANUS Compiler Flags
+
+    x86_64 architecture-specific flags and configuration
+    Compiler and linker are set by the toolchain file
+]]
 
 # Boot protocols for x86_64 (both Multiboot2 and Limine supported)
 set(JANUS_BOOT_PROTOCOLS "multiboot2;limine" CACHE STRING

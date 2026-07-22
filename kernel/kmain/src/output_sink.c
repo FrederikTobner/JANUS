@@ -36,7 +36,7 @@ static void output_sink_putc(char c);
 __cold void output_sink_init_early(void)
 {
     if (g_serial_active) {
-        return; // Already initialized — no-op
+        return; // Already initialized
     }
     // Read address-translation parameters directly from boot-protocol data
     // structures.  On Limine these are populated before kernel_main is entered.

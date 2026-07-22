@@ -7,10 +7,8 @@
 -- Usage: lua scripts/tidy.lua [OPTIONS]
 -- Run with --help for full usage information.
 --
--- @copyright Copyright (C) 2026 Frederik, TinyOS contributors
+-- @copyright Copyright (C) 2026 Frederik Tobner
 -- @license   GNU Affero General Public License v3.0 or later
-
--- ─── Colours ─────────────────────────────────────────────────────────────────
 
 local _tty_raw   = os.execute("test -t 1") -- luacheck: ignore
 local use_colour = (_tty_raw == true) or (_tty_raw == 0)
@@ -29,8 +27,6 @@ local C = {
     cyan   = sgr("36"),
     dim    = sgr("2"),
 }
-
--- ─── Helpers ──────────────────────────────────────────────────────────────────
 
 --- Print an error message and exit.
 local function die(fmt, ...)
@@ -66,8 +62,6 @@ local function fmt_elapsed(seconds)
     return string.format("%dm%02ds", math.floor(seconds / 60), seconds % 60)
 end
 
--- ─── Project root ─────────────────────────────────────────────────────────────
-
 local ROOT = (function()
     local abs = capture(string.format("realpath %q 2>/dev/null", arg[0]))
     if not abs then die("cannot resolve script path from '%s'", arg[0]) end
@@ -78,8 +72,6 @@ local ROOT = (function()
     end
     return root
 end)()
-
--- ─── Tool detection ───────────────────────────────────────────────────────────
 
 local function find_tool(candidates)
     for _, name in ipairs(candidates) do
@@ -114,8 +106,6 @@ if not TOOL then
         .. "         Results may differ from CI (which pins %s).\n\n",
         C.yellow, C.reset, CI_TOOL, TOOL, ver, CI_TOOL))
 end
-
--- ─── Options ──────────────────────────────────────────────────────────────────
 
 local USAGE = [[
 Usage: lua scripts/tidy.lua [OPTIONS]
@@ -168,8 +158,6 @@ do
     end
 end
 
--- ─── Build directory resolution ───────────────────────────────────────────────
-
 --- Return the build directory for a preset name.
 local function build_dir_for(preset)
     return ROOT .. "/build-" .. preset
@@ -212,8 +200,6 @@ else
     opts.preset = BUILD_DIR:match("build%-(.+)$") or BUILD_DIR
 end
 
--- ─── compile_commands.json parsing ───────────────────────────────────────────
-
 --- Extract kernel .c source paths from compile_commands.json.
 --- Uses Lua pattern matching to avoid a jq dependency.
 local function load_sources(build_dir)
@@ -242,8 +228,6 @@ local function load_sources(build_dir)
     table.sort(files)
     return files
 end
-
--- ─── Progress helpers ─────────────────────────────────────────────────────────
 
 --- Strip ROOT prefix for readable output.
 local function short_path(path)
@@ -276,8 +260,6 @@ local function show_output(text)
     end
     io.write("\n")
 end
-
--- ─── Main ─────────────────────────────────────────────────────────────────────
 
 local function main()
     io.write(string.format("%s── JANUS clang-tidy ──%s  (%s)\n",

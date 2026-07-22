@@ -1,5 +1,7 @@
-# JANUS Architecture-Specific Source Helper
-# Provides janus_add_arch_subsys() for building arch-specific driver implementations
+#[[ 
+    ArchSource.cmake - JANUS Architecture-Specific Source Helper
+    Provides janus_add_arch_subsys() for building arch-specific driver implementations
+]]
 
 include_guard(GLOBAL)
 

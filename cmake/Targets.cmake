@@ -43,14 +43,6 @@ foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
     endif()
 endforeach()
 
-# Note protocols with modules but not enabled for this arch
-foreach(_proto IN LISTS JANUS_ALL_PROTOCOLS)
-    if(NOT _proto IN_LIST JANUS_BOOT_PROTOCOLS)
-        message(STATUS "Protocol '${_proto}' has a module but is not "
-            "enabled for ${JANUS_TARGET_ARCH}.")
-    endif()
-endforeach()
-
 # Create a target that prints an error message and fails.
 function(janus_error_target TARGET_NAME ERROR_MSG)
     set(_cmds COMMAND ${CMAKE_COMMAND} -E echo "ERROR: ${ERROR_MSG}")
@@ -212,6 +204,11 @@ function(janus_add_targets)
 
     # Arch-specific special targets (run-elf, run-uefi, debug-elf)
     cmake_language(CALL janus_add_special_targets_${JANUS_TARGET_ARCH})
+
+    # Host side smoke tests
+    if(COMMAND janus_register_smoke_tests)
+        janus_register_smoke_tests()
+    endif()
 endfunction()
 
 function(janus_setup_targets)
@@ -268,13 +265,13 @@ function(janus_print_targets)
         endif()
     endmacro()
     _janus_msg("" "Build kernel ELFs")
-    _janus_msg("iso" "Create all ISOs for this platform")
+    _janus_msg("iso" "Create all ISOs for this architecture")
     foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
         _janus_msg("iso-${_proto}" "Create ISO for the ${_proto} boot protocol")
         _janus_msg("run-${_proto}" "Run ISO for the ${_proto} boot protocol")
         _janus_msg("debug-${_proto}" "Debug ISO for the ${_proto} boot protocol")
     endforeach()
-    _janus_msg("run-uefi" "Boot ISO in UEFI mode")
-    _janus_msg("run-elf" "Direct kernel boot (debug)")
+    _janus_msg("run-uefi" "Boot ISO in UEFI mode for this architecture")
+    _janus_msg("run-elf" "Direct kernel boot (debug) for this architecture")
     message(STATUS "================================================================================")
 endfunction()

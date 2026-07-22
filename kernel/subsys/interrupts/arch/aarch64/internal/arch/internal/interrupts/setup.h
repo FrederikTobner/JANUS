@@ -22,7 +22,7 @@
 #ifndef AARCH64_INTERNAL_INTERRUPTS_SETUP_H
 #define AARCH64_INTERNAL_INTERRUPTS_SETUP_H
 
-#include <arch/impl/interrupts/frame.h>
+#include <arch/internal/interrupts/frame.h>
 #include <janus/attributes.h>
 #include <janus/types.h>
 

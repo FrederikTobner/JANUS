@@ -1,5 +1,8 @@
-# JANUS Subsystem Helper
-# Provides janus_add_subsys() for creating kernel subsystems (boot, drivers, mm)
+#[[
+    Subsystem.cmake - JANUS Subsystem Helper
+
+    Provides janus_add_subsys() for creating kernel subsystems (boot, drivers, mm)
+]]
 
 include_guard(GLOBAL)
 

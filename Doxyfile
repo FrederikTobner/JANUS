@@ -1,5 +1,4 @@
 # Doxygen configuration for JANUS
-# Generated for Doxygen 1.9+ (ubuntu-latest ships ≥ 1.9.1)
 # Run: doxygen Doxyfile  (from repo root)
 # Output: doxygen-out/html/index.html
 
@@ -18,7 +17,7 @@ CREATE_SUBDIRS         = NO
 INPUT                  = kernel tools
 FILE_PATTERNS          = *.c *.h
 RECURSIVE              = YES
-EXCLUDE_PATTERNS       = */build/* */_deps/*
+EXCLUDE_PATTERNS       = */build/* */_deps/* */.deps/*
 
 #---------------------------------------------------------------------------
 # Extraction

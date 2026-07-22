@@ -1,0 +1,70 @@
+name: Kernel Smoke Tests
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - ".github/workflows/smoke.yaml"
+      - ".github/actions/**"
+  pull_request:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - ".github/workflows/smoke.yaml"
+      - ".github/actions/**"
+
+jobs:
+  smoke:
+    name: ${{ matrix.preset }} (${{ matrix.profile }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [x86_64-gcc, x86_64-clang, aarch64-gcc, aarch64-clang]
+        profile: [nominal, fault]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-build-env
+        with:
+          arch: ${{ startsWith(matrix.preset, 'aarch64') && 'aarch64' || 'x86_64' }}
+
+      - uses: ./.github/actions/setup-compiler
+        with:
+          arch: ${{ startsWith(matrix.preset, 'aarch64') && 'aarch64' || 'x86_64' }}
+          compiler: ${{ endsWith(matrix.preset, 'clang') && 'clang' || 'gcc' }}
+
+      - name: Install QEMU (+ aarch64 UEFI firmware) and Lua
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends lua5.4
+          if [[ "${{ matrix.preset }}" == aarch64-* ]]; then
+            sudo apt-get install -y --no-install-recommends qemu-system-arm qemu-efi-aarch64 ipxe-qemu 
+          else
+            sudo apt-get install -y --no-install-recommends qemu-system-x86
+          fi
+
+      - name: Configure (${{ matrix.profile }})
+        run: >
+          cmake --preset ${{ matrix.preset }}
+          -D JANUS_ENABLE_SMOKE_TESTS=ON
+          ${{ matrix.profile == 'fault' && '-D JANUS_TEST_FAULTS=ON' || '' }}
+
+      - name: Smoke test
+        run: ctest --preset ${{ matrix.preset }} -R smoke
+
+      - name: Upload serial logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-serial-${{ matrix.preset }}-${{ matrix.profile }}
+          path: build-${{ matrix.preset }}/smoke-*.log
+          if-no-files-found: ignore

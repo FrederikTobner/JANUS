@@ -1,17 +1,13 @@
-# JANUS Generic Registry
-#
-# Parameterised registry functions shared by the kernel build and the tools
-# build.  Each registry is identified by a short REGISTRY name (e.g. KERNEL,
-# TOOLS).  All CMake cache variables are namespaced as JANUS_REG_<REGISTRY>_*.
-#
-# The bottom of this file contains backward-compatible kernel wrappers so
-# that cmake/kernel/*.cmake and kernel/CMakeLists.txt do not need to change.
+#[[ 
+    Registry.cmake — JANUS Generic Registry
+    Parameterised registry functions shared by the kernel build and the tools build.
+    Each registry is identified by a short REGISTRY name (e.g. KERNEL, TOOLS).  
+    All CMake cache variables are namespaced as JANUS_REG_<REGISTRY>_*.
+    The bottom of this file contains backward-compatible kernel wrappers so
+    that cmake/kernel/*.cmake and kernel/CMakeLists.txt do not need to change. 
+]]
 
 include_guard(GLOBAL)
-
-# ---------------------------------------------------------------------------
-# Core data functions
-# ---------------------------------------------------------------------------
 
 # Reset a named registry.  Call once per configure before any
 # janus_registry_register() calls for that registry.
@@ -29,10 +25,6 @@ function(janus_registry_register REGISTRY NAME TYPE)
     set("${_pfx}_TYPE_${NAME}"   "${TYPE}"   CACHE INTERNAL "" FORCE)
     set("${_pfx}_DEPS_${NAME}"   ${ARGN}     CACHE INTERNAL "" FORCE)
 endfunction()
-
-# ---------------------------------------------------------------------------
-# Validation
-# ---------------------------------------------------------------------------
 
 # Validate dependency isolation.
 #   janus_registry_validate(REGISTRY <r> SUBSYS_TYPES <t>... [CORE_TYPES <t>...])
@@ -78,10 +70,6 @@ function(janus_registry_validate)
         endif()
     endforeach()
 endfunction()
-
-# ---------------------------------------------------------------------------
-# Diagram generation
-# ---------------------------------------------------------------------------
 
 # Internal: sanitize a name into a valid Mermaid node ID.
 function(_janus_registry_mermaid_id NAME OUT_VAR)
@@ -226,9 +214,6 @@ endfunction()
 # ===========================================================================
 # Kernel registry — backward-compatible wrappers
 # ===========================================================================
-# These thin wrappers preserve the existing call sites in cmake/kernel/*.cmake
-# and kernel/CMakeLists.txt.  All data is stored in the KERNEL registry
-# (JANUS_REG_KERNEL_*).
 
 janus_registry_init(KERNEL)
 

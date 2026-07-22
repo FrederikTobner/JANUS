@@ -7,7 +7,7 @@
 -- Usage: lua scripts/regression_check.lua [OPTIONS]
 -- Run with --help for full usage information.
 --
--- @copyright Copyright (C) 2026 Frederik, TinyOS contributors
+-- @copyright Copyright (C) 2026 Frederik Tobner
 -- @license   GNU Affero General Public License v3.0 or later
 
 -- Colours (disabled when stdout is not a tty)
@@ -114,7 +114,7 @@ local ROOT = (function()
 end)()
 
 local USAGE = [[
-Usage: lua scripts/regression_check.lua [OPTIONS]
+Usage: lua scripts/build.lua [OPTIONS]
 
 Builds the JANUS kernel and ISO images across all CMake presets.
 

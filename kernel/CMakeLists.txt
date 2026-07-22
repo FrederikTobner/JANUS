@@ -31,6 +31,9 @@ add_subdirectory(kmain)
 # Entry point (creates kernel.elf, must be last)
 add_subdirectory(_start)
 
+# Tests of the kernel
+add_subdirectory(tests)
+
 # Validate subsystem/library registry for dependency isolation
 janus_validate_registry()
 
