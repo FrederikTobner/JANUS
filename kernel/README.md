@@ -1,8 +1,7 @@
 # Kernel Root Directory
 
-Contains all the code needed to create the JANUS kernel. The kernel is built as
-a freestanding executable (`kernel.elf`) that can be booted by Limine or GRUB
-(Multiboot2).
+Contains all the code needed to create the JANUS kernel.
+The kernel is built as a freestanding executable (`kernel.elf`) that can be booted by Limine or GRUB (Multiboot2).
 
 ## Sub Folders
 
@@ -31,22 +30,26 @@ See [lib/README.md](lib/README.md) for more details.
 
 ### core/
 
-Shared kernel core services used by multiple subsystems
-without introducing subsystem-to-subsystem dependencies.
+Shared kernel core services used by multiple subsystems without introducing subsystem-to-subsystem dependencies.
 See [core/README.md](core/README.md)for more details.
 
 ### subsys/
 
-The main kernel subsystems (`boot`, `drivers`, `mm`). Each
-subsystem owns its hardware state and exposes a public API. Subsystems are
-isolated from each other — only `kmain` may depend on multiple subsystems.
+The main kernel subsystems (`boot`, `drivers`, `mm`).
+Each subsystem owns its hardware state and exposes a public API.
+Subsystems are isolated from each other — only `kmain` may depend on multiple subsystems.
 See [subsys/README.md](subsys/README.md)for more details.
 
 ### include/janus/
 
-Global kernel headers: `types.h`, `attributes.h`,
-`config.h` (generated). These have no dependencies and are visible everywhere.
+Global kernel headers: `types.h`, `attributes.h`, `config.h` (generated).
+These have no dependencies and are visible everywhere.
 See [include/README.md](include/README.md)for more details.
+
+### tests
+
+Tests of the kernel.
+See [tests/README.md](tests/README.md) for more details.
 
 ## Layer Order
 

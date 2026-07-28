@@ -26,10 +26,9 @@
 
 /// @brief Architecture-specific interrupt initialisation.
 ///
-/// Implemented per architecture in arch/<ARCH>/. x86_64 installs the GDT
-/// (Global Descriptor Table), TSS (Task State Segment), and IDT (Interrupt
-/// Descriptor Table); aarch64 will install a VBAR_EL1 (Vector Base Address
-/// Register, EL1) exception vector table.
+/// Implemented per architecture in arch/<ARCH>/.
+/// x86_64 installs the GDT (Global Descriptor Table), TSS (Task State Segment), and IDT (Interrupt Descriptor Table);
+/// aarch64 installs a VBAR_EL1 (Vector Base Address Register, EL1) exception vector table.
 ///
 /// @return JANUS_OK on success; a negative error_t otherwise.
 error_t arch_interrupts_init(void);

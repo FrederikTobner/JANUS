@@ -33,8 +33,8 @@ error_t exceptions_install(void);
 
 /// @brief Common C dispatch for every vector entry; reports state and panics.
 ///
-/// Called from exc_common (vector_table.S) with a pointer to the captured
-/// frame; reports the fault over kprintf and panics. Never returns.
+/// Called from exc_common (vector_table.S) with a pointer to the captured frame
+/// Reports the fault over kprintf and panics and therefore never returns.
 ///
 /// @param frame Snapshot of CPU state captured by the vector_table.S entry path.
 __noreturn void interrupts_dispatch(interrupt_frame_t const * frame);

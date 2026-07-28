@@ -45,11 +45,11 @@
 
 /// @brief Entry-source index carried from each vector-table slot (0..15).
 ///
-/// Computed as group * 4 + type, mirroring the vector-table layout: the four
-/// groups are {Current EL SP0, Current EL SPx, Lower EL AArch64, Lower EL
-/// AArch32}, each with the four types {Synchronous, IRQ, FIQ, SError}. The
-/// kernel runs at EL1h (SPx) with no EL0, so genuine faults arrive as
-/// EXC_SRC_CUR_SPX_SYNC; every other slot is populated defensively.
+/// Computed as group * 4 + type, mirroring the vector-table layout.
+/// The four groups are {Current EL SP0, Current EL SPx, Lower EL AArch64, Lower EL AArch32},
+/// each with the four types {Synchronous, IRQ, FIQ, SError}.
+/// The kernel runs at EL1h (SPx) with no EL0, so genuine faults arrive as EXC_SRC_CUR_SPX_SYNC.
+/// Every other slot is populated defensively.
 typedef enum {
     EXC_SRC_CUR_SP0_SYNC = 0, ///< Current EL, SP0, Synchronous
     EXC_SRC_CUR_SP0_IRQ,      ///< Current EL, SP0, IRQ

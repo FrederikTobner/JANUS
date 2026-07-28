@@ -49,12 +49,3 @@ add_subdirectory(lib/clap)
 add_subdirectory(psf2c)
 
 janus_write_tools_diagram("${CMAKE_CURRENT_SOURCE_DIR}/../docs/generated/deps-tools.md")
-
-add_custom_target(
-    copy_compile_commands ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_BINARY_DIR}/compile_commands.json
-        ${CMAKE_SOURCE_DIR}/compile_commands.json
-    BYPRODUCTS ${CMAKE_SOURCE_DIR}/compile_commands.json
-    COMMENT "Copying compile_commands.json to project root"
-)

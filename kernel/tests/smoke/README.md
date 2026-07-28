@@ -1,6 +1,6 @@
 # Kernel Smoke Tests
 
-Black-box "does it boot and reach known-good milestones?" tests.
+Black-box tests.
 They build the real ISO, boot it in QEMU headless, and assert on the serial console output.
 
 ## Layout

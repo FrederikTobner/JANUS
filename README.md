@@ -1,9 +1,10 @@
 <p align="center"><a href="https://github.com/FrederikTobner/JANUS"><img src="./images/JANUS_Logo_Small.jpg" alt="JANUS Logo" height="180"/></a></p>
-<p align="center">A monolitihic kernel, supporting x86_64 and aarch64.</p>
+<p align="center">A monolithic kernel, supporting x86_64 and aarch64.</p>
 
 [![Build](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/build.yaml?branch=main&label=Build&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/build.yaml)
 [![Tools](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/tools.yaml?branch=main&label=Tools&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/tools.yaml)
 [![Doxygen](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/doxygen.yaml?branch=main&label=Doxygen&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/doxygen.yaml)
+[![Smoke](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/smoke.yaml?branch=main&labelSmoke&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/smoke.yaml)
 [![Coverage](https://codecov.io/gh/FrederikTobner/JANUS/graph/badge.svg)](https://codecov.io/gh/FrederikTobner/JANUS)
 [![C Standard](https://img.shields.io/badge/C-C17%20freestanding-blue?logo=c)](https://en.cppreference.com/w/c/17)
 
@@ -29,7 +30,7 @@ Currently the following presets are defined:
 For creating all bootable ISO's for the current architecture with the supported boot protocols, the following command can be used:
 
 ```bash
-ninja -C build-x86_64-gcc iso         # or: cmake --build --preset <preset> --target iso
+ninja -C build-x86_64-gcc iso         
 ```
 
 For running the kernel in QEMU every supported boot protocol defines its own target, that can be used to make the setup easier:
@@ -44,6 +45,8 @@ Currently JANUS supports the following boot protocols per architecture:
 |--------------|--------------------------|
 | x86_64       | limine, multiboot2       |
 | aarch64      | limine                   |
+
+For a more detailed setup guide see the documentation regarding the [setup](./docs/01-getting-started.md)
 
 ## License
 
