@@ -17,13 +17,12 @@
 #ifndef UAPI_TYPES_H
 #define UAPI_TYPES_H
 
-/// @file int-ll64.h
-/// @brief 64-bit integer types (JANUS freestanding implementation)
-
-/// @brief 64-bit integer types (JANUS freestanding implementation)
+/// @file kernel/include/uapi/types.h
+/// @brief User-space API types
 ///
-/// This is JANUS's implementation of the C standard stdint.h header.
-/// In freestanding mode, we provide our own using compiler builtins.
+/// This header defines the fixed-width integer types used in the JANUS user-space API.
+/// These types are guaranteed to have the same size and alignment in both kernel and user-space,
+/// ensuring that structures shared between the two are layout-compatible
 
 typedef __UINT8_TYPE__ __u8;
 typedef __INT8_TYPE__ __s8;

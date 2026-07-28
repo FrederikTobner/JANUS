@@ -23,16 +23,13 @@
 #include <arch/impl/asm/capabilities.h>
 #include <janus/attributes.h>
 
-#define ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED 1
-#define ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT   2
-
 /*
  * Validation block:
  * Every architecture must define all ASM_ARCH_* and ASM_CAP_* macros,
  * and each value must be 0 or 1.
  */
 
-#define ASM_VALIDATE_BOOL_MACRO(name)       STATIC_ASSERT(((name) == 0) || ((name) == 1), #name " must be 0 or 1")
+#define ASM_VALIDATE_BOOL_MACRO(name) STATIC_ASSERT(((name) == 0) || ((name) == 1), #name " must be 0 or 1")
 
 /* Required architecture selectors */
 
@@ -86,13 +83,6 @@ ASM_VALIDATE_BOOL_MACRO(ASM_CAP_TLB_INVALIDATE_ALL);
 ASM_VALIDATE_BOOL_MACRO(ASM_CAP_PORT_IO);
 #endif
 
-// Privileged architecture-specific system register helpers are available.
-#ifndef ASM_CAP_ARCH_SYSREG_ACCESS
-#error "Missing required macro: ASM_CAP_ARCH_SYSREG_ACCESS"
-#else
-ASM_VALIDATE_BOOL_MACRO(ASM_CAP_ARCH_SYSREG_ACCESS);
-#endif
-
 #ifndef ASM_CAP_INTERRUPT_VECTOR_TABLE
 #error "Missing required macro: ASM_CAP_INTERRUPT_VECTOR_TABLE"
 #else
@@ -117,13 +107,10 @@ ASM_VALIDATE_BOOL_MACRO(ASM_CAP_FAULT_ADDRESS_REGISTER);
 ASM_VALIDATE_BOOL_MACRO(ASM_CAP_EXCEPTION_STACK_REGISTER);
 #endif
 
-#ifndef ASM_CAP_PAGE_TABLE_BASE_MODEL
-#error "Missing required macro: ASM_CAP_PAGE_TABLE_BASE_MODEL"
+#ifndef ASM_CAP_PAGE_TABLE_BASE_MODEL_SPLIT
+#error "Missing required macro: ASM_CAP_PAGE_TABLE_BASE_MODEL_SPLIT"
 #else
-STATIC_ASSERT((ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED) ||
-                  (ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT),
-              "ASM_CAP_PAGE_TABLE_BASE_MODEL must be either ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED or "
-              "ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT");
+ASM_VALIDATE_BOOL_MACRO(ASM_CAP_PAGE_TABLE_BASE_MODEL_SPLIT);
 #endif
 
 #undef ASM_VALIDATE_BOOL_MACRO

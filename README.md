@@ -17,9 +17,16 @@ cmake --preset x86_64-gcc        # or x86_64-clang, aarch64-gcc, aarch64-clang
 cmake --build --preset x86_64-gcc
 ```
 
-Since both clang and gcc are supported under all architectures the available presets are `x86_64-gcc`, `x86_64-clang`, `aarch64-gcc` and `aarch64-clang`.
+Currently the following presets are defined:
 
-For creating all bootable ISO's for the current architecture with the supported boot protocols, you can execute the following command:
+| Architecture | Compiler | Preset name  |
+|--------------|----------|--------------|
+| x86_64       | clang    | x86_64-clang |
+| x86_64       | gcc      | x86_64-gcc   |
+| aarch64      | clang    | x86_64-clang |
+| aarch64      | gcc      | x86_64-gcc   |
+
+For creating all bootable ISO's for the current architecture with the supported boot protocols, the following command can be used:
 
 ```bash
 ninja -C build-x86_64-gcc iso         # or: cmake --build --preset <preset> --target iso

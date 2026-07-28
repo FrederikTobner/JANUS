@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS                                              *
+ * This file is part of JANUS                                                *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -18,7 +18,7 @@
 #define JANUS_VA_ARG_H
 
 #ifndef JANUS_KERNEL
-#error "This header is for JANUS kernel code only. Do not include it from user-space code."
+#error "This header is designed to be used in the JANUS kernel code only. Do not include it from any user-space code!"
 #endif
 
 typedef __builtin_va_list va_list;

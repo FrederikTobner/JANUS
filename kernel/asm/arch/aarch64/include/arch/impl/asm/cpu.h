@@ -19,7 +19,6 @@
 ///
 /// Raw inline-assembly wrappers for privileged CPU instructions.
 /// This is the only permitted site for __asm__ volatile on AArch64 for CPU control.
-/// Consumed by subsystem Tier 3 headers and kernel libraries.
 
 #ifndef AARCH64_IMPL_ASM_CPU_H
 #define AARCH64_IMPL_ASM_CPU_H

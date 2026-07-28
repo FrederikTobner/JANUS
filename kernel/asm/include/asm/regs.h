@@ -30,19 +30,8 @@ static __always_inline u64 asm_read_fault_address(void)
 }
 #endif /* ASM_CAP_FAULT_ADDRESS_REGISTER */
 
-#if ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED
-static __always_inline u64 asm_read_cr3(void)
-{
-    return arch_asm_read_cr3();
-}
-
-static __always_inline void asm_write_cr3(u64 val)
-{
-    arch_asm_write_cr3(val);
-}
-#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_UNIFIED */
-
-#if ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT
+#if ASM_CAP_PAGE_TABLE_BASE_MODEL_SPLIT == 1
+// Split page table base model (AArch64) uses TTBR0_EL1 and TTBR1_EL1 for user/kernel mappings.
 static __always_inline u64 asm_read_ttbr1_el1(void)
 {
     return arch_asm_read_ttbr1_el1();
@@ -62,6 +51,16 @@ static __always_inline void asm_write_ttbr0_el1(u64 val)
 {
     arch_asm_write_ttbr0_el1(val);
 }
-#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL == ASM_CAP_VAL_PAGE_TABLE_BASE_SPLIT */
+#else
+// Unified page table base model (x86_64) uses CR3 for both user/kernel mappings.
+static __always_inline u64 asm_read_cr3(void)
+{
+    return arch_asm_read_cr3();
+}
 
+static __always_inline void asm_write_cr3(u64 val)
+{
+    arch_asm_write_cr3(val);
+}
+#endif /* ASM_CAP_PAGE_TABLE_BASE_MODEL_SPLIT == 0 */
 #endif /* ASM_REGS_H */

@@ -18,7 +18,7 @@
 #define JANUS_ATTRIBUTES_H
 
 #ifndef JANUS_KERNEL
-#error "This header is for JANUS kernel code only. Do not include it from user-space code."
+#error "This header is designed to be used in the JANUS kernel code only. Do not include it from any user-space code!"
 #endif
 
 /// Compiler-specific attributes and macros for JANUS
@@ -79,21 +79,19 @@
 // not.
 #define __pure                   __attribute__((pure))
 
-// Stricter than __pure.  The return value depends *only* on the arguments
-// — the function must not read global memory, dereference pointers, or
-// call non-const functions.  The compiler may freely reorder, merge, or
-// eliminate calls with the same argument values.
+// Stricter than __pure.  The return value depends *only* on the arguments.
+// The function must not read global memory, dereference pointers, or call non-const functions.
+// The compiler may freely reorder, merge, or eliminate calls with the same argument values.
 #define __const                  __attribute__((const))
 
-// Hints that the function is unlikely to be called (error paths, one-time
-// initialisation).  The compiler may move its code to a distant text
-// section, reduce inlining aggressiveness, and optimise branch prediction
-// for the non-cold path.
+// Hints that the function is unlikely to be called (error paths, one-time initialisation).
+// The compiler may move its code to a distant text section, reduce inlining aggressiveness,
+// and optimise branch prediction for the non-cold path.
 #define __cold                   __attribute__((cold))
 
-// Hints that the function is called frequently.  The compiler may place
-// it in a hot text section, increase inlining aggressiveness, and optimise
-// for the hot path in branch prediction.
+// Hints that the function is called frequently.
+// The compiler may place it in a hot text section, increase inlining aggressiveness,
+/// and optimise for the hot path in branch prediction.
 #define __hot                    __attribute__((hot))
 
 // Likely/unlikely for branch prediction
@@ -103,24 +101,7 @@
 // Static assertion
 #define STATIC_ASSERT(expr, msg) _Static_assert(expr, msg)
 
-// Compile-time check — triggers a compile error when condition is true.
-// Mirrors Linux's BUILD_BUG_ON for familiarity.
-#define BUILD_BUG_ON(condition)  STATIC_ASSERT(!(condition), "BUILD_BUG_ON triggered")
-
-// Array size
-#define ARRAY_SIZE(arr)          (sizeof(arr) / sizeof((arr)[0]))
-
-// Offset of member in struct (for CONTAINER_OF)
+// Offset of member in struct
 #define __offsetof(type, member) __builtin_offsetof(type, member)
-
-// Container of macro.
-// Uses a compound-statement (GCC/Clang extension) so that __typeof__ can
-// verify at compile time that ptr has the same type as &container->member,
-// catching accidental pointer-type mismatches early.
-#define CONTAINER_OF(ptr, type, member)                          \
-    ({                                                           \
-        __typeof__(((type *) 0)->member) const * __mptr = (ptr); \
-        (type *) ((char *) __mptr - __offsetof(type, member));   \
-    })
 
 #endif // JANUS_ATTRIBUTES_H

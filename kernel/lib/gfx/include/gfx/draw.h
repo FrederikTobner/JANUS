@@ -30,23 +30,23 @@
 
 /// @brief Write a single pixel at (x, y).
 ///
-/// @param s    Target surface.
+/// @param surface    Target surface.
 /// @param x    X coordinate in pixels (0 = left).
 /// @param y    Y coordinate in pixels (0 = top).
 /// @param rgb  Color as 0x00RRGGBB.
-void gfx_surface_put_pixel(gfx_surface_t const * s, u32 x, u32 y, u32 rgb);
+void gfx_surface_put_pixel(gfx_surface_t const * surface, u32 x, u32 y, u32 rgb);
 
 /// @brief Fill an axis-aligned rectangle with a solid color.
 ///
 /// The rectangle is clipped to the surface bounds.
 ///
-/// @param s    Target surface.
+/// @param surface    Target surface.
 /// @param x    Left edge in pixels.
 /// @param y    Top edge in pixels.
 /// @param w    Width in pixels.
 /// @param h    Height in pixels.
 /// @param rgb  Fill color as 0x00RRGGBB.
-void gfx_surface_fill_rect(gfx_surface_t const * s, u32 x, u32 y, u32 w, u32 h, u32 rgb);
+void gfx_surface_fill_rect(gfx_surface_t const * surface, u32 x, u32 y, u32 w, u32 h, u32 rgb);
 
 /// @brief Blit a monochrome 1-bpp bitmap onto the surface.
 ///
@@ -54,7 +54,7 @@ void gfx_surface_fill_rect(gfx_surface_t const * s, u32 x, u32 y, u32 w, u32 h, 
 /// @p width must be a non-zero multiple of 8.
 /// Set bits draw @p fg_rgb; clear bits draw @p bg_rgb.
 ///
-/// @param s        Target surface.
+/// @param surface        Target surface.
 /// @param x        Left edge in pixels.
 /// @param y        Top edge in pixels.
 /// @param bitmap   Row-major 1-bpp source data.
@@ -63,7 +63,7 @@ void gfx_surface_fill_rect(gfx_surface_t const * s, u32 x, u32 y, u32 w, u32 h, 
 /// @param fg_rgb   Foreground color as 0x00RRGGBB.
 /// @param bg_rgb   Background color as 0x00RRGGBB.
 void gfx_surface_blit_mono(
-    gfx_surface_t const * s, u32 x, u32 y, u8 const * bitmap, u32 width, u32 height, u32 fg_rgb, u32 bg_rgb);
+    gfx_surface_t const * surface, u32 x, u32 y, u8 const * bitmap, u32 width, u32 height, u32 fg_rgb, u32 bg_rgb);
 
 /// @brief Scroll the surface up by @p dy pixel rows.
 ///
@@ -71,9 +71,9 @@ void gfx_surface_blit_mono(
 /// [height-dy, height) with @p fill_rgb. If dy >= height, the entire
 /// surface is filled.
 ///
-/// @param s         Target surface.
+/// @param surface         Target surface.
 /// @param dy        Number of pixel rows to scroll up.
 /// @param fill_rgb  Fill color for the newly exposed rows (0x00RRGGBB).
-void gfx_surface_scroll(gfx_surface_t const * s, u32 dy, u32 fill_rgb);
+void gfx_surface_scroll(gfx_surface_t const * surface, u32 dy, u32 fill_rgb);
 
 #endif /* GFX_DRAW_H */

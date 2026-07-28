@@ -20,14 +20,22 @@
 #ifndef ASM_CPU_H
 #define ASM_CPU_H
 
-#include <arch/impl/asm/cpu.h>
 #include <asm/capabilities.h>
 #include <janus/attributes.h>
+#if ASM_CAP_LOCAL_IRQ_CONTROL || ASM_CAP_IDLE_WAIT_INTERRUPT
+#include <arch/impl/asm/cpu.h>
+#endif /* ASM_CAP_LOCAL_IRQ_CONTROL || ASM_CAP_IDLE_WAIT_INTERRUPT */
+
+#if ASM_CAP_IDLE_WAIT_INTERRUPT
 
 static __always_inline void asm_cpu_halt_once(void)
 {
     arch_asm_cpu_halt_once();
 }
+
+#endif /* ASM_CAP_IDLE_WAIT_INTERRUPT */
+
+#if ASM_CAP_LOCAL_IRQ_CONTROL
 
 static __always_inline void asm_cpu_disable_interrupts(void)
 {
@@ -39,6 +47,9 @@ static __always_inline void asm_cpu_enable_interrupts(void)
     arch_asm_irq_enable_local();
 }
 
+#endif /* ASM_CAP_LOCAL_IRQ_CONTROL */
+
+#if ASM_CAP_IDLE_WAIT_INTERRUPT && ASM_CAP_LOCAL_IRQ_CONTROL
 static __always_inline __noreturn void asm_cpu_halt_forever(void)
 {
     asm_cpu_disable_interrupts();
@@ -46,5 +57,6 @@ static __always_inline __noreturn void asm_cpu_halt_forever(void)
         asm_cpu_halt_once();
     }
 }
+#endif /* ASM_CAP_IDLE_WAIT_INTERRUPT && ASM_CAP_LOCAL_IRQ_CONTROL */
 
 #endif /* ASM_CPU_H */
