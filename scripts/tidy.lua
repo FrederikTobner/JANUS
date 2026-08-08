@@ -10,102 +10,29 @@
 -- @copyright Copyright (C) 2026 Frederik Tobner
 -- @license   GNU Affero General Public License v3.0 or later
 
-local _tty_raw   = os.execute("test -t 1") -- luacheck: ignore
-local use_colour = (_tty_raw == true) or (_tty_raw == 0)
+local SCRIPT_DIR = arg[0]:match("^(.*)/[^/]+$") or "."
+package.path = SCRIPT_DIR .. "/lib/?.lua;" .. package.path
 
-local function sgr(code)
-    if use_colour then return string.format("\27[%sm", code) end
-    return ""
-end
+local ansi      = require("ansi")
+local shell     = require("shell")
+local cli       = require("cli")
+local project   = require("project")
+local time      = require("time")
+local progress  = require("progress")
+local toolchain = require("toolchain")
 
-local C = {
-    reset  = sgr("0"),
-    bold   = sgr("1"),
-    red    = sgr("31"),
-    green  = sgr("32"),
-    yellow = sgr("33"),
-    cyan   = sgr("36"),
-    dim    = sgr("2"),
-}
+local C           = ansi.C
+local die         = cli.die
+local capture     = shell.capture
+local short_path  = project.short_path
+local now         = time.now
+local fmt_elapsed = time.fmt_elapsed
 
---- Print an error message and exit.
-local function die(fmt, ...)
-    io.stderr:write(string.format("%serror:%s " .. fmt .. "\n", C.red, C.reset, ...))
-    os.exit(1)
-end
-
---- Execute a shell command, return (ok, exit_code).
-local function exec(cmd)
-    local ok, _, code = os.execute(cmd)
-    if ok == true then return true, 0 end
-    if type(ok) == "number" then return ok == 0, ok end
-    return false, code or 1
-end
-
---- Execute a command and capture stdout+stderr as a string.
-local function capture(cmd)
-    local f = io.popen(cmd, "r")
-    if not f then return nil end
-    local out = f:read("*a")
-    f:close()
-    return out
-end
-
---- Get a monotonic wall-clock timestamp in seconds.
-local function now()
-    return os.time()
-end
-
---- Format elapsed seconds as a human string.
-local function fmt_elapsed(seconds)
-    if seconds < 60 then return string.format("%ds", seconds) end
-    return string.format("%dm%02ds", math.floor(seconds / 60), seconds % 60)
-end
-
-local ROOT = (function()
-    local abs = capture(string.format("realpath %q 2>/dev/null", arg[0]))
-    if not abs then die("cannot resolve script path from '%s'", arg[0]) end
-    abs = abs:match("^%s*(.-)%s*$")
-    local root = abs:match("^(.*)/[^/]+/[^/]+$")  -- strip /scripts/<name>.lua
-    if not root or root == "" then
-        die("cannot derive project root from script path '%s'", abs)
-    end
-    return root
-end)()
-
-local function find_tool(candidates)
-    for _, name in ipairs(candidates) do
-        local out = capture(string.format("command -v %s 2>/dev/null", name))
-        if out and out:match("%S") then return name end
-    end
-    return nil
-end
+local ROOT = project.root()
 
 -- The CI pipeline pins clang-tidy-18.  Using a different version may silence
 -- or add diagnostics relative to CI, giving misleading local results.
-local CI_TOOL = "clang-tidy-18"
-
-local function find_tool(candidates)
-    for _, name in ipairs(candidates) do
-        local out = capture(string.format("command -v %s 2>/dev/null", name))
-        if out and out:match("%S") then return name end
-    end
-    return nil
-end
-
-local TOOL = find_tool { CI_TOOL }
-if not TOOL then
-    TOOL = find_tool { "clang-tidy-17", "clang-tidy-16", "clang-tidy" }
-    if not TOOL then
-        die("clang-tidy not found — install clang-tidy-18 or add it to PATH")
-    end
-    local ver = capture(TOOL .. " --version 2>/dev/null") or "unknown"
-    ver = ver:match("^%s*(.-)%s*$")
-    io.stderr:write(string.format(
-        "%swarning:%s %s not found; using '%s' (%s)\n"
-        .. "         Results may differ from CI (which pins %s).\n\n",
-        C.yellow, C.reset, CI_TOOL, TOOL, ver, CI_TOOL))
-end
+local TOOL = toolchain.pinned_tool("clang-tidy", "18", { "17", "16" })
 
 local USAGE = [[
 Usage: lua scripts/tidy.lua [OPTIONS]
@@ -159,12 +86,17 @@ do
 end
 
 --- Return the build directory for a preset name.
+---
+--- @param preset string CMake preset name
+--- @returns string build directory path
 local function build_dir_for(preset)
     return ROOT .. "/build-" .. preset
 end
 
 --- Discover available *-clang build directories that contain a
 --- compile_commands.json, sorted for deterministic selection.
+---
+--- @returns table list of build directory paths
 local function discover_clang_build_dirs()
     local raw = capture(string.format(
         "find %q -maxdepth 2 -name compile_commands.json | sort", ROOT))
@@ -202,6 +134,9 @@ end
 
 --- Extract kernel .c source paths from compile_commands.json.
 --- Uses Lua pattern matching to avoid a jq dependency.
+---
+--- @param build_dir string path to a build directory containing compile_commands.json
+--- @returns table list of kernel .c source paths
 local function load_sources(build_dir)
     local path = build_dir .. "/compile_commands.json"
     local f = io.open(path, "r")
@@ -229,30 +164,30 @@ local function load_sources(build_dir)
     return files
 end
 
---- Strip ROOT prefix for readable output.
-local function short_path(path)
-    return path:gsub("^" .. ROOT .. "/", "")
-end
-
 --- Overwrite the current line with a progress indicator.
+---
+--- @param i     integer current file index
+--- @param total integer total number of files
+--- @param path  string current file path
+--- @param msg   string message to display
 local function status(i, total, path, msg)
-    io.write(string.format("\r\27[K[%d/%d] %s%s%s: %s",
-        i, total, C.cyan, short_path(path), C.reset, msg))
-    io.flush()
+    progress.status(i, total, short_path(path), msg)
 end
 
 --- Finalise a status line with a result symbol and elapsed time.
+---
+--- @param i       integer current file index
+--- @param total   integer total number of files
+--- @param path    string current file path
+--- @param ok      boolean true if the file passed clang-tidy
+--- @param elapsed integer elapsed seconds for this file
 local function status_done(i, total, path, ok, elapsed)
-    local sym = ok and (C.green .. "✓") or (C.red .. "✗")
-    io.write(string.format("\r\27[K%s[%d/%d]%s %s%s%s %s%s  %s%s%s\n",
-        C.bold, i, total, C.reset,
-        C.cyan, short_path(path), C.reset,
-        sym, C.reset,
-        C.dim, fmt_elapsed(elapsed), C.reset))
-    io.flush()
+    progress.status_done(i, total, short_path(path), ok, elapsed)
 end
 
 --- Print indented clang-tidy output.
+---
+--- @param text string clang-tidy stdout+stderr output
 local function show_output(text)
     if not text or text:match("^%s*$") then return end
     for line in text:gmatch("[^\n]+") do
@@ -261,6 +196,7 @@ local function show_output(text)
     io.write("\n")
 end
 
+--- Main entry point: run clang-tidy on all kernel .c sources in the build directory.
 local function main()
     io.write(string.format("%s── JANUS clang-tidy ──%s  (%s)\n",
         C.bold, C.reset, TOOL))

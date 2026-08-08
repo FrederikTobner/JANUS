@@ -10,84 +10,27 @@
 -- @copyright Copyright (C) 2026 Frederik Tobner 
 -- @license   GNU Affero General Public License v3.0 or later
 
-local _tty_raw   = os.execute("test -t 1") -- luacheck: ignore
-local use_colour = (_tty_raw == true) or (_tty_raw == 0)
+local SCRIPT_DIR = arg[0]:match("^(.*)/[^/]+$") or "."
+package.path = SCRIPT_DIR .. "/lib/?.lua;" .. package.path
 
-local function sgr(code)
-    if use_colour then return string.format("\27[%sm", code) end
-    return ""
-end
+local ansi      = require("ansi")
+local shell     = require("shell")
+local cli       = require("cli")
+local project   = require("project")
+local toolchain = require("toolchain")
 
-local C = {
-    reset  = sgr("0"),
-    bold   = sgr("1"),
-    red    = sgr("31"),
-    green  = sgr("32"),
-    yellow = sgr("33"),
-    dim    = sgr("2"),
-}
+local C          = ansi.C
+local die        = cli.die
+local exec       = shell.exec
+local capture    = shell.capture
+local short_path = project.short_path
 
---- Print an error message and exit.
-local function die(fmt, ...)
-    io.stderr:write(string.format("%serror:%s " .. fmt .. "\n", C.red, C.reset, ...))
-    os.exit(1)
-end
-
---- Execute a shell command, return (ok, exit_code).
-local function exec(cmd)
-    local ok, _, code = os.execute(cmd)
-    if ok == true then return true, 0 end
-    if type(ok) == "number" then return ok == 0, ok end
-    return false, code or 1
-end
-
---- Execute a command and capture stdout as a string.
-local function capture(cmd)
-    local f = io.popen(cmd, "r")
-    if not f then return nil end
-    local out = f:read("*a")
-    f:close()
-    return out
-end
-
-local ROOT = (function()
-    local abs = capture(string.format("realpath %q 2>/dev/null", arg[0]))
-    if not abs then die("cannot resolve script path from '%s'", arg[0]) end
-    abs = abs:match("^%s*(.-)%s*$")
-    local root = abs:match("^(.*)/[^/]+/[^/]+$")  -- strip /scripts/<name>.lua
-    if not root or root == "" then
-        die("cannot derive project root from script path '%s'", abs)
-    end
-    return root
-end)()
+local ROOT = project.root()
 
 -- The CI pipeline pins clang-format-18.  Using a different version can produce
 -- different results (compound-literal spacing, brace-init rules, etc.), giving
 -- a false pass locally while CI still fails.
-local CI_TOOL = "clang-format-18"
-
-local function find_tool(candidates)
-    for _, name in ipairs(candidates) do
-        local out = capture(string.format("command -v %s 2>/dev/null", name))
-        if out and out:match("%S") then return name end
-    end
-    return nil
-end
-
-local TOOL = find_tool { CI_TOOL }
-if not TOOL then
-    -- Fall back to whatever is available, but warn loudly.
-    TOOL = find_tool { "clang-format-17", "clang-format-16", "clang-format" }
-    if not TOOL then
-        die("clang-format not found — install clang-format-18 or add it to PATH")
-    end
-    local ver = capture(TOOL .. " --version 2>/dev/null") or "unknown"
-    ver = ver:match("^%s*(.-)%s*$")
-    io.stderr:write(string.format(
-        "%swarning:%s %s not found; using '%s' (%s)\n"
-        .. "         Results may differ from CI (which pins %s).\n\n",
-        C.yellow, C.reset, CI_TOOL, TOOL, ver, CI_TOOL))
-end
+local TOOL = toolchain.pinned_tool("clang-format", "18", { "17", "16" })
 
 local USAGE = [[
 Usage: lua scripts/format.lua [OPTIONS]
@@ -161,11 +104,6 @@ end
 --- Reformat a file in-place.
 local function fix_file(path)
     exec(string.format("%s -i %q", TOOL, path))
-end
-
---- Strip ROOT prefix for readable output.
-local function short_path(path)
-    return path:gsub("^" .. ROOT .. "/", "")
 end
 
 local function print_file_result(i, total, path, label)

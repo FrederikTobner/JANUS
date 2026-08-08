@@ -14,11 +14,11 @@
 --
 -- @copyright Copyright (C) 2026 Frederik Tobner 
 -- @license   GNU Affero General Public License v3.0 or later
-local function substr(s)
+local function substr(str)
     return {
-        label = s,
+        label = str,
         matches = function(_, line)
-            return line:find(s, 1, true) ~= nil
+            return line:find(str, 1, true) ~= nil
         end,
     }
 end
