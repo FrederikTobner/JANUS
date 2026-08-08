@@ -58,4 +58,4 @@ _start → kmain → subsys → core → lib → asm → include
 ```
 
 Each layer may only depend on layers lower in the stack.
-`kmain` is the sole layer permitted to combine multiple subsystems (since it is technically a subsystem, like boot, drivers and mm).
+`kmain` is the sole subsystem that is permitted to combine multiple subsystems.
