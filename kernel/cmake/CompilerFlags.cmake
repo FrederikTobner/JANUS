@@ -1,6 +1,6 @@
 #[[ 
-    CompilerFlags.cmake - JANUS Compiler Flags
-    Architecture-specific flags (from arch layer) + common kernel compiler flags
+    CompilerFlags.cmake - JANUS Kernel Compiler Flags
+    Kernel ABI flags (from kernel/cmake/arch/<arch>/) and common freestanding kernel compiler flags.
 
     Expects: JANUS_COMPILER_CLANG or JANUS_COMPILER_GCC set (by platform/Detection.cmake)
     Expects: JANUS_TARGET_ARCH set (by toolchain file)
@@ -8,8 +8,8 @@
 
 include_guard(GLOBAL)
 
-# Include architecture-specific flags (sets JANUS_ARCH_FLAGS, JANUS_BOOT_PROTOCOLS)
-include(${CMAKE_SOURCE_DIR}/cmake/arch/${JANUS_TARGET_ARCH}/platform/CompilerFlags.cmake)
+# Include kernel ABI flags for this architecture (sets JANUS_ARCH_FLAGS)
+include(${CMAKE_CURRENT_LIST_DIR}/arch/${JANUS_TARGET_ARCH}/CompilerFlags.cmake)
 
 # Common compiler flags for all kernel code
 set(JANUS_COMPILE_OPTIONS_COMMON

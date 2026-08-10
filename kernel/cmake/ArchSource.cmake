@@ -29,7 +29,7 @@ include_guard(GLOBAL)
 
 # Ensure platform is loaded
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/ArchSource.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before ArchSource.cmake")
 endif()
 
 function(janus_add_arch_subsys NAME)

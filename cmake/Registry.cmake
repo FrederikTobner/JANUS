@@ -1,10 +1,15 @@
 #[[ 
     Registry.cmake — JANUS Generic Registry
-    Parameterised registry functions shared by the kernel build and the tools build.
-    Each registry is identified by a short REGISTRY name (e.g. KERNEL, TOOLS).  
+    Parameterised registry functions shared across every build space (kernel,
+    tools, and future user/stdlib spaces). Each registry is identified by a
+    short REGISTRY name (e.g. KERNEL, TOOLS).
     All CMake cache variables are namespaced as JANUS_REG_<REGISTRY>_*.
-    The bottom of this file contains backward-compatible kernel wrappers so
-    that cmake/kernel/*.cmake and kernel/CMakeLists.txt do not need to change. 
+
+    This file only contains the generic engine. Each space wraps it with its
+    own thin file that calls janus_registry_init(<NAME>) and defines
+    conveniently-named functions — see kernel/cmake/Registry.cmake and
+    tools/cmake/Registry.cmake for the two existing wrappers, which are
+    identical in shape and are the template for a future user/cmake/Registry.cmake.
 ]]
 
 include_guard(GLOBAL)
@@ -210,46 +215,3 @@ function(janus_registry_write_diagram)
     file(WRITE "${ARG_OUTPUT_FILE}" "${_content}")
     message(STATUS "Generated dependency graph in: ${ARG_OUTPUT_FILE}")
 endfunction()
-
-# ===========================================================================
-# Kernel registry — backward-compatible wrappers
-# ===========================================================================
-
-janus_registry_init(KERNEL)
-
-# Register an entry in the kernel registry.
-function(janus_register NAME TYPE DEPENDENCIES)
-    janus_registry_register(KERNEL "${NAME}" "${TYPE}" ${DEPENDENCIES})
-endfunction()
-
-# Validate kernel subsystem isolation.
-function(janus_validate_registry)
-    janus_registry_validate(
-        REGISTRY     KERNEL
-        SUBSYS_TYPES SUBSYS
-        CORE_TYPES   CORE
-    )
-endfunction()
-
-# Generate the kernel dependency diagram.
-function(janus_write_mermaid_diagram OUTPUT_FILE)
-    janus_registry_write_diagram(
-        REGISTRY     KERNEL
-        OUTPUT_FILE  "${OUTPUT_FILE}"
-        NOTE         "> *Generated for \`${JANUS_TARGET_ARCH}\` — run \`cmake --preset <${JANUS_TARGET_ARCH}-preset>\` to regenerate.*"
-        DASHED_TYPES CONTRACT
-        LABEL_PREFIX JANUS_CONTRACT_LABEL
-        LAYERS
-            "Library Layer|ROUNDED_RECT|LIB"
-            "Core Layer|STADIUM|CORE"
-            "Subsystem Layer|RECT|SUBSYS"
-            "Protocol Libraries|SUBROUTINE|PROTOCOL_LIB"
-            "Executables|HEX|EXEC"
-            "ASM Layer|CYLINDER|ASM"
-            "Contracts|CIRCLE|CONTRACT"
-    )
-endfunction()
-
-# Guard variable checked by cmake/kernel/Library.cmake, Core.cmake, Subsystem.cmake.
-set(JANUS_REGISTRY_LOADED TRUE CACHE INTERNAL "Janus registry loaded")
-    message(STATUS "Validating dependency isolation...")

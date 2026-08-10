@@ -1,15 +1,14 @@
 #[[ 
     Contract.cmake - JANUS Contract Layer
    
-    A "contract" is a type definition that must be shared across subsystem
-    boundaries. Unlike the global kernel/include layer (universally-needed
-    primitives only) or subsystem headers (private to one subsystem), a
-    contract has exactly N named consumers.
+    A "contract" is a type definition that must be shared across subsystem boundaries. 
+    Unlike the global kernel/include layer (universally-needed primitives only) or subsystem 
+    headers (private to one subsystem), a contract has exactly N named consumers.
    
-    Headers live in  kernel/subsys/contracts/<name>/include/contracts/<name>.h
-    and are NOT in any default include search path.  Only listed consumers
-    receive the include directory; any other target that tries to link the
-    generated INTERFACE target is rejected at configure time by
+    Headers live in  kernel/subsys/contracts/<name>/include/contracts/<name>.h and are NOT in 
+    any default include search path.  
+    Only listed consumers receive the include directory. 
+    Any other target that tries to link the generated INTERFACE target is rejected at configure time by 
     janus_validate_contracts().
    
     Usage (in kernel/subsys/contracts/CMakeLists.txt):
@@ -20,8 +19,7 @@
    
       target_link_libraries(<target> PUBLIC janus_contract_<name>)
    
-    in its own CMakeLists.txt.  This is what janus_validate_contracts()
-    verifies.
+    in its own CMakeLists.txt. This is what janus_validate_contracts() verifies.
 ]]
 
 include_guard(GLOBAL)

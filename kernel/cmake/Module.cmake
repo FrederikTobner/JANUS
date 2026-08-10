@@ -10,11 +10,11 @@
 include_guard(GLOBAL)
 
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/Module.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before Module.cmake")
 endif()
 
 if(NOT JANUS_REGISTRY_LOADED)
-    message(FATAL_ERROR "Registry.cmake must be included before kernel/Module.cmake")
+    message(FATAL_ERROR "Registry.cmake must be included before Module.cmake")
 endif()
 
 # ---------------------------------------------------------------------------

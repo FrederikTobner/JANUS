@@ -42,7 +42,7 @@ To add a new protocol:
 * create a folder called `protocol/<name>/`, with a CMakeLists.txt that builds a static library linking `PUBLIC boot`
 * implement `boot_init()` such that it sets every field unconditionally
 * add the architecture-specific assembly entry points under `_start/<arch>/<name>/`
-* register the protocol in `cmake/boot/`.
+* register the protocol in `cmake/image/boot/`.
 
 More information about the submodule can be found in its [Readme](boot/README.md)
 

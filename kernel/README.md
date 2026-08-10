@@ -5,6 +5,10 @@ The kernel is built as a freestanding executable (`kernel.elf`) that can be boot
 
 ## Sub Folders
 
+### cmake/
+
+Kernel-only CMake helper functions (`janus_add_library`, `janus_add_core`, `janus_add_subsys`, ...) and kernel ABI compiler flags. Only ever included from `kernel/CMakeLists.txt`. See [cmake/README.md](cmake/README.md) for more details.
+
 ### asm
 
 Inline assembly layer. The **only** permitted location for `__asm__ volatile` in kernel C code.

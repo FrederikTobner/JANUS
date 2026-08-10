@@ -1,12 +1,15 @@
 #[[ 
-    CompilerFlags.cmake - JANUS Compiler Flags
+    CompilerFlags.cmake - JANUS Kernel ABI Flags (aarch64)
 
-    aarch64 architecture-specific flags and configuration
-    Compiler and linker are set by the toolchain file
+    Kernel-only compiler flags for aarch64: general-registers-only (no
+    NEON/FP registers, since kernel code — especially interrupt/exception
+    handlers — can't safely save/restore them without extra work).
+    Compiler and linker are set by the toolchain file. Boot-protocol support
+    for this arch is a separate, shared fact — see
+    cmake/arch/aarch64/BootProtocols.cmake.
 ]]
 
-# Boot protocols (aarch64 is UEFI-only, no Multiboot2)
-set(JANUS_BOOT_PROTOCOLS "limine" CACHE STRING "Boot protocols (aarch64: limine only)" FORCE)
+include_guard(GLOBAL)
 
 # Architecture-specific compiler flags
 if(JANUS_COMPILER_CLANG)

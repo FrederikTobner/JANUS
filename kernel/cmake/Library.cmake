@@ -6,14 +6,14 @@
 include_guard(GLOBAL)
 
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/Library.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before Library.cmake")
 endif()
 
 if(NOT JANUS_REGISTRY_LOADED)
-    message(FATAL_ERROR "Registry.cmake must be included before kernel/Library.cmake")
+    message(FATAL_ERROR "Registry.cmake must be included before Library.cmake")
 endif()
 
-include(kernel/Module)
+include(Module)
 
 #
 # Add a kernel library with standard configuration

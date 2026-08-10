@@ -7,7 +7,7 @@ include_guard(GLOBAL)
 
 # Ensure platform is loaded
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/Executable.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before Executable.cmake")
 endif()
 
 #

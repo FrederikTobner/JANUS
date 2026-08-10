@@ -1,4 +1,4 @@
-include(kernel/Subsystem)
+include(Subsystem)
 
 # Cross-subsystem contracts (must come before subsys so INTERFACE targets exist)
 add_subdirectory(contracts)
