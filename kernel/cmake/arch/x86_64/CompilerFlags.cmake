@@ -1,15 +1,15 @@
 #[[ 
-    CompilerFlags.cmake - JANUS Compiler Flags
+    CompilerFlags.cmake - JANUS Kernel ABI Flags (x86_64)
 
-    x86_64 architecture-specific flags and configuration
-    Compiler and linker are set by the toolchain file
+    Kernel-only compiler flags for x86_64: freestanding kernel code model,
+    no red zone, no SSE (interrupt handlers can't safely save/restore XMM
+    state without extra work). Compiler and linker are set by the toolchain
+    file. Boot-protocol support for this arch is a separate, shared fact —
+    see cmake/arch/x86_64/BootProtocols.cmake.
 ]]
 
-# Boot protocols for x86_64 (both Multiboot2 and Limine supported)
-set(JANUS_BOOT_PROTOCOLS "multiboot2;limine" CACHE STRING
-    "Boot protocols to support (semicolon-separated)")
+include_guard(GLOBAL)
 
-# Architecture-specific compiler flags
 if(JANUS_COMPILER_CLANG)
     set(JANUS_ARCH_FLAGS
         -target x86_64-elf
@@ -20,7 +20,6 @@ if(JANUS_COMPILER_CLANG)
         -mno-mmx
     )
 elseif(JANUS_COMPILER_GCC)
-    # GCC x86_64
     # -fno-pic/-fno-pie: Arch Linux's system GCC is configured with --enable-default-pie,
     # but -mcmodel=kernel requires non-PIC code.
     set(JANUS_ARCH_FLAGS

@@ -1,6 +1,6 @@
 #[[ 
-    CompilerFlags.cmake - JANUS Compiler Flags
-    Architecture-specific flags (from arch layer) + common kernel compiler flags
+    CompilerFlags.cmake - JANUS Kernel Compiler Flags
+    Kernel ABI flags (from kernel/cmake/arch/<arch>/) and common freestanding kernel compiler flags.
 
     Expects: JANUS_COMPILER_CLANG or JANUS_COMPILER_GCC set (by platform/Detection.cmake)
     Expects: JANUS_TARGET_ARCH set (by toolchain file)
@@ -8,10 +8,9 @@
 
 include_guard(GLOBAL)
 
-# Include architecture-specific flags (sets JANUS_ARCH_FLAGS, JANUS_BOOT_PROTOCOLS)
-include(${CMAKE_SOURCE_DIR}/cmake/arch/${JANUS_TARGET_ARCH}/platform/CompilerFlags.cmake)
+# Include kernel ABI flags for this architecture (sets JANUS_ARCH_FLAGS)
+include(${CMAKE_CURRENT_LIST_DIR}/arch/${JANUS_TARGET_ARCH}/CompilerFlags.cmake)
 
-# Common compiler flags for all kernel code
 set(JANUS_COMPILE_OPTIONS_COMMON
     ${JANUS_ARCH_FLAGS}
     -nostdlib
@@ -28,7 +27,6 @@ set(JANUS_COMPILE_OPTIONS_COMMON
     -Wpointer-arith
 )
 
-# Debug-specific flags
 set(JANUS_COMPILE_OPTIONS_DEBUG
     -g3
     -gdwarf-4
@@ -36,19 +34,16 @@ set(JANUS_COMPILE_OPTIONS_DEBUG
     -DDEBUG
 )
 
-# Release-specific flags
 set(JANUS_COMPILE_OPTIONS_RELEASE
     -O2
     -DNDEBUG
 )
 
-# MinSizeRel flags (optimize for size)
 set(JANUS_COMPILE_OPTIONS_MINSIZEREL
     -Os
     -DNDEBUG
 )
 
-# Apply all compile flags (common + build-type) to a target.
 function(janus_apply_compile_flags TARGET)
     target_compile_options(${TARGET} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")

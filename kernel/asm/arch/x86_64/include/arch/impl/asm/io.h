@@ -19,7 +19,6 @@
 ///
 /// Raw inline-assembly wrappers for IN/OUT port instructions.
 /// This is the only permitted site for __asm__ volatile on x86_64 for port I/O.
-/// Consumed by subsystem Tier 3 headers and kernel libraries.
 
 #ifndef X86_64_IMPL_ASM_IO_H
 #define X86_64_IMPL_ASM_IO_H

@@ -1,16 +1,12 @@
 #[[ 
     Contract.cmake - JANUS Contract Layer
    
-    A "contract" is a type definition that must be shared across subsystem
-    boundaries. Unlike the global kernel/include layer (universally-needed
-    primitives only) or subsystem headers (private to one subsystem), a
-    contract has exactly N named consumers.
+    A "contract" is a type definition that can be shared across subsystem boundaries. 
+    Unlike the global kernel/include layer or subsystem headers a contract has exactly N named consumers.
    
-    Headers live in  kernel/subsys/contracts/<name>/include/contracts/<name>.h
-    and are NOT in any default include search path.  Only listed consumers
-    receive the include directory; any other target that tries to link the
-    generated INTERFACE target is rejected at configure time by
-    janus_validate_contracts().
+    Headers live in  kernel/subsys/contracts/<name>/include/contracts/<name>.h and are NOT in any default include search path.  
+    Only listed consumers receive the include directory. 
+    Any other target that tries to link the generated INTERFACE target is rejected at configure time by janus_validate_contracts().
    
     Usage (in kernel/subsys/contracts/CMakeLists.txt):
    
@@ -20,8 +16,7 @@
    
       target_link_libraries(<target> PUBLIC janus_contract_<name>)
    
-    in its own CMakeLists.txt.  This is what janus_validate_contracts()
-    verifies.
+    in its own CMakeLists.txt. This is what janus_validate_contracts() verifies.
 ]]
 
 include_guard(GLOBAL)
@@ -35,8 +30,8 @@ set(JANUS_CONTRACT_NAMES "" CACHE INTERNAL "All registered contract names" FORCE
 #   kernel/contracts/<NAME>/include
 # as its sole include root.
 #
-# CONSUMERS is the exhaustive allowlist of CMake targets that may directly
-# link this contract target.  janus_validate_contracts() enforces the list.
+# CONSUMERS is the exhaustive allowlist of CMake targets that may directly link this contract target.  
+# janus_validate_contracts() enforces the list.
 # ---------------------------------------------------------------------------
 function(janus_add_contract NAME)
     cmake_parse_arguments(ARG "" "" "CONSUMERS" ${ARGN})
@@ -64,8 +59,7 @@ function(janus_add_contract NAME)
         "${ARG_CONSUMERS}"
         CACHE INTERNAL "Allowed direct consumers of contract ${NAME}" FORCE)
 
-    # Register in the global registry so janus_write_mermaid_diagram picks it up.
-    # DEPENDENCIES is empty — edges go FROM consumers TO this node, not the reverse.
+    # Registers the contract in the global registry so janus_write_mermaid_diagram picks it up.
     janus_register("${CONTRACT_TARGET}" CONTRACT "")
     # Store the short name (e.g. "memmap") as the diagram label.
     set("JANUS_CONTRACT_LABEL_${CONTRACT_TARGET}" "${NAME}"
@@ -80,14 +74,12 @@ endfunction()
 # Call after all CMake targets are defined (i.e. after all add_subdirectory
 # calls in kernel/CMakeLists.txt).
 #
-# For each registered contract, inspects the LINK_LIBRARIES property of
-# every target in the JANUS registry.  A target that directly links
-# janus_contract_<N> but is not in the CONSUMERS list for contract <N>
+# For each registered contract, inspects the LINK_LIBRARIES property of every target in the JANUS registry.  
+# A target that directly links janus_contract_<N> but is not in the CONSUMERS list for contract <N> 
 # triggers a fatal configure-time error.
 #
-# Note: targets that only receive the contract headers *transitively*
-# (because a listed consumer links with PUBLIC visibility) are not
-# flagged — only direct linkage is validated.
+# Note: targets that only receive the contract headers *transitively* are not flagged. 
+# Only direct linkage is validated.
 # ---------------------------------------------------------------------------
 function(janus_validate_contracts)
     if(NOT JANUS_CONTRACT_NAMES)

@@ -1,7 +1,6 @@
 # subsys
 
-Kernel subsystems own hardware state and expose public C APIs.
-Each subsystem is isolated, meaning subsystems are not allowed to depend on each other.
+A subsystem is an isolated, top level component in the janus architecture, meaning subsystems are not allowed to depend on each other.
 Only `kmain` is permitted to depend on other subsystems.
 
 Architecture-specific code lives inside the owning subsystem under `arch/`, following the three-tier include hierarchy (Tier 1 public → Tier 2 contract → Tier 3 implementation).
@@ -42,9 +41,37 @@ To add a new protocol:
 * create a folder called `protocol/<name>/`, with a CMakeLists.txt that builds a static library linking `PUBLIC boot`
 * implement `boot_init()` such that it sets every field unconditionally
 * add the architecture-specific assembly entry points under `_start/<arch>/<name>/`
-* register the protocol in `cmake/boot/`.
+* register the protocol in `cmake/image/boot/`.
 
 More information about the submodule can be found in its [Readme](boot/README.md)
+
+### drivers
+
+The drivers subsystem provides narrow, hardware-facing C APIs for devices that the kernel needs during early initialisation.
+Each driver exposes its public interface through `include/drivers/` and hides all hardware register access behind the three-tier include hierarchy, so the generic driver code is fully portable and the architecture-specific code is contained in a single, auditable location.
+
+| Driver  | Description                                                    |
+|---------|----------------------------------------------------------------|
+| Serial  | Character-level UART output — COM1 on x86_64, PL011 on aarch64 |
+| Console | Text terminal rendering over VGA text mode or a framebuffer    |
+
+The console generic layer owns cursor tracking, line wrapping, scrolling, and colour state.
+Architecture-specific rendering is delegated via `console_ops_t` (a vtable filled by `arch_console_probe`), which is resolved at init time to the platform's backend.
+
+To add a new driver, provide the public header in `include/drivers/`, add architecture-specific implementations under `arch/<arch>/`, and add any platform-agnostic source in `src/`.
+
+More information about the submodule can be found in its [readme](drivers/README.md)
+
+### interrupts
+
+The interrupts subsystem is responsible for CPU exception handling, so that hardware faults become readable kernel panics over `kio` instead of silent triple-faults and machine resets.
+Its single entry point, `interrupts_init`, must be called once after console initialisation and before any subsystem that can fault (e.g. the physical memory manager).
+
+The public surface is intentionally architecture-agnostic: no x86_64 concept (IDT, CR2, gate type) appears above the arch contract boundary.
+
+Currently interrupts are not implemented for aarch64.
+
+More information about the subsystem can be found in its [README](interrupts/README.md)
 
 ### mm
 
@@ -67,30 +94,4 @@ Virtual memory management and higher-level allocators are planned as future laye
 
 More information about the submodule can be found in its [Readme](mm/README.md)
 
-## drivers
 
-The drivers subsystem provides narrow, hardware-facing C APIs for devices that the kernel needs during early initialisation.
-Each driver exposes its public interface through `include/drivers/` and hides all hardware register access behind the three-tier include hierarchy, so the generic driver code is fully portable and the architecture-specific code is contained in a single, auditable location.
-
-| Driver  | Description                                                    |
-|---------|----------------------------------------------------------------|
-| Serial  | Character-level UART output — COM1 on x86_64, PL011 on aarch64 |
-| Console | Text terminal rendering over VGA text mode or a framebuffer    |
-
-The console generic layer owns cursor tracking, line wrapping, scrolling, and colour state.
-Architecture-specific rendering is delegated via `console_ops_t` (a vtable filled by `arch_console_probe`), which is resolved at init time to the platform's backend.
-
-To add a new driver, provide the public header in `include/drivers/`, add architecture-specific implementations under `arch/<arch>/`, and add any platform-agnostic source in `src/`.
-
-More information about the submodule can be found in its [readme](drivers/README.md)
-
-## interrupts
-
-The interrupts subsystem installs CPU exception handling so that hardware faults become readable kernel panics over `kio` instead of silent triple-faults and machine resets.
-Its single entry point, `interrupts_init`, must be called once after console initialisation and before any subsystem that can fault (e.g. the physical memory manager).
-
-The public surface is intentionally architecture-agnostic: no x86_64 concept (IDT, CR2, gate type) appears above the arch contract boundary.
-
-Currently interrupts are not implemented for aarch64.
-
-More information about the subsystem can be found in its [README](interrupts/README.md)

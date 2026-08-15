@@ -1,14 +1,14 @@
 #[[
-    Targets.cmake — Root orchestrator
+    Targets.cmake — Image-assembly orchestrator
 
     Three-layer target system mirroring the kernel source structure:
-      cmake/Targets.cmake                      ← this file: orchestration + shared helpers
-      cmake/arch/<arch>/Targets.cmake          ← QEMU config + special targets (run-elf, etc.)
-      cmake/boot/<proto>/Targets.cmake         ← iso/run/debug per boot protocol
+      cmake/image/Targets.cmake                ← this file: orchestration + shared helpers
+      cmake/image/arch/<arch>/Targets.cmake    ← QEMU config + special targets (run-elf, etc.)
+      cmake/image/boot/<proto>/Targets.cmake   ← iso/run/debug per boot protocol
 
     Protocols are discovered by convention: a protocol exists if and only if
-    cmake/boot/<proto>/Targets.cmake is present. JANUS_BOOT_PROTOCOLS
-    (set per-arch in cmake/arch/<arch>/platform/CompilerFlags.cmake) selects which
+    cmake/image/boot/<proto>/Targets.cmake is present. JANUS_BOOT_PROTOCOLS
+    (set per-arch in cmake/arch/<arch>/BootProtocols.cmake) selects which
     protocols to enable. Validation ensures consistency.
 
     Limine is fetched automatically via FetchContent.
@@ -23,9 +23,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(limine)
 
-# Discover all known protocols from cmake/boot/*/Targets.cmake
+# Discover all known protocols from cmake/image/boot/*/Targets.cmake
 file(GLOB _proto_modules
-     "${CMAKE_SOURCE_DIR}/cmake/boot/*/Targets.cmake")
+     "${CMAKE_SOURCE_DIR}/cmake/image/boot/*/Targets.cmake")
 
 set(JANUS_ALL_PROTOCOLS "")
 foreach(_mod IN LISTS _proto_modules)
@@ -39,7 +39,7 @@ foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
     if(NOT _proto IN_LIST JANUS_ALL_PROTOCOLS)
         message(FATAL_ERROR
             "Protocol '${_proto}' listed in JANUS_BOOT_PROTOCOLS but "
-            "cmake/boot/${_proto}/Targets.cmake does not exist.")
+            "cmake/image/boot/${_proto}/Targets.cmake does not exist.")
     endif()
 endforeach()
 
@@ -162,14 +162,14 @@ function(janus_add_targets)
     # Configure boot protocol templates
     if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
         configure_file(
-            ${CMAKE_SOURCE_DIR}/cmake/boot/limine/limine.conf.in
+            ${CMAKE_SOURCE_DIR}/cmake/image/boot/limine/limine.conf.in
             ${CMAKE_BINARY_DIR}/limine.conf
             @ONLY
         )
     endif()
     if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
         configure_file(
-            ${CMAKE_SOURCE_DIR}/cmake/boot/multiboot2/grub.cfg.in
+            ${CMAKE_SOURCE_DIR}/cmake/image/boot/multiboot2/grub.cfg.in
             ${CMAKE_BINARY_DIR}/grub.cfg
             @ONLY
         )
@@ -177,7 +177,7 @@ function(janus_add_targets)
 
     # Include and call per-protocol modules for enabled protocols
     foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
-        include("${CMAKE_SOURCE_DIR}/cmake/boot/${_proto}/Targets.cmake")
+        include("${CMAKE_SOURCE_DIR}/cmake/image/boot/${_proto}/Targets.cmake")
         cmake_language(CALL janus_iso_${_proto})
         cmake_language(CALL janus_run_${_proto})
         cmake_language(CALL janus_debug_${_proto})
@@ -213,7 +213,7 @@ endfunction()
 
 function(janus_setup_targets)
     # 1. Include arch layer — sets QEMU variables
-    include("${CMAKE_SOURCE_DIR}/cmake/arch/${JANUS_TARGET_ARCH}/Targets.cmake")
+    include("${CMAKE_SOURCE_DIR}/cmake/image/arch/${JANUS_TARGET_ARCH}/Targets.cmake")
     cmake_language(CALL janus_configure_qemu_${JANUS_TARGET_ARCH})
 
     # 2. Check external tools (uses QEMU_BINARY from arch layer)

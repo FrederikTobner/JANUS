@@ -16,10 +16,13 @@
 -- @copyright Copyright (C) 2026 Frederik Tobner 
 -- @license   GNU Affero General Public License v3.0 or later
 
+--- Return codes for the test runner, following CTest's SKIP_RETURN_CODE convention.
 local RC_PASS, RC_FAIL, RC_SKIP, RC_USAGE = 0, 1, 77, 2
 
--- Resolve profiles.lua relative to this script, so `require` works regardless of
--- the caller's working directory (CMake also sets LUA_PATH, this is a fallback).
+--- Resolve profiles.lua relative to this script, so `require` works regardless of
+--- the caller's working directory (CMake also sets LUA_PATH, this is a fallback).
+---
+--- @returns string path to the directory containing this script
 local function script_dir()
     local src = arg and arg[0] or ""
     return src:match("^(.*)[/\\][^/\\]*$") or "."
@@ -28,11 +31,18 @@ package.path = script_dir() .. "/?.lua;" .. package.path
 
 
 --- Single-quote a string for safe use as one POSIX shell word.
-local function shq(s)
-    return "'" .. tostring(s):gsub("'", "'\\''") .. "'"
+---
+--- @param str string to Single-quote
+--- @returns string safely quoted for shell
+local function shq(str)
+    return "'" .. tostring(str):gsub("'", "'\\''") .. "'"
 end
 
 --- Normalise os.execute's return across Lua 5.1 (number) and 5.2+ (boolean).
+---
+--- @param a boolean or number from os.execute
+--- @param _ ignored second return value from os.execute
+--- @param code integer exit code from os.execute
 local function ok_exit(a, _, code)
     if type(a) == "boolean" then
         return a
@@ -41,11 +51,17 @@ local function ok_exit(a, _, code)
 end
 
 --- Is `cmd` runnable (a bare name on PATH or an executable path)?
+---
+--- @param cmd string command name or path
+--- @returns boolean true if the command exists and is executable
 local function command_exists(cmd)
     return ok_exit(os.execute("command -v " .. shq(cmd) .. " >/dev/null 2>&1"))
 end
 
 --- Does a readable file exist at `path`?
+---
+--- @param path string path to check
+--- @returns boolean true if the file exists and is readable
 local function file_exists(path)
     if not path or #path == 0 then
         return false
@@ -59,6 +75,8 @@ local function file_exists(path)
 end
 
 --- Best-effort kill of the QEMU process named in `pidfile`, then remove it.
+---
+--- @param pidfile string path to a QEMU -pidfile
 local function kill_pidfile(pidfile)
     local f = io.open(pidfile, "r")
     if not f then
@@ -72,7 +90,9 @@ local function kill_pidfile(pidfile)
     os.remove(pidfile)
 end
 
-
+--- Print usage message and exit with RC_USAGE.
+---
+--- @param msg optional string to prefix the usage message with
 local function usage(msg)
     if msg then
         io.stderr:write("run_smoke.lua: ", msg, "\n")
@@ -85,6 +105,10 @@ local function usage(msg)
     os.exit(RC_USAGE)
 end
 
+--- Parse command-line arguments into a table, with defaults and validation.
+--- 
+--- @param argv array of strings, typically `arg` from the script's main chunk
+--- @returns table with keys: qemu, iso, profile, machine, bios, timeout, memory, log
 local function parse_args(argv)
     local a = { machine = "", timeout = "30", memory = "256M" }
     local i = 1
@@ -129,6 +153,9 @@ local function parse_args(argv)
 end
 
 --- Assemble the timeout(1)-wrapped QEMU command line (stderr merged for popen).
+---
+--- @param a table of parsed arguments
+--- @param pidfile string path to a temporary file for QEMU to write its PID
 local function build_command(a, pidfile)
     local parts = {
         "timeout", "-k", "5", tostring(a.timeout),
@@ -151,6 +178,10 @@ local function build_command(a, pidfile)
     return table.concat(parts, " ") .. " 2>&1"
 end
 
+--- Return a comma-separated string of the labels of required markers that were not seen.
+---
+--- @param required array of matcher tables (from profiles.lua)
+--- @param seen array of booleans, indexed by the same order as `required`
 local function missing_labels(required, seen)
     local out = {}
     for i, r in ipairs(required) do
@@ -161,6 +192,9 @@ local function missing_labels(required, seen)
     return table.concat(out, ", ")
 end
 
+--- Dump the captured serial output to stderr, bracketed by markers.
+---
+--- @param captured array of strings, each a line of serial output
 local function dump(captured)
     io.stderr:write("--- captured serial output ---\n")
     for _, line in ipairs(captured) do
@@ -169,6 +203,10 @@ local function dump(captured)
     io.stderr:write("--- end serial output ---\n")
 end
 
+--- Main test runner: launch QEMU, read serial output, and assert against the profile.
+---
+--- @param a table of parsed arguments
+--- @returns rc integer exit code, msg string, captured array of serial lines
 local function run(a)
     -- Skip (rather than fail) when the environment cannot run the test at all.
     if not command_exists(a.qemu) then
@@ -242,6 +280,7 @@ local function run(a)
     return RC_FAIL, "FAIL: deadline/exit with missing markers: " .. missing_labels(profile.required, seen), captured
 end
 
+-- Main entry point: parse args, run the test, report results, and exit with the right code.
 local a = parse_args(arg)
 local rc, msg, captured = run(a)
 if msg then

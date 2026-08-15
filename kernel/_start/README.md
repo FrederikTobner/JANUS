@@ -2,7 +2,7 @@
 
 This module produces the final `kernel-<protocol>.elf` by linking all kernel subsystems and libraries.
 It defines the assembly entry point and linker script for each architecture and boot protocol.
-At the end of the assembly entry point, after the stack has been setup and the CPU has been transfered to the proper mode of execution, we call the entry point of "our C world", the function `kernel_main()`.
+At the end of the assembly entry point, after the stack has been setup and the CPU has been transfered to the proper mode of execution, we call the entry point of "our C world", the function `kernel_main()`, inside the `kmain` subsystem.
 
 ## Supported architectures
 

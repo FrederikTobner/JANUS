@@ -1,3 +1,3 @@
-include(kernel/Core)
+include(Core)
 
 add_subdirectory(kio)

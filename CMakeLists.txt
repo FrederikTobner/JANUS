@@ -29,18 +29,11 @@ elseif(JANUS_TARGET_ARCH STREQUAL "aarch64")
 endif()
 
 include(platform/Detection)
-include(platform/CompilerFlags)
 
-add_custom_target(
-    copy_compile_commands ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_BINARY_DIR}/compile_commands.json
-        ${CMAKE_SOURCE_DIR}/compile_commands.json
-    BYPRODUCTS ${CMAKE_SOURCE_DIR}/compile_commands.json
-    COMMENT "Copying compile_commands.json to project root"
-)
-
-
+# Shared, arch-dependent fact needed both by kernel/_start (which
+# kernel-<protocol>.elf variants to build) and by cmake/image/ (which ISO
+# targets to create) — see cmake/arch/<arch>/BootProtocols.cmake.
+include(arch/${JANUS_TARGET_ARCH}/BootProtocols)
 
 add_subdirectory(kernel)
 
@@ -59,6 +52,6 @@ endif()
 message(STATUS "Boot Protocols:  ${JANUS_BOOT_PROTOCOLS}")
 message(STATUS "================================================================================")
 
-include(Targets)
+include(image/Targets)
 janus_setup_targets()
 janus_print_targets()

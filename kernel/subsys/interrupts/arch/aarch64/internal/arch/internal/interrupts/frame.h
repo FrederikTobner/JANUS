@@ -23,11 +23,11 @@
 /*
  * Byte offsets and reserved size of the captured frame.
  *
- * These live outside the __ASSEMBLER__ guard so vector_table.S (which is run
- * through the C preprocessor) is the single source of truth together with the
- * struct below. The STATIC_ASSERTs in the C section prove the struct matches
- * these offsets, so a mismatch between the store order in vector_table.S and
- * interrupt_frame_t fails the build rather than corrupting the report.
+ * These live outside the __ASSEMBLER__ guard so vector_table.S (which is run through the C preprocessor)
+ * is the single source of truth together with the struct below.
+ * The STATIC_ASSERTs in the C section prove the struct matches these offsets,
+ * so a mismatch between the store order in vector_table.S and interrupt_frame_t fails the build rather than corrupting
+ * the report.
  */
 #define FRAME_OFF_X0       0   ///< x[0] (x0..x30 occupy 0..240, 31 * 8 bytes)
 #define FRAME_OFF_SP       248 ///< interrupted stack pointer
@@ -49,12 +49,11 @@
 
 /// @brief Full CPU state captured on AArch64 exception entry.
 ///
-/// The field order MUST mirror the store order in vector_table.S (lowest
-/// address first): the entry path reserves AARCH64_FRAME_SIZE bytes, saves
-/// x0..x30, then the interrupted sp and the syndrome system registers, and
-/// finally the synthesised source index. The dispatcher treats the saved
-/// stack region as this struct. Do not reorder without updating vector_table.S
-/// in lockstep — the STATIC_ASSERTs below guard the offsets.
+/// The field order MUST mirror the store order in vector_table.S (lowest address first).
+/// The entry path reserves AARCH64_FRAME_SIZE bytes, saves x0..x30, then the interrupted sp and the syndrome system
+/// registers, and finally the synthesised source index.
+/// The dispatcher treats the saved stack region as this struct.
+/// Do not reorder without updating vector_table.S in lockstep — the STATIC_ASSERTs below guard the offsets.
 typedef struct {
     u64 x[31];  ///< General-purpose registers x0..x30 (x30 = LR)
     u64 sp;     ///< Interrupted stack pointer (SP_EL1 at fault time)

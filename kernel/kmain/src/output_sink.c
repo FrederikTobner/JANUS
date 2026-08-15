@@ -33,24 +33,6 @@ static __cold bool init_serial(boot_context_t const * boot_context);
 static __cold bool init_console(boot_context_t const * boot_context, bool serial_available);
 static void output_sink_putc(char c);
 
-__cold void output_sink_init_early(void)
-{
-    if (g_serial_active) {
-        return; // Already initialized
-    }
-    // Read address-translation parameters directly from boot-protocol data
-    // structures.  On Limine these are populated before kernel_main is entered.
-    // On Multiboot2 all three are 0 (x86_64 serial uses port I/O; zeros are valid).
-    u64 hhdm_offset;
-    phys_addr_t kernel_phys_base;
-    virt_addr_t kernel_virt_base;
-    boot_early_params(&hhdm_offset, &kernel_phys_base, &kernel_virt_base);
-    if (drivers_serial_init(hhdm_offset, kernel_phys_base, kernel_virt_base) == JANUS_OK) {
-        g_serial_active = true;
-        kio_register_putc(output_sink_putc);
-    }
-}
-
 __cold void output_sink_init(boot_context_t const * boot_context)
 {
     bool serial_available = init_serial(boot_context);

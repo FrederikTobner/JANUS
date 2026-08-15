@@ -3,18 +3,14 @@
 
     Provides janus_register_smoke_tests(), which registers CTest smoke tests that
     boot the built ISO in QEMU headless and assert on serial output.
-    These are HOST-SIDE tests: a Lua runner (kernel/tests/smoke/run_smoke.lua) plus
-    CTest glue. Nothing here is compiled into a kernel artifact, so the tests never
-    enter the kernel's layered dependency graph even though they live under kernel/.
-    Must be called from a scope where the arch QEMU variables and the iso-* targets
-    already exist (i.e. from within the Targets orchestration, after the arch layer
-    and protocol modules have run): QEMU_BINARY, QEMU_MACHINE_FLAGS, JANUS_QEMU_FOUND,
-    AARCH64_UEFI_FIRMWARE, JANUS_ISO_NAME, JANUS_BOOT_PROTOCOLS.
+    These are HOST-SIDE tests: a Lua runner (kernel/tests/smoke/run_smoke.lua) plus CTest glue. 
+    Nothing here is compiled into a kernel artifact, so the tests never enter the kernel's 
+    layered dependency graph even though they live under kernel/.
 ]]
 
 include_guard(GLOBAL)
 
-# Off by default so a plain `ninja` build is unaffected; opt in for test runs/CI.
+# Off by default since only developers will want to run these tests 
 option(JANUS_ENABLE_SMOKE_TESTS "Register QEMU serial smoke tests with CTest" OFF)
 
 function(janus_register_smoke_tests)
@@ -39,9 +35,6 @@ function(janus_register_smoke_tests)
     # the runner can splice it into the QEMU command line verbatim.
     string(REPLACE ";" " " _machine "${QEMU_MACHINE_FLAGS}")
 
-    # The two profiles come from two configurations, not one: JANUS_TEST_FAULTS is
-    # a configure-time switch, so a fault-configured build registers the fault
-    # profile and a normal build registers the nominal profile.
     if(JANUS_TEST_FAULTS)
         set(_profile "fault")
     else()
@@ -49,8 +42,6 @@ function(janus_register_smoke_tests)
     endif()
 
     foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
-        # Skip protocols whose ISO cannot be built in this environment, so a
-        # missing host tool surfaces as "no test" rather than a spurious failure.
         if(NOT JANUS_XORRISO_FOUND)
             message(STATUS "Smoke: xorriso missing; skipping '${_proto}' smoke test.")
             continue()
@@ -63,12 +54,10 @@ function(janus_register_smoke_tests)
         set(_iso_target "iso-${_proto}")
         set(_fixture "smoke_iso_${_proto}")
 
-        # Setup fixture: build the ISO through the normal target before QEMU runs.
         add_test(NAME build_${_iso_target}
             COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${_iso_target})
         set_tests_properties(build_${_iso_target} PROPERTIES FIXTURES_SETUP ${_fixture})
 
-        # ISO path: Limine and GRUB targets emit different names (mirror Targets.cmake).
         if(_proto STREQUAL "multiboot2")
             set(_iso "${CMAKE_BINARY_DIR}/janus_${JANUS_TARGET_ARCH}_grub.iso")
         else()

@@ -1,7 +1,7 @@
 # lib — Kernel Libraries
 
-Freestanding utility libraries shared across subsystems. Libraries may depend
-on `janus_asm`, but never on other libraries, any core services or any subsystems.
+Freestanding utility libraries shared across subsystems. 
+Libraries may depend on `janus_asm`, but never on other libraries, any core services or any subsystems.
 
 ## Libraries
 
@@ -11,13 +11,19 @@ Stateless pixel primitives operating on a `gfx_surface_t` (plain public struct, 
 Provides pixel write, filled-rectangle fill, mono-bitmap blit, and scanline-copy scroll.
 Fonts, text layout, and console semantics are out of scope.
 
+More information about the subsystem can be found in its [README](gfx/README.md)
+
 ### fmt
 
 Formatted output to an arbitrary sink.
 Provides `printf`-style formatting without depending on `libc`.
 Consumers first supply a `fmt_putc_fn` callback, which is called for each character of the formatted output.
 
+More information about the subsystem can be found in its [README](fmt/README.md)
+
 ### page\_tables *(aarch64 only)*
 
 MMU library for creating and managing 4-level page tables on AArch64.
 Maps physical addresses into the kernel virtual address space.
+
+More information about the subsystem can be found in its [README](page_tables/README.md)

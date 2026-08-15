@@ -17,7 +17,7 @@ lldb ./build-x86_64-gcc/kernel-limine.elf
 (lldb) c
 ```
 
-The `.lldbinit` at the project root configures the remote protocol and source path mapping automatically when LLDB is launched from the project directory.
+The `.lldbinit` file at the project root configures the remote protocol and source path mapping automatically when LLDB is launched from the project directory.
 
 ## Execution Control
 

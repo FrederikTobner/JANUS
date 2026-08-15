@@ -7,14 +7,14 @@ include_guard(GLOBAL)
 
 # Ensure platform is loaded
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/Executable.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before Executable.cmake")
 endif()
 
 #
-# Link a kernel executable
+# Links a kernel executable using the provided linker script, dependencies and object files.
 # 
 # Called from _start/${ARCH}/ to create kernel executables.
-# Supports building multiple kernel binaries for different boot protocols.
+# Used for building multiple kernel binaries for different boot protocols.
 #
 # Usage:
 #   janus_add_kernel(
@@ -66,18 +66,18 @@ function(janus_add_kernel)
             ${CMAKE_BINARY_DIR}/include
     )
 
-    # Linker flags — use target_link_options to APPEND to (not replace) global flags
+    # Linker flags 
+    # Use target_link_options to APPEND to (not replace) global flags
     # This preserves CMAKE_EXE_LINKER_FLAGS set by toolchain files (e.g. --target, -fuse-ld)
     target_link_options(${ARG_TARGET} PRIVATE
         -T ${ARG_LINKER_SCRIPT}
         -nostdlib
         -static
         -Wl,--build-id=none   # Prevent .note.gnu.build-id from being emitted.
-                              # Without this, ld places the note at vaddr=paddr=KERNEL_VMA+LMA
-                              # (no AT() transform) on the same 4K page as .limine_requests (RW),
-                              # creating two LOAD PHDRs with conflicting permissions on one page.
-                              # Limine enforces that no two PHDRs with different permissions share
-                              # a page and panics. Build IDs are unused in a bare-metal kernel.
+                              # Without this, ld places the note at vaddr=paddr=KERNEL_VMA+LMA (no AT() transform) 
+                              # on the same 4K page as .limine_requests (RW), creating two LOAD PHDRs with conflicting permissions on one page.
+                              # Limine enforces that no two PHDRs with different permissions share a page and panics. 
+                              # Build IDs are unused in a bare-metal kernel.
     )
     set_target_properties(${ARG_TARGET} PROPERTIES
         LINK_DEPENDS "${ARG_LINKER_SCRIPT}"

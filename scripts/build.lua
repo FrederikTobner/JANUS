@@ -10,50 +10,24 @@
 -- @copyright Copyright (C) 2026 Frederik Tobner
 -- @license   GNU Affero General Public License v3.0 or later
 
--- Colours (disabled when stdout is not a tty)
-local _tty_raw    = os.execute("test -t 1") -- luacheck: ignore
--- Normalise across Lua versions: 5.3+ returns true/false; 5.1/5.2 returns 0/non-zero
-local use_colour  = (_tty_raw == true) or (_tty_raw == 0)
+local SCRIPT_DIR = arg[0]:match("^(.*)/[^/]+$") or "."
+package.path = SCRIPT_DIR .. "/lib/?.lua;" .. package.path
 
-local function sgr(code)
-    if use_colour then return string.format("\27[%sm", code) end
-    return ""
-end
+local ansi     = require("ansi")
+local shell    = require("shell")
+local cli      = require("cli")
+local project  = require("project")
+local time     = require("time")
+local progress = require("progress")
 
-local C = {
-    reset  = sgr("0"),
-    bold   = sgr("1"),
-    red    = sgr("31"),
-    green  = sgr("32"),
-    yellow = sgr("33"),
-    cyan   = sgr("36"),
-    dim    = sgr("2"),
-}
-
---- Print an error message and exit.
-local function die(fmt, ...)
-    io.stderr:write(string.format("%serror:%s " .. fmt .. "\n", C.red, C.reset, ...))
-    os.exit(1)
-end
-
---- Execute a shell command, return (ok, exit_code).
-local function exec(cmd)
-    local ok, _, code = os.execute(cmd)
-    if ok == true then return true, 0 end    -- Lua 5.3+: boolean true on success
-    if type(ok) == "number" then             -- Lua 5.1/5.2: numeric 0 on success
-        return ok == 0, ok
-    end
-    return false, code or 1
-end
-
---- Execute a command and capture stdout as a string.
-local function capture(cmd)
-    local f = io.popen(cmd, "r")
-    if not f then return nil end
-    local out = f:read("*a")
-    f:close()
-    return out
-end
+local C           = ansi.C
+local die         = cli.die
+local exec        = shell.exec
+local capture     = shell.capture
+local now         = time.now
+local fmt_elapsed = time.fmt_elapsed
+local status      = progress.status
+local status_done = progress.status_done
 
 --- Split a string on a separator pattern.  Returns a list (table).
 local function split(str, sep)
@@ -73,20 +47,6 @@ local function passes_filter(value, filter)
     return false
 end
 
---- Get a monotonic-ish timestamp in seconds (os.clock = CPU time, but
---- for wall-clock we use os.time which has 1 s resolution — good enough).
-local function now()
-    return os.time()
-end
-
---- Format elapsed seconds as a human string.
-local function fmt_elapsed(seconds)
-    if seconds < 60 then
-        return string.format("%ds", seconds)
-    end
-    return string.format("%dm%02ds", math.floor(seconds / 60), seconds % 60)
-end
-
 --- Return the number of CPUs (nproc equivalent).
 local function nproc()
     local n = capture("nproc 2>/dev/null")
@@ -94,24 +54,10 @@ local function nproc()
         n = tonumber(n:match("%d+"))
         if n then return n end
     end
-    return 4  -- safe fallback
+    return 1  -- safe fallback
 end
 
---- Resolve the project root from the location of this script.
--- The script lives at <root>/scripts/regression_check.lua, so the root
--- is the parent of the directory that contains this file.
-local ROOT = (function()
-    local abs = capture(string.format("realpath %q 2>/dev/null", arg[0]))
-    if not abs then
-        die("cannot resolve script path from '%s'", arg[0])
-    end
-    abs = abs:match("^%s*(.-)%s*$")
-    local root = abs:match("^(.*)/[^/]+/[^/]+$")  -- strip /scripts/<name>.lua
-    if not root or root == "" then
-        die("cannot derive project root from script path '%s'", abs)
-    end
-    return root
-end)()
+local ROOT = project.root()
 
 local USAGE = [[
 Usage: lua scripts/build.lua [OPTIONS]
@@ -171,6 +117,8 @@ do
 end
 
 --- Discover all configure preset names from CMakePresets.json.
+---
+--- @return table list of preset names
 local function discover_presets()
     local raw = capture(string.format("cd %q && cmake --list-presets=configure 2>/dev/null", ROOT))
     if not raw then die("cmake --list-presets failed — is cmake installed?") end
@@ -199,6 +147,9 @@ local function discover_presets()
 end
 
 --- Extract architecture and compiler from a preset name like "x86_64-gcc".
+---
+--- @param name string preset name
+--- @return a pair of strings: architecture, compiler
 local function parse_preset(name)
     local arch, compiler = name:match("^(.-)%-(.+)$")
     if not arch then
@@ -208,6 +159,9 @@ local function parse_preset(name)
 end
 
 --- Filter the preset list by the user's --arch / --compiler flags.
+---
+--- @param all_presets table list of preset names
+--- @return table filtered list of preset names
 local function filter_presets(all_presets)
     local result = {}
     for _, p in ipairs(all_presets) do
@@ -235,29 +189,10 @@ local function filter_presets(all_presets)
     return result
 end
 
---- Status line helper — overwrites the current line.
-local function status(index, total, preset, msg)
-    local prefix = string.format("[%d/%d]", index, total)
-    io.write(string.format("\r\27[K%s%s%s %s%s%s: %s",
-        C.bold, prefix, C.reset,
-        C.cyan, preset, C.reset,
-        msg))
-    io.flush()
-end
-
---- Finish a status line with a result symbol.
-local function status_done(index, total, preset, ok, elapsed)
-    local sym = ok and (C.green .. "✓") or (C.red .. "✗")
-    -- Clear the entire line first, then write the final result
-    io.write(string.format("\r\27[K%s[%d/%d]%s %s%s%s %s%s  %s%s%s\n",
-        C.bold, index, total, C.reset,
-        C.cyan, preset, C.reset,
-        sym, C.reset,
-        C.dim, fmt_elapsed(elapsed), C.reset))
-    io.flush()
-end
-
 --- Show the tail of a log file on failure.
+---
+--- @param log_path string path to the log file
+--- @param lines    integer number of lines to show (default: 30)
 local function show_log_tail(log_path, lines)
     lines = lines or 30
     local tail = capture(string.format("tail -n %d %q 2>/dev/null", lines, log_path))
@@ -270,6 +205,10 @@ local function show_log_tail(log_path, lines)
 end
 
 --- Run the configure phase for a preset.  Returns true on success.
+---
+--- @param preset    string preset name
+--- @param build_dir string path to the build directory
+--- @param log_path  string path to the log file
 local function phase_configure(preset, build_dir, log_path)
     if opts.clean then
         os.execute(string.format("rm -rf %q", build_dir))
@@ -281,6 +220,11 @@ local function phase_configure(preset, build_dir, log_path)
 end
 
 --- Run a single ninja build target.  Returns true on success.
+---
+--- @param build_dir string path to the build directory
+--- @param target    string ninja target to build
+--- @param log_path  string path to the log file
+--- @return boolean true on success
 local function phase_build(build_dir, target, log_path)
     local quiet = opts.verbose and "" or " --quiet"
     local cmd = string.format(
@@ -292,6 +236,9 @@ end
 
 local results = {}
 
+--- Print a summary table of all presets and their results.
+---
+--- @return integer number of failed presets
 local function print_summary()
     -- Column widths
     local col_preset = 7  -- "Preset" header
@@ -348,6 +295,8 @@ local function print_summary()
     return fail_count
 end
 
+--- Main entry point
+--- Discovers presets, filters them, and runs configure + build for each.
 local function main()
     io.write(string.format("%s── JANUS pre-commit check ──%s\n\n", C.bold, C.reset))
 

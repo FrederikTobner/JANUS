@@ -5,7 +5,7 @@
 # genuinely owns or interprets the type — not merely because it receives
 # it transitively through a public header chain.
 #
-# See cmake/kernel/Contract.cmake for the janus_add_contract() specification.
+# See kernel/cmake/Contract.cmake for the janus_add_contract() specification.
 
 janus_add_contract(memmap
     CONSUMERS

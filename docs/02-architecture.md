@@ -54,6 +54,7 @@ kernel/
 ├── core/                   Cross-cutting services
 └── subsys/                 Independent subsystems
     ├── boot/               Boot protocol parsing and context population
+    ├── contracts/          Cross-subsystem type contracts (allowlist-enforced)
     ├── drivers/            Device drivers
     ├── interrupts/         Interrupt handling
     └── mm/                 Memory management
@@ -61,15 +62,6 @@ kernel/
 
 Architecture-specific code is co-located with the module that needs it rather than being aggregated in a centralised `arch/` tree.
 A subsystem's complete implementation in particular both the platform-agnostic logic and the per-architecture code, is therefor navigable as a single unit.
-
-## File Name Uniqueness
-
-Every source file and header name must be **unique across the entire kernel tree**, with two permitted exceptions.
-Duplicate names at different paths create ambiguity in tooling output (compiler diagnostics, linker errors, file-finder results) and force every reader to verify which copy is meant each time the name appears.
-
-The only permitted exception is the **Arch layer**.
-Architecture-specific files intentionally carry the same base name because they provide alternative implementations of the same interface. For example, `console.c` exists in both `arch/x86_64/` and `arch/aarch64/`, and `mmu.c` exists under each architecture. Path-qualified `@file` tags and include-guard names (which embed the architecture name) disambiguate these unambiguously.
-
 ## Dependency Graph
 
 A Mermaid dependency diagram is generated automatically during each CMake configure run and written to `docs/generated/`. Contract edges are rendered with dashed arrows to distinguish type-sharing relationships from module dependencies.

@@ -27,12 +27,6 @@
 
 #include <boot/context.h>
 
-/// @brief Best-effort serial initialization before the boot context is available.
-///
-/// Calls boot_early_params() to obtain address-translation parameters.
-/// Safe to call multiple times — no-op if serial is already active.
-void output_sink_init_early(void);
-
 /// @brief Initialize the output sink after the boot context is available.
 ///
 /// Initializes serial and console drivers based on the boot context, then

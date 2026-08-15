@@ -167,6 +167,10 @@ static __cold void parse_mmap_tag(boot_context_t * boot_context, multiboot_tag_m
     u8 const * cursor = (u8 const *) mmap_tag->entries;
     u8 const * const end = (u8 const *) mmap_tag + mmap_tag->size;
 
+    if (entry_size < sizeof(multiboot_mmap_entry_t)) {
+        return; // Invalid entry size - cannot parse memory map
+    }
+
     while (cursor + entry_size <= end && boot_context->memmap.count < BOOT_MEMMAP_MAX_ENTRIES) {
         multiboot_mmap_entry_t const * src = (multiboot_mmap_entry_t const *) cursor;
         u32 const idx = boot_context->memmap.count;

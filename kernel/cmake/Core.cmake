@@ -1,6 +1,6 @@
 #[[
     Core.cmake - JANUS Core Layer Helper
-    Provides janus_add_core() for creating kernel core services (e.g. kio)
+    Provides janus_add_core() for creating kernel core services 
    
     Core modules sit between the library layer (lib/) and the subsystem layer (subsys/).
     Rules:
@@ -13,14 +13,14 @@
 include_guard(GLOBAL)
 
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/Core.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before Core.cmake")
 endif()
 
 if(NOT JANUS_REGISTRY_LOADED)
-    message(FATAL_ERROR "Registry.cmake must be included before kernel/Core.cmake")
+    message(FATAL_ERROR "Registry.cmake must be included before Core.cmake")
 endif()
 
-include(kernel/Module)
+include(Module)
 
 #
 # Add a kernel core module

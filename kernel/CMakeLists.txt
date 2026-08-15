@@ -1,7 +1,13 @@
-include(Registry)
-include(kernel/Contract)
+# Prepend so kernel's own cmake/ helpers are found before root cmake/'s
+# same-named modules (specifically Registry.cmake — this file is the KERNEL
+# registry wrapper, not the shared engine; see kernel/cmake/Registry.cmake).
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-include(kernel/Library)
+include(Registry)
+include(CompilerFlags)
+include(Contract)
+
+include(Library)
 
 # Configure config.h from config.h.in
 configure_file(

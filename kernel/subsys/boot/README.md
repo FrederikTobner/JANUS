@@ -26,4 +26,4 @@ The actual initialization code lives in the protocol libraries under `protocol/`
 1. Create `protocol/<name>/` with a `CMakeLists.txt` that builds a static library (e.g., `boot_<name>`) and links `PUBLIC boot`
 2. Implement `int boot_init(boot_context_t * ctx)` — populate all fields of the    context unconditionally (no reliance on zero-initialization)
 3. Add assembly entry point(s) under `_start/<arch>/<name>/`
-4. Wire the protocol into `cmake/boot/` via the `JANUS_BOOT_PROTOCOLS` variable in cmake, so it becomes a selectable build target
+4. Wire the protocol into `cmake/image/boot/` via the `JANUS_BOOT_PROTOCOLS` variable in cmake, so it becomes a selectable build target

@@ -20,9 +20,8 @@
 /// @file gfx/surface.h
 /// @brief Drawable pixel-surface type and initializer.
 ///
-/// gfx_surface_t is a public struct — callers embed it by value and own
-/// their own storage. Use gfx_surface_init() to populate the fields.
-/// Pixel drawing operations are declared in <gfx/draw.h>.
+/// gfx_surface_t is a public struct callers embed it by value and own their own storage.
+/// Use gfx_surface_init() to populate the fields. Pixel drawing operations are declared in <gfx/draw.h>.
 
 #include <janus/types.h>
 
@@ -45,10 +44,10 @@ typedef struct {
 /// @brief Initialize a caller-owned surface.
 ///
 /// No allocation; no singleton. The caller provides the storage.
-/// Narrowing from display_info_t's u64 geometry to u32 happens here —
+/// Narrowing from display_info_t'surface u64 geometry to u32 happens here —
 /// casts are explicit to satisfy -Wconversion.
 ///
-/// @param s        Surface to initialize.
+/// @param surface        Surface to initialize.
 /// @param base     Framebuffer base address.
 /// @param width    Horizontal resolution in pixels.
 /// @param height   Vertical resolution in pixels.
@@ -57,7 +56,14 @@ typedef struct {
 /// @param r_shift  Red channel bit position.
 /// @param g_shift  Green channel bit position.
 /// @param b_shift  Blue channel bit position.
-void gfx_surface_init(
-    gfx_surface_t * s, void * base, u32 width, u32 height, u32 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift);
+void gfx_surface_init(gfx_surface_t * surface,
+                      void * base,
+                      u32 width,
+                      u32 height,
+                      u32 pitch,
+                      u16 bpp,
+                      u8 r_shift,
+                      u8 g_shift,
+                      u8 b_shift);
 
 #endif /* GFX_SURFACE_H */

@@ -10,7 +10,7 @@ include_guard(GLOBAL)
 #
 # Usage:
 #   janus_add_arch_subsys(<subsystem_name>
-#       SOURCES file1.c file2.c ...    # All sources (own + shared)
+#       SOURCES file1.c file2.c ... 
 #   )
 #
 # - Each arch declares ALL its sources explicitly
@@ -21,15 +21,14 @@ include_guard(GLOBAL)
 # Example:
 #   janus_add_arch_subsys(drivers
 #       SOURCES
-#           serial.c
-#           tty.c
-#           ../shared/framebuffer.c
+#           foo.c
+#           bar.c
+#           ../shared/base.c
 #   )
 #
 
-# Ensure platform is loaded
 if(NOT JANUS_PLATFORM_LOADED)
-    message(FATAL_ERROR "platform/Detection.cmake must be included before kernel/ArchSource.cmake")
+    message(FATAL_ERROR "platform/Detection.cmake must be included before ArchSource.cmake")
 endif()
 
 function(janus_add_arch_subsys NAME)
@@ -45,18 +44,16 @@ function(janus_add_arch_subsys NAME)
     add_library(${ARCH_LIB_NAME} STATIC ${ARG_SOURCES})
     target_include_directories(${ARCH_LIB_NAME} 
     PUBLIC 
-        "${CMAKE_CURRENT_SOURCE_DIR}/include"          # <arch/impl/drivers/*.h>
-        "${CMAKE_CURRENT_SOURCE_DIR}/../shared/include" # <arch/shared/include/*.h>
-        "${CMAKE_CURRENT_SOURCE_DIR}/../include"         # <arch/include/drivers/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"          
+        "${CMAKE_CURRENT_SOURCE_DIR}/../shared/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../include"      
     PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/internal"         # <arch/internal/drivers/*.h>
-        "${CMAKE_CURRENT_SOURCE_DIR}/../../include"         # <drivers/include/*.h>
+        "${CMAKE_CURRENT_SOURCE_DIR}/internal"       
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../include" 
     )
-    # Link dependencies (only lib allowed, not other subsystems)
     if(ARG_DEPENDENCIES)
         target_link_libraries(${ARCH_LIB_NAME} PUBLIC ${ARG_DEPENDENCIES})
     endif()
 
-    # Apply compiler flags
     janus_apply_compile_flags(${ARCH_LIB_NAME})
 endfunction()

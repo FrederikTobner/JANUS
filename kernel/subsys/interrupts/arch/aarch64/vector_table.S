@@ -37,7 +37,8 @@
 .section .text
 
 /*
- * One vector-table slot. Kept tiny (4 instructions, well within 0x80 bytes):
+ * One vector-table slot. 
+ * Kept tiny (4 instructions, well within 0x80 bytes):
  * the interrupted x0/x1 are stored first so x0 is free to carry the source
  * index into exc_common without losing any interrupted register value.
  */
@@ -116,8 +117,8 @@ exc_common:
     mov     x0, sp
     bl      interrupts_dispatch
 
-    // Unreached today. Retained as a safety net and a placeholder for a future
-    // recoverable-exception restore + eret tail.
+    // Unreached today. 
+    // Retained as a safety net and a placeholder for a future recoverable-exception restore + eret tail.
 1:  b       1b
 
 // Mark the stack as non-executable so the linker does not infer an executable

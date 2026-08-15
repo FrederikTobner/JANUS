@@ -1,6 +1,6 @@
-include(kernel/Subsystem)
+include(Subsystem)
 
-# Cross-subsystem contracts (must come before subsys so INTERFACE targets exist)
+# Cross-subsystem contracts 
 add_subdirectory(contracts)
 
 add_subdirectory(boot)

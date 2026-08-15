@@ -4,15 +4,15 @@ Cause I would loose me head if it would not be attached to my shoulders here is 
 
 ## Invocation
 
-The `run` and `debug-*` CMake targets invoke QEMU with the correct flags for the selected preset.
+The `run-<protocol>` and `debug-<protocol>` CMake targets invoke QEMU with the correct flags for the selected preset.
 Direct invocation is rarely necessary, but the underlying commands are:
 
 ```bash
 # x86_64 Limine ISO
-qemu-system-x86_64 -cdrom build-x86_64-gcc/janus.iso -serial stdio -m 256M
+qemu-system-x86_64 -cdrom build-x86_64-gcc/janus_x86_64.iso -serial stdio -m 256M
 
 # aarch64 Limine
-qemu-system-aarch64 -M virt -cpu cortex-a72 -kernel build-aarch64-gcc/kernel.elf \
+qemu-system-aarch64 -M virt -cpu cortex-a72 -kernel build-aarch64-gcc/kernel-limine.elf \
     -serial stdio -m 256M
 ```
 
@@ -43,18 +43,3 @@ It provides direct inspection of the emulated machine state without stopping the
 | `info mtree`        | Print the full memory region tree                              |
 | `info irq`          | Show IRQ statistics                                            |
 | `quit`              | Terminate QEMU immediately                                     |
-
-## Common Pitfalls
-
-- **No serial output:** confirm `-serial stdio` is present. If the output target
-  is a file, use `-serial file:serial.log` and `tail -f serial.log` in a separate
-  terminal.
-- **Triple fault on boot:** use `-no-reboot -d int,cpu_reset` together. QEMU exits
-  with a non-zero code on triple fault, making it easy to detect in scripts.
-- **aarch64 requires `-M virt`:** there is no default machine type for aarch64;
-  omitting it is an error.
-- **UEFI mode on x86_64:** pass `-bios /usr/share/OVMF/OVMF_CODE.fd`; the
-  `run-uefi` build target already includes this flag.
-- **Clock drift under heavy load:** `-icount shift=auto` enables a deterministic
-  instruction counter that improves reproducibility when debugging timing-sensitive
-  code.

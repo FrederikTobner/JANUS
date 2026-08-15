@@ -15,59 +15,59 @@
  ****************************************************************************/
 
 /// @file gfx/draw.c
-/// @brief Stateless pixel primitives — implementation.
+/// @brief Stateless pixel primitives
 
 #include <gfx/draw.h>
 #include <gfx/surface.h>
 #include <janus/attributes.h>
 
-static void write_pixel(gfx_surface_t const * s, u32 x, u32 y, u32 rgb);
+static void gfx_write_pixel(gfx_surface_t const * surface, u32 x, u32 y, u32 rgb);
 
 __cold void gfx_surface_init(
-    gfx_surface_t * s, void * base, u32 width, u32 height, u32 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift)
+    gfx_surface_t * surface, void * base, u32 width, u32 height, u32 pitch, u16 bpp, u8 r_shift, u8 g_shift, u8 b_shift)
 {
-    s->base = (u8 volatile *) base;
-    s->width = width;
-    s->height = height;
-    s->pitch = pitch;
-    s->bpp = bpp;
-    s->red_shift = r_shift;
-    s->green_shift = g_shift;
-    s->blue_shift = b_shift;
+    surface->base = (u8 volatile *) base;
+    surface->width = width;
+    surface->height = height;
+    surface->pitch = pitch;
+    surface->bpp = bpp;
+    surface->red_shift = r_shift;
+    surface->green_shift = g_shift;
+    surface->blue_shift = b_shift;
 }
 
-__hot void gfx_surface_put_pixel(gfx_surface_t const * s, u32 x, u32 y, u32 rgb)
+__hot void gfx_surface_put_pixel(gfx_surface_t const * surface, u32 x, u32 y, u32 rgb)
 {
-    if (UNLIKELY(!s->base || x >= s->width || y >= s->height)) {
+    if (UNLIKELY(!surface->base || x >= surface->width || y >= surface->height)) {
         return;
     }
-    write_pixel(s, x, y, rgb);
+    gfx_write_pixel(surface, x, y, rgb);
 }
 
-__hot void gfx_surface_fill_rect(gfx_surface_t const * s, u32 x, u32 y, u32 w, u32 h, u32 rgb)
+__hot void gfx_surface_fill_rect(gfx_surface_t const * surface, u32 x, u32 y, u32 w, u32 h, u32 rgb)
 {
-    if (UNLIKELY(!s->base)) {
+    if (UNLIKELY(!surface->base)) {
         return;
     }
     // Clip to surface bounds. Widen to u64 before adding to avoid u32 overflow.
     u64 x_limit = (u64) x + (u64) w;
     u64 y_limit = (u64) y + (u64) h;
-    u32 x_end = (x_limit < (u64) s->width) ? (u32) x_limit : s->width;
-    u32 y_end = (y_limit < (u64) s->height) ? (u32) y_limit : s->height;
+    u32 x_end = (x_limit < (u64) surface->width) ? (u32) x_limit : surface->width;
+    u32 y_end = (y_limit < (u64) surface->height) ? (u32) y_limit : surface->height;
     if (x >= x_end || y >= y_end) {
         return;
     }
     for (u32 row = y; row < y_end; row++) {
         for (u32 col = x; col < x_end; col++) {
-            write_pixel(s, col, row, rgb);
+            gfx_write_pixel(surface, col, row, rgb);
         }
     }
 }
 
 __hot void gfx_surface_blit_mono(
-    gfx_surface_t const * s, u32 x, u32 y, u8 const * bitmap, u32 width, u32 height, u32 fg_rgb, u32 bg_rgb)
+    gfx_surface_t const * surface, u32 x, u32 y, u8 const * bitmap, u32 width, u32 height, u32 fg_rgb, u32 bg_rgb)
 {
-    if (UNLIKELY(!s->base || !bitmap)) {
+    if (UNLIKELY(!surface->base || !bitmap)) {
         return;
     }
     if (UNLIKELY(width == 0 || width % 8 != 0)) {
@@ -81,53 +81,53 @@ __hot void gfx_surface_blit_mono(
                 u32 px = x + (byte_idx * 8) + bit;
                 u32 py = y + row;
                 u32 color = (bits & (0x80U >> bit)) ? fg_rgb : bg_rgb;
-                if (px < s->width && py < s->height) {
-                    write_pixel(s, px, py, color);
+                if (px < surface->width && py < surface->height) {
+                    gfx_write_pixel(surface, px, py, color);
                 }
             }
         }
     }
 }
 
-__hot void gfx_surface_scroll(gfx_surface_t const * s, u32 dy, u32 fill_rgb)
+__hot void gfx_surface_scroll(gfx_surface_t const * surface, u32 dy, u32 fill_rgb)
 {
-    if (UNLIKELY(!s->base)) {
+    if (UNLIKELY(!surface->base)) {
         return;
     }
-    if (dy >= s->height) {
-        gfx_surface_fill_rect(s, 0, 0, s->width, s->height, fill_rgb);
+    if (dy >= surface->height) {
+        gfx_surface_fill_rect(surface, 0, 0, surface->width, surface->height, fill_rgb);
         return;
     }
     // Copy scanlines [dy, height) upward to [0, height-dy).
     // Ascending iteration is safe: destination row y < source row y+dy.
-    u32 const copy_rows = s->height - dy;
+    u32 const copy_rows = surface->height - dy;
     for (u32 row = 0; row < copy_rows; row++) {
-        u8 volatile * dst = s->base + ((u64) row * s->pitch);
-        u8 const volatile * src = s->base + ((u64) (row + dy) * s->pitch);
-        for (u32 i = 0; i < s->pitch; i++) {
+        u8 volatile * dst = surface->base + ((u64) row * surface->pitch);
+        u8 const volatile * src = surface->base + ((u64) (row + dy) * surface->pitch);
+        for (u32 i = 0; i < surface->pitch; i++) {
             dst[i] = src[i];
         }
     }
     // Fill the newly exposed bottom rows.
-    gfx_surface_fill_rect(s, 0, s->height - dy, s->width, dy, fill_rgb);
+    gfx_surface_fill_rect(surface, 0, surface->height - dy, surface->width, dy, fill_rgb);
 }
 
-static void write_pixel(gfx_surface_t const * s, u32 x, u32 y, u32 rgb)
+static void gfx_write_pixel(gfx_surface_t const * surface, u32 x, u32 y, u32 rgb)
 {
-    if (UNLIKELY(s->bpp != 32 && s->bpp != 24)) {
+    if (UNLIKELY(surface->bpp != 32 && surface->bpp != 24)) {
         return;
     }
     // Widen to u64 before multiplying to avoid u32 overflow on large pitches.
-    u64 offset = ((u64) y * (u64) s->pitch) + ((u64) x * (u64) (s->bpp / 8));
-    u32 pixel = (u32) (((rgb >> 16) & 0xFF) << s->red_shift) | (u32) (((rgb >> 8) & 0xFF) << s->green_shift) |
-                (u32) ((rgb & 0xFF) << s->blue_shift);
+    u64 offset = ((u64) y * (u64) surface->pitch) + ((u64) x * (u64) (surface->bpp / 8));
+    u32 pixel = (u32) (((rgb >> 16) & 0xFF) << surface->red_shift) |
+                (u32) (((rgb >> 8) & 0xFF) << surface->green_shift) | (u32) ((rgb & 0xFF) << surface->blue_shift);
 
-    if (s->bpp == 32) {
-        *((u32 volatile *) (s->base + offset)) = pixel;
+    if (surface->bpp == 32) {
+        *((u32 volatile *) (surface->base + offset)) = pixel;
     } else {
         // 24 bpp — three individual byte writes, little-endian order.
-        s->base[offset] = (u8) (pixel & 0xFF);
-        s->base[offset + 1] = (u8) ((pixel >> 8) & 0xFF);
-        s->base[offset + 2] = (u8) ((pixel >> 16) & 0xFF);
+        surface->base[offset] = (u8) (pixel & 0xFF);
+        surface->base[offset + 1] = (u8) ((pixel >> 8) & 0xFF);
+        surface->base[offset + 2] = (u8) ((pixel >> 16) & 0xFF);
     }
 }

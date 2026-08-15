@@ -1,6 +1,6 @@
 # kio - kernel I/O core module (kprintf, vkprintf, kpanic)
 
-include(kernel/Core)
+include(Core)
 
 file(GLOB_RECURSE KIO_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 

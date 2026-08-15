@@ -31,7 +31,6 @@
 #include <kio/die.h>
 #include <kio/output.h>
 #include <kmain/fault_test.h>
-#include <kmain/kernel_descriptor.h>
 #include <kmain/output_sink.h>
 #include <mm/pmm.h>
 
@@ -55,11 +54,11 @@
 /// then passes the boot boot_context slice to each subsystem initializer.
 __noreturn void kernel_main(void)
 {
-    kernel_descriptor_t descriptor;
-    if (boot_init(&descriptor.boot) != JANUS_OK) {
+    boot_context_t boot_context;
+    if (boot_init(&boot_context) != JANUS_OK) {
         kpanic("boot_init failed — cannot continue");
     }
-    output_sink_init(&descriptor.boot);
+    output_sink_init(&boot_context);
     kprintf("%s\nVersion: %s\n\n", JANUS_HELLO_MESSAGE, JANUS_VERSION_STRING);
 
     if (interrupts_init() != JANUS_OK) {
@@ -69,8 +68,7 @@ __noreturn void kernel_main(void)
 #ifdef JANUS_TEST_FAULTS
     kmain_fault_test();
 #endif
-    error_t pmm_err =
-        mm_pmm_init(&descriptor.boot.memmap, descriptor.boot.kernel_phys_base, descriptor.boot.kernel_phys_end);
+    error_t pmm_err = mm_pmm_init(&boot_context.memmap, boot_context.kernel_phys_base, boot_context.kernel_phys_end);
     if (pmm_err != JANUS_OK) {
         kpanic("mm_pmm_init failed: %d", pmm_err);
     }

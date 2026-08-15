@@ -15,7 +15,6 @@ add_library(_start_common OBJECT
 )
 
 if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
-    # Limine requests in portable C (shared across architectures)
     add_library(_start_limine_requests OBJECT
         ${CMAKE_SOURCE_DIR}/kernel/_start/common/limine_requests.c
     )
@@ -25,17 +24,24 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
     )
     target_compile_options(_start_limine_requests PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 
-    # x86_64 specific Limine entry point (assembly)
     add_library(_start_limine OBJECT
         limine/entry.asm
     )
     
-    # Build kernel-limine.elf with Limine linker script
     janus_add_kernel(
         TARGET kernel-limine.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-        DEPENDENCIES boot boot_limine drivers interrupts mm
-        OBJECTS _start_common _start_limine _start_limine_requests kmain
+        DEPENDENCIES 
+                boot 
+                boot_limine 
+                drivers 
+                interrupts 
+                mm
+        OBJECTS 
+                _start_common 
+                _start_limine 
+                _start_limine_requests 
+                kmain
     )
 endif()
 
@@ -46,14 +52,18 @@ if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
         multiboot2/paging.asm
     )
     
-    # Build kernel-multiboot2.elf with Multiboot2 linker script
     janus_add_kernel(
         TARGET kernel-multiboot2.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/multiboot2/linker.ld
-        DEPENDENCIES boot boot_multiboot2
-        drivers 
-        interrupts 
-        mm
-        OBJECTS _start_common _start_multiboot2 kmain
+        DEPENDENCIES 
+                boot 
+                boot_multiboot2
+                drivers 
+                interrupts 
+                mm
+        OBJECTS 
+                _start_common 
+                _start_multiboot2 
+                kmain
     )
 endif()

@@ -32,7 +32,6 @@ multiboot_start:
     ; Checksum: -(header magic + architecture + header_length)
     dd -(0xe85250d6 + 0 + (multiboot_end - multiboot_start))
 
-; Information request tag
 ; Requests specific information from the bootloader
 align 8
 information_request_tag_start:
@@ -61,7 +60,7 @@ framebuffer_tag_start:
     dd 32                            ; preferred depth (bits per pixel)
 framebuffer_tag_end:
 
-; End tag (required)
+; Required end tag
 ; Marks the end of the Multiboot2 header
 align 8
     dw 0                             ; type = 0 (end tag)
