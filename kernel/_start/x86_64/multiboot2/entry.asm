@@ -117,6 +117,7 @@ long_mode_start:
     ; Enter kernel
     call kernel_main
 
+; If kernel_main returns, halt forever
 .hang:
     cli
     hlt

@@ -1,6 +1,6 @@
 #[[
     Core.cmake - JANUS Core Layer Helper
-    Provides janus_add_core() for creating kernel core services (e.g. kio)
+    Provides janus_add_core() for creating kernel core services 
    
     Core modules sit between the library layer (lib/) and the subsystem layer (subsys/).
     Rules:

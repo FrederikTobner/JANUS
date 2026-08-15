@@ -11,7 +11,6 @@
 
 include_guard(GLOBAL)
 
-# Architecture-specific compiler flags
 if(JANUS_COMPILER_CLANG)
     set(JANUS_ARCH_FLAGS
         --target=aarch64-elf
@@ -19,7 +18,6 @@ if(JANUS_COMPILER_CLANG)
         -mgeneral-regs-only
     )
 elseif(JANUS_COMPILER_GCC)
-    # GCC aarch64
     set(JANUS_ARCH_FLAGS
         -march=armv8-a
         -mgeneral-regs-only

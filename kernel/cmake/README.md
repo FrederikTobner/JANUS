@@ -1,31 +1,24 @@
 # kernel/cmake — Kernel-Only CMake Helpers
 
-CMake helper functions used **only** by the freestanding kernel build. Nothing
-here is included outside `kernel/CMakeLists.txt` (and files it transitively
-`include()`s) — a hosted build (`tools/`, future `user/`) must never pick up
-`-nostdlib`/`-ffreestanding` or the kernel-registry wrappers below.
+CMake helper functions used **only** by the freestanding kernel build. 
+Nothing here is included outside `kernel/CMakeLists.txt` and files it transitively includes.
+A hosted build (`tools/`, future `user/`) must never pick up `-nostdlib`/`-ffreestanding` or the kernel-registry wrappers below.
 
 ## Registry.cmake
 
-Thin wrapper around [`cmake/Registry.cmake`](../../cmake/Registry.cmake)'s
-generic engine that sets up the `KERNEL` registry namespace and defines
-`janus_register()`, `janus_validate_registry()`, `janus_write_mermaid_diagram()`.
+Thin wrapper around [`cmake/Registry.cmake`](../../cmake/Registry.cmake)'s generic engine that sets up the `KERNEL` registry namespace and defines `janus_register()`, `janus_validate_registry()`, `janus_write_mermaid_diagram()`.
 Mirrors [`tools/cmake/Registry.cmake`](../../tools/cmake/Registry.cmake) exactly.
 
 ## CompilerFlags.cmake
 
-Common kernel compiler flags (`-nostdlib -ffreestanding -fno-builtin
--fno-stack-protector`, warnings, build-type flags) plus
-`janus_apply_compile_flags(TARGET)`. Includes the kernel ABI flags for the
-current architecture from `arch/<arch>/CompilerFlags.cmake`.
+Common kernel compiler flags (`-nostdlib -ffreestanding -fno-builtin -fno-stack-protector`, warnings, build-type flags) plus `janus_apply_compile_flags(TARGET)`. 
+Includes the kernel ABI flags for the current architecture from `arch/<arch>/CompilerFlags.cmake`.
 
 ## arch/\<arch\>/CompilerFlags.cmake
 
-Kernel-only ABI flags per architecture (e.g. `-mcmodel=kernel`,
-`-mno-red-zone`, `-mno-sse*` on x86_64; `-mgeneral-regs-only` on aarch64).
+Kernel-only ABI flags per architecture (e.g. `-mcmodel=kernel`, `-mno-red-zone`, `-mno-sse*` on x86_64; `-mgeneral-regs-only` on aarch64).
 Deliberately separate from [`cmake/arch/<arch>/BootProtocols.cmake`](../../cmake/arch/x86_64/BootProtocols.cmake),
-which is a shared (not kernel-only) fact consumed by `kernel/_start` and
-`cmake/image/` alike.
+which is a shared (not kernel-only) fact consumed by `kernel/_start` and `cmake/image/` alike.
 
 ## Target helpers
 
@@ -63,6 +56,5 @@ and `Subsystem.cmake`. Not meant to be used directly.
 
 ### `SmokeTests.cmake` — `janus_register_smoke_tests()`
 
-Registers host-side CTest smoke tests that boot the built ISO in QEMU
-headless and assert on serial output. Called from `cmake/image/Targets.cmake`
-once the arch/protocol targets it depends on exist.
+Registers host-side CTest smoke tests that boot the built ISO in QEMU headless and assert on serial output. 
+Called from `cmake/image/Targets.cmake` once the arch/protocol targets it depends on exist.

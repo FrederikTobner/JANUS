@@ -11,7 +11,6 @@ include_guard(GLOBAL)
 # Include kernel ABI flags for this architecture (sets JANUS_ARCH_FLAGS)
 include(${CMAKE_CURRENT_LIST_DIR}/arch/${JANUS_TARGET_ARCH}/CompilerFlags.cmake)
 
-# Common compiler flags for all kernel code
 set(JANUS_COMPILE_OPTIONS_COMMON
     ${JANUS_ARCH_FLAGS}
     -nostdlib
@@ -28,7 +27,6 @@ set(JANUS_COMPILE_OPTIONS_COMMON
     -Wpointer-arith
 )
 
-# Debug-specific flags
 set(JANUS_COMPILE_OPTIONS_DEBUG
     -g3
     -gdwarf-4
@@ -36,19 +34,16 @@ set(JANUS_COMPILE_OPTIONS_DEBUG
     -DDEBUG
 )
 
-# Release-specific flags
 set(JANUS_COMPILE_OPTIONS_RELEASE
     -O2
     -DNDEBUG
 )
 
-# MinSizeRel flags (optimize for size)
 set(JANUS_COMPILE_OPTIONS_MINSIZEREL
     -Os
     -DNDEBUG
 )
 
-# Apply all compile flags (common + build-type) to a target.
 function(janus_apply_compile_flags TARGET)
     target_compile_options(${TARGET} PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -24,8 +24,8 @@ Currently the following presets are defined:
 |--------------|----------|--------------|
 | x86_64       | clang    | x86_64-clang |
 | x86_64       | gcc      | x86_64-gcc   |
-| aarch64      | clang    | x86_64-clang |
-| aarch64      | gcc      | x86_64-gcc   |
+| aarch64      | clang    | aarch64-clang |
+| aarch64      | gcc      | aarch64-gcc   |
 
 For creating all bootable ISO's for the current architecture with the supported boot protocols, the following command can be used:
 
@@ -33,7 +33,7 @@ For creating all bootable ISO's for the current architecture with the supported 
 ninja -C build-x86_64-gcc iso         
 ```
 
-For running the kernel in QEMU every supported boot protocol defines its own target, that can be used to make the setup easier:
+For running the kernel in QEMU every supported boot protocol defines its own target:
 
 ```bash
 ninja -C build-x86_64-gcc run-<protocol>         # E.g ninja -C build-x86_64-gcc run-limine
@@ -46,7 +46,7 @@ Currently JANUS supports the following boot protocols per architecture:
 | x86_64       | limine, multiboot2       |
 | aarch64      | limine                   |
 
-For a more detailed setup guide see the documentation regarding the [setup](./docs/01-getting-started.md)
+A more detailed setup guide can be found in the [documentation](./docs/01-getting-started.md)
 
 ## License
 

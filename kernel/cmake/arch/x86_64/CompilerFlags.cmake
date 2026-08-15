@@ -10,7 +10,6 @@
 
 include_guard(GLOBAL)
 
-# Architecture-specific compiler flags
 if(JANUS_COMPILER_CLANG)
     set(JANUS_ARCH_FLAGS
         -target x86_64-elf
@@ -21,7 +20,6 @@ if(JANUS_COMPILER_CLANG)
         -mno-mmx
     )
 elseif(JANUS_COMPILER_GCC)
-    # GCC x86_64
     # -fno-pic/-fno-pie: Arch Linux's system GCC is configured with --enable-default-pie,
     # but -mcmodel=kernel requires non-PIC code.
     set(JANUS_ARCH_FLAGS

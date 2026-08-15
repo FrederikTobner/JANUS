@@ -24,8 +24,6 @@
  * Memory layout:
  * - Load/run address: 0x100000 (1MB) - above BIOS reserved area
  * - Multiboot2 header must be in first 32KB of kernel image
- * 
- * Note: This is x86_64-specific. Multiboot2 is not available on ARM.
  */
 
 ENTRY(_start_multiboot2)

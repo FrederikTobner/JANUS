@@ -16,7 +16,7 @@ endif()
 include(Module)
 
 #
-# Add a kernel library with standard configuration
+# Adds a kernel library with standard configuration to the build and registry.
 #
 # Usage:
 #   janus_add_library(name
