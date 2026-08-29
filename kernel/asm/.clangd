@@ -1,0 +1,5 @@
+CompileFlags:
+
+  Add:
+  # We are not calling any functions in the clangd_probe therefor we can ignore the unused function warnings in here
+  "-Wno-unused-function"
