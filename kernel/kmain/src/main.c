@@ -32,6 +32,7 @@
 #include <kio/output.h>
 #include <kmain/fault_test.h>
 #include <kmain/output_sink.h>
+#include <mm/kmalloc.h>
 #include <mm/pmm.h>
 
 // Greeting message printed after booting has been completed and the console has ben initialized
@@ -75,6 +76,12 @@ __noreturn void kernel_main(void)
     mm_pmm_stats_t pmm_stats;
     mm_pmm_get_stats(&pmm_stats);
     kprintf("Physical Memory Manager: %llu MiB free\n", pmm_stats.free_pages * 4096ULL / (1024ULL * 1024ULL));
+
+error_t kmalloc_err = kmalloc_init(boot_context.hhdm_offset);
+    if (kmalloc_err != JANUS_OK) {
+        kpanic("kmalloc_init failed: %d", kmalloc_err);
+    }
+    kprintf("Kernel heap allocator initialized\n");
 
     asm_cpu_halt_forever();
 }
