@@ -30,16 +30,16 @@ Currently the following presets are defined:
 For creating all bootable ISO's for the current architecture with the supported boot protocols, the following command can be used:
 
 ```bash
-ninja -C build-x86_64-gcc iso         
+ninja -C build-<preset> iso         
 ```
 
 For running the kernel in QEMU every supported boot protocol defines its own target:
 
 ```bash
-ninja -C build-x86_64-gcc run-<protocol>         # E.g ninja -C build-x86_64-gcc run-limine
+ninja -C build-<preset> run-<protocol>         # E.g ninja -C build-x86_64-gcc run-limine
 ```
 
-Currently JANUS supports the following boot protocols per architecture:
+JANUS supports the following boot protocols (per cpu architecture):
 
 | Architecture | Supported Boot Protocols |
 |--------------|--------------------------|

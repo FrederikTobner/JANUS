@@ -64,4 +64,19 @@ return {
         forbidden = {}, -- a panic IS the expected outcome here
         timeout = 30,
     },
+
+    -- JANUS_TEST_KMALLOC build: the heap allocator self-test must run to
+    -- completion with no panic, then the kernel continues to a normal halt.
+    kmalloc = {
+        required = {
+            substr("Version:"),
+            substr("[kmalloc-test] running heap allocator smoke tests"),
+            substr("[kmalloc-test] all 11 cases passed"),
+        },
+        forbidden = {
+            substr("*** KERNEL PANIC ***"),
+            substr("*** CPU EXCEPTION ***"),
+        },
+        timeout = 30,
+    },
 }

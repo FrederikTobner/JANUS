@@ -37,6 +37,8 @@ function(janus_register_smoke_tests)
 
     if(JANUS_TEST_FAULTS)
         set(_profile "fault")
+    elseif(JANUS_TEST_KMALLOC)
+        set(_profile "kmalloc")
     else()
         set(_profile "nominal")
     endif()
