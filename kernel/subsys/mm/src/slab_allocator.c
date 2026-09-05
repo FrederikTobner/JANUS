@@ -99,6 +99,16 @@ static u32 kmalloc_size_to_class(u32 size)
 
 static kmalloc_slab_t * kmalloc_grow(kmalloc_cache_t * cache)
 {
+    // A size class larger than a single page can hold would leave the new slab with
+    // zero objects (an empty free_list), which the caller is never prepared to handle.
+    // All current classes satisfy object_size <= KMALLOC_PAGE_USABLE, so count is always
+    // at least 1, but this guard keeps that invariant explicit and fails safely instead
+    // of handing back a slab with nothing to allocate from.
+    u32 const count = (u32) (KMALLOC_PAGE_USABLE / cache->object_size);
+    if (count == 0) {
+        return NULL; // object_size exceeds a single page; misconfigured size class
+    }
+
     phys_addr_t phys_page = mm_pmm_alloc_page();
     if (phys_page == 0) {
         return NULL; // Out of physical memory
@@ -111,7 +121,6 @@ static kmalloc_slab_t * kmalloc_grow(kmalloc_cache_t * cache)
     slab->phys_addr = phys_page;
     slab->free_list = NULL;
 
-    u32 const count = (u32) (KMALLOC_PAGE_USABLE / cache->object_size);
     u8 * const base = (u8 *) slab + KMALLOC_SLAB_HDR;
     for (u32 i = 0; i < count; ++i) {
         void * obj = base + ((u64) i * cache->object_size);
