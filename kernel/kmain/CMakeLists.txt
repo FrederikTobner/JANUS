@@ -8,6 +8,14 @@ endif()
 set(JANUS_FAULT_TEST_KIND 0 CACHE STRING "Fault injection test kind (0=page fault, 1 stack overflow (x86_64 only))")
 add_compile_definitions(JANUS_FAULT_TEST_KIND=${JANUS_FAULT_TEST_KIND})
 
+# kmalloc heap allocator self-test. Runs in-kernel right after the heap allocator initializes.
+option(JANUS_TEST_KMALLOC "Enable the kmalloc heap allocator self-test" OFF)
+if(JANUS_TEST_KMALLOC)
+    if(JANUS_TEST_FAULTS)
+        message(FATAL_ERROR "JANUS_TEST_FAULTS and JANUS_TEST_KMALLOC are mutually exclusive")
+    endif()
+    add_compile_definitions(JANUS_TEST_KMALLOC=1)
+endif()
 
 file(GLOB_RECURSE INIT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 

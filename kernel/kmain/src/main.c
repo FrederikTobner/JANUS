@@ -31,9 +31,10 @@
 #include <kio/die.h>
 #include <kio/output.h>
 #include <kmain/fault_test.h>
+#include <kmain/kmalloc_test.h>
 #include <kmain/output_sink.h>
-#include <mm/kmalloc.h>
 #include <mm/pmm.h>
+#include <mm/slab_allocator.h>
 
 // Greeting message printed after booting has been completed and the console has ben initialized
 #define JANUS_HELLO_MESSAGE                  \
@@ -77,11 +78,15 @@ __noreturn void kernel_main(void)
     mm_pmm_get_stats(&pmm_stats);
     kprintf("Physical Memory Manager: %llu MiB free\n", pmm_stats.free_pages * 4096ULL / (1024ULL * 1024ULL));
 
-error_t kmalloc_err = kmalloc_init(boot_context.hhdm_offset);
-    if (kmalloc_err != JANUS_OK) {
-        kpanic("kmalloc_init failed: %d", kmalloc_err);
+    error_t slab_allocator_err = mm_slab_alloc_init(boot_context.hhdm_offset);
+    if (slab_allocator_err != JANUS_OK) {
+        kpanic("mm_slab_alloc_init failed: %d", slab_allocator_err);
     }
     kprintf("Kernel heap allocator initialized\n");
+
+#ifdef JANUS_TEST_KMALLOC
+    kmain_kmalloc_test();
+#endif
 
     asm_cpu_halt_forever();
 }

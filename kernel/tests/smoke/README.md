@@ -8,7 +8,7 @@ They build the real ISO, boot it in QEMU headless, and assert on the serial cons
 | File             | Responsibility                                                       |
 |------------------|----------------------------------------------------------------------|
 | `run_smoke.lua`  | Launch QEMU under `timeout(1)`, scrape serial, assert, report.       |
-| `profiles.lua`   | The marker tables (`nominal`, `fault`) — the single source of truth. |
+| `profiles.lua`   | The marker tables (`nominal`, `fault`, `kmalloc`) — the single source of truth. |
 
 ## Requirements
 
@@ -33,6 +33,14 @@ cmake -S . -B build-x86_64-gcc-fault -G Ninja \
       -D JANUS_TARGET_ARCH=x86_64 \
       -D JANUS_ENABLE_SMOKE_TESTS=ON -D JANUS_TEST_FAULTS=ON
 ctest --test-dir build-x86_64-gcc-fault -R smoke --output-on-failure
+
+# kmalloc profile (heap allocator self-test must pass with no panic).
+# JANUS_TEST_KMALLOC is a configure-time switch, so use a separate build dir:
+cmake -S . -B build-x86_64-gcc-kmalloc -G Ninja \
+      --toolchain cmake/toolchains/x86_64-gcc.cmake \
+      -D JANUS_TARGET_ARCH=x86_64 \
+      -D JANUS_ENABLE_SMOKE_TESTS=ON -D JANUS_TEST_KMALLOC=ON
+ctest --test-dir build-x86_64-gcc-kmalloc -R smoke --output-on-failure
 ```
 
 The ISO is built automatically by a CTest setup fixture before each run.

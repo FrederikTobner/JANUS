@@ -2,8 +2,8 @@
 #include <janus/errno.h>
 
 #include <kio/die.h>
-#include <mm/kmalloc.h>
 #include <mm/pmm.h>
+#include <mm/slab_allocator.h>
 
 #define KMALLOC_PAGE_SIZE   4096ULL
 #define KMALLOC_MIN_ALIGN   16ULL
@@ -66,7 +66,7 @@ static void kmalloc_partial_remove(kmalloc_cache_t * cache, kmalloc_slab_t * sla
 static void kmalloc_fill(void * dest, u8 value, size_t n);
 static void kmalloc_copy(void * dest, void const * src, size_t n);
 
-error_t kmalloc_init(u64 hhdm_offset)
+error_t mm_slab_alloc_init(u64 hhdm_offset)
 {
     if (g_initialized) {
         return JANUS_EINVAL;

@@ -45,7 +45,7 @@ __noreturn void kmain_fault_test(void)
     u64 sink = overflow_stack(0);
     kprintf("[fault-test] unreachable %llu\n", (u64) sink);
 #else
-    // Write above the first 4 GB → #PF in both boot configurations.
+    // Write above the first 4 GB to trigger a Protection fault in both boot configurations.
     //
     // Address 0 cannot be used: the multiboot2 boot path identity-maps the
     // first 4 GB with 2 MB huge pages (paging.asm), so a write to virtual

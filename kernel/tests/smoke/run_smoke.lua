@@ -98,7 +98,7 @@ local function usage(msg)
         io.stderr:write("run_smoke.lua: ", msg, "\n")
     end
     io.stderr:write(
-        "usage: lua run_smoke.lua --qemu <bin> --iso <path> --profile <nominal|fault>\n",
+        "usage: lua run_smoke.lua --qemu <bin> --iso <path> --profile <nominal|fault|kmalloc>\n",
         "                        [--machine \"<flags>\"] [--bios <path>]\n",
         "                        [--timeout <seconds>] [--memory <size>] [--log <path>]\n"
     )
@@ -146,8 +146,8 @@ local function parse_args(argv)
     if not a.iso then
         usage("--iso is required")
     end
-    if a.profile ~= "nominal" and a.profile ~= "fault" then
-        usage("--profile must be 'nominal' or 'fault'")
+    if a.profile ~= "nominal" and a.profile ~= "fault" and a.profile ~= "kmalloc" then
+        usage("--profile must be 'nominal', 'fault' or 'kmalloc'")
     end
     return a
 end

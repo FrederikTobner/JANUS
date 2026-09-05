@@ -10,6 +10,16 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 project(JANUS VERSION 0.1.0 LANGUAGES C)
 
+# Must be called in this (root) directory scope, not a descendant, because
+# janus_register_smoke_tests() (kernel/cmake/SmokeTests.cmake) calls add_test()
+# from image/Targets.cmake, which is include()'d here at the root. CMake only
+# generates a directory's CTestTestfile.cmake — and honours add_test() calls
+# made in it — if enable_testing() ran in that same directory or an ancestor;
+# a descendant-only call (as kernel/tests/CMakeLists.txt used to rely on) does
+# not retroactively cover this scope, so those tests were silently dropped and
+# `ctest` reported "No tests were found!!!" with exit code 0.
+enable_testing()
+
 # JANUS_TARGET_ARCH: set by toolchain file, preset, or -D flag.
 # Must be checked AFTER project() because toolchain files aren't loaded until then.
 if(NOT DEFINED JANUS_TARGET_ARCH)

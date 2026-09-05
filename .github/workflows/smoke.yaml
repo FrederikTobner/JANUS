@@ -28,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         preset: [x86_64-gcc, x86_64-clang, aarch64-gcc, aarch64-clang]
-        profile: [nominal, fault]
+        profile: [nominal, fault, kmalloc]
 
     steps:
       - uses: actions/checkout@v4
@@ -57,6 +57,7 @@ jobs:
           cmake --preset ${{ matrix.preset }}
           -D JANUS_ENABLE_SMOKE_TESTS=ON
           ${{ matrix.profile == 'fault' && '-D JANUS_TEST_FAULTS=ON' || '' }}
+          ${{ matrix.profile == 'kmalloc' && '-D JANUS_TEST_KMALLOC=ON' || '' }}
 
       - name: Smoke test
         run: ctest --preset ${{ matrix.preset }} -R smoke
