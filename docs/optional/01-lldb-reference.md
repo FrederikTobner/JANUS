@@ -1,6 +1,6 @@
 # LLDB Reference
 
-Since I tend to forget things easily here is an overview of lldb, the command line debugger provided by the llvm project.
+This document provides an overview of the capabilities of lldb, the command line debugger provided by the llvm project.
 
 ## Connecting to QEMU
 

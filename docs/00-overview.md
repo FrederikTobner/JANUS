@@ -15,5 +15,5 @@ A detailed view of the dependency graph is generated automatically during each C
 ### Modular, Co-located Architecture
 
 Each module has clear boundaries, explicit dependencies, and a public header interface that is the sole point of contact with the rest of the kernel.
-Rather than centralising all platform code in a single `arch/` tree, like it is done in the Linux kernel, every subsystem and library contains its own `arch/` subdirectory.
+Rather than centralising all platform code in a single `arch/` tree, like it is done in the Linux kernel for example, every subsystem and library contains its own `arch/` subdirectory.
 This means a module's complete implementation, generic logic and platform-specific code alike, is navigable as a single unit without jumping between distant directories.

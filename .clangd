@@ -33,3 +33,22 @@ InlayHints:
   ParameterNames: Yes
   DeducedTypes: Yes
   Designators: Yes
+
+---
+
+# NASM
+
+## NASM (.asm) sources dont offer any benefit for clangd
+
+## Additionally they cause problems because the flags cant be processed by clangd
+
+## Therefor we can just ignore these files
+
+If:
+  PathMatch: .*\.asm
+
+CompileFlags:
+  CompilationDatabase: None
+
+Index:
+  Background: Skip

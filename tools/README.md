@@ -5,7 +5,7 @@ Development tools and utilities built separately from the kernel using their own
 ## Libraries
 
 Libraries used to create the tools.
-See [lib/README.md](lib/README.md).
+See [lib/README.md](./lib/README.md).
 
 ## Tools
 

@@ -26,19 +26,22 @@
 
 #include <janus/attributes.h>
 
-/// Full memory fence — orders all prior loads and stores (MFENCE).
+/// @brief Full memory fence 
+/// @details Orders all prior loads and stores by utilizing the MFENCE instruction.
 static __always_inline void arch_asm_barrier_full(void)
 {
     __asm__ volatile("mfence" ::: "memory");
 }
 
-/// Load fence — orders all prior load operations (LFENCE).
+/// @brief Load fence
+/// @details Orders all prior load operations by utilizing the LFENCE instruction.
 static __always_inline void arch_asm_barrier_load(void)
 {
     __asm__ volatile("lfence" ::: "memory");
 }
 
-/// Store fence — orders all prior store operations (SFENCE).
+/// @brief Store fence 
+/// @details Orders all prior store operations by utilizing the SFENCE instruction.
 static __always_inline void arch_asm_barrier_store(void)
 {
     __asm__ volatile("sfence" ::: "memory");

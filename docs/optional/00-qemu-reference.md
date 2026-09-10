@@ -1,6 +1,6 @@
 # QEMU Reference
 
-Cause I would loose me head if it would not be attached to my shoulders here is an overview of QEMU.
+The following document provides a reference for running JANUS in QEMU, including useful flags and commands for debugging.
 
 ## Invocation
 

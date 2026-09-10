@@ -14,24 +14,28 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
-/// @file asm/interrupt_vectors.h
-/// @brief Public asm interrupt-vector-table entry point.
+/// @file kmalloc_test.h
+/// @brief Kernel heap allocator self-test (build-flag guarded).
+///
+/// Only declared/compiled when JANUS_TEST_KMALLOC is defined. Used to verify
+/// kmalloc/kcalloc/krealloc/kfree behave correctly before relying on them
+/// elsewhere in the kernel.
 
-#ifndef ASM_INTERRUPT_VECTORS_H
-#define ASM_INTERRUPT_VECTORS_H
+#ifndef KMAIN_KMALLOC_TEST_H
+#define KMAIN_KMALLOC_TEST_H
 
-#include <asm/capabilities.h>
-#include <janus/attributes.h>
+#ifdef JANUS_TEST_KMALLOC
 
-#if ASM_CAP_INTERRUPT_VECTOR_TABLE
-#include <arch/impl/asm/interrupt_vectors.h>
+/// @brief Run the kernel heap allocator self-test.
+///
+/// Exercises kmalloc(), kcalloc(), krealloc() and kfree() with a fixed
+/// sequence of allocation patterns and validates the reported heap
+/// statistics. Panics with a message identifying the failing case if any
+/// check fails; otherwise returns normally so the kernel continues booting.
+///
+/// Must be called after mm_slab_alloc_init() has completed successfully.
+void kmain_kmalloc_test(void);
 
-/// @brief Load the CPU's interrupt vector table from the given table pointer
-/// @param table Pointer to the interrupt vector table to load
-static __always_inline void asm_load_interrupt_vectors(void const * table)
-{
-    arch_asm_load_interrupt_vectors(table);
-}
-#endif /* ASM_CAP_INTERRUPT_VECTOR_TABLE */
+#endif /* JANUS_TEST_KMALLOC */
 
-#endif /* ASM_INTERRUPT_VECTORS_H */
+#endif /* KMAIN_KMALLOC_TEST_H */

@@ -10,8 +10,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 project(JANUS VERSION 0.1.0 LANGUAGES C)
 
-# JANUS_TARGET_ARCH: set by toolchain file, preset, or -D flag.
-# Must be checked AFTER project() because toolchain files aren't loaded until then.
+enable_testing()
+
 if(NOT DEFINED JANUS_TARGET_ARCH)
     set(JANUS_TARGET_ARCH "x86_64" CACHE STRING "Target architecture (x86_64 or aarch64)")
     message(STATUS "JANUS_TARGET_ARCH not set, defaulting to x86_64")
@@ -29,10 +29,6 @@ elseif(JANUS_TARGET_ARCH STREQUAL "aarch64")
 endif()
 
 include(platform/Detection)
-
-# Shared, arch-dependent fact needed both by kernel/_start (which
-# kernel-<protocol>.elf variants to build) and by cmake/image/ (which ISO
-# targets to create) — see cmake/arch/<arch>/BootProtocols.cmake.
 include(arch/${JANUS_TARGET_ARCH}/BootProtocols)
 
 add_subdirectory(kernel)

@@ -25,19 +25,21 @@
 
 #include <janus/attributes.h>
 
-/// Wait For Interrupt — suspend execution until an interrupt arrives (WFI).
+/// @brief Wait For interrupt
+/// @details Suspends the execution until an interrupt arrives by utilizing the WFI instruction.
 static __always_inline void arch_asm_cpu_halt_once(void)
 {
     __asm__ volatile("wfi");
 }
 
-/// Disable all interrupts by setting the DAIF mask (IRQ, FIQ, SError, Debug).
+/// @brief Disable all interrupts by setting the DAIF mask (IRQ, FIQ, SError, Debug).
 static __always_inline void arch_asm_irq_disable_local(void)
 {
     __asm__ volatile("msr daifset, #0xF" ::: "memory");
 }
 
-/// Enable all interrupts by clearing the DAIF mask (IRQ, FIQ, SError, Debug).
+/// @brief Enables all interupts
+/// @details This is done by clearing the DAIF mask (IRQ, FIQ, SError, Debug).
 static __always_inline void arch_asm_irq_enable_local(void)
 {
     __asm__ volatile("msr daifclr, #0xF" ::: "memory");

@@ -112,7 +112,7 @@ isr_stub_table:
     %assign v v+1
 %endrep
 
-; Mark the stack as non-executable.  Without this section the GNU linker
-; infers an executable stack from the NASM object, which triggers a
-; deprecation warning and is a security concern.
+; Mark the stack as non-executable.
+; Without this section the GNU linker infers an executable stack from the NASM object.
+; This triggers a deprecation warning and additionally is a security concern.
 section .note.GNU-stack noalloc noexec nowrite progbits
