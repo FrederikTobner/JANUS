@@ -1,3 +1,19 @@
+/*****************************************************************************
+ * Copyright (C) 2026 by Frederik Tobner                                     *
+ *                                                                           *
+ * This file is part of JANUS.                                               *
+ *                                                                           *
+ * Permission to use, copy, modify, and distribute this software and its     *
+ * documentation under the terms of the GNU Affero General Public License is *
+ * hereby granted.                                                           *
+ * No representations are made about the suitability of this software for    *
+ * any purpose.                                                              *
+ * It is provided "as is" without express or implied warranty.               *
+ * See the <https://www.gnu.org/licenses/agpl-3.0.en.html>                   *
+ * GNU Affero General Public License                                         *
+ * License for more details.                                                 *
+ ****************************************************************************/
+
 #include <janus/attributes.h>
 #include <janus/errno.h>
 
@@ -5,10 +21,19 @@
 #include <mm/pmm.h>
 #include <mm/slab_allocator.h>
 
+/// @brief Size of a single slab page in bytes
 #define KMALLOC_PAGE_SIZE   4096ULL
+
+/// @brief Minimum alignment guaranteed by kmalloc/kcalloc/krealloc
 #define KMALLOC_MIN_ALIGN   16ULL
+
+/// @brief Magic number for slab validation
 #define KMALLOC_SLAB_MAGIC  0x4B4D41C4C534C42ULL
+
+/// @brief Size of the slab header in bytes
 #define KMALLOC_SLAB_HDR    48ULL
+
+/// @brief Usable bytes in a slab page after accounting for the slab header
 #define KMALLOC_PAGE_USABLE (KMALLOC_PAGE_SIZE - KMALLOC_SLAB_HDR) // 4096 - 48 = 4048 bytes usable for objects
 
 typedef struct kmalloc_slab kmalloc_slab_t;
@@ -58,12 +83,40 @@ static kmalloc_stats_t g_stats;
 static u64 g_hhdm_offset;
 static bool g_initialized;
 
+/// @brief Convert a requested allocation size to the corresponding size class class index. Returns KMALLOC_NUM_CLASSES if the size is too large for any class.
+/// @param size The requested allocation size in bytes
+/// @return The index of the size class, or KMALLOC_NUM_CLASSES if the size is too large
 static u32 kmalloc_size_to_class(u32 size);
+
+/// @brief Get the size class index of a given slab. Returns KMALLOC_NUM_CLASSES if the slab's object size does not match any class.
+/// @param slab The slab to check
+/// @return The index of the size class, or KMALLOC_NUM_CLASSES if the slab's object size does not match any class
 static u32 kmalloc_class_of_slab(kmalloc_slab_t const * slab);
+
+/// @brief Grow the given cache by allocating a new slab page and initializing its free list. Returns NULL if allocation fails.
+/// @param cache The cache to grow
+/// @return A pointer to the new slab, or NULL if allocation fails
 static kmalloc_slab_t * kmalloc_grow(kmalloc_cache_t * cache);
+
+/// @brief Push a slab onto the cache's partial list. The slab must have at least one free object.
+/// @param cache The cache to push the slab onto
+/// @param slab The slab to push
 static void kmalloc_partial_push(kmalloc_cache_t * cache, kmalloc_slab_t * slab);
+
+/// @brief Remove a slab from the cache's partial list. The slab must be in the list.
+/// @param cache The cache to remove the slab from
+/// @param slab The slab to remove
 static void kmalloc_partial_remove(kmalloc_cache_t * cache, kmalloc_slab_t * slab);
+
+/// @brief Fill a memory region with a given byte value. Used to implement kcalloc.
+/// @param dest The destination memory region
+/// @param value The byte value to fill with
 static void kmalloc_fill(void * dest, u8 value, size_t n);
+
+/// @brief Copy a memory region from src to dest. Used to implement krealloc.
+/// @param dest The destination memory region
+/// @param src The source memory region
+/// @param n The number of bytes to copy
 static void kmalloc_copy(void * dest, void const * src, size_t n);
 
 error_t mm_slab_alloc_init(u64 hhdm_offset)
@@ -99,11 +152,6 @@ static u32 kmalloc_size_to_class(u32 size)
 
 static kmalloc_slab_t * kmalloc_grow(kmalloc_cache_t * cache)
 {
-    // A size class larger than a single page can hold would leave the new slab with
-    // zero objects (an empty free_list), which the caller is never prepared to handle.
-    // All current classes satisfy object_size <= KMALLOC_PAGE_USABLE, so count is always
-    // at least 1, but this guard keeps that invariant explicit and fails safely instead
-    // of handing back a slab with nothing to allocate from.
     u32 const count = (u32) (KMALLOC_PAGE_USABLE / cache->object_size);
     if (count == 0) {
         return NULL; // object_size exceeds a single page; misconfigured size class

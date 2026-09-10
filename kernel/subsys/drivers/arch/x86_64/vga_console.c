@@ -44,10 +44,6 @@ __cold console_ops_t const * vga_console_init(__unused display_info_t const * cf
     return &vga_console_backend;
 }
 
-// ---------------------------------------------------------------------------
-// Static backend ops
-// ---------------------------------------------------------------------------
-
 static void vga_put_cell(u16 x, u16 y, char c, u8 fg, u8 bg)
 {
     vga_write_cell(g_vga, x, y, c, fg, bg);

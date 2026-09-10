@@ -28,10 +28,12 @@
 
 /// @brief Sets the stack pointer the CPU switches to on exception entry
 ///
-/// On architectures where exception entry selects a distinct banked stack register
+/// @details On architectures where exception entry selects a distinct banked stack register
 /// (aarch64: SP_EL1), this points that register at a valid mapped stack.
 /// Architectures that source the exception stack form a descriptor table instead (x86_64: IST1 in the TSS)
 /// don't have this capability.
+///
+/// @param stack_top Pointer to the top of the exception stack (stack grows downwards)
 static __always_inline void asm_set_exception_stack(void const * stack_top)
 {
     arch_asm_set_exception_stack(stack_top);

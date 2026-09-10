@@ -20,14 +20,11 @@
 #ifndef X86_64_IMPL_ASM_CAPABILITIES_H
 #define X86_64_IMPL_ASM_CAPABILITIES_H
 
-#define ASM_ARCH_X86_64                     1
-#define ASM_ARCH_AARCH64                    0
-
-#define ASM_CAP_LOCAL_IRQ_CONTROL           1
-#define ASM_CAP_IDLE_WAIT_INTERRUPT         1
-#define ASM_CAP_TLB_INVALIDATE_PAGE         1
-#define ASM_CAP_TLB_INVALIDATE_ALL          0
-#define ASM_CAP_PORT_IO                     1
+#define ASM_CAP_LOCAL_IRQ_CONTROL           1 // x86_64 supports local interrupt control via CLI/STI instructions
+#define ASM_CAP_IDLE_WAIT_INTERRUPT         1 // x86_64 supports idle wait for interrupts using the HLT instruction
+#define ASM_CAP_TLB_INVALIDATE_PAGE         1 // x86_64 supports per-page TLB invalidation using the INVLPG instruction
+#define ASM_CAP_TLB_INVALIDATE_ALL          0 // x86_64 does not have a single instruction to invalidate the entire TLB; it requires CR3 reload or INVLPG for each page
+#define ASM_CAP_PORT_IO                     1 // x86_64 supports port I/O using IN/OUT instructions
 #define ASM_CAP_INTERRUPT_VECTOR_TABLE      1 // x86_64 uses the IDT for interrupt vectors
 #define ASM_CAP_SEGMENT_DESCRIPTORS         1 // x86_64 uses segment descriptors (GDT/IDT/LDT)
 #define ASM_CAP_FAULT_ADDRESS_REGISTER      1 // x86_64 has a fault address register (CR2)

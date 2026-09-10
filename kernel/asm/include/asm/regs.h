@@ -53,11 +53,16 @@ static __always_inline void asm_write_ttbr0_el1(u64 val)
 }
 #else
 // Unified page table base model (x86_64) uses CR3 for both user/kernel mappings.
+
+/// @brief Read the current page table base register (CR3)
+/// @return The current value of CR3
 static __always_inline u64 asm_read_cr3(void)
 {
     return arch_asm_read_cr3();
 }
 
+/// @brief Write a new value to the page table base register (CR3)
+/// @param val The new value to write to CR3
 static __always_inline void asm_write_cr3(u64 val)
 {
     arch_asm_write_cr3(val);
