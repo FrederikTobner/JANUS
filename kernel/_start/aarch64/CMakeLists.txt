@@ -28,6 +28,7 @@ janus_add_kernel(
         boot_limine 
         drivers 
         interrupts 
+        kmalloc
         mm
     OBJECTS 
         _start_limine 

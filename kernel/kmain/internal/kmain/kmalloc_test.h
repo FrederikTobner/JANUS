@@ -33,7 +33,7 @@
 /// statistics. Panics with a message identifying the failing case if any
 /// check fails; otherwise returns normally so the kernel continues booting.
 ///
-/// Must be called after mm_slab_alloc_init() has completed successfully.
+/// Must be called after kmalloc_init() has completed successfully.
 void kmain_kmalloc_test(void);
 
 #endif /* JANUS_TEST_KMALLOC */

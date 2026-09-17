@@ -36,6 +36,7 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
                 boot_limine 
                 drivers 
                 interrupts 
+            kmalloc
                 mm
         OBJECTS 
                 _start_common 
@@ -60,6 +61,7 @@ if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
                 boot_multiboot2
                 drivers 
                 interrupts 
+            kmalloc
                 mm
         OBJECTS 
                 _start_common 

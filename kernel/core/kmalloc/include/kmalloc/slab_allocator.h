@@ -14,6 +14,9 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
+/// @file slab_allocator.h
+/// @brief Interface for the slab-based kernel heap allocator.
+
 #ifndef JANUS_SLAB_ALLOCATOR_H
 #define JANUS_SLAB_ALLOCATOR_H
 
@@ -27,13 +30,27 @@ typedef struct {
     u64 free_count;
 } kmalloc_stats_t;
 
+/// @brief Callback type used to allocate one physical page for slab growth.
+typedef phys_addr_t (*kmalloc_page_alloc_fn)(void);
+
+/// @brief Callback type used to free one physical page when a slab is reclaimed.
+typedef void (*kmalloc_page_free_fn)(phys_addr_t phys);
+
+/// @brief Register the physical page source used by the slab allocator.
+///
+/// Must be called before kmalloc_init(). Both callbacks must be non-NULL.
+/// @param alloc_fn Callback used to allocate one physical page
+/// @param free_fn Callback used to free one physical page
+void kmalloc_register_page_source(kmalloc_page_alloc_fn alloc_fn, kmalloc_page_free_fn free_fn);
+
 /// @brief Initialize the kernel heap allocator
 ///
-/// Must be called exactly once after mm_pmm_init(). Records the HHDM offset used to address slab pages and clears all
-/// size-class state.
+/// Must be called exactly once after a page source has been registered via
+/// kmalloc_register_page_source(). Records the HHDM offset used to address
+/// slab pages and clears all size-class state.
 /// @param hhdm_offset The HHDM offset used to address slab pages_in_use
 /// @return JANUS_OK on success, or an error code on failure
-error_t mm_slab_alloc_init(u64 hhdm_offset);
+error_t kmalloc_init(u64 hhdm_offset);
 
 /// @brief Allocate at least `size` bytes of memory from the kernel heap
 ///

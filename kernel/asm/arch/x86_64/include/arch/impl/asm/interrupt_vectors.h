@@ -17,8 +17,9 @@
 /// @file arch/impl/asm/interrupt_vectors.h
 /// @brief x86_64 interrupt-vector-table load primitive.
 ///
-/// Raw inline-assembly wrapper for LIDT. This is the only permitted site for
-/// __asm__ volatile on x86_64 for interrupt vector table loading.
+/// Raw inline-assembly wrapper for LIDT (Load Interrupt Descriptor Table) instruction.
+///
+/// This is the only permitted site for __asm__ volatile on x86_64 for interrupt vector table loading.
 /// Consumed by the interrupts subsystem's x86_64 implementation.
 
 #ifndef X86_64_IMPL_ASM_INTERRUPT_VECTORS_H
@@ -27,7 +28,7 @@
 #include <janus/attributes.h>
 #include <janus/types.h>
 
-/// Install the IDT (Interrupt Descriptor Table) via LIDT.
+/// Install the IDT (Interrupt Descriptor Table) by using the LIDT instruction.
 ///
 /// @param idtr Pointer to a 10-byte pseudo-descriptor { u16 limit; u64 base }.
 static __always_inline void arch_asm_load_interrupt_vectors(void const * idtr)

@@ -24,7 +24,7 @@
 #include <janus/types.h>
 #include <kio/die.h>
 #include <kio/output.h>
-#include <mm/slab_allocator.h>
+#include <kmalloc/slab_allocator.h>
 
 /// @brief Number of self-contained test cases run by kmain_kmalloc_test().
 #define KMALLOC_TEST_CASE_COUNT          11

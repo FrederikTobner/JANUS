@@ -14,12 +14,15 @@
  * License for more details.                                                 *
  ****************************************************************************/
 
+/// @file slab_allocator.c
+/// @brief Implementation of the slab-based kernel heap allocator.
+
 #include <janus/attributes.h>
 #include <janus/errno.h>
 
 #include <kio/die.h>
-#include <mm/pmm.h>
-#include <mm/slab_allocator.h>
+#include <kmalloc/slab_allocator.h>
+#include <mem/mem.h>
 
 /// @brief Size of a single slab page in bytes
 #define KMALLOC_PAGE_SIZE   4096ULL
@@ -82,18 +85,23 @@ static kmalloc_cache_t g_caches[KMALLOC_NUM_CLASSES];
 static kmalloc_stats_t g_stats;
 static u64 g_hhdm_offset;
 static bool g_initialized;
+static kmalloc_page_alloc_fn g_page_alloc;
+static kmalloc_page_free_fn g_page_free;
 
-/// @brief Convert a requested allocation size to the corresponding size class class index. Returns KMALLOC_NUM_CLASSES if the size is too large for any class.
+/// @brief Convert a requested allocation size to the corresponding size class class index. Returns KMALLOC_NUM_CLASSES
+/// if the size is too large for any class.
 /// @param size The requested allocation size in bytes
 /// @return The index of the size class, or KMALLOC_NUM_CLASSES if the size is too large
 static u32 kmalloc_size_to_class(u32 size);
 
-/// @brief Get the size class index of a given slab. Returns KMALLOC_NUM_CLASSES if the slab's object size does not match any class.
+/// @brief Get the size class index of a given slab. Returns KMALLOC_NUM_CLASSES if the slab's object size does not
+/// match any class.
 /// @param slab The slab to check
 /// @return The index of the size class, or KMALLOC_NUM_CLASSES if the slab's object size does not match any class
 static u32 kmalloc_class_of_slab(kmalloc_slab_t const * slab);
 
-/// @brief Grow the given cache by allocating a new slab page and initializing its free list. Returns NULL if allocation fails.
+/// @brief Grow the given cache by allocating a new slab page and initializing its free list. Returns NULL if allocation
+/// fails.
 /// @param cache The cache to grow
 /// @return A pointer to the new slab, or NULL if allocation fails
 static kmalloc_slab_t * kmalloc_grow(kmalloc_cache_t * cache);
@@ -108,21 +116,19 @@ static void kmalloc_partial_push(kmalloc_cache_t * cache, kmalloc_slab_t * slab)
 /// @param slab The slab to remove
 static void kmalloc_partial_remove(kmalloc_cache_t * cache, kmalloc_slab_t * slab);
 
-/// @brief Fill a memory region with a given byte value. Used to implement kcalloc.
-/// @param dest The destination memory region
-/// @param value The byte value to fill with
-static void kmalloc_fill(void * dest, u8 value, size_t n);
+void kmalloc_register_page_source(kmalloc_page_alloc_fn alloc_fn, kmalloc_page_free_fn free_fn)
+{
+    g_page_alloc = alloc_fn;
+    g_page_free = free_fn;
+}
 
-/// @brief Copy a memory region from src to dest. Used to implement krealloc.
-/// @param dest The destination memory region
-/// @param src The source memory region
-/// @param n The number of bytes to copy
-static void kmalloc_copy(void * dest, void const * src, size_t n);
-
-error_t mm_slab_alloc_init(u64 hhdm_offset)
+error_t kmalloc_init(u64 hhdm_offset)
 {
     if (g_initialized) {
         return JANUS_EINVAL;
+    }
+    if (g_page_alloc == NULL || g_page_free == NULL) {
+        return JANUS_ENOTREADY;
     }
 
     g_hhdm_offset = hhdm_offset;
@@ -157,7 +163,7 @@ static kmalloc_slab_t * kmalloc_grow(kmalloc_cache_t * cache)
         return NULL; // object_size exceeds a single page; misconfigured size class
     }
 
-    phys_addr_t phys_page = mm_pmm_alloc_page();
+    phys_addr_t phys_page = g_page_alloc();
     if (phys_page == 0) {
         return NULL; // Out of physical memory
     }
@@ -244,8 +250,9 @@ void kfree(void * ptr)
     }
     if (slab->free_count == slab->total_count) {
         kmalloc_partial_remove(cache, slab);
-        slab->magic = 0; // Invalidate the slab
-        mm_pmm_free_page(slab->phys_addr);
+        // Invalidate and free the slab page
+        slab->magic = 0;
+        g_page_free(slab->phys_addr);
         g_stats.pages_in_use--;
     }
 }
@@ -253,9 +260,11 @@ void kfree(void * ptr)
 void * krealloc(void * ptr, u64 new_size)
 {
     if (ptr == NULL) {
+        // No existing allocation, just allocate a new block
         return kmalloc(new_size);
     }
     if (new_size == 0) {
+        // Requested size is zero, free the existing block
         kfree(ptr);
         return NULL;
     }
@@ -266,15 +275,17 @@ void * krealloc(void * ptr, u64 new_size)
     }
 
     if (new_size <= slab->object_size) {
-        return ptr; // No need to reallocate
+        // No need to reallocate
+        return ptr;
     }
 
     void * new_ptr = kmalloc(new_size);
     if (new_ptr == NULL) {
-        return NULL; // Out of memory
+        // Out of memory
+        return NULL;
     }
 
-    kmalloc_copy(new_ptr, ptr, slab->object_size);
+    mem_copy(new_ptr, ptr, slab->object_size);
     kfree(ptr);
     return new_ptr;
 }
@@ -286,7 +297,7 @@ void * kcalloc(u64 size)
     }
     void * ptr = kmalloc(size);
     if (ptr != NULL) {
-        kmalloc_fill(ptr, 0, size);
+        mem_set(ptr, 0, size);
     }
     return ptr;
 }
@@ -297,23 +308,6 @@ void kmalloc_get_stats(kmalloc_stats_t * stats)
         return;
     }
     *stats = g_stats;
-}
-
-static void kmalloc_fill(void * dest, u8 value, size_t n)
-{
-    u8 * d = (u8 *) dest;
-    for (size_t i = 0; i < n; ++i) {
-        d[i] = value;
-    }
-}
-
-static void kmalloc_copy(void * dest, void const * src, size_t n)
-{
-    u8 * d = (u8 *) dest;
-    u8 const * s = (u8 const *) src;
-    for (size_t i = 0; i < n; ++i) {
-        d[i] = s[i];
-    }
 }
 
 static u32 kmalloc_class_of_slab(kmalloc_slab_t const * slab)

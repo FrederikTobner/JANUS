@@ -27,6 +27,7 @@ janus_add_subsys(kmain SOURCES ${INIT_SOURCES}
         fmt
         interrupts
         kio
+        kmalloc
         mm
 )
 
