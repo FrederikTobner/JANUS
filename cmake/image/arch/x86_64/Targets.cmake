@@ -38,10 +38,10 @@ function(janus_add_special_targets_x86_64)
     # QEMU -kernel requires Multiboot1 headers, which we don't provide
     janus_error_target(run-elf
         "QEMU -kernel only supports Multiboot1, not Multiboot2."
-        "Use 'ninja run-limine' to boot via ISO instead.")
+        "Use the target 'run-limine' to boot via ISO instead.")
     janus_error_target(debug-elf
         "QEMU -kernel only supports Multiboot1, not Multiboot2."
-        "Use 'ninja debug-limine' instead.")
+        "Use the target 'debug-limine' instead.")
 
     # UEFI boot via OVMF
     add_custom_target(run-uefi

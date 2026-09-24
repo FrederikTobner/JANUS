@@ -5,10 +5,10 @@ They build the real ISO, boot it in QEMU headless, and assert on the serial cons
 
 ## Layout
 
-| File             | Responsibility                                                       |
-|------------------|----------------------------------------------------------------------|
-| `run_smoke.lua`  | Launch QEMU under `timeout(1)`, scrape serial, assert, report.       |
-| `profiles.lua`   | The marker tables (`nominal`, `fault`, `kmalloc`) — the single source of truth. |
+| File             | Responsibility                                                                  |
+|------------------|---------------------------------------------------------------------------------|
+| `run_smoke.lua`  | Launch QEMU under `timeout(1)`, scrape serial, assert, report.                  |
+| `profiles.lua`   | The marker tables (`nominal`, `fault`, `kmalloc`)                               |
 
 ## Requirements
 

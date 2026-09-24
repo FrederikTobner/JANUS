@@ -82,12 +82,15 @@ function(janus_check_required_tools)
         list(APPEND INSTALL_HINTS "  ${QEMU_BINARY}:\n${_hint}")
     endif()
 
-    # grub-mkrescue (GRUB ISO creation)
-    find_program(GRUB_MKRESCUE_EXECUTABLE grub-mkrescue)
-    if(NOT GRUB_MKRESCUE_EXECUTABLE)
-        list(APPEND MISSING_TOOLS "grub-mkrescue")
-        list(APPEND INSTALL_HINTS "  grub-mkrescue:\n    Arch: sudo pacman -S grub\n    Debian/Ubuntu: sudo apt install grub-pc-bin grub-common xorriso mtools")
-    endif()
+    # Check whether GRUB is needed for the current boot protocols
+    if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
+        # grub-mkrescue (GRUB ISO creation)
+        find_program(GRUB_MKRESCUE_EXECUTABLE grub-mkrescue)
+        if(NOT GRUB_MKRESCUE_EXECUTABLE)
+            list(APPEND MISSING_TOOLS "grub-mkrescue")
+            list(APPEND INSTALL_HINTS "  grub-mkrescue:\n    Arch: sudo pacman -S grub\n    Debian/Ubuntu: sudo apt install grub-pc-bin grub-common xorriso mtools")
+        endif()
+    endif() # if("multiboot2" IN LISTS JANUS_BOOT_PROTOCOLS)
 
     # Limine is fetched automatically via FetchContent (no system install needed)
 
@@ -233,7 +236,7 @@ function(janus_print_targets)
 
     message(STATUS "Available targets:")
     # Compute the widest command column so every " - " separator aligns.
-    # Column width = length of the longest "ninja <cmd>" string.
+    # Column width = length of the longest "<cmd>" string.
     set(_max_col 5) # bare "ninja"
     foreach(_cmd IN ITEMS "iso" "run-uefi" "run-elf")
         string(LENGTH "${_cmd}" _len)
@@ -251,20 +254,20 @@ function(janus_print_targets)
             endif()
         endforeach()
     endforeach()
-    # Print one aligned target line: "  ninja [<cmd>]<pad> - <desc>"
+    # Print one aligned target line: "  [<cmd>]<pad> - <desc>"
     macro(_janus_msg _cmd _desc)
         if("${_cmd}" STREQUAL "")
             math(EXPR _pad "${_max_col} - 5 + 1")
             string(REPEAT " " ${_pad} _sp)
-            message(STATUS "  ninja${_sp}- ${_desc}")
+            message(STATUS "  ${_sp}- ${_desc}")
         else()
             string(LENGTH "${_cmd}" _clen)
             math(EXPR _pad "${_max_col} - 6 - ${_clen} + 1")
             string(REPEAT " " ${_pad} _sp)
-            message(STATUS "  ninja ${_cmd}${_sp}- ${_desc}")
+            message(STATUS "  ${_cmd}${_sp}- ${_desc}")
         endif()
     endmacro()
-    _janus_msg("" "Build kernel ELFs")
+    _janus_msg("all" "Build all kernel ELFs")
     _janus_msg("iso" "Create all ISOs for this architecture")
     foreach(_proto IN LISTS JANUS_BOOT_PROTOCOLS)
         _janus_msg("iso-${_proto}" "Create ISO for the ${_proto} boot protocol")

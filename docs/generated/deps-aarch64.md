@@ -6,9 +6,11 @@ graph TD
     gfx("gfx")
     fmt("fmt")
     page_tables("page_tables")
+    mem("mem")
   end
   subgraph core_layer["Core Layer"]
     kio(["kio"])
+    kmalloc(["kmalloc"])
   end
   subgraph subsystem_layer["Subsystem Layer"]
     boot["boot"]
@@ -33,6 +35,8 @@ graph TD
   page_tables --> janus_asm
   kio --> fmt
   kio --> janus_asm
+  kmalloc --> mem
+  kmalloc --> kio
   boot -.-> janus_contract_memmap
   boot -.-> janus_contract_display
   boot_limine --> boot
@@ -45,11 +49,13 @@ graph TD
   kmain --> fmt
   kmain --> interrupts
   kmain --> kio
+  kmain --> kmalloc
   kmain --> mm
   kernel_limine_elf --> boot
   kernel_limine_elf --> boot_limine
   kernel_limine_elf --> drivers
   kernel_limine_elf --> interrupts
+  kernel_limine_elf --> kmalloc
   kernel_limine_elf --> mm
   kernel_limine_elf --> kmain
 ```

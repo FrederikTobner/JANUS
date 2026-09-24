@@ -1,15 +1,10 @@
 # Boot subsystem: protocol-agnostic core
-# Protocol implementations live in protocol/limine/ and protocol/multiboot2/
-
 janus_add_subsys(boot
     DEPENDENCIES
         janus_contract_memmap
         janus_contract_display
 )
-
-# Protocol libraries (plain add_library, not subsystems)
-add_subdirectory(protocol/limine)
-if(JANUS_TARGET_ARCH STREQUAL "x86_64")
-    # Multiboot2 is only supported on x86_64, so only add that protocol if we're building for that architecture.
-    add_subdirectory(protocol/multiboot2)
-endif()
+# Specific boot protocol implementations
+foreach(protocol IN LISTS JANUS_BOOT_PROTOCOLS)
+    add_subdirectory(protocol/${protocol})
+endforeach()

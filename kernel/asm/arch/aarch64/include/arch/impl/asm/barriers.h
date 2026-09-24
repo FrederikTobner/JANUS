@@ -35,7 +35,7 @@ static __always_inline void arch_asm_barrier_full(void)
 
 /// @brief Instruction synchronisation barrier
 /// @details flushes the pipeline and refetch instructions by utilizing the ISB instruction.
-static __always_inline void arch_asm_barrier_load(void)
+static __always_inline void arch_asm_barrier_instruction(void)
 {
     __asm__ volatile("isb" ::: "memory");
 }

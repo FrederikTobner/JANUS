@@ -1,7 +1,7 @@
 # Kernel Root Directory
 
 Contains all the code needed to create the JANUS kernel.
-The kernel is built as a freestanding executable (`kernel.elf`) that can be booted by Limine or GRUB (Multiboot2).
+The kernel is built as a freestanding executable (`kernel-<protocol>.elf`) that can be booted by Limine or GRUB under x86\_64 using the multiboot2 boot protocol.
 
 ## Sub Folders
 

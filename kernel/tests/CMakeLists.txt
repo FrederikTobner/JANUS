@@ -1,1 +1,1 @@
-include(SmokeTests)
+add_subdirectory(smoke)

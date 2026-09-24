@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
-# Set C standard
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-# Allow GNU extension
 set(CMAKE_C_EXTENSIONS ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")

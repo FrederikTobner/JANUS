@@ -33,9 +33,9 @@ static __always_inline void arch_asm_barrier_full(void)
     __asm__ volatile("mfence" ::: "memory");
 }
 
-/// @brief Load fence
-/// @details Orders all prior load operations by utilizing the LFENCE instruction.
-static __always_inline void arch_asm_barrier_load(void)
+/// @brief Instruction fence
+/// @details Ensures that all prior instructions have been fetched and executed by utilizing the LFENCE instruction.
+static __always_inline void arch_asm_barrier_instruction(void)
 {
     __asm__ volatile("lfence" ::: "memory");
 }

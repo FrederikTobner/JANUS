@@ -264,7 +264,7 @@ void * krealloc(void * ptr, u64 new_size)
         return kmalloc(new_size);
     }
     if (new_size == 0) {
-        // Requested size is zero, free the existing block
+        // Requested size is zero, therefore free the existing block
         kfree(ptr);
         return NULL;
     }

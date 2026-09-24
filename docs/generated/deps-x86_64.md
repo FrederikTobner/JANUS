@@ -20,8 +20,8 @@ graph TD
     kmain["kmain"]
   end
   subgraph protocol_libraries["Protocol Libraries"]
-    boot_limine[["boot_limine"]]
     boot_multiboot2[["boot_multiboot2"]]
+    boot_limine[["boot_limine"]]
   end
   subgraph executables["Executables"]
     kernel_limine_elf{{"kernel-limine.elf"}}
@@ -41,8 +41,8 @@ graph TD
   kmalloc --> kio
   boot -.-> janus_contract_memmap
   boot -.-> janus_contract_display
-  boot_limine --> boot
   boot_multiboot2 --> boot
+  boot_limine --> boot
   drivers -.-> janus_contract_display
   interrupts --> kio
   mm --> kio

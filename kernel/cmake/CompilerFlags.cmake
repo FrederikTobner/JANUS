@@ -8,7 +8,7 @@
 
 include_guard(GLOBAL)
 
-# Include kernel ABI flags for this architecture (sets JANUS_ARCH_FLAGS)
+# Include kernel ABI flags for this architecture which populates the JANUS_ARCH_FLAGS
 include(${CMAKE_CURRENT_LIST_DIR}/arch/${JANUS_TARGET_ARCH}/CompilerFlags.cmake)
 
 set(JANUS_COMPILE_OPTIONS_COMMON
@@ -20,7 +20,6 @@ set(JANUS_COMPILE_OPTIONS_COMMON
     -Wall
     -Wextra
     -Werror
-    # Additional warnings for stricter code quality
     -Wconversion
     -Wimplicit
     -Wcast-qual

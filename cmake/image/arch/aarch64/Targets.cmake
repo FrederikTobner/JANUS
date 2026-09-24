@@ -59,7 +59,7 @@ function(janus_add_special_targets_aarch64)
         COMMAND ${CMAKE_COMMAND} -E echo
             "         The kernel will not receive Limine protocol data."
         COMMAND ${CMAKE_COMMAND} -E echo
-            "         Use 'ninja run-limine' for proper Limine boot."
+            "         Use the target 'run-limine' for proper Limine boot."
         COMMAND ${CMAKE_COMMAND} -E echo "QEMU debug log: ${QEMU_DEBUG_LOG}"
         COMMAND ${QEMU_BINARY}
             -M virt -cpu cortex-a72

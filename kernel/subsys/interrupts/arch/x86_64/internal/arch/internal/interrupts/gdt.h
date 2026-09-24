@@ -60,7 +60,6 @@ typedef struct {
 } __packed gdt_ptr_t;
 
 /// GDT selectors (offsets into the kernel GDT).
-#define GDT_SEL_NULL 0x00 ///< Null descriptor
 #define GDT_SEL_CODE 0x08 ///< Kernel code segment
 #define GDT_SEL_DATA 0x10 ///< Kernel data segment
 #define GDT_SEL_TSS  0x18 ///< Task State Segment descriptor

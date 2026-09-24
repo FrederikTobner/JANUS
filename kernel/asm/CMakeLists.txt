@@ -1,10 +1,3 @@
-# JANUS asm — Inline Assembly Primitives
-#
-# Defines the 'janus_asm' INTERFACE target.
-# The include path resolves #include <asm/foo.h> through the same
-# include -> arch/include -> arch/<arch>/include chain used by the
-# other kernel libraries.
-
 add_library(janus_asm INTERFACE)
 
 target_include_directories(janus_asm
@@ -35,7 +28,6 @@ endforeach()
 set(JANUS_ASM_CLANGD_DUMMY "${CMAKE_CURRENT_BINARY_DIR}/clangd_dummy.c")
 file(WRITE "${JANUS_ASM_CLANGD_DUMMY}" "${JANUS_ASM_CLANGD_DUMMY_CONTENT}")
 
-# EXCLUDE_FROM_ALL keeps this out of the default build
 add_library(janus_asm_clangd_dummy OBJECT EXCLUDE_FROM_ALL "${JANUS_ASM_CLANGD_DUMMY}")
 target_link_libraries(janus_asm_clangd_dummy PRIVATE janus_asm)
 janus_apply_compile_flags(janus_asm_clangd_dummy)

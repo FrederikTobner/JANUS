@@ -10,7 +10,7 @@
 
 include_guard(GLOBAL)
 
-if(JANUS_COMPILER_CLANG)
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(JANUS_ARCH_FLAGS
         -target x86_64-elf
         -mcmodel=kernel # Required for kernel code that may be >4GB in size
@@ -19,7 +19,7 @@ if(JANUS_COMPILER_CLANG)
         -mno-sse2
         -mno-mmx
     )
-elseif(JANUS_COMPILER_GCC)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     # -fno-pic/-fno-pie: Arch Linux's system GCC is configured with --enable-default-pie,
     # but -mcmodel=kernel requires non-PIC code.
     set(JANUS_ARCH_FLAGS

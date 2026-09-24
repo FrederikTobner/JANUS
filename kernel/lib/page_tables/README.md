@@ -1,3 +1,3 @@
-# page\_tables — AArch64 MMU Library
+# page\_tables
 
 Stateless library for creating and managing page tables.

@@ -1,6 +1,6 @@
 # JANUS Build and Utility Scripts
 
-This directory contains shell scripts for building, testing, and running JANUS.
+This directory contains lua scripts for building, testing, and running JANUS.
 
 ## Content
 

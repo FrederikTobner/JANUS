@@ -6,11 +6,11 @@ The entire kernel source tree is partitioned into layers ordered by abstraction 
 The single governing rule is that dependencies may only point downward, meaning that a module may depend on anything in a lower layer, but never on a peer in the same layer or on anything above it.
 A violation causes a configure-time fatal error by CMake, before any compiler is invoked.
 
-|Location                   | Name          | Description                                                           |
+|Location                   | Name          Description                                                             |
 |---------------------------|---------------|-----------------------------------------------------------------------|
 | kernel/include/           | Global        | types.h, attributes.h, config.h                                       |
 | kernel/asm/               | ASM layer     | janus_asm INTERFACE; sole owner of raw assembly instruction wrappers  |
-| kernel/_start/            | Entry         | assembly entry point, linker script, creates kernel.elf               |
+| kernel/_start/            | Entry         | assembly entry point, linker script, creates kernel-\<protocol\>.elf  |
 | kernel/kmain/             | Composition   | the only module permitted to depend on subsystems                     |
 | kernel/lib/               | Libraries     | no inter-library dependencies                                         |
 | kernel/core/              | Core services | may use libraries, must not use subsystems                            |
@@ -62,6 +62,7 @@ kernel/
 
 Architecture-specific code is co-located with the module that needs it rather than being aggregated in a centralised `arch/` tree.
 A subsystem's complete implementation in particular both the platform-agnostic logic and the per-architecture code, is therefor navigable as a single unit.
+
 ## Dependency Graph
 
 A Mermaid dependency diagram is generated automatically during each CMake configure run and written to `docs/generated/`. Contract edges are rendered with dashed arrows to distinguish type-sharing relationships from module dependencies.
