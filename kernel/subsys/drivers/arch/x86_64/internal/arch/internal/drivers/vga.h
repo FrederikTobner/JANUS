@@ -61,31 +61,6 @@ vga_write_cell(u16 volatile * buffer, u16 x, u16 y, char character, u8 foregroun
     }
 }
 
-/// @brief Read a character from the VGA buffer.
-///
-/// @param buffer Pointer to VGA buffer
-/// @param x      Column (0 to VGA_WIDTH-1)
-/// @param y      Row (0 to VGA_HEIGHT-1)
-/// @param character      Output: character (may be NULL)
-/// @param foreground     Output: foreground color (may be NULL)
-/// @param background     Output: background color (may be NULL)
-static __always_inline void
-vga_read_cell(u16 const volatile * buffer, u16 x, u16 y, char * character, u8 * foreground, u8 * background)
-{
-    if (buffer && x < VGA_WIDTH && y < VGA_HEIGHT) {
-        u16 entry = buffer[(y * VGA_WIDTH) + x];
-        if (character) {
-            *character = (char) (entry & 0xFF);
-        }
-        if (foreground) {
-            *foreground = (entry >> 8) & 0x0F;
-        }
-        if (background) {
-            *background = (entry >> 12) & 0x0F;
-        }
-    }
-}
-
 /// @brief Set the VGA hardware cursor position.
 ///
 /// @param x Column (0 to VGA_WIDTH-1)

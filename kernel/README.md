@@ -1,13 +1,13 @@
 # Kernel Root Directory
 
 Contains all the code needed to create the JANUS kernel.
-The kernel is built as a freestanding executable (`kernel.elf`) that can be booted by Limine or GRUB (Multiboot2).
+The kernel is built as a freestanding executable (`kernel-<protocol>.elf`) that can be booted by Limine or GRUB under x86\_64 using the multiboot2 boot protocol.
 
 ## Sub Folders
 
 ### cmake/
 
-Kernel-only CMake helper functions (`janus_add_library`, `janus_add_core`, `janus_add_subsys`, ...) and kernel ABI compiler flags. Only ever included from `kernel/CMakeLists.txt`. See [cmake/README.md](cmake/README.md) for more details.
+Kernel-only CMake helper functions (`janus_add_library`, `janus_add_core`, `janus_add_subsys`, ...) and kernel ABI compiler flags. Only ever included from `kernel/CMakeLists.txt`. See [cmake/README.md](./cmake/README.md) for more details.
 
 ### asm
 
@@ -30,7 +30,7 @@ See [kmain/README.md](kmain/README.md) for more details.
 ### lib/
 
 Freestanding utility libraries shared across subsystems
-See [lib/README.md](lib/README.md) for more details.
+See [lib/README.md](./lib/README.md) for more details.
 
 ### core/
 

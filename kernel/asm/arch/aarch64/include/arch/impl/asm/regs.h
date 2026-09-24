@@ -29,7 +29,7 @@
 
 /// Read the faulting address (FAR_EL1) register.
 ///
-/// @return Faulting virtual address.
+/// @return The faulting virtual address.
 static __always_inline u64 arch_asm_read_fault_address(void)
 {
     u64 val;

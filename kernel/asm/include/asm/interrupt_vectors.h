@@ -26,6 +26,8 @@
 #if ASM_CAP_INTERRUPT_VECTOR_TABLE
 #include <arch/impl/asm/interrupt_vectors.h>
 
+/// @brief Load the CPU's interrupt vector table from the given table pointer
+/// @param table Pointer to the interrupt vector table to load
 static __always_inline void asm_load_interrupt_vectors(void const * table)
 {
     arch_asm_load_interrupt_vectors(table);

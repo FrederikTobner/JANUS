@@ -13,3 +13,4 @@ These rules are enforced by the CMake registry validation.
 ## Current Modules
 
 - [kio](./kio/README.md) provides formatted output and panic service (`kprintf`, `vkprintf`, `kpanic`)
+- [kmalloc](./kmalloc/README.md) provides kernel heap allocation (`kmalloc`, `kcalloc`, `krealloc`, `kfree`)

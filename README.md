@@ -1,5 +1,5 @@
 <p align="center"><a href="https://github.com/FrederikTobner/JANUS"><img src="./images/JANUS_Logo_Small.jpg" alt="JANUS Logo" height="180"/></a></p>
-<p align="center">A monolithic kernel, supporting x86_64 and aarch64.</p>
+<p align="center">A small monolithic kernel, supporting x86_64 and aarch64.</p>
 
 [![Build](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/build.yaml?branch=main&label=Build&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/build.yaml)
 [![Tools](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/tools.yaml?branch=main&label=Tools&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/tools.yaml)
@@ -30,16 +30,16 @@ Currently the following presets are defined:
 For creating all bootable ISO's for the current architecture with the supported boot protocols, the following command can be used:
 
 ```bash
-ninja -C build-x86_64-gcc iso         
+cmake --build --preset x86_64-clang --target iso
 ```
 
 For running the kernel in QEMU every supported boot protocol defines its own target:
 
 ```bash
-ninja -C build-x86_64-gcc run-<protocol>         # E.g ninja -C build-x86_64-gcc run-limine
+cmake --build --preset x86_64-clang --target run-<protocol>  # E.g cmake --build --preset x86_64-gcc --target run-limine
 ```
 
-Currently JANUS supports the following boot protocols per architecture:
+The following boot protocols are supported by JANUS (per cpu architecture):
 
 | Architecture | Supported Boot Protocols |
 |--------------|--------------------------|

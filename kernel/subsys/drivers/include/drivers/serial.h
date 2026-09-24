@@ -52,7 +52,7 @@ void drivers_serial_putc(char c);
 /// @param str The string to write.
 void drivers_serial_puts(char const * str);
 
-/// @brief Read a character (non-blocking).
+/// @brief Read a character (non-blocking). Currently unused.
 /// @return The character read, or -1 if none available.
 s32 drivers_serial_getc(void);
 

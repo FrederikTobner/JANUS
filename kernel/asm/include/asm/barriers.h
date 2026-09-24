@@ -23,16 +23,19 @@
 #include <arch/impl/asm/barriers.h>
 #include <asm/capabilities.h>
 
+/// @brief Full memory barrier
 static __always_inline void asm_barrier_full(void)
 {
     arch_asm_barrier_full();
 }
 
-static __always_inline void asm_barrier_load(void)
+/// @brief Instruction barrier
+static __always_inline void asm_barrier_instruction(void)
 {
-    arch_asm_barrier_load();
+    arch_asm_barrier_instruction();
 }
 
+/// @brief Store memory barrier
 static __always_inline void asm_barrier_store(void)
 {
     arch_asm_barrier_store();

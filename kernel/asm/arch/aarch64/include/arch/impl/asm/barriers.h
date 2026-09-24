@@ -26,19 +26,22 @@
 
 #include <janus/attributes.h>
 
-/// Data synchronisation barrier — complete all memory accesses before continuing (DSB SY).
+/// @brief Data synchronisation barrier
+/// @details Completes all memory accesses before continuing by utilizing the DSB SY assemlbly instruction.
 static __always_inline void arch_asm_barrier_full(void)
 {
     __asm__ volatile("dsb sy" ::: "memory");
 }
 
-/// Instruction synchronisation barrier — flush the pipeline and refetch instructions (ISB).
-static __always_inline void arch_asm_barrier_load(void)
+/// @brief Instruction synchronisation barrier
+/// @details flushes the pipeline and refetch instructions by utilizing the ISB instruction.
+static __always_inline void arch_asm_barrier_instruction(void)
 {
     __asm__ volatile("isb" ::: "memory");
 }
 
-/// Data memory barrier — order memory accesses without completing them (DMB SY).
+/// @brief Data memory barrier
+/// @details Orders memory accesses without completing them by utilizing the DMB SY instruction.
 static __always_inline void arch_asm_barrier_store(void)
 {
     __asm__ volatile("dmb sy" ::: "memory");

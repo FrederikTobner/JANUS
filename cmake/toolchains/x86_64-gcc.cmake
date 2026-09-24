@@ -3,7 +3,6 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
 set(JANUS_TARGET_ARCH "x86_64" CACHE STRING "Target architecture")
 
-# Use system GCC (or cross-compiler if on non-x86 host)
 if(NOT CMAKE_C_COMPILER)
     find_program(X86_64_GCC gcc REQUIRED)
     set(CMAKE_C_COMPILER "${X86_64_GCC}")

@@ -11,13 +11,13 @@
 
 include_guard(GLOBAL)
 
-if(JANUS_COMPILER_CLANG)
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     set(JANUS_ARCH_FLAGS
         --target=aarch64-elf
         -march=armv8-a
         -mgeneral-regs-only
     )
-elseif(JANUS_COMPILER_GCC)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(JANUS_ARCH_FLAGS
         -march=armv8-a
         -mgeneral-regs-only

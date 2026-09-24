@@ -44,7 +44,6 @@
 // Flag register bits
 #define PL011_FR_TXFF      (1 << 5) // Transmit FIFO full
 #define PL011_FR_RXFE      (1 << 4) // Receive FIFO empty
-#define PL011_FR_BUSY      (1 << 3) // UART busy
 
 // Control register bits
 #define PL011_CR_RXE       (1 << 9) // Receive enable

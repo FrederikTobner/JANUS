@@ -95,7 +95,7 @@ error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt)
     virt_addr_t va = virt_addr;
     for (phys_addr_t pa = page_start; pa < page_end; pa += PAGE_SIZE, va += PAGE_SIZE) {
         phys_addr_t * l0_pte = mmu_get_or_create_page_table_entry(l0_phys, L0_INDEX(va), true);
-        if (!l0_pte) {
+        if (UNLIKELY(!l0_pte)) {
             return JANUS_ENOMEM;
         }
         phys_addr_t l1_phys = *l0_pte & PAGE_TABLE_ENTRY_ADDR_MASK;
@@ -120,7 +120,7 @@ error_t mmu_map_mmio(phys_addr_t phys_addr, u64 size, virt_addr_t * out_virt)
         asm_tlb_invalidate_page(v);
     }
     asm_barrier_full();
-    asm_barrier_load();
+    asm_barrier_instruction();
     *out_virt = virt_addr;
     return JANUS_OK;
 }

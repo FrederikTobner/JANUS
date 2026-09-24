@@ -64,8 +64,6 @@ function(janus_add_contract NAME)
     # Store the short name (e.g. "memmap") as the diagram label.
     set("JANUS_CONTRACT_LABEL_${CONTRACT_TARGET}" "${NAME}"
         CACHE INTERNAL "Short diagram label for ${CONTRACT_TARGET}" FORCE)
-
-    message(STATUS "Contract '${NAME}' registered — consumers: ${ARG_CONSUMERS}")
 endfunction()
 
 # ---------------------------------------------------------------------------

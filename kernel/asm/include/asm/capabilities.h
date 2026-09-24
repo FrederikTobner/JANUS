@@ -31,24 +31,6 @@
 
 #define ASM_VALIDATE_BOOL_MACRO(name) STATIC_ASSERT(((name) == 0) || ((name) == 1), #name " must be 0 or 1")
 
-/* Required architecture selectors */
-
-// Build target is x86_64 (1) or not (0).
-#ifndef ASM_ARCH_X86_64
-#error "Missing required macro: ASM_ARCH_X86_64"
-#else
-ASM_VALIDATE_BOOL_MACRO(ASM_ARCH_X86_64);
-#endif
-
-// Build target is AArch64 (1) or not (0).
-#ifndef ASM_ARCH_AARCH64
-#error "Missing required macro: ASM_ARCH_AARCH64"
-#else
-ASM_VALIDATE_BOOL_MACRO(ASM_ARCH_AARCH64);
-#endif
-
-/* Required capability flags */
-
 // Local interrupt mask/unmask operations are available.
 #ifndef ASM_CAP_LOCAL_IRQ_CONTROL
 #error "Missing required macro: ASM_CAP_LOCAL_IRQ_CONTROL"
@@ -114,10 +96,5 @@ ASM_VALIDATE_BOOL_MACRO(ASM_CAP_PAGE_TABLE_BASE_MODEL_SPLIT);
 #endif
 
 #undef ASM_VALIDATE_BOOL_MACRO
-
-// Single architecture build validation: exactly one ASM_ARCH_* macro must be set to 1.
-#if ((ASM_ARCH_X86_64 + ASM_ARCH_AARCH64) != 1)
-#error "Exactly one ASM_ARCH_* macro must be set to 1"
-#endif
 
 #endif /* ASM_CAPABILITIES_H */

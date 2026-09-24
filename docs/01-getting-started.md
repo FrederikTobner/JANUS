@@ -7,11 +7,18 @@ Where a distribution-specific install command is given, Debian/Ubuntu and Arch L
 
 ### Build System
 
-CMake 3.20 or later is required, together with Ninja as the build backend.
+CMake 3.20 or later is required.
 
 ```bash
-sudo apt install cmake ninja-build   # Debian/Ubuntu
-sudo pacman -S cmake ninja            # Arch Linux
+sudo apt install cmake ninja-build      # Debian
+sudo pacman -S cmake ninja              # Arch Linux
+```
+
+As Generator Ninja is recommended, but others should work as well.
+
+```bash
+sudo apt install ninja-build            # Debian
+sudo pacman -S ninja                    # Arch Linux
 ```
 
 ### Compilers
@@ -32,7 +39,7 @@ sudo pacman -S aarch64-linux-gnu-gcc
 
 ### Assembler
 
-NASM is required for x86_64 assembly. aarch64 uses GAS, which ships with the cross-compiler toolchain and requires no separate installation.
+NASM is required for x86_64 assembly. aarch64 on the other hand uses GAS, which ships with the cross-compiler toolchain and therefor requires no separate installation.
 
 ```bash
 sudo apt install nasm
@@ -51,7 +58,8 @@ sudo pacman -S lldb gdb
 
 ### Emulator
 
-QEMU is used to run the kernel in a virtual machine. The `qemu-system-x86` and `qemu-system-arm` packages are required for x86_64 and aarch64 respectively.
+QEMU is used to run the kernel in a virtual machine.
+The `qemu-system-x86` and `qemu-system-arm` packages are required for x86_64 and aarch64 respectively.
 
 ```bash
 sudo apt install qemu-system-x86 qemu-system-arm
@@ -73,8 +81,8 @@ Limine itself is fetched automatically by CMake via `FetchContent` and does not 
 ### Language Server
 
 clangd provides IDE features such as autocompletion and jump-to-definition.
-The repository includes a `.clangd` configuration file that points clangd at the
-generated `compile_commands.json`.
+The repository includes a `.clangd` configuration file that points clangd at the root of the repository.
+The configuration file `compile_commands.json`is also generared in each build directory so creating a symbolic link to the proper architecture is the recomended option here.
 
 ```bash
 sudo apt install clangd
@@ -91,29 +99,3 @@ cmake --build --preset x86_64-gcc
 ```
 
 Each preset writes to its own build directory (`build-x86_64-gcc/`, etc.), so all four configurations can coexist on disk simultaneously.
-
-To build without presets, or to use a toolchain not covered by the presets:
-
-```bash
-# Native x86_64
-cmake -B build -G Ninja
-cmake --build build
-
-# Explicit cross-compilation
-cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/aarch64-gcc.cmake
-cmake --build build
-```
-
-## Build Targets
-
-| Target             | Description                                  |
-|--------------------|----------------------------------------------|
-| *(default)*        | Build `kernel.elf`                           |
-| `iso`              | Create all ISOs for this platform            |
-| `iso-limine`       | Limine ISO                                   |
-| `iso-multiboot2`   | Multiboot2 ISO via GRUB (x86_64 only)        |
-| `run-limine`       | Boot Limine ISO in QEMU                      |
-| `run-multiboot2`   | Boot Multiboot2 ISO in QEMU (x86_64 only)    |
-| `run-uefi`         | Boot in UEFI mode (requires OVMF)            |
-| `debug-limine`     | Limine ISO with GDB server on `:1234`        |
-| `debug-multiboot2` | Multiboot2 ISO with GDB server (x86_64 only) |

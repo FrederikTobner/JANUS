@@ -25,19 +25,19 @@
 
 #include <janus/attributes.h>
 
-/// Halt the CPU until the next interrupt (HLT).
+/// Halt the CPU until the next interrupt using the HLT instruction.
 static __always_inline void arch_asm_cpu_halt_once(void)
 {
     __asm__ volatile("hlt");
 }
 
-/// Disable external interrupts (CLI).
+/// Disable external interrupts using the CLI instruction.
 static __always_inline void arch_asm_irq_disable_local(void)
 {
     __asm__ volatile("cli" ::: "memory");
 }
 
-/// Enable external interrupts (STI).
+/// Enable external interrupts using the STI instruction.
 static __always_inline void arch_asm_irq_enable_local(void)
 {
     __asm__ volatile("sti" ::: "memory");

@@ -75,7 +75,7 @@ jobs:
           gcovr \
             --root tools \
             --object-directory build-tools-coverage \
-            --exclude '.*/test/.*' \
+            --exclude '.*/tests/.*' \
             --exclude '.*/googletest/.*' \
             --html-details coverage/index.html \
             --html-title "JANUS Tools — Coverage Report" \

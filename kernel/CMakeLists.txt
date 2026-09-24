@@ -1,15 +1,9 @@
-# Prepend so kernel's own cmake/ helpers are found before root cmake/'s
-# same-named modules (specifically Registry.cmake — this file is the KERNEL
-# registry wrapper, not the shared engine; see kernel/cmake/Registry.cmake).
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(Registry)
 include(CompilerFlags)
 include(Contract)
 
-include(Library)
-
-# Configure config.h from config.h.in
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/include/janus/config.h.in"
     "${CMAKE_BINARY_DIR}/include/janus/config.h"
@@ -19,32 +13,14 @@ configure_file(
 # Used to indicate that the kernel is being built (as opposed to userland code)
 add_compile_definitions(JANUS_KERNEL=1)
 
-# Architecture abstraction layer — defines janus_asm INTERFACE target
 add_subdirectory(asm)
-
-# Kernel libraries - These can only include the types from our include directory
 add_subdirectory(lib)
-
-# Kernel core services - may use libs, must NOT depend on subsystems
 add_subdirectory(core)
-
-# Kernel subsystems 
 add_subdirectory(subsys)
-
-# Kernel initialization (protocol-agnostic)
 add_subdirectory(kmain)
-
-# Entry point (creates kernel.elf, must be last)
 add_subdirectory(_start)
-
-# Tests of the kernel
 add_subdirectory(tests)
 
-# Validate subsystem/library registry for dependency isolation
 janus_validate_registry()
-
-# Validate contract consumer allowlists
 janus_validate_contracts()
-
-# Generate dependency diagram into the docs source tree (one file per architecture)
 janus_write_mermaid_diagram("${CMAKE_SOURCE_DIR}/docs/generated/deps-${JANUS_TARGET_ARCH}.md")

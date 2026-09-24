@@ -4,7 +4,7 @@
 -- Builds the kernel across all CMake presets (architecture × compiler)
 -- and creates ISO images via the umbrella 'iso' target.
 --
--- Usage: lua scripts/regression_check.lua [OPTIONS]
+-- Usage: lua scripts/build.lua [OPTIONS]
 -- Run with --help for full usage information.
 --
 -- @copyright Copyright (C) 2026 Frederik Tobner
@@ -249,15 +249,14 @@ local function print_summary()
     local col_iso  = 3  -- "ISO" header
     local col_time = 4  -- "Time" header
 
-    -- Separator
     local total_width = col_preset + 2 + col_iso + 2 + col_time + 2
-    local sep = string.rep("─", total_width)
+    local seperator = string.rep("─", total_width)
 
     -- Header
-    io.write("\n" .. sep .. "\n")
+    io.write("\n" .. seperator .. "\n")
     io.write(string.format(" %-" .. col_preset .. "s  %-" .. col_iso .. "s  %-" .. col_time .. "s\n",
         "Preset", "ISO", "Time"))
-    io.write(sep .. "\n")
+    io.write(seperator .. "\n")
 
     -- Rows
     local fail_count = 0
@@ -265,7 +264,6 @@ local function print_summary()
         local row = string.format(" %-" .. col_preset .. "s", r.preset)
         local preset_ok = r.configure
 
-        -- ISO column
         local cell
         if r.iso == nil then
             cell = C.dim .. "—" .. C.reset
@@ -283,7 +281,7 @@ local function print_summary()
         io.write(row .. "\n")
     end
 
-    io.write(sep .. "\n")
+    io.write(seperator .. "\n")
     if fail_count == 0 then
         io.write(string.format(" %s%d of %d presets passed%s\n\n",
             C.green, #results, #results, C.reset))
@@ -298,7 +296,7 @@ end
 --- Main entry point
 --- Discovers presets, filters them, and runs configure + build for each.
 local function main()
-    io.write(string.format("%s── JANUS pre-commit check ──%s\n\n", C.bold, C.reset))
+    io.write(string.format("%s── JANUS build ──%s\n\n", C.bold, C.reset))
 
     -- Discover and filter presets
     local all_presets = discover_presets()
@@ -310,7 +308,7 @@ local function main()
     -- Process each preset
     for i, preset in ipairs(presets) do
         local build_dir = ROOT .. "/build-" .. preset
-        local log_path  = build_dir .. "/regression_check.log"
+        local log_path  = build_dir .. "/build.log"
 
         -- Clear log
         os.execute(string.format("mkdir -p %q && : > %q", build_dir, log_path))
@@ -318,7 +316,6 @@ local function main()
         local t_start = now()
         local r = { preset = preset, elapsed = 0, configure = false, iso = nil }
 
-        -- Phase 1: Configure
         status(i, #presets, preset, "configuring...")
         local conf_ok = phase_configure(preset, build_dir, log_path)
         r.configure = conf_ok
@@ -338,7 +335,6 @@ local function main()
             goto continue
         end
 
-        -- Phase 2: Build all ISOs via umbrella target
         status(i, #presets, preset, "building iso...")
         local ok = phase_build(build_dir, "iso", log_path)
         r.iso = ok
@@ -353,7 +349,6 @@ local function main()
         ::continue::
     end
 
-    -- Summary
     local fail_count = print_summary()
     os.exit(fail_count == 0 and 0 or 1)
 end

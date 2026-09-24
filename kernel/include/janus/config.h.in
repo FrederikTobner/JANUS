@@ -73,20 +73,6 @@
 #define JANUS_KERNEL_VIRT_BASE 0xFFFFFFFF80000000UL
 
 /*
- * Compiler Detection
- */
-#if defined(__clang__)
-#define JANUS_COMPILER_CLANG 1
-#define JANUS_COMPILER_NAME  "Clang"
-#elif defined(__GNUC__)
-#define JANUS_COMPILER_GCC  1
-#define JANUS_COMPILER_NAME "GCC"
-#else
-#define JANUS_COMPILER_UNKNOWN 1
-#define JANUS_COMPILER_NAME    "Unknown"
-#endif
-
-/*
  * Debug Build Detection
  */
 #ifdef DEBUG

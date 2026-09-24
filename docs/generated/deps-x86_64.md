@@ -6,9 +6,11 @@ graph TD
     gfx("gfx")
     fmt("fmt")
     page_tables("page_tables")
+    mem("mem")
   end
   subgraph core_layer["Core Layer"]
     kio(["kio"])
+    kmalloc(["kmalloc"])
   end
   subgraph subsystem_layer["Subsystem Layer"]
     boot["boot"]
@@ -18,8 +20,8 @@ graph TD
     kmain["kmain"]
   end
   subgraph protocol_libraries["Protocol Libraries"]
-    boot_limine[["boot_limine"]]
     boot_multiboot2[["boot_multiboot2"]]
+    boot_limine[["boot_limine"]]
   end
   subgraph executables["Executables"]
     kernel_limine_elf{{"kernel-limine.elf"}}
@@ -35,10 +37,12 @@ graph TD
   page_tables --> janus_asm
   kio --> fmt
   kio --> janus_asm
+  kmalloc --> mem
+  kmalloc --> kio
   boot -.-> janus_contract_memmap
   boot -.-> janus_contract_display
-  boot_limine --> boot
   boot_multiboot2 --> boot
+  boot_limine --> boot
   drivers -.-> janus_contract_display
   interrupts --> kio
   mm --> kio
@@ -48,17 +52,20 @@ graph TD
   kmain --> fmt
   kmain --> interrupts
   kmain --> kio
+  kmain --> kmalloc
   kmain --> mm
   kernel_limine_elf --> boot
   kernel_limine_elf --> boot_limine
   kernel_limine_elf --> drivers
   kernel_limine_elf --> interrupts
+  kernel_limine_elf --> kmalloc
   kernel_limine_elf --> mm
   kernel_limine_elf --> kmain
   kernel_multiboot2_elf --> boot
   kernel_multiboot2_elf --> boot_multiboot2
   kernel_multiboot2_elf --> drivers
   kernel_multiboot2_elf --> interrupts
+  kernel_multiboot2_elf --> kmalloc
   kernel_multiboot2_elf --> mm
   kernel_multiboot2_elf --> kmain
 ```

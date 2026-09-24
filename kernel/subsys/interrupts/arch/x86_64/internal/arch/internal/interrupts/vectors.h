@@ -22,10 +22,7 @@
 
 #include <janus/types.h>
 
-#define VEC_INVALID_OPCODE 6  ///< #UD — Invalid Opcode (Undefined Instruction)
-#define VEC_DEVICE_NA      7  ///< #NM — Device Not Available (no math coprocessor)
 #define VEC_DOUBLE_FAULT   8  ///< #DF — Double Fault
-#define VEC_GP_FAULT       13 ///< #GP — General Protection fault
 #define VEC_PAGE_FAULT     14 ///< #PF — Page Fault
 
 /// Number of Intel-reserved exception vectors (0–31).
