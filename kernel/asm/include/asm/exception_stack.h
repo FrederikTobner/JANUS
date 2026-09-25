@@ -22,6 +22,7 @@
 
 #include <asm/capabilities.h>
 #include <janus/attributes.h>
+#include <janus/types.h>
 
 #if ASM_CAP_EXCEPTION_STACK_REGISTER
 #include <arch/impl/asm/exception_stack.h>
@@ -37,6 +38,22 @@
 static __always_inline void asm_set_exception_stack(void const * stack_top)
 {
     arch_asm_set_exception_stack(stack_top);
+}
+
+/// @brief Checks whether the CPU is currently running with the "current" stack
+/// register (e.g. SP_EL0 on aarch64) active, as opposed to the dedicated
+/// exception-entry stack register.
+///
+/// @details Intended as a boot-time invariant check before installing the
+/// vector table: the dedicated exception stack this capability sets up is
+/// only a genuinely separate, corruption-resilient stack if normal code never
+/// runs on it.
+///
+/// @return true if the CPU is on its normal execution stack, false if it is
+/// already on the exception-entry stack register.
+static __always_inline bool asm_exception_stack_inactive(void)
+{
+    return arch_asm_current_sp_is_sp0();
 }
 
 #endif /* ASM_CAP_EXCEPTION_STACK_REGISTER */
