@@ -76,7 +76,6 @@ __cold error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, v
     virt_addr_t mapped = 0;
     error_t map_err = mmu_map_mmio(PL011_PHYS_BASE, 0x1000, &mapped);
     if (map_err != JANUS_OK) {
-        kpanic("arch_serial_init: failed to map PL011 MMIO region: %d", map_err);
         return map_err;
     }
     g_pl011_base = mapped;
@@ -87,9 +86,7 @@ __cold error_t arch_serial_init(u64 hhdm_offset, phys_addr_t kernel_phys_base, v
     // Clear all pending interrupts
     mmio_write32(pl011_reg(PL011_REG_IMSC), 0);
 
-    // Set baud rate (115200 at 24MHz UART clock for QEMU virt)
-    // Divisor = 24000000 / (16 * 115200) = 13.0208...
-    // Integer part = 13, Fractional part = 0.0208 * 64 = 1.33 ≈ 1
+    // Set baud rate (115200 at 24MHz UART clock for QEMU virt, needs to be adopted for other platforms)
     mmio_write32(pl011_reg(PL011_REG_IBRD), 13);
     mmio_write32(pl011_reg(PL011_REG_FBRD), 1);
 

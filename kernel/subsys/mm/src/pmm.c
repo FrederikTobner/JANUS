@@ -35,6 +35,7 @@
 #include <janus/attributes.h>
 #include <janus/errno.h>
 #include <kio/die.h>
+#include <mem/mem.h>
 
 /// Page size in bytes (4 KiB)
 #define PAGE_SIZE           4096ULL
@@ -81,6 +82,9 @@ __cold error_t mm_pmm_init(boot_memmap_t const * memmap, phys_addr_t kernel_phys
     if (UNLIKELY(memmap == NULL)) {
         return JANUS_EINVAL;
     }
+
+    // Clear the allocation bitmap to avoid any problems upon re-initialization (for any future test cases)
+    mem_set(g_pmm.bitmap, 0, sizeof(g_pmm.bitmap));
 
     g_pmm.free_pages = 0;
     g_pmm.total_pages = 0;
