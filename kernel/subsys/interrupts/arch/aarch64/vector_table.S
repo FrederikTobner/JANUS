@@ -38,8 +38,8 @@
 
 /*
  * One vector-table slot. 
- * Kept tiny (4 instructions, well within 0x80 bytes):
- * the interrupted x0/x1 are stored first so x0 is free to carry the source
+ * Kept tiny (4 instructions, well within 0x80 bytes).
+ * The interrupted x0/x1 are stored first so x0 is free to carry the source
  * index into exc_common without losing any interrupted register value.
  */
 .macro VECTOR_ENTRY source
@@ -53,11 +53,11 @@
 // VBAR_EL1 requires the table base to be 2 KiB aligned.
 .balign 0x800
 janus_vector_table:
-    VECTOR_ENTRY 0    // Current EL, SP0,  Synchronous
+    VECTOR_ENTRY 0    // Current EL, SP0,  Synchronous <- real faults land here (kernel runs EL1t)
     VECTOR_ENTRY 1    // Current EL, SP0,  IRQ
     VECTOR_ENTRY 2    // Current EL, SP0,  FIQ
     VECTOR_ENTRY 3    // Current EL, SP0,  SError
-    VECTOR_ENTRY 4    // Current EL, SPx,  Synchronous <- real faults land here
+    VECTOR_ENTRY 4    // Current EL, SPx,  Synchronous
     VECTOR_ENTRY 5    // Current EL, SPx,  IRQ
     VECTOR_ENTRY 6    // Current EL, SPx,  FIQ
     VECTOR_ENTRY 7    // Current EL, SPx,  SError
@@ -73,9 +73,8 @@ janus_vector_table:
 /*
  * exc_common: shared save + dispatch.
  *
- * On entry: sp points at the reserved frame; x0 holds the 0..15 source index;
- * the interrupted x0/x1 are already stored at FRAME_OFF_X0. Never entered by
- * hardware directly — only reached via the per-slot `b exc_common`.
+ * On entry: sp points at the reserved frame, x0 holds the 0..15 source index and the interrupted x0/x1 are already stored at FRAME_OFF_X0.
+ * Never entered by hardware directly — only reached via the per-slot `b exc_common`.
  */
 exc_common:
     // Save the remaining general-purpose registers x2..x30 as interrupted.

@@ -22,6 +22,10 @@
 #include <janus/attributes.h>
 #include <janus/errno.h>
 
+/// @brief Initialize the AArch64 interrupt subsystem.
+///
+/// On AArch64 this function sets up the exception vector table and configures the necessary CPU registers to handle
+/// interrupts and exceptions appropriately.
 __cold error_t arch_interrupts_init(void)
 {
     return exceptions_install();

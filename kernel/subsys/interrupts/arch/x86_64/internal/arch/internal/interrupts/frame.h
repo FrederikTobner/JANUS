@@ -25,10 +25,10 @@
 
 /// @brief Full CPU state captured on exception entry.
 ///
-/// The field order MUST mirror the push order in isr.asm (lowest address
-/// first): the per-vector stub pushes the error code then the vector, the
-/// common tail pushes the general-purpose registers (r15 last → lowest
-/// address), and the CPU pushes the trap frame (rip..ss) automatically.
+/// The field order MUST mirror the push order in isr.asm (lowest address first).
+/// The per-vector stub pushes the error code then the vector.
+/// The common tail pushes the general-purpose registers (r15 last → lowest address), and the CPU pushes the trap frame
+/// (rip..ss) automatically.
 /// Do not reorder without updating isr.asm in lockstep.
 typedef struct {
     u64 r15; ///< General-purpose register R15

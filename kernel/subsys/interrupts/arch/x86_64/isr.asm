@@ -83,7 +83,7 @@ isr_common:
     mov rdi, rsp            ; arg0 = interrupt_frame_t *
     call interrupts_dispatch
 
-    ; Retained for completeness; interrupts_dispatch is __noreturn today
+    ; Retained for completeness; interrupts_dispatch is __noreturn at this point in time 
     pop r15
     pop r14
     pop r13

@@ -110,8 +110,21 @@ __cold error_t boot_init(boot_context_t * boot_context)
     display_info_t const none_display = {.mode = DISPLAY_MODE_NONE};
     boot_context->display = none_display;
 
-    multiboot_tag_t * tag = multiboot_first_tag((multiboot_info_t *) (phys_addr_t) g_mb2_info);
-    while (!multiboot_is_end_tag(tag)) {
+    multiboot_info_t * const mb2_info = (multiboot_info_t *) (phys_addr_t) g_mb2_info;
+    if (UNLIKELY(mb2_info->total_size < sizeof(multiboot_info_t))) {
+        return JANUS_EINVAL; // Truncated info block — cannot contain even a well-formed end tag
+    }
+
+    u8 const * const tags_end = (u8 const *) mb2_info + mb2_info->total_size;
+    multiboot_tag_t * tag = multiboot_first_tag(mb2_info);
+    while ((u8 const *) tag + sizeof(multiboot_tag_t) <= tags_end) {
+        if (multiboot_is_end_tag(tag)) {
+            break;
+        }
+        // A tag smaller than its own header would never advance the cursor so we reject it to avoid an infinite loop.
+        if (UNLIKELY(tag->size < sizeof(multiboot_tag_t))) {
+            return JANUS_EINVAL;
+        }
         if (tag->type == MULTIBOOT2_TAG_FRAMEBUFFER) {
             parse_framebuffer_tag(boot_context, (multiboot_tag_framebuffer_t const *) tag);
         } else if (tag->type == MULTIBOOT2_TAG_MMAP) {

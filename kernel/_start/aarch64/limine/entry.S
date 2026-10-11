@@ -22,8 +22,12 @@
  * - Higher-half paging (maps kernel at virtual address from ELF)
  * - A valid stack (64KB or per stack size request)
  *
- * We transition to EL1 if needed and call kernel_main.
- * Boot context is populated by boot_init inside kernel_main.
+ * We transition to EL1t if needed (dropping from EL2, or normalizing SPSel if
+ * Limine already handed off at EL1) and call kernel_main. The kernel commits to
+ * running at EL1t (SP_EL0 as the current stack) everywhere past this point, so
+ * SP_EL1 stays free for use as a dedicated exception-entry stack (see
+ * subsys/interrupts and asm/exception_stack.h). Boot context is populated by
+ * boot_init inside kernel_main.
  *
  * Note: Limine request structures are defined in common/limine_requests.c
  * for portability across architectures.
@@ -50,8 +54,13 @@
 .equ SPSR_EL2_A,       (1 << 8)   // SError mask
 .equ SPSR_EL2_I,       (1 << 7)   // IRQ mask
 .equ SPSR_EL2_F,       (1 << 6)   // FIQ mask
-.equ SPSR_EL2_EL1h,    (5 << 0)   // Return to EL1h (EL1 with SP_EL1)
-.equ SPSR_EL2_VALUE,   (SPSR_EL2_D | SPSR_EL2_A | SPSR_EL2_I | SPSR_EL2_F | SPSR_EL2_EL1h)
+// EL1t (SP_EL0 as the current stack) rather than EL1h: the exception-entry path
+// (see arch/impl/asm/exception_stack.h and subsys/interrupts) relies on SP_EL1
+// being a register the kernel never otherwise uses, so it can serve as a
+// dedicated, corruption-resilient exception stack (the aarch64 analog of the
+// x86 IST #DF stack). That only holds if normal code runs on SP_EL0.
+.equ SPSR_EL2_EL1t,    (4 << 0)   // Return to EL1t (EL1 with SP_EL0)
+.equ SPSR_EL2_VALUE,   (SPSR_EL2_D | SPSR_EL2_A | SPSR_EL2_I | SPSR_EL2_F | SPSR_EL2_EL1t)
 
 // SCTLR_EL1: System Control Register for EL1
 // Note: RES1 bits handled via ldr pseudo-instruction due to immediate encoding limits
@@ -110,8 +119,17 @@ _start_limine:
     ldr     x1, =0x30D00800
     orr     x0, x0, x1
     msr     sctlr_el1, x0
-    
-    // Set up SPSR_EL2 for return to EL1h
+
+    // `eret` only changes PC/PSTATE, it never moves data between banked SP
+    // registers. Whatever stack Limine gave us is only visible through the
+    // *currently active* SP right now (SP_EL2 or SP_EL0, depending on how EL2
+    // was entered) — it is not automatically inherited by SP_EL0 at EL1t.
+    // Seed SP_EL0 explicitly before dropping, so kernel_main doesn't run on
+    // whatever garbage SP_EL0 happens to hold.
+    mov     x2, sp
+    msr     sp_el0, x2
+
+    // Set up SPSR_EL2 for return to EL1t
     mov     x0, #SPSR_EL2_VALUE
     msr     spsr_el2, x0
     
@@ -124,12 +142,22 @@ _start_limine:
 
 .Lel1_entry:
     /*
-     * Now running at EL1
-     * Limine has already set up the stack for us
-     * Enter kernel_main — boot_init runs inside kernel_main
+     * Now running at EL1. Normalize to EL1t (SPSel = 0, SP_EL0 active): the
+     * EL2 drop above already lands here in EL1t, but Limine's handoff EL/SPSel
+     * when it enters directly at EL1 (the b.ne branch above) is not guaranteed.
+     * If we're already on SP_EL0 this is a no-op; otherwise carry the current
+     * stack value across the switch so it isn't lost.
      */
+    mrs     x0, spsel
+    and     x0, x0, #1
+    cbz     x0, .Lspsel_ok
+    mov     x1, sp
+    msr     spsel, #0
+    mov     sp, x1
+.Lspsel_ok:
 
-    // Enter kernel 
+    // Limine has already set up the stack for us (now normalized on SP_EL0)
+    // Enter kernel_main — boot_init runs inside kernel_main
     bl      kernel_main
 
     // If kernel_main returns, halt forever

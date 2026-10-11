@@ -13,10 +13,11 @@ AArch64 EL1 CPU-exception handling: turns synchronous faults into a readable dia
 
 ## Design notes
 
-- The kernel runs at EL1h (SPx) with no EL0, so genuine faults arrive through the "Current EL SPx / Synchronous" entry (source index 4). Every other entry is populated defensively and only ever panics as "unexpected".
+- The kernel runs at EL1t (SPSel = 0, SP_EL0 active) everywhere outside exception entry, so genuine faults arrive through the "Current EL SP0 / Synchronous" entry (source index 0). Every other entry is populated defensively and only ever panics as "unexpected". `exceptions_install()` asserts this SPSel invariant at boot before installing the vector table.
+- SP_EL1 is intentionally never used as a normal stack: `exceptions.c` points it at a dedicated `.bss` stack before the vectors go live, so it survives a corrupted SP_EL0 the same way the x86 IST `#DF` stack does. Entry to EL1 (from `_start_limine`) normalizes SPSel to 0 before calling `kernel_main`, whether the CPU arrived via the EL2 drop or directly at EL1.
 - The page-fault self-test (`JANUS_TEST_FAULTS`, kind 0) writes to `0x100000000` → a **Data Abort** (EC `0x25`) with `FAR_EL1 == 0x100000000`.
 
 ## Not yet implemented (future work)
 
 - Asynchronous interrupt (IRQ/FIQ) servicing — `DAIF` stays masked; those entries panic if reached.
-- Exception recovery/return (`ERET`) and a dedicated exception stack (the aarch64 analog of the x86 IST `#DF` stack).
+- Exception recovery/return (`ERET`) — currently every entry is fatal.

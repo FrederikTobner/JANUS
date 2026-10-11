@@ -25,19 +25,18 @@
 #include <arch/internal/interrupts/frame.h>
 #include <janus/attributes.h>
 
-/// @brief Build and load the kernel GDT (Global Descriptor Table) and TSS (Task
-///        State Segment), wiring IST1 (Interrupt Stack Table entry 1) to the
-///        dedicated #DF (Double Fault) stack.
+/// @brief Build and load the kernel GDT (Global Descriptor Table) and TSS (Task State Segment).
+///        Also wires IST1 (Interrupt Stack Table entry 1) to the dedicated #DF (Double Fault) stack.
 void gdt_install(void);
 
-/// @brief Populate all 256 IDT (Interrupt Descriptor Table) gates from the stub
-///        table and load it via LIDT.
+/// @brief Populate all 256 IDT (Interrupt Descriptor Table) gates from the stub table and load it via LIDT.
 void idt_install(void);
 
 /// @brief Common C dispatch for every ISR (Interrupt Service Routine) stub.
 ///
-/// Called from isr_common (isr.asm) with a pointer to the saved frame; reports
-/// the fault over kprintf/serial and halts. Never returns.
+/// Called from isr_common (isr.asm) with a pointer to the saved frame.
+/// The fault is reported over kprintf/serial and halts.
+/// Never returns.
 ///
 /// @param frame Snapshot of CPU state captured by the entry stub.
 __noreturn void interrupts_dispatch(interrupt_frame_t const * frame);

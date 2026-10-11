@@ -25,6 +25,9 @@
 #include <kio/die.h>
 #include <kio/output.h>
 
+#define DBG_CLASSES_LOWER_BOUND 0x30
+#define DBG_CLASSES_UPPER_BOUND 0x37
+
 /// @brief Human-readable label for each of the 16 entry-source indices.
 static char const * const k_source_labels[EXC_SRC_COUNT] = {
     "Current EL SP0 / Synchronous",
@@ -47,15 +50,13 @@ static char const * const k_source_labels[EXC_SRC_COUNT] = {
 
 /// @brief Print the full CPU register state captured in an interrupt frame.
 ///
-/// Writes x0..x30 (three per line) and the interrupted sp to the kernel console.
-///
 /// @param frame Interrupt frame captured by the entry path in vector_table.S.
 static void dump_registers(interrupt_frame_t const * frame);
 
 char const * interrupts_ec_mnemonic(u64 ec)
 {
     // Debug classes (breakpoint / step / watchpoint) share a contiguous range.
-    if (ec >= 0x30 && ec <= 0x37) {
+    if (ec >= DBG_CLASSES_LOWER_BOUND && ec <= DBG_CLASSES_UPPER_BOUND) {
         return "Debug event (breakpoint/step/watchpoint)";
     }
 

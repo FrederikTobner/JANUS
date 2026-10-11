@@ -39,8 +39,8 @@ typedef struct {
 
 /// @brief x86_64 TSS (Task State Segment).
 ///
-/// Only the IST (Interrupt Stack Table) and rsp fields are used by JANUS;
-/// the rest are present for hardware-layout correctness.
+/// Only the IST (Interrupt Stack Table) and rsp fields are used by the kernel as of now.
+/// The rest is only present for hardware-layout correctness.
 typedef struct {
     u32 reserved0;
     u64 rsp0; ///< Stack pointer for privilege level 0
