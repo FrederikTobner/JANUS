@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Copyright (C) 2025 by Frederik Tobner                                     *
  *                                                                           *
- * This file is part of JANUS.                                              *
+ * This file is part of JANUS.                                               *
  *                                                                           *
  * Permission to use, copy, modify, and distribute this software and its     *
  * documentation under the terms of the GNU Affero General Public License is *
@@ -42,11 +42,11 @@ typedef struct {
 
 /// @brief Initialize the physical memory manager
 ///
-/// Must be called once, after boot_init(), before any mm_pmm_alloc_page()
-/// calls. Parses the boot memory map and marks usable regions free.
+/// Must be called once, after boot_init(), before any mm_pmm_alloc_page() calls.
+/// Parses the boot memory map and marks usable regions free.
 /// The kernel image and the first 1 MiB are always reserved.
 ///
-/// @param memmap          Physical memory map from boot_init()
+/// @param memmap           Physical memory map from boot_init()
 /// @param kernel_phys_base Physical start address of the kernel image
 /// @param kernel_phys_end  Physical end address of the kernel image
 /// @return JANUS_OK on success, JANUS_EINVAL if memmap is NULL,
@@ -56,17 +56,18 @@ error_t mm_pmm_init(boot_memmap_t const * memmap, phys_addr_t kernel_phys_base, 
 /// @brief Allocate one physical page frame (4 KiB)
 ///
 /// Returns the physical address of a free page and marks it used.
-/// Returns 0 if no free frames remain (out of memory). Physical address 0
-/// is always reserved (low 1 MiB), so 0 is a safe failure sentinel.
-/// The returned address is always >= 1 MiB (low memory is never allocated).
+/// Returns 0 if no free frames remain (out of memory).
+/// Physical address 0 is always reserved (low 1 MiB), so 0 is a safe failure sentinel.
+/// The returned address is always >= 1 MiB, since low memory is never allocated.
 ///
 /// @return Physical address of the allocated page (page-aligned), or 0 on OOM
 phys_addr_t mm_pmm_alloc_page(void);
 
 /// @brief Free a previously allocated physical page frame
 ///
-/// Marks the page frame at @p phys as free. Traps (hardware fault) if
-/// @p phys is not page-aligned, out of range, or already free (double-free).
+/// Marks the page frame at @p phys as free.
+/// Panics via kpanic if @p phys is either not page-aligned, out of the tracking range, refers to lower reserved memory
+/// or has already been freed (double-free).
 ///
 /// @param phys Physical address returned by mm_pmm_alloc_page()
 void mm_pmm_free_page(phys_addr_t phys);

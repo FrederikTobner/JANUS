@@ -22,9 +22,14 @@
 #include <janus/attributes.h>
 #include <janus/errno.h>
 
+/// @brief Initialize the x86_64 interrupt subsystem.
+///
+/// On x86_64 this function builds and loads a kernel-owned GDT (Global Descriptor Table) and TSS (Task State Segment)
+/// with a dedicated IST (Interrupt Stack Table) stack for #DF (Double Fault).
+/// It then builds and loads a 256-entry IDT (Interrupt Descriptor Table)
 __cold error_t arch_interrupts_init(void)
 {
-    // GDT + TSS + IST must exist before the IDT references IST1 for #DF.
+    // GDT, TSS and IST must exist before the IDT references IST1 for #DF.
     gdt_install();
     idt_install();
     return JANUS_OK;

@@ -26,21 +26,21 @@
 /// @param dest Destination pointer
 /// @param value Byte value to store
 /// @param n Number of bytes to write
-/// @return dest
+/// @return destination pointer (dest)
 void * mem_set(void * dest, u8 value, u64 n);
 
 /// @brief Copy bytes from src to dest. Source and destination must not overlap.
 /// @param dest Destination pointer
 /// @param src Source pointer
 /// @param n Number of bytes to copy
-/// @return dest
+/// @return destination pointer (dest)
 void * mem_copy(void * dest, void const * src, u64 n);
 
 /// @brief Copy bytes from src to dest. Handles overlapping regions.
 /// @param dest Destination pointer
 /// @param src Source pointer
 /// @param n Number of bytes to move
-/// @return dest
+/// @return destination pointer (dest)
 void * mem_move(void * dest, void const * src, u64 n);
 
 /// @brief Compare two byte ranges lexicographically.

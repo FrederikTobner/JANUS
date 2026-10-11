@@ -32,10 +32,10 @@ extern u8 janus_vector_table[];
 
 /// Dedicated stack for exception entry (SP_EL1).
 ///
-/// The kernel main runs at EL1t (using SP_EL0); exceptions taken to EL1 switch to SP_EL1, which the bootloader leaves
-/// pointing at an unmapped low address.
-/// This kernel-image .bss stack is guaranteed mapped, so the entry path can save the frame without immediately
-/// faulting.
+/// The kernel main runs at EL1t (using SP_EL0).
+/// Exceptions taken to EL1 switch to SP_EL1, which the bootloader leaves pointing at an unmapped low address.
+/// This kernel-image .bss stack is guaranteed mapped.
+/// This means that the entry path can save the frame without immediately faulting.
 /// It also survives a corrupted user stack (SP_EL0), the aarch64 analog of the x86 IST #DF stack.
 static u8 g_exception_stack[EXCEPTION_STACK_SIZE] __aligned(16);
 

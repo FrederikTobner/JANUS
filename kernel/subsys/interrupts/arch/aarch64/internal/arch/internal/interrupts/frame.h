@@ -23,11 +23,8 @@
 /*
  * Byte offsets and reserved size of the captured frame.
  *
- * These live outside the __ASSEMBLER__ guard so vector_table.S (which is run through the C preprocessor)
- * is the single source of truth together with the struct below.
- * The STATIC_ASSERTs in the C section prove the struct matches these offsets,
- * so a mismatch between the store order in vector_table.S and interrupt_frame_t fails the build rather than corrupting
- * the report.
+ * These live outside the __ASSEMBLER__ guard so vector_table.S is the single source of truth together with the struct
+ * below.
  */
 #define FRAME_OFF_X0       0   ///< x[0] (x0..x30 occupy 0..240, 31 * 8 bytes)
 #define FRAME_OFF_SP       248 ///< interrupted stack pointer
@@ -37,9 +34,9 @@
 #define FRAME_OFF_FAR      280 ///< FAR_EL1
 #define FRAME_OFF_SOURCE   288 ///< entry-source index (0..15)
 
-/// Bytes reserved on the stack for the frame. The struct is 296 bytes (37 * 8);
-/// rounded up to a 16-byte multiple (AAPCS64 stack alignment) with 8 bytes of
-/// padding at the top.
+/// Bytes reserved on the stack for the frame.
+/// The struct is 296 bytes (37 * 8), which is rounded up to a 16-byte multiple (AAPCS64 stack alignment)
+/// with 8 bytes of padding at the top.
 #define AARCH64_FRAME_SIZE 304
 
 #ifndef __ASSEMBLER__
@@ -53,7 +50,7 @@
 /// The entry path reserves AARCH64_FRAME_SIZE bytes, saves x0..x30, then the interrupted sp and the syndrome system
 /// registers, and finally the synthesised source index.
 /// The dispatcher treats the saved stack region as this struct.
-/// Do not reorder without updating vector_table.S in lockstep — the STATIC_ASSERTs below guard the offsets.
+/// Do not reorder without updating vector_table.S in lockstep.
 typedef struct {
     u64 x[31];  ///< General-purpose registers x0..x30 (x30 = LR)
     u64 sp;     ///< Interrupted stack pointer (SP_EL1 at fault time)
@@ -73,6 +70,7 @@ STATIC_ASSERT(__offsetof(interrupt_frame_t, far) == FRAME_OFF_FAR, "far offset m
 STATIC_ASSERT(__offsetof(interrupt_frame_t, source) == FRAME_OFF_SOURCE, "source offset mismatch");
 STATIC_ASSERT(sizeof(interrupt_frame_t) == 296, "frame must be 37 u64 slots");
 STATIC_ASSERT(AARCH64_FRAME_SIZE >= sizeof(interrupt_frame_t), "reserved frame must fit struct");
+// Guards the size of the reserved frame against the struct size.
 STATIC_ASSERT((AARCH64_FRAME_SIZE % 16) == 0, "frame size must be 16-byte aligned");
 
 #endif /* __ASSEMBLER__ */

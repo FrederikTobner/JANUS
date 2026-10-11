@@ -78,7 +78,10 @@ static u32 const g_class_sizes[] = {
     (u32) KMALLOC_PAGE_USABLE,
 };
 
+// Number of size classes available in the slab allocator
 #define KMALLOC_NUM_CLASSES (sizeof(g_class_sizes) / sizeof(g_class_sizes[0]))
+
+// Maximum allocation size supported by the slab allocator. This is equal to the usable bytes in a single page.
 #define KMALLOC_MAX_SIZE    KMALLOC_PAGE_USABLE
 
 static kmalloc_cache_t g_caches[KMALLOC_NUM_CLASSES];
@@ -153,7 +156,8 @@ static u32 kmalloc_size_to_class(u32 size)
             return i;
         }
     }
-    return KMALLOC_NUM_CLASSES; // Invalid class index
+    // Invalid class index
+    return KMALLOC_NUM_CLASSES;
 }
 
 static kmalloc_slab_t * kmalloc_grow(kmalloc_cache_t * cache)

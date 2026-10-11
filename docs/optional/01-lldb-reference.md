@@ -59,25 +59,25 @@ f 2                                  # switch to frame 2
 ## Memory Inspection
 
 ```
-memory read 0xB8000 --count 64       # read 64 bytes from address
-x/16xw 0xB8000                       # read 16 words (GDB-style)
-memory write 0x1234 -- 0x41          # write a byte
+memory read 0xB8000 --count 64          # read 64 bytes from address
+x/16xw 0xB8000                          # read 16 words (GDB-style)
+memory write 0x1234 -- 0x41             # write a byte
 memory find --size 1 0x0 0x100000 0x55  # search physical memory
 ```
 
 ## Disassembly
 
 ```
-disassemble --frame                  # disassemble around current PC
-disassemble --name boot_init         # disassemble a named function
-disassemble --start-address 0x100000 --end-address 0x100040
+disassemble --frame                                             # disassemble around current PC
+disassemble --name boot_init                                    # disassemble a named function
+disassemble --start-address 0x100000 --end-address 0x100040     # dissasemble the function between the two provided addresses
 ```
 
 ## Watchpoints
 
 ```
-watchpoint set variable my_var       # break on write
-watchpoint set variable my_var -w read_write  # break on read or write
-watchpoint set expression -- &g_pmm_bitmap    # break on address
+watchpoint set variable my_var                  # break on write
+watchpoint set variable my_var -w read_write    # break on read or write
+watchpoint set expression -- &g_pmm_bitmap      # break on address
 watchpoint list
 ```

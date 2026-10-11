@@ -38,8 +38,8 @@
 
 /*
  * One vector-table slot. 
- * Kept tiny (4 instructions, well within 0x80 bytes):
- * the interrupted x0/x1 are stored first so x0 is free to carry the source
+ * Kept tiny (4 instructions, well within 0x80 bytes).
+ * The interrupted x0/x1 are stored first so x0 is free to carry the source
  * index into exc_common without losing any interrupted register value.
  */
 .macro VECTOR_ENTRY source
@@ -73,9 +73,8 @@ janus_vector_table:
 /*
  * exc_common: shared save + dispatch.
  *
- * On entry: sp points at the reserved frame; x0 holds the 0..15 source index;
- * the interrupted x0/x1 are already stored at FRAME_OFF_X0. Never entered by
- * hardware directly — only reached via the per-slot `b exc_common`.
+ * On entry: sp points at the reserved frame, x0 holds the 0..15 source index and the interrupted x0/x1 are already stored at FRAME_OFF_X0.
+ * Never entered by hardware directly — only reached via the per-slot `b exc_common`.
  */
 exc_common:
     // Save the remaining general-purpose registers x2..x30 as interrupted.
