@@ -212,6 +212,11 @@ function(janus_add_targets)
     if(COMMAND janus_register_smoke_tests)
         janus_register_smoke_tests()
     endif()
+
+    # Host side runner for the in-kernel ktest suite
+    if(COMMAND janus_register_ktest_tests)
+        janus_register_ktest_tests()
+    endif()
 endfunction()
 
 function(janus_setup_targets)

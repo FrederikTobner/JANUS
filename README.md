@@ -8,6 +8,16 @@
 [![Coverage](https://codecov.io/gh/FrederikTobner/JANUS/graph/badge.svg)](https://codecov.io/gh/FrederikTobner/JANUS)
 [![C Standard](https://img.shields.io/badge/C-C17%20freestanding-blue?logo=c)](https://en.cppreference.com/w/c/17)
 
+## Features
+
+* Higher half kernel
+* TTY driver
+* Framebuffer graphics
+* VGA graphics
+* Output using the serial port
+* Paging
+* Physical memory manager
+
 ## Quick Start
 
 For building the kernel the usage of one of the presets is recommended to simplify the configuration.
@@ -20,10 +30,10 @@ cmake --build --preset x86_64-gcc
 
 Currently the following presets are defined:
 
-| Architecture | Compiler | Preset name  |
-|--------------|----------|--------------|
-| x86_64       | clang    | x86_64-clang |
-| x86_64       | gcc      | x86_64-gcc   |
+| Architecture | Compiler | Preset name   |
+|--------------|----------|---------------|
+| x86_64       | clang    | x86_64-clang  |
+| x86_64       | gcc      | x86_64-gcc    |
 | aarch64      | clang    | aarch64-clang |
 | aarch64      | gcc      | aarch64-gcc   |
 

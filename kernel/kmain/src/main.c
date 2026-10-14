@@ -36,6 +36,9 @@
 #include <kmalloc/slab_allocator.h>
 #include <mm/pmm.h>
 
+#ifdef JANUS_ENABLE_KTEST
+#include <ktest/ktest.h>
+#endif
 // Greeting message printed after booting has been completed and the console has ben initialized
 #define JANUS_HELLO_MESSAGE                  \
     "     _   _    _   _ _   _ ____  \n"     \
@@ -89,5 +92,9 @@ __noreturn void kernel_main(void)
     kmain_kmalloc_test();
 #endif
 
+#ifdef JANUS_ENABLE_KTEST
+    ktest_run_all();
+#else
     asm_cpu_halt_forever();
+#endif
 }

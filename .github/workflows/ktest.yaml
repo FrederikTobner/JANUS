@@ -1,0 +1,69 @@
+name: Kernel KTest
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - ".github/workflows/ktest.yaml"
+      - ".github/actions/**"
+  pull_request:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - ".github/workflows/ktest.yaml"
+      - ".github/actions/**"
+
+jobs:
+  ktest:
+    name: ${{ matrix.preset }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [x86_64-gcc, x86_64-clang, aarch64-gcc, aarch64-clang]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-build-env
+        with:
+          arch: ${{ startsWith(matrix.preset, 'aarch64') && 'aarch64' || 'x86_64' }}
+
+      - uses: ./.github/actions/setup-compiler
+        with:
+          arch: ${{ startsWith(matrix.preset, 'aarch64') && 'aarch64' || 'x86_64' }}
+          compiler: ${{ endsWith(matrix.preset, 'clang') && 'clang' || 'gcc' }}
+
+      - name: Install QEMU (+ aarch64 UEFI firmware) and Lua
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends lua5.4
+          if [[ "${{ matrix.preset }}" == aarch64-* ]]; then
+            sudo apt-get install -y --no-install-recommends qemu-system-arm qemu-efi-aarch64 ipxe-qemu
+          else
+            sudo apt-get install -y --no-install-recommends qemu-system-x86
+          fi
+
+      - name: Configure ktest
+        run: cmake --preset ${{ matrix.preset }} -D JANUS_ENABLE_KTEST=ON
+
+      - name: Build kernel and ISO
+        run: cmake --build --preset ${{ matrix.preset }}
+
+      - name: Run ktest
+        run: ctest --preset ${{ matrix.preset }} -R ktest --output-on-failure
+
+      - name: Upload serial logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ktest-serial-${{ matrix.preset }}
+          path: build-${{ matrix.preset }}/ktest-*.log
+          if-no-files-found: ignore

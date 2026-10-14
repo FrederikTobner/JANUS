@@ -20,18 +20,25 @@ add_library(_start_limine OBJECT
 target_compile_options(_start_limine PRIVATE ${JANUS_COMPILE_OPTIONS_COMMON})
 
 include(Executable)
+
+set(_limine_kernel_deps
+    boot
+    boot_limine
+    drivers
+    interrupts
+    kmalloc
+    mm
+)
+if(JANUS_ENABLE_KTEST)
+    list(APPEND _limine_kernel_deps ktest_runtime)
+endif()
+
 janus_add_kernel(
     TARGET kernel-limine.elf
     LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-    DEPENDENCIES 
-        boot 
-        boot_limine 
-        drivers 
-        interrupts 
-        kmalloc
-        mm
-    OBJECTS 
-        _start_limine 
-        _start_limine_requests 
+    DEPENDENCIES ${_limine_kernel_deps}
+    OBJECTS
+        _start_limine
+        _start_limine_requests
         kmain
 )
