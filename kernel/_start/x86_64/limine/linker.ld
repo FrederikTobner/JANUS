@@ -58,6 +58,13 @@ SECTIONS {
         *(.rodata)
         *(.rodata.*)
     }
+
+    /* Auto-registered kernel tests */
+    .ktests ALIGN(8) : AT(ADDR(.ktests) - KERNEL_VMA) {
+        __start_ktests = .;
+        KEEP(*(ktests))
+        __stop_ktests = .;
+    }
     
     /* Initialized data */
     .data ALIGN(4K) : AT(ADDR(.data) - KERNEL_VMA) {

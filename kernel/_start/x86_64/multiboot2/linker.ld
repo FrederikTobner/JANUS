@@ -49,6 +49,13 @@ SECTIONS {
         *(.rodata)
         *(.rodata.*)
     }
+
+    /* Auto-registered kernel tests */
+    .ktests ALIGN(8) : {
+        __start_ktests = .;
+        KEEP(*(ktests))
+        __stop_ktests = .;
+    }
     
     /* Initialized data */
     .data ALIGN(4K) : {

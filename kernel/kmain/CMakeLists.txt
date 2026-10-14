@@ -14,7 +14,14 @@ if(JANUS_TEST_KMALLOC)
     if(JANUS_TEST_FAULTS)
         message(FATAL_ERROR "JANUS_TEST_FAULTS and JANUS_TEST_KMALLOC are mutually exclusive")
     endif()
+    if(JANUS_ENABLE_KTEST)
+        message(FATAL_ERROR "JANUS_ENABLE_KTEST is mutually exclusive with JANUS_TEST_FAULTS and JANUS_TEST_KMALLOC")
+    endif()
     add_compile_definitions(JANUS_TEST_KMALLOC=1)
+endif()
+
+if(JANUS_TEST_FAULTS AND JANUS_ENABLE_KTEST)
+    message(FATAL_ERROR "JANUS_ENABLE_KTEST is mutually exclusive with JANUS_TEST_FAULTS and JANUS_TEST_KMALLOC")
 endif()
 
 file(GLOB_RECURSE INIT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
@@ -30,6 +37,11 @@ janus_add_subsys(kmain SOURCES ${INIT_SOURCES}
         kmalloc
         mm
 )
+
+if(JANUS_ENABLE_KTEST)
+    target_include_directories(kmain PRIVATE "${CMAKE_SOURCE_DIR}/kernel/tests/ktest/include")
+    target_sources(kmain PRIVATE ${JANUS_KTEST_CASE_SOURCES})
+endif()
 
 # Add kmain's own include directory and generated headers
 target_include_directories(kmain

@@ -27,21 +27,27 @@ if("limine" IN_LIST JANUS_BOOT_PROTOCOLS)
     add_library(_start_limine OBJECT
         limine/entry.asm
     )
-    
+
+    set(_limine_kernel_deps
+        boot
+        boot_limine
+        drivers
+        interrupts
+        kmalloc
+        mm
+    )
+    if(JANUS_ENABLE_KTEST)
+        list(APPEND _limine_kernel_deps ktest_runtime)
+    endif()
+
     janus_add_kernel(
         TARGET kernel-limine.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/limine/linker.ld
-        DEPENDENCIES 
-                boot 
-                boot_limine 
-                drivers 
-                interrupts 
-            kmalloc
-                mm
-        OBJECTS 
-                _start_common 
-                _start_limine 
-                _start_limine_requests 
+        DEPENDENCIES ${_limine_kernel_deps}
+        OBJECTS
+                _start_common
+                _start_limine
+                _start_limine_requests
                 kmain
     )
 endif()
@@ -52,20 +58,26 @@ if("multiboot2" IN_LIST JANUS_BOOT_PROTOCOLS)
         multiboot2/header.asm
         multiboot2/paging.asm
     )
-    
+
+    set(_multiboot2_kernel_deps
+        boot
+        boot_multiboot2
+        drivers
+        interrupts
+        kmalloc
+        mm
+    )
+    if(JANUS_ENABLE_KTEST)
+        list(APPEND _multiboot2_kernel_deps ktest_runtime)
+    endif()
+
     janus_add_kernel(
         TARGET kernel-multiboot2.elf
         LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/multiboot2/linker.ld
-        DEPENDENCIES 
-                boot 
-                boot_multiboot2
-                drivers 
-                interrupts 
-            kmalloc
-                mm
-        OBJECTS 
-                _start_common 
-                _start_multiboot2 
+        DEPENDENCIES ${_multiboot2_kernel_deps}
+        OBJECTS
+                _start_common
+                _start_multiboot2
                 kmain
     )
 endif()
