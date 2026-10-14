@@ -27,6 +27,8 @@
 
 __noreturn void ktest_exit(bool passed)
 {
+    // Under AArch64, this value is unused, but we still need to mark it as used to avoid warnings.
+    (void) passed;
 #if ASM_CAP_PORT_IO
     asm_io_outb(KTEST_QEMU_EXIT_PORT, (u8) (passed ? KTEST_QEMU_PASS_VAL : KTEST_QEMU_FAIL_VAL));
 #endif
