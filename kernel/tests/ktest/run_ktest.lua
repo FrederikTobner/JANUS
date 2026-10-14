@@ -184,6 +184,11 @@ local function run(a)
         if line:match("KTEST:%s+FAIL") then
             saw_fail = true
         end
+        if saw_pass or saw_fail then
+            -- The kernel halts after the verdict, so QEMU would otherwise idle
+            -- until the timeout. Stop reading and shut it down below.
+            break
+        end
         if line:match("KTEST SUMMARY:") then
             saw_summary = true
             local run_count, pass_count, fail_count = line:match(
