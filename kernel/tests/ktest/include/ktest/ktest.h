@@ -34,13 +34,15 @@ typedef struct ktest_case {
 
 void ktest__fail(ktest_ctx_t * ctx, char const * file, int line, char const * expr);
 
-#define KTEST(suite_id, name_id)                                                               \
-    static void ktest_fn_##suite_id##_##name_id(ktest_ctx_t * _kt);                            \
-    static ktest_case_t const ktest_case_##suite_id##_##name_id __used __section("ktests") = { \
-        .suite = #suite_id,                                                                    \
-        .name = #name_id,                                                                      \
-        .fn = ktest_fn_##suite_id##_##name_id,                                                 \
-    };                                                                                         \
+// Explicit alignment: GCC otherwise pads each entry to 16 bytes and the array walk misreads them.
+#define KTEST(suite_id, name_id)                                                           \
+    static void ktest_fn_##suite_id##_##name_id(ktest_ctx_t * _kt);                        \
+    static ktest_case_t const ktest_case_##suite_id##_##name_id __used __section("ktests") \
+        __aligned(_Alignof(ktest_case_t)) = {                                              \
+            .suite = #suite_id,                                                            \
+            .name = #name_id,                                                              \
+            .fn = ktest_fn_##suite_id##_##name_id,                                         \
+    };                                                                                     \
     static void ktest_fn_##suite_id##_##name_id(ktest_ctx_t * _kt)
 
 #define KTEST_ASSERT_TRUE(cond)                                             \

@@ -7,9 +7,9 @@ local ansi  = require("ansi")
 local shell = require("shell")
 local cli   = require("cli")
 
-local C = ansi.C
+local C     = ansi.C
 
-local M = {}
+local M     = {}
 
 --- Find the first executable tool from a list of candidates.
 ---
