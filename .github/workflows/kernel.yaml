@@ -29,7 +29,7 @@ concurrency:
 jobs:
   lint:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -38,11 +38,11 @@ jobs:
           analysis: true
 
       - name: Check formatting
-        run: find kernel -name '*.c' -o -name '*.h' | xargs clang-format-18 --dry-run --Werror
+        run: find kernel -name '*.c' -o -name '*.h' | xargs clang-format --dry-run --Werror
 
   tidy:
     name: tidy-${{ matrix.arch }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -66,11 +66,11 @@ jobs:
         run: |
           jq -r '.[].file' build-${{ matrix.arch }}-clang/compile_commands.json \
             | grep 'kernel/.*\.c$' \
-            | xargs clang-tidy-18 -p build-${{ matrix.arch }}-clang
+            | xargs clang-tidy -p build-${{ matrix.arch }}-clang
 
   build:
     name: ${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.build_type }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:

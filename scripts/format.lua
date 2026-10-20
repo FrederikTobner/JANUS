@@ -27,10 +27,9 @@ local short_path = project.short_path
 
 local ROOT       = project.root()
 
--- The CI pipeline pins clang-format-18.  Using a different version can produce
--- different results (compound-literal spacing, brace-init rules, etc.), giving
--- a false pass locally while CI still fails.
-local TOOL       = toolchain.pinned_tool("clang-format", "18", { "17", "16" })
+-- CI pins clang-format 18.1.8.  Other versions (even other 18.x patch releases)
+-- can format differently, giving a false pass locally while CI still fails.
+local TOOL       = toolchain.pinned_tool("clang-format", "18.1.8")
 
 local USAGE      = [[
 Usage: lua scripts/format.lua [OPTIONS]

@@ -30,9 +30,9 @@ local fmt_elapsed = time.fmt_elapsed
 
 local ROOT = project.root()
 
--- The CI pipeline pins clang-tidy-18.  Using a different version may silence
--- or add diagnostics relative to CI, giving misleading local results.
-local TOOL = toolchain.pinned_tool("clang-tidy", "18", { "17", "16" })
+-- CI pins clang-tidy 18.1.8.  Other versions may silence or add diagnostics
+-- relative to CI, giving misleading local results.
+local TOOL = toolchain.pinned_tool("clang-tidy", "18.1.8")
 
 local USAGE = [[
 Usage: lua scripts/tidy.lua [OPTIONS]

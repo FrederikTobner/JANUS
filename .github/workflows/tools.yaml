@@ -21,7 +21,7 @@ concurrency:
 jobs:
   lint:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -30,11 +30,11 @@ jobs:
           analysis: true
 
       - name: Check formatting
-        run: find tools -type d -name 'build*' -prune -o -type f \( -name '*.c' -o -name '*.h' \) -print | xargs clang-format-18 --dry-run --Werror
+        run: find tools -type d -name 'build*' -prune -o -type f \( -name '*.c' -o -name '*.h' \) -print | xargs clang-format --dry-run --Werror
 
   build-and-test:
     name: ${{ matrix.compiler }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -64,7 +64,7 @@ jobs:
 
   coverage:
     name: coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 

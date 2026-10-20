@@ -12,7 +12,7 @@ inputs:
     description: Install kernel build tools (cmake, ninja, assembler or binutils, ISO tools)
     default: "false"
   analysis:
-    description: Install clang-format-18 and clang-tidy-18
+    description: Install clang-format and clang-tidy 18.1.8 from PyPI
     default: "false"
   qemu:
     description: Install QEMU (plus aarch64 UEFI firmware) and Lua for the test runners
@@ -53,10 +53,6 @@ runs:
           fi
         fi
 
-        if [ "$ANALYSIS" = true ]; then
-          pkgs+=(clang-format-18 clang-tidy-18)
-        fi
-
         if [ "$QEMU" = true ]; then
           pkgs+=(lua5.4)
           if [ "$ARCH" = aarch64 ]; then
@@ -69,3 +65,13 @@ runs:
         [ ${#pkgs[@]} -gt 0 ] || exit 0
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends "${pkgs[@]}"
+
+    # Exact versions: formatting and diagnostics differ between patch releases.
+    - name: Install clang-format and clang-tidy
+      if: inputs.analysis == 'true'
+      shell: bash
+      run: |
+        pipx install clang-format==18.1.8
+        pipx install clang-tidy==18.1.8
+        clang-format --version | grep -q 18.1.8
+        clang-tidy --version | grep -q 18.1.8
