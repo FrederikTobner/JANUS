@@ -6,16 +6,35 @@ on:
     paths:
       - "tools/**"
       - ".github/workflows/tools.yaml"
+      - ".clang-format"
   pull_request:
     branches: ["main", "master"]
     paths:
       - "tools/**"
       - ".github/workflows/tools.yaml"
+      - ".clang-format"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-env
+        with:
+          analysis: true
+
+      - name: Check formatting
+        run: find tools -type d -name 'build*' -prune -o -type f \( -name '*.c' -o -name '*.h' \) -print | xargs clang-format --dry-run --Werror
+
   build-and-test:
     name: ${{ matrix.compiler }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -24,13 +43,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake ninja-build zlib1g-dev
-
-      - uses: ./.github/actions/setup-compiler
+      - uses: ./.github/actions/setup-env
         with:
-          arch: x86_64
           compiler: ${{ matrix.compiler }}
+          packages: cmake ninja-build zlib1g-dev
 
       - name: Configure
         run: >
@@ -48,12 +64,13 @@ jobs:
 
   coverage:
     name: coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install build tools and coverage tooling
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends cmake ninja-build zlib1g-dev gcovr
+      - uses: ./.github/actions/setup-env
+        with:
+          packages: cmake ninja-build zlib1g-dev gcovr
 
       - name: Configure with coverage instrumentation
         run: >

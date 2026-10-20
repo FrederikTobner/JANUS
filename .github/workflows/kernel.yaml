@@ -1,0 +1,104 @@
+name: Kernel
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - ".clang-format"
+      - ".github/workflows/kernel.yaml"
+      - ".github/actions/**"
+  pull_request:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - ".clang-format"
+      - ".github/workflows/kernel.yaml"
+      - ".github/actions/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-env
+        with:
+          analysis: true
+
+      - name: Check formatting
+        run: find kernel -name '*.c' -o -name '*.h' | xargs clang-format --dry-run --Werror
+
+  tidy:
+    name: tidy-${{ matrix.arch }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-env
+        with:
+          arch: ${{ matrix.arch }}
+          compiler: clang
+          kernel: true
+          analysis: true
+
+      # Configure only: compile_commands.json and the generated headers exist after configure.
+      - name: Configure
+        run: cmake --preset ${{ matrix.arch }}-clang -D CMAKE_BUILD_TYPE=Release
+
+      - name: Static analysis (clang-tidy)
+        run: |
+          jq -r '.[].file' build-${{ matrix.arch }}-clang/compile_commands.json \
+            | grep 'kernel/.*\.c$' \
+            | xargs clang-tidy -p build-${{ matrix.arch }}-clang
+
+  build:
+    name: ${{ matrix.arch }}-${{ matrix.compiler }}-${{ matrix.build_type }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
+        compiler: [gcc, clang]
+        build_type: [Release]
+        include:
+          - arch: x86_64
+            compiler: gcc
+            build_type: Debug
+          - arch: x86_64
+            compiler: clang
+            build_type: Debug
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-env
+        with:
+          arch: ${{ matrix.arch }}
+          compiler: ${{ matrix.compiler }}
+          kernel: true
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.arch }}-${{ matrix.compiler }} -D CMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }}
+
+      - name: Build ISOs
+        run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }} --target iso

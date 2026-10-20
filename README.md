@@ -1,12 +1,22 @@
 <p align="center"><a href="https://github.com/FrederikTobner/JANUS"><img src="./images/JANUS_Logo_Small.jpg" alt="JANUS Logo" height="180"/></a></p>
 <p align="center">A small monolithic kernel, supporting x86_64 and aarch64.</p>
 
-[![Build](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/build.yaml?branch=main&label=Build&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/build.yaml)
+[![Kernel](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/kernel.yaml?branch=main&label=Kernel&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/kernel.yaml)
 [![Tools](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/tools.yaml?branch=main&label=Tools&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/tools.yaml)
 [![Doxygen](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/doxygen.yaml?branch=main&label=Doxygen&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/doxygen.yaml)
 [![Smoke](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/smoke.yaml?branch=main&labelSmoke&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/smoke.yaml)
 [![Coverage](https://codecov.io/gh/FrederikTobner/JANUS/graph/badge.svg)](https://codecov.io/gh/FrederikTobner/JANUS)
 [![C Standard](https://img.shields.io/badge/C-C17%20freestanding-blue?logo=c)](https://en.cppreference.com/w/c/17)
+
+## Features
+
+* Higher half kernel
+* TTY driver
+* Framebuffer graphics
+* VGA graphics
+* Output using the serial port
+* Paging
+* Physical memory manager
 
 ## Quick Start
 
@@ -20,10 +30,10 @@ cmake --build --preset x86_64-gcc
 
 Currently the following presets are defined:
 
-| Architecture | Compiler | Preset name  |
-|--------------|----------|--------------|
-| x86_64       | clang    | x86_64-clang |
-| x86_64       | gcc      | x86_64-gcc   |
+| Architecture | Compiler | Preset name   |
+|--------------|----------|---------------|
+| x86_64       | clang    | x86_64-clang  |
+| x86_64       | gcc      | x86_64-gcc    |
 | aarch64      | clang    | aarch64-clang |
 | aarch64      | gcc      | aarch64-gcc   |
 

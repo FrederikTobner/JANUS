@@ -54,7 +54,7 @@ __noreturn void kmain_fault_test(void)
     // (identity-mapped) and limine (higher-half) virtual address spaces.
 
     u32 volatile * p = (u32 volatile *) 0x100000000ULL;
-    *p = 0xDEADBEEFu;
+    *p = 0xDEADBEEFU;
 #endif
     for (;;) {
     }

@@ -43,6 +43,7 @@ graph TD
   drivers -.-> janus_contract_display
   interrupts --> kio
   mm --> kio
+  mm --> mem
   mm -.-> janus_contract_memmap
   kmain --> drivers
   kmain --> boot

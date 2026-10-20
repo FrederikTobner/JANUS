@@ -1,23 +1,23 @@
 #!/usr/bin/env lua
 --- clang-format runner for JANUS.
 --
--- Checks or fixes the formatting of all kernel C/H sources against the
+-- Checks or fixes the formatting of all kernel and tools C/H sources against the
 -- project's .clang-format style file.
 --
 -- Usage: lua scripts/format.lua [OPTIONS]
 -- Run with --help for full usage information.
 --
--- @copyright Copyright (C) 2026 Frederik Tobner 
+-- @copyright Copyright (C) 2026 Frederik Tobner
 -- @license   GNU Affero General Public License v3.0 or later
 
 local SCRIPT_DIR = arg[0]:match("^(.*)/[^/]+$") or "."
-package.path = SCRIPT_DIR .. "/lib/?.lua;" .. package.path
+package.path     = SCRIPT_DIR .. "/lib/?.lua;" .. package.path
 
-local ansi      = require("ansi")
-local shell     = require("shell")
-local cli       = require("cli")
-local project   = require("project")
-local toolchain = require("toolchain")
+local ansi       = require("ansi")
+local shell      = require("shell")
+local cli        = require("cli")
+local project    = require("project")
+local toolchain  = require("toolchain")
 
 local C          = ansi.C
 local die        = cli.die
@@ -25,17 +25,16 @@ local exec       = shell.exec
 local capture    = shell.capture
 local short_path = project.short_path
 
-local ROOT = project.root()
+local ROOT       = project.root()
 
--- The CI pipeline pins clang-format-18.  Using a different version can produce
--- different results (compound-literal spacing, brace-init rules, etc.), giving
--- a false pass locally while CI still fails.
-local TOOL = toolchain.pinned_tool("clang-format", "18", { "17", "16" })
+-- CI pins clang-format 18.1.8.  Other versions (even other 18.x patch releases)
+-- can format differently, giving a false pass locally while CI still fails.
+local TOOL       = toolchain.pinned_tool("clang-format", "18.1.8")
 
-local USAGE = [[
+local USAGE      = [[
 Usage: lua scripts/format.lua [OPTIONS]
 
-Checks or fixes the formatting of JANUS kernel sources against .clang-format.
+Checks or fixes the formatting of JANUS kernel and tools sources against .clang-format.
 
 Options:
   -f, --fix             Reformat files in-place (default: check only)
@@ -48,7 +47,7 @@ Exit codes:
   1   One or more files need formatting (check mode only)
 ]]
 
-local opts = {
+local opts       = {
     fix     = false,
     filter  = nil,
     verbose = false,
@@ -77,10 +76,10 @@ end
 
 local function find_sources()
     local raw = capture(string.format(
-        "find %q/kernel -type f \\( -name '*.c' -o -name '*.h' \\) | sort",
-        ROOT))
+        "find %q %q -type d -name 'build*' -prune -o -type f \\( -name '*.c' -o -name '*.h' \\) -print | sort",
+        ROOT .. "/kernel", ROOT .. "/tools"))
     if not raw or raw == "" then
-        die("no C/H sources found under %s/kernel", ROOT)
+        die("no C/H sources found under %s/{kernel,tools}", ROOT)
     end
     local files = {}
     for path in raw:gmatch("[^\n]+") do
@@ -117,7 +116,7 @@ local function main()
     io.write(string.format("%s── JANUS format %s ──%s  (%s)\n\n",
         C.bold, mode_label, C.reset, TOOL))
 
-    local files = find_sources()
+    local files       = find_sources()
     local n           = #files
     local dirty_count = 0
     local fixed_count = 0

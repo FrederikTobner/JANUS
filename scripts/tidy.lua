@@ -10,16 +10,16 @@
 -- @copyright Copyright (C) 2026 Frederik Tobner
 -- @license   GNU Affero General Public License v3.0 or later
 
-local SCRIPT_DIR = arg[0]:match("^(.*)/[^/]+$") or "."
-package.path = SCRIPT_DIR .. "/lib/?.lua;" .. package.path
+local SCRIPT_DIR  = arg[0]:match("^(.*)/[^/]+$") or "."
+package.path      = SCRIPT_DIR .. "/lib/?.lua;" .. package.path
 
-local ansi      = require("ansi")
-local shell     = require("shell")
-local cli       = require("cli")
-local project   = require("project")
-local time      = require("time")
-local progress  = require("progress")
-local toolchain = require("toolchain")
+local ansi        = require("ansi")
+local shell       = require("shell")
+local cli         = require("cli")
+local project     = require("project")
+local time        = require("time")
+local progress    = require("progress")
+local toolchain   = require("toolchain")
 
 local C           = ansi.C
 local die         = cli.die
@@ -28,13 +28,13 @@ local short_path  = project.short_path
 local now         = time.now
 local fmt_elapsed = time.fmt_elapsed
 
-local ROOT = project.root()
+local ROOT        = project.root()
 
--- The CI pipeline pins clang-tidy-18.  Using a different version may silence
--- or add diagnostics relative to CI, giving misleading local results.
-local TOOL = toolchain.pinned_tool("clang-tidy", "18", { "17", "16" })
+-- CI pins clang-tidy 18.1.8.  Other versions may silence or add diagnostics
+-- relative to CI, giving misleading local results.
+local TOOL        = toolchain.pinned_tool("clang-tidy", "18.1.8")
 
-local USAGE = [[
+local USAGE       = [[
 Usage: lua scripts/tidy.lua [OPTIONS]
 
 Runs clang-tidy on JANUS kernel C sources using a build directory's
@@ -53,7 +53,7 @@ Exit codes:
   1   One or more files produced diagnostics
 ]]
 
-local opts = {
+local opts        = {
     preset  = nil,
     filter  = nil,
     fix     = false,
@@ -203,29 +203,29 @@ local function main()
     io.write(string.format("Build dir: %s%s%s\n\n",
         C.cyan, BUILD_DIR, C.reset))
 
-    local files    = load_sources(BUILD_DIR)
-    local n        = #files
-    local pass     = 0
-    local fail     = 0
-    local t_total  = now()
+    local files   = load_sources(BUILD_DIR)
+    local n       = #files
+    local pass    = 0
+    local fail    = 0
+    local t_total = now()
 
     for i, path in ipairs(files) do
         status(i, n, path, "analysing...")
-        local t_start = now()
+        local t_start  = now()
 
         local fix_flag = opts.fix and " --fix" or ""
-        local cmd    = string.format(
+        local cmd      = string.format(
             "%s -p %q%s %q 2>&1", TOOL, BUILD_DIR, fix_flag, path)
-        local output = capture(cmd)
+        local output   = capture(cmd)
         -- clang-tidy exits 0 even with warnings; treat any diagnostic output
         -- that contains ": error:" or ": warning:" as a failure.
         local has_diag = output and (
-            output:match(": error:")   or
+            output:match(": error:") or
             output:match(": warning:") or
             output:match(": note:"))
-        local ok = not has_diag
+        local ok       = not has_diag
 
-        local elapsed = now() - t_start
+        local elapsed  = now() - t_start
         status_done(i, n, path, ok, elapsed)
 
         if ok then

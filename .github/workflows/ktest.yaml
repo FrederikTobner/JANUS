@@ -1,0 +1,61 @@
+name: Kernel KTest
+
+on:
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - ".github/workflows/ktest.yaml"
+      - ".github/actions/**"
+  pull_request:
+    branches: ["main", "master"]
+    paths:
+      - "kernel/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - "CMakePresets.json"
+      - ".github/workflows/ktest.yaml"
+      - ".github/actions/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ktest:
+    name: ${{ matrix.preset }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [x86_64-gcc, x86_64-clang, aarch64-gcc, aarch64-clang]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-env
+        with:
+          arch: ${{ startsWith(matrix.preset, 'aarch64') && 'aarch64' || 'x86_64' }}
+          compiler: ${{ endsWith(matrix.preset, 'clang') && 'clang' || 'gcc' }}
+          kernel: true
+          qemu: true
+
+      - name: Configure ktest
+        run: cmake --preset ${{ matrix.preset }} -D JANUS_ENABLE_KTEST=ON
+
+      - name: Build kernel and ISO
+        run: cmake --build --preset ${{ matrix.preset }}
+
+      - name: Run ktest
+        run: ctest --preset ${{ matrix.preset }} -R ktest --output-on-failure
+
+      - name: Upload serial logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ktest-serial-${{ matrix.preset }}
+          path: build-${{ matrix.preset }}/ktest-*.log
+          if-no-files-found: ignore

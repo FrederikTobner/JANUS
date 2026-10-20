@@ -1,0 +1,38 @@
+name: Kernel (latest toolchain)
+
+# Rolling-release toolchain, so new compiler warnings show up before they reach local Arch builds.
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.arch }}-${{ matrix.compiler }}
+    runs-on: ubuntu-24.04
+    container:
+      image: archlinux:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, aarch64]
+        compiler: [gcc, clang]
+
+    steps:
+      - name: Install toolchain
+        run: >
+          pacman -Syu --noconfirm --needed
+          git base-devel cmake ninja nasm clang llvm lld
+          libisoburn mtools grub
+          aarch64-linux-gnu-gcc aarch64-linux-gnu-binutils
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.arch }}-${{ matrix.compiler }} -D CMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }}
+
+      - name: Build ISOs
+        run: cmake --build --preset ${{ matrix.arch }}-${{ matrix.compiler }} --target iso
