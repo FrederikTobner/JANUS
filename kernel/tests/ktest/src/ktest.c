@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2025 by Frederik Tobner                                     *
+ * Copyright (C) 2026 by Frederik Tobner                                     *
  *                                                                           *
  * This file is part of JANUS.                                              *
  *                                                                           *
@@ -53,6 +53,11 @@ __noreturn void ktest_run_all(void)
             (unsigned long long) passed,
             (unsigned long long) failed);
 
+    if (total == 0) {
+        kprintf("KTEST: FAIL no tests registered\n");
+        ktest_exit(false);
+    }
+
     if (failed == 0) {
         kprintf("KTEST: PASS\n");
         ktest_exit(true);
@@ -60,5 +65,4 @@ __noreturn void ktest_run_all(void)
 
     kprintf("KTEST: FAIL %llu\n", (unsigned long long) failed);
     ktest_exit(false);
-    __builtin_unreachable();
 }

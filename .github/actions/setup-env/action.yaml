@@ -1,0 +1,71 @@
+name: Setup Environment
+description: Install everything a job needs with a single apt-get update and install
+
+inputs:
+  arch:
+    description: Target architecture (x86_64 or aarch64)
+    default: x86_64
+  compiler:
+    description: Compiler to install (gcc or clang); empty installs none
+    default: ""
+  kernel:
+    description: Install kernel build tools (cmake, ninja, assembler or binutils, ISO tools)
+    default: "false"
+  analysis:
+    description: Install clang-format-18 and clang-tidy-18
+    default: "false"
+  qemu:
+    description: Install QEMU (plus aarch64 UEFI firmware) and Lua for the test runners
+    default: "false"
+  packages:
+    description: Extra space-separated apt packages
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Install packages
+      shell: bash
+      env:
+        ARCH: ${{ inputs.arch }}
+        COMPILER: ${{ inputs.compiler }}
+        KERNEL: ${{ inputs.kernel }}
+        ANALYSIS: ${{ inputs.analysis }}
+        QEMU: ${{ inputs.qemu }}
+        PACKAGES: ${{ inputs.packages }}
+      run: |
+        pkgs=($PACKAGES)
+
+        case "$COMPILER" in
+          gcc)
+            if [ "$ARCH" = aarch64 ]; then pkgs+=(gcc-aarch64-linux-gnu); else pkgs+=(gcc); fi ;;
+          clang) pkgs+=(clang llvm) ;;
+          "") ;;
+          *) echo "unknown compiler: $COMPILER" >&2; exit 1 ;;
+        esac
+
+        if [ "$KERNEL" = true ]; then
+          pkgs+=(cmake ninja-build xorriso mtools)
+          if [ "$ARCH" = aarch64 ]; then
+            pkgs+=(binutils-aarch64-linux-gnu)
+          else
+            pkgs+=(nasm grub-pc-bin grub-common)
+          fi
+        fi
+
+        if [ "$ANALYSIS" = true ]; then
+          pkgs+=(clang-format-18 clang-tidy-18)
+        fi
+
+        if [ "$QEMU" = true ]; then
+          pkgs+=(lua5.4)
+          if [ "$ARCH" = aarch64 ]; then
+            pkgs+=(qemu-system-arm qemu-efi-aarch64 ipxe-qemu)
+          else
+            pkgs+=(qemu-system-x86)
+          fi
+        fi
+
+        [ ${#pkgs[@]} -gt 0 ] || exit 0
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends "${pkgs[@]}"

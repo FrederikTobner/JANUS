@@ -67,12 +67,18 @@ function(janus_register_ktest_tests)
         endif()
 
         set(_test_name "ktest_${_proto}")
+        set(_expect_arg "")
+        if(JANUS_KTEST_NEGATIVE_CONTROL)
+            set(_test_name "ktest_control_${_proto}")
+            set(_expect_arg --expect-fail ktest_control.deliberate_failure)
+        endif()
         add_test(NAME ${_test_name}
             COMMAND ${LUA_EXECUTABLE} ${_runner}
                     --qemu ${QEMU_BINARY}
                     --iso ${_iso}
                     ${_machine_arg}
                     ${_bios_arg}
+                    ${_expect_arg}
                     --timeout 60
                     --log ${CMAKE_BINARY_DIR}/ktest-${_proto}.log)
 

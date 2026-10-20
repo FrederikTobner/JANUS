@@ -1,7 +1,7 @@
 <p align="center"><a href="https://github.com/FrederikTobner/JANUS"><img src="./images/JANUS_Logo_Small.jpg" alt="JANUS Logo" height="180"/></a></p>
 <p align="center">A small monolithic kernel, supporting x86_64 and aarch64.</p>
 
-[![Build](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/build.yaml?branch=main&label=Build&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/build.yaml)
+[![Kernel](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/kernel.yaml?branch=main&label=Kernel&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/kernel.yaml)
 [![Tools](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/tools.yaml?branch=main&label=Tools&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/tools.yaml)
 [![Doxygen](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/doxygen.yaml?branch=main&label=Doxygen&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/doxygen.yaml)
 [![Smoke](https://img.shields.io/github/actions/workflow/status/FrederikTobner/JANUS/smoke.yaml?branch=main&labelSmoke&logo=github)](https://github.com/FrederikTobner/JANUS/actions/workflows/smoke.yaml)

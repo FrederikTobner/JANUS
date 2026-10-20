@@ -28,3 +28,13 @@ target_link_libraries(ktest_runtime
         janus_asm
 )
 janus_apply_compile_flags(ktest_runtime)
+
+# Opt-in: adds a case that must fail, proving the failure path reaches CTest.
+option(JANUS_KTEST_NEGATIVE_CONTROL "Add a deliberately failing ktest case (expects the runner to report it)" OFF)
+
+set(_ktest_selftest_sources "${CMAKE_CURRENT_SOURCE_DIR}/selftest/ktest_selftest.c")
+if(JANUS_KTEST_NEGATIVE_CONTROL)
+    list(APPEND _ktest_selftest_sources "${CMAKE_CURRENT_SOURCE_DIR}/selftest/ktest_negative_control.c")
+endif()
+list(APPEND JANUS_KTEST_CASE_SOURCES ${_ktest_selftest_sources})
+set(JANUS_KTEST_CASE_SOURCES "${JANUS_KTEST_CASE_SOURCES}" CACHE INTERNAL "" FORCE)

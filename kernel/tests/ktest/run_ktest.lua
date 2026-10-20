@@ -11,6 +11,8 @@
 
 local RC_PASS, RC_FAIL, RC_SKIP, RC_USAGE = 0, 1, 77, 2
 
+local FORBIDDEN_MARKERS = { "KERNEL PANIC", "CPU EXCEPTION" }
+
 local function script_dir()
     local src = arg and arg[0] or ""
     return src:match("^(.*)[/\\][^/\\]*$") or "."
@@ -65,7 +67,8 @@ local function usage(msg)
     io.stderr:write(
         "usage: lua run_ktest.lua --qemu <bin> --iso <path>\n",
         "                        [--machine \"<flags>\"] [--bios <path>]\n",
-        "                        [--timeout <seconds>] [--memory <size>] [--log <path>]\n"
+        "                        [--timeout <seconds>] [--memory <size>] [--log <path>]\n",
+        "                        [--expect-fail <suite.name>]\n"
     )
     os.exit(RC_USAGE)
 end
@@ -91,6 +94,8 @@ local function parse_args(argv)
             a.memory = val
         elseif key == "--log" then
             a.log = val
+        elseif key == "--expect-fail" then
+            a.expect_fail = val
         else
             usage("unknown argument: " .. tostring(key))
         end
@@ -165,6 +170,10 @@ local function run(a)
     local summary_run = nil
     local summary_pass = nil
     local summary_fail = nil
+    local forbidden_hit = nil
+    local active_case = nil
+    local failed_cases = {}
+    local fail_line = nil
 
     for line in pipe:lines() do
         captured[#captured + 1] = line
@@ -172,22 +181,40 @@ local function run(a)
             logf:write(line, "\n")
         end
 
-        if line:find("==== ktest ====") then
+        for _, marker in ipairs(FORBIDDEN_MARKERS) do
+            if line:find(marker, 1, true) then
+                forbidden_hit = marker
+                break
+            end
+        end
+        if forbidden_hit then
+            break
+        end
+
+        if line:find("==== ktest ====", 1, true) then
             saw_boot = true
         end
-        if line:match("%[%s*RUN%s*%]%s") then
+
+        local started = line:match("%[%s*RUN%s*%]%s+(%S+)")
+        if started then
             saw_run = true
+            active_case = started
         end
+        if line:match("%[%s*OK%s*%]%s") then
+            active_case = nil
+        end
+        local failed = line:match("%[%s*FAIL%s*%]%s+(%S+)")
+        if failed then
+            failed_cases[#failed_cases + 1] = failed
+            active_case = nil
+        end
+
         if line:match("KTEST:%s+PASS") then
             saw_pass = true
         end
         if line:match("KTEST:%s+FAIL") then
             saw_fail = true
-        end
-        if saw_pass or saw_fail then
-            -- The kernel halts after the verdict, so QEMU would otherwise idle
-            -- until the timeout. Stop reading and shut it down below.
-            break
+            fail_line = line
         end
         if line:match("KTEST SUMMARY:") then
             saw_summary = true
@@ -200,6 +227,11 @@ local function run(a)
                 summary_fail = tonumber(fail_count)
             end
         end
+
+        if saw_pass or saw_fail then
+            -- The kernel halts after the verdict, so QEMU would otherwise idle until the timeout.
+            break
+        end
     end
 
     kill_pidfile(pidfile)
@@ -208,20 +240,37 @@ local function run(a)
     end
     pipe:close()
 
+    if forbidden_hit then
+        local where = active_case and (" while running " .. active_case) or ""
+        return RC_FAIL, "FAIL: " .. forbidden_hit .. where, captured
+    end
     if not saw_boot then
         return RC_FAIL, "FAIL: ktest banner was not seen", captured
+    end
+
+    if a.expect_fail then
+        local got = #failed_cases > 0 and table.concat(failed_cases, ", ") or "none"
+        if saw_fail and #failed_cases == 1 and failed_cases[1] == a.expect_fail then
+            return RC_PASS, "PASS: " .. a.expect_fail .. " failed as expected", captured
+        end
+        return RC_FAIL,
+            "FAIL: expected only " .. a.expect_fail .. " to fail, failing cases: " .. got,
+            captured
+    end
+
+    if saw_fail then
+        local names = #failed_cases > 0 and table.concat(failed_cases, ", ") or fail_line
+        return RC_FAIL, "FAIL: ktest reported failure: " .. names, captured
     end
     if not saw_run then
         return RC_FAIL, "FAIL: no ktest case executed", captured
     end
     if not saw_summary then
-        return RC_FAIL, "FAIL: ktest summary was not reported", captured
+        local hung = active_case and ("; test did not finish: " .. active_case) or ""
+        return RC_FAIL, "FAIL: ktest summary was not reported" .. hung, captured
     end
     if not saw_pass then
         return RC_FAIL, "FAIL: final PASS marker was not seen", captured
-    end
-    if saw_fail then
-        return RC_FAIL, "FAIL: ktest reported one or more failing cases", captured
     end
     if summary_run and summary_pass and summary_fail then
         if summary_run <= 0 then

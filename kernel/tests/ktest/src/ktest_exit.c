@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2025 by Frederik Tobner                                     *
+ * Copyright (C) 2026 by Frederik Tobner                                     *
  *                                                                           *
  * This file is part of JANUS.                                              *
  *                                                                           *

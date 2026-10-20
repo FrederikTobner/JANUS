@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2025 by Frederik Tobner                                     *
+ * Copyright (C) 2026 by Frederik Tobner                                     *
  *                                                                           *
  * This file is part of JANUS.                                              *
  *                                                                           *
@@ -70,6 +70,6 @@ void ktest__fail(ktest_ctx_t * ctx, char const * file, int line, char const * ex
     } while (0)
 
 __noreturn void ktest_run_all(void);
-void ktest_exit(bool passed);
+__noreturn void ktest_exit(bool passed);
 
 #endif /* KTEST_KTEST_H */

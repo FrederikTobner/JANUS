@@ -20,6 +20,10 @@ on:
       - ".github/workflows/ktest.yaml"
       - ".github/actions/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   ktest:
     name: ${{ matrix.preset }}
@@ -32,24 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ./.github/actions/setup-build-env
-        with:
-          arch: ${{ startsWith(matrix.preset, 'aarch64') && 'aarch64' || 'x86_64' }}
-
-      - uses: ./.github/actions/setup-compiler
+      - uses: ./.github/actions/setup-env
         with:
           arch: ${{ startsWith(matrix.preset, 'aarch64') && 'aarch64' || 'x86_64' }}
           compiler: ${{ endsWith(matrix.preset, 'clang') && 'clang' || 'gcc' }}
-
-      - name: Install QEMU (+ aarch64 UEFI firmware) and Lua
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends lua5.4
-          if [[ "${{ matrix.preset }}" == aarch64-* ]]; then
-            sudo apt-get install -y --no-install-recommends qemu-system-arm qemu-efi-aarch64 ipxe-qemu
-          else
-            sudo apt-get install -y --no-install-recommends qemu-system-x86
-          fi
+          kernel: true
+          qemu: true
 
       - name: Configure ktest
         run: cmake --preset ${{ matrix.preset }} -D JANUS_ENABLE_KTEST=ON
